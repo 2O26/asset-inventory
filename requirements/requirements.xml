@@ -1,0 +1,2213 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.5//EN" "https://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<book>
+  <bookinfo>
+    <authorgroup>
+      <author>
+        <personname>
+          <firstname>Olof</firstname>
+          <surname>Haglund</surname>
+        </personname>
+        <affiliation>
+          <jobtitle>Facilitator</jobtitle>
+          <orgname>KCL</orgname>
+        </affiliation>
+      </author>
+      <author>
+        <personname>
+          <firstname>Martin</firstname>
+          <surname>Vesterlund</surname>
+        </personname>
+        <affiliation>
+          <jobtitle>Facilitator</jobtitle>
+          <orgname>KCL</orgname>
+        </affiliation>
+      </author>
+    </authorgroup>
+    <title>Asset Inventory</title>
+    <revhistory>
+      <revision>
+        <revnumber>1</revnumber>
+        <date>2024-01-09T08:12:55.124Z</date>
+        <revdescription>Initial</revdescription>
+      </revision>
+      <revision>
+        <revnumber>2</revnumber>
+        <date>2024-01-16T10:20:30.176Z</date>
+        <revdescription>Added usecases, personas and requirements</revdescription>
+      </revision>
+    </revhistory>
+  </bookinfo>
+  <title>Asset Inventory</title>
+  <preface>
+    <title>Introduction</title>
+    <section>
+      <title>Background</title>
+      <para>Projektet har i syfte om att utveckla en Asset Inventory åt Knowit Cybersecurity &amp; Law. Tanken är en modulbaserad webapplikation som är flexibel och smidig att använda för att en organisation ska snabbt kunna identifiera och kategorisera sina IT-tillgångar.</para>
+    </section>
+    <section>
+      <title>Strategic Goals</title>
+      <para>Systemet ska kunna inhämta, uppdatera och presentera information om tillgångar i IT-miljön samt eventuella beroenden mellan tillgångarna.</para>
+      <para>* Automatisk inhämtning och uppdatering</para>
+      <para>* Beroendeanalys</para>
+      <para>* Scenario Impact Simulation</para>
+    </section>
+    <section>
+      <title>Scope</title>
+      <para>Huvudsakligt fokus ligger på att utveckla själva bas-systemet med funktionalitet för att hantera tillgångar i IT-miljön och erbjuda ett användargränssnitt för detta. Då ett mål är att lätt kunna utöka funktionaliteten kommer dock några moduler för t.ex. datainhämtning att behöva utvecklas.</para>
+    </section>
+  </preface>
+  <chapter>
+    <title>Goals</title>
+    <section>
+      <title>Overview</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/goals.svg" format="SVG" depth="150mm" align="center" valign="middle"/>
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>Customizable</title>
+      <para>To improve usability for different stakeholders and support the business as far as possible the application must be customizable in various aspects.</para>
+    </section>
+    <section>
+      <title>Always current information</title>
+      <para>To improve the utility of the application the information contained must be kept updated and current.</para>
+    </section>
+    <section>
+      <title>Present relevant information</title>
+      <para>Different stakeholders will be interested in different information regarding an asset, the application must be able to filter out what information is relevant for a specific stakeholder to avoid information overload.</para>
+    </section>
+    <section>
+      <title>Highly Available</title>
+      <para>To avoid downtime when needed the application must be built so it can be deployed in an high availability configuration.</para>
+    </section>
+    <section>
+      <title>Enable risk based decision making</title>
+      <para>To be able to take decisions based on risk, sufficient information about assets criticality is needed</para>
+    </section>
+    <section>
+      <title>Resilient</title>
+      <para>In the face of malfunction the application should recover to normal operation as fast as possible and adapt to handle similar events in the future.</para>
+    </section>
+    <section>
+      <title>Role Based Access</title>
+      <para>Different users need access to different views and functionality in the application. To be able to control this role based access to the system and the information should be used.</para>
+    </section>
+    <section>
+      <title>Represent different types of assets</title>
+      <para>To maximise the ability to provide relevant information about assets, the applikation must be able to represent different types of assets with different properties.</para>
+    </section>
+    <section>
+      <title>Represent dependencies between assets</title>
+      <para>No asset exists in isolation, to improve the ability to analyse the components of a system the application must be able to represent different types of dependencies between assets.</para>
+    </section>
+    <section>
+      <title>Extendable</title>
+      <para>To improve portability and usability the applikation should be easily extendable with modules or plug-ins, for instance to change authentication mechanism or add methods for collecting data about an asset type.</para>
+    </section>
+    <section>
+      <title>Secure</title>
+      <para>Since the information contained in the system might be sensitive the system must be as secure as possible. Access-control, accounting and ensuring integrity of data is especially important.</para>
+    </section>
+    <section>
+      <title>User Friendly</title>
+      <para>The application must be user friendly and intuitive to use.</para>
+      <para>Aspects of user interface and workflow must be considered.</para>
+    </section>
+    <section>
+      <title>Support Change Management</title>
+      <para>To be able to securely perform changes in the operating environment it must be possible to determine what impact a change might cause on other systems.</para>
+    </section>
+    <section>
+      <title>Support Risk Management</title>
+      <para>To efficiently manage risks it must be possible to determine what threats and vulnerabilities that is present in the environment and how exposed the environment is.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Obstacles</title>
+    <section>
+      <title>Overview</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/obstacles.svg" format="SVG" depth="150mm" align="center" valign="middle"/>
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>Integrity_Threat: Information outdated</title>
+      <para>The information in the inventory does not reflect the current reality.</para>
+    </section>
+    <section>
+      <title>Integrity_Threat: Unauthorized changes to asset information</title>
+      <para>Changes can be made to stored information in such way that the new information does not reflect the reality any more.</para>
+    </section>
+    <section>
+      <title>Integrity_Threat: A08 – Software and Data Integrity Failures</title>
+      <para>Software and data integrity failures relate to code and infrastructure that does not protect against integrity violations. An example of this is where an application relies upon plugins, libraries, or modules from untrusted sources, repositories, and content delivery networks (CDNs). An insecure CI/CD pipeline can introduce the potential for unauthorized access, malicious code, or system compromise. Lastly, many applications now include auto-update functionality, where updates are downloaded without sufficient integrity verification and applied to the previously trusted application. Attackers could potentially upload their own updates to be distributed and run on all installations. Another example is where objects or data are encoded or serialized into a structure that an attacker can see and modify is vulnerable to insecure deserialization.</para>
+    </section>
+    <section>
+      <title>Demands: Information not sufficient</title>
+      <para>The information available in the inventory is not sufficient for the stakeholder to perform it's work, making it necessary to consult external sources for the information</para>
+    </section>
+    <section>
+      <title>Availability_Threat: External sources unavailable</title>
+      <para>External information sources is unavailable, for instance due to network outage.</para>
+    </section>
+    <section>
+      <title>Availability_Threat: Loss of infrastructure</title>
+      <para>Full, or partial, loss of infrastructure such as network devices and storage nodes.</para>
+    </section>
+    <section>
+      <title>Confidentiality_Threat: Access to sensitive asset information</title>
+      <para>The inventory will contain information that is sensitive, for instance known vulnerabilities and internal documentation.</para>
+    </section>
+    <section>
+      <title>Confidentiality_Threat: A02 – Cryptographic Failures</title>
+      <para>The first thing is to determine the protection needs of data in transit and at rest. For example, passwords, credit card numbers, health records, personal information, and business secrets require extra protection, mainly if that data falls under privacy laws, e.g., EU's General Data Protection Regulation (GDPR), or regulations, e.g., financial data protection such as PCI Data Security Standard (PCI DSS).</para>
+    </section>
+    <section>
+      <title>Accountability_Threat: A09 – Security Logging and Monitoring Failures</title>
+      <para>Without logging and monitoring, breaches cannot be detected. Insufficient logging, detection, monitoring, and active response occurs any time:</para>
+      <para>* Auditable events, such as logins, failed logins, and high-value transactions, are not logged.</para>
+      <para>* Warnings and errors generate no, inadequate, or unclear log messages.</para>
+      <para>* Logs of applications and APIs are not monitored for suspicious activity.</para>
+      <para>* Logs are only stored locally.</para>
+      <para>* Appropriate alerting thresholds and response escalation processes are not in place or effective.</para>
+      <para>* Penetration testing and scans by dynamic application security testing (DAST) tools (such as OWASP ZAP) do not trigger alerts.</para>
+      <para>* The application cannot detect, escalate, or alert for active attacks in real-time or near real-time.</para>
+    </section>
+    <section>
+      <title>Threat: A01 – Broken Access Control</title>
+      <para>Access control enforces policy such that users cannot act outside of their intended permissions. </para>
+      <para>Failures typically lead to unauthorized information disclosure, modification, or destruction of all data or performing a business function outside the user's limits.</para>
+    </section>
+    <section>
+      <title>Threat: A07 – Identification and Authentication Failures</title>
+      <para>Confirmation of the user's identity, authentication, and session management is critical to protect against authentication-related attacks.</para>
+    </section>
+    <section>
+      <title>Threat: A03 – Injection</title>
+      <para>Some of the more common injections are SQL, NoSQL, OS command, Object Relational Mapping (ORM), LDAP, and Expression Language (EL) or Object Graph Navigation Library (OGNL) injection. The concept is identical among all interpreters.</para>
+      <para>An application is vulnerable to attack when:</para>
+      <para>* User-supplied data is not validated, filtered, or sanitized by the application.</para>
+      <para>* Dynamic queries or non-parameterized calls without context-aware escaping are used directly in the interpreter.</para>
+      <para>* Hostile data is used within object-relational mapping (ORM) search parameters to extract additional, sensitive records.</para>
+      <para>* Hostile data is directly used or concatenated. The SQL or command contains the structure and malicious data in dynamic queries, commands, or stored procedures.</para>
+    </section>
+    <section>
+      <title>Threat: A04 – Insecure Design</title>
+      <para>Insecure design is a broad category representing different weaknesses, expressed as “missing or ineffective control design.” There is a difference between insecure design and insecure implementation; we differentiate between design flaws and implementation defects for a reason, they have different root causes and remediation. A secure design can still have implementation defects leading to vulnerabilities that may be exploited. An insecure design cannot be fixed by a perfect implementation as by definition, needed security controls were never created to defend against specific attacks.</para>
+    </section>
+    <section>
+      <title>Threat: A05 – Security Misconfiguration</title>
+      <para>The application might be vulnerable if the application is:</para>
+      <para>* Missing appropriate security hardening across any part of the application stack or improperly configured permissions on cloud services.</para>
+      <para>* Unnecessary features are enabled or installed (e.g., unnecessary ports, services, pages, accounts, or privileges).</para>
+      <para>* Default accounts and their passwords are still enabled and unchanged.</para>
+      <para>* Error handling reveals stack traces or other overly informative error messages to users.</para>
+      <para>* For upgraded systems, the latest security features are disabled or not configured securely.</para>
+      <para>* The security settings in the application servers, application frameworks (e.g., Struts, Spring, ASP.NET), libraries, databases, etc., are not set to secure values.</para>
+      <para>* The server does not send security headers or directives, or they are not set to secure values.</para>
+      <para>* The software is out of date or vulnerable</para>
+      <para>Without a concerted, repeatable application security configuration process, systems are at a higher risk</para>
+    </section>
+    <section>
+      <title>Threat: A06 – Vulnerable and Outdated Components</title>
+      <para>You are likely vulnerable:</para>
+      <para>* If you do not know the versions of all components you use (both client-side and server-side). This includes components you directly use as well as nested dependencies.</para>
+      <para>* If you do not fix or upgrade the underlying platform, frameworks, and dependencies in a risk-based, timely fashion. This commonly happens in environments when patching is a monthly or quarterly task under change control, leaving organizations open to days or months of unnecessary exposure to fixed vulnerabilities.</para>
+      <para>* If you do not secure the components’ configurations (see A05:2021-Security Misconfiguration).</para>
+    </section>
+    <section>
+      <title>Threat: A10 - Server-Side Request Forgery</title>
+      <para>SSRF flaws occur whenever a web application is fetching a remote resource without validating the user-supplied URL. It allows an attacker to coerce the application to send a crafted request to an unexpected destination, even when protected by a firewall, VPN, or another type of network access control list (ACL).</para>
+      <para>As modern web applications provide end-users with convenient features, fetching a URL becomes a common scenario. As a result, the incidence of SSRF is increasing. Also, the severity of SSRF is becoming higher due to cloud services and the complexity of architectures.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Use Cases</title>
+    <section>
+      <title>Overview</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/usecases.svg" format="SVG" depth="200mm"/>
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>UC1: Add New Asset to Inventory</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Asset Owner</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Add a new asset to the inventory.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>Asset not present in inventory</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Generate unique asset identificator</para>
+        </listitem>
+        <listitem>
+          <para>Register mandatory asset information, such as asset owner, criticality and financial information</para>
+        </listitem>
+        <listitem>
+          <para>Provide information from external sources</para>
+        </listitem>
+        <listitem>
+          <para>Register dependencies to other assets</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Asset present in inventory</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC2: Determine risk exposure</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Risk Manager</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Continously monitor the risk exposure of the organisation by assessing the risks present for systems and assets.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>Hard to determine risk exposure due to manual labour.</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Gather information about current threat landscape and potential threat agents</para>
+        </listitem>
+        <listitem>
+          <para>Determine what assets affected by which threat</para>
+        </listitem>
+        <listitem>
+          <para>Determine what assets that is exposed to threat agents (internal and external)</para>
+        </listitem>
+        <listitem>
+          <para>Calculate risk based on asset criticality and threat severity</para>
+        </listitem>
+        <listitem>
+          <para>Determine exposure based on reachability to affected asset</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Easy to determine risk exposure due to automation.</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC8: Vulnerability Management</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Information Security Manager</para>
+        <para>Risk Manager</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Support the finding, prioritization and remidiation of vulnerabilities.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>No visibility into the severity and criticality of vulnerabilities affecting assets</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Gather asset information, such as CPE or Package URL</para>
+        </listitem>
+        <listitem>
+          <para>Gather information about reported vulnerabilities affecting the assets</para>
+        </listitem>
+        <listitem>
+          <para>Determine how an asset is affected by a vulnerability and calculate severity, e.g. by using the environment section of CVSS</para>
+        </listitem>
+        <listitem>
+          <para>Find and document possible remediational actions </para>
+        </listitem>
+        <listitem>
+          <para>Follow up remediation status</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Visibility into the severity and criticality of vulnerabilities affecting assets and steps to remidiate them</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC3: Generate Reports</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Asset Owner</para>
+        <para>Information Security Manager</para>
+        <para>Risk Manager</para>
+        <para>Product Owner</para>
+        <para>IT Operations</para>
+        <para>Incident Response Lead</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Different stakeholder will want to generate different kinds of reports freom the application. </para>
+        <para>Incident response managers will, for instance, be able to create reports with disaster recovery procedures and vulnerability managers will want reports regarding known vulnerabilities.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>No report generated</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Select which asset, group of assets or asset type the report will be based on</para>
+        </listitem>
+        <listitem>
+          <para>Select type of report or create custom type</para>
+        </listitem>
+        <listitem>
+          <para>Select fields to use for populating the report with information.</para>
+        </listitem>
+        <listitem>
+          <para>Collect information based on selections</para>
+        </listitem>
+        <listitem>
+          <para>Generate report in a user selected format (PDF, Word, Excel, Json, XML etc)</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Report generated</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC7: Manage Asset</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Asset Owner</para>
+        <para>Product Owner</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Changes to the environment or the asset itself must be reflected in the information about the asset so it is current.</para>
+        <para>Some properties will change frequently while others might be static during the asset lifetime.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>Outdated record in inventory</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Find asset</para>
+        </listitem>
+        <listitem>
+          <para>Fetch updates from remote sources</para>
+          <orderedlist>
+            <listitem>
+              <para>Exception External source unavailable: External information sources might not be available</para>
+            </listitem>
+          </orderedlist>
+        </listitem>
+        <listitem>
+          <para>Present current information and fill in new information</para>
+        </listitem>
+        <listitem>
+          <para>Store changed fields</para>
+          <orderedlist>
+            <listitem>
+              <para>Exception Primary storage not available: The primary storage is unavailable</para>
+            </listitem>
+          </orderedlist>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Updated record in inventory</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC6: Lifecycle Management</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Asset Owner</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>An asset will go through different states during it's life time, as an example; a system will can be under development, in test, in production and decommissioned.</para>
+        <para>The actual lifecycle states might differ between asset types.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>-</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Find asset or create asset</para>
+        </listitem>
+        <listitem>
+          <para>Read current lifecycle status</para>
+        </listitem>
+        <listitem>
+          <para>Change status to a valid value</para>
+        </listitem>
+        <listitem>
+          <para>Store change</para>
+        </listitem>
+        <listitem>
+          <para>Trig any external processes connected to the new status</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>-</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC4: Impact Analysis</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Risk Manager</para>
+        <para>IT Operations</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>To be able to make risk based decisions the impact of an outtake of or change to an asset must be determined.</para>
+        <para>Since assets has links to other assets, the effect on these assets must be taken into consideration during that process.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>Impact undetermined</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Determine direct impact on the asset</para>
+        </listitem>
+        <listitem>
+          <para>Determine how the impact on the main asset affect linked assets</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Impact determined</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC5: Incident Response</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Incident Response Lead</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Determine what assets is affected by an incident, what support groups should handle the incident and escalation points and follow the respective assets incident response plans and escalation chains.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>Incindent has been registered with, at least, information where and how the issue manifest itself for end-users.</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Categorize incident</para>
+        </listitem>
+        <listitem>
+          <para>Identify primary asset affected</para>
+        </listitem>
+        <listitem>
+          <para>Use asset dependencies to identify assets affected</para>
+        </listitem>
+        <listitem>
+          <para>Determine the urgency of the incident based on assets affected and incident charactheristics</para>
+        </listitem>
+        <listitem>
+          <para>Determine the impact based on affected asset(s)</para>
+        </listitem>
+        <listitem>
+          <para>Prioritize based on urgency and impact</para>
+        </listitem>
+        <listitem>
+          <para>Determine if incident task force must be formed or if ordinary support groups is to be used</para>
+        </listitem>
+        <listitem>
+          <para>Assign incident to relevant support group (e.g. DevOps-team, technicians, system vendor)</para>
+        </listitem>
+        <listitem>
+          <para>Retrieve incident handling documentation for affected assets</para>
+        </listitem>
+        <listitem>
+          <para>Retrive known issues related to affected assets</para>
+        </listitem>
+        <listitem>
+          <para>Ensure escalation points has been notified and is on stand by</para>
+        </listitem>
+        <listitem>
+          <para>Initiate incident remidiation and change management process</para>
+        </listitem>
+        <listitem>
+          <para>Report incident handling progress continously</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Incident resolved or mitigated</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC9: Support Architectural Decisions</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Enterprise Architect</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Architecture on different levels, i.e. enterprise, infrastructure, system and application, must be anchored in what the enterprise as a whole strives for and what assets and capabilities that is available to reach these goals.</para>
+        <para>To support the architectural work it is vital to be able to determine what assets that is currently available in the enterprise and their dependencies.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>None</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Gather information on relevant available assets</para>
+        </listitem>
+        <listitem>
+          <para>Identify stakeholders</para>
+        </listitem>
+        <listitem>
+          <para>Conduct impact analysis</para>
+        </listitem>
+        <listitem>
+          <para>Identify Options and Evaluate Alternatives</para>
+        </listitem>
+        <listitem>
+          <para>Analyze Risk and Reward for each available option</para>
+        </listitem>
+        <listitem>
+          <para>Select the Preferred Option</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Architectural decision documented and communicated.</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UC10: Manage changes</title>
+      <formalpara>
+        <title>Actor</title>
+        <para>Asset Owner</para>
+        <para>Product Owner</para>
+        <para>IT Operations</para>
+        <para>Change Manager</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Reduced Disruptions to Business Operations: Effective change management minimizes disruptions to business operations by planning and implementing changes carefully.</para>
+        <para>Improved IT Service Quality: By minimizing the risk of failures and incidents, IT change management helps improve the overall quality of IT services.</para>
+        <para>Reduced Cost of Change: By preventing costly mistakes and rework, effective change management can save organizations money over time.</para>
+        <para>Increased Agility and Adaptability: By having a structured and repeatable process for change, organizations can be more agile and adaptable to changing business needs.</para>
+      </formalpara>
+      <formalpara>
+        <title>Pre-Conditions</title>
+        <para>Change Request created</para>
+      </formalpara>
+      <formalpara>
+        <title>Steps</title>
+      </formalpara>
+      <orderedlist>
+        <listitem>
+          <para>Identify assets affected by the change</para>
+        </listitem>
+        <listitem>
+          <para>Asses risks regarding the change</para>
+        </listitem>
+        <listitem>
+          <para>Assess potential impacts of the change, both positive and negative</para>
+        </listitem>
+        <listitem>
+          <para>Determine feasibility of the change</para>
+        </listitem>
+        <listitem>
+          <para>Identify needed resources for deploying the change</para>
+        </listitem>
+        <listitem>
+          <para>Change request accepted</para>
+          <orderedlist>
+            <listitem>
+              <para>Exception Reject Change Request: If the change is deemed to risky, unfeasible or too costly the request is rejected and this use case is ended.</para>
+            </listitem>
+          </orderedlist>
+        </listitem>
+        <listitem>
+          <para>Develop change plan</para>
+        </listitem>
+        <listitem>
+          <para>Schedule change</para>
+        </listitem>
+        <listitem>
+          <para>Deploy change</para>
+        </listitem>
+      </orderedlist>
+      <formalpara>
+        <title>Post-Conditions</title>
+        <para>Change deployed</para>
+      </formalpara>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Requirements</title>
+    <section>
+      <title>CI1 - Unique Identifier (Data)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Unique Identifier*</para>
+        <para>All assets must be assigned a unique identifier that is automatically generated during creation of the record.</para>
+        <para>The format of the identifier should be customizable depending on the type of asset.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ITIL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>CI2 - Asset type hierarchy (Data)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Asset type hierarchy*</para>
+        <para>Assets must be assigned a main type (such as hardware, software, data) and a more granular subtype (e.g. server, laptop). An asset may be assigned sub-sub-types (or deeper if appropriate).</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ITIL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>CI3 - Attributes (Data)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Attributes*</para>
+        <para>All assets must have a set of attribute-fields that is common across different asset types, including but not limited to Unique id, name, description, modification history and asset owner.</para>
+        <para>Further fields will be determined by asset type, sub-type and available information modules.</para>
+        <para>Available attributes should be possible to customize.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ITIL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>CI4 - Relationships (Data)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Relationships*</para>
+        <para>Relationships between assets must be possible to specify, for instance "X is a component of Y", "Y uses Z".</para>
+        <para>Custom relation types should be possible to define.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ITIL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>CI5 - Mandatory attributes (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Mandatory attributes*</para>
+        <para>It must be possible to define a set of mandatory attributes for all assets, it should be possible to define mandatory attributes specific for asset types.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ITIL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>CI7 - Custom asset types (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Custom asset types*</para>
+        <para>It should be possible to define custom asset types.</para>
+        <para>The custom type can be either a toplevel main type or a subtype to an existing main or sub-type</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>AUTH-2 Remote user database (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Remote user database*</para>
+        <para>The application must support the use of external user management such as LDAP and AD.</para>
+        <para>The remote service MUST handle authentication and MAY handle authorization.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>INFO-4 Automated Asset discovery (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Automated Asset discovery*</para>
+        <para>It should be possible to automate the creation of assets in the inventory by reading data from external sources, or by using internal modules.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>INFO-5 Disable Automatic Information Gathering (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Disable Automatic Information Gathering*</para>
+        <para>It must be possible to disable automatic information gathering for a given asset.</para>
+      </formalpara>
+      <formalpara>
+        <title>Rationale</title>
+        <para>If the automation for some reason does not work, manual entries must not be overwritten with faulty input from the automation.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>CI6 - Audit Log (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Audit Log*</para>
+        <para>All modifications made must be traceable and show who did the change and when the change was made.</para>
+        <para>It should be possible to produce a diff-view of the change showing changed fields and their old and new values.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ITIL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>AUTH-1 Local User Database (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Local User Database*</para>
+        <para>A local user database must be provided that allow users to sign in.</para>
+        <para>The database must contain credentials and assigned roles to allow authentication, access control and auditing to work.</para>
+      </formalpara>
+      <formalpara>
+        <title>Rationale</title>
+        <para>If a central authentication solution, such as LDAP or AD, is unavailable it must be possible to authenticate to the system and use it.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>INFO-1 Manual entries (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Manual entries*</para>
+        <para>It must be possible to enter information about an asset manually into the system.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>INFO-2 Automatic information gathering (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Automatic information gathering*</para>
+        <para>The application must support automatic information gathering from different external sources.</para>
+      </formalpara>
+      <formalpara>
+        <title>Rationale</title>
+        <para>Some information about an asset will change for various reasons, examples is known vulnerabilities and which version of an application a host is running.</para>
+        <para>Maintaining this kind of information manually is cumbersome and should be avoided.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>INFO-7 Data access control (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Access to asset information must be possible to control with various levels of granularity.</para>
+      </formalpara>
+      <formalpara>
+        <title>Rationale</title>
+        <para>Depending on role and resposibilities, different data and possible actions must be available to the user.</para>
+        <para>For instance; the asset owner must be able to change the information about an asset, while a developer only need read access to some specific fields.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>AUTH-3 Priority of user databases (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>3</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Priority of user databases*</para>
+        <para>With multiple user databases configured the application must use them in order for authentication.</para>
+        <para>The first mathing user id must be used for credential validation.</para>
+      </formalpara>
+      <formalpara>
+        <title>Rationale</title>
+        <para>If a user-id exist in all configured databases it must not be possible to exploit differences between the databases to gain access. Therefore the search must stop at the first match on user-id and not on credential validation.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>INFO-6 Secure Data Storage (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>Data at rest must be encrypted with algorithms that provide both confidentiality and integrity</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.1.3 Features and User stories (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Features and User stories*</para>
+        <para>All user stories and features must contain functional security constraints, such as:</para>
+        <para>"As a user, I should be able to view and edit my profile. I should not be able to view or edit anyone else's profile"</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.1.2 Threat modeling (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Threat modeling*</para>
+        <para>Threat modeling should be performed for every design change and sprint planning to identify threats, plan for countermeasures, facilitate appropriate risk responses, and guide security testing.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.2.2 Component Communication (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Component Communication*</para>
+        <para>Communications between application components, including APIs, middleware and data layers, must be authenticated. Components must have the least necessary privileges needed.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.2.3 Authentication Mechanism (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Authentication Mechanism*</para>
+        <para>The application must use a single vetted authentication mechanism that is known to be secure, can be extended to include strong authentication, and has sufficient logging and monitoring to detect account abuse or breaches.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.4.4 Access Control Mechanism (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Access Control Mechanism*</para>
+        <para>The application must use a single and well-vetted access control mechanism for accessing protected data and resources. All requests must pass through this single mechanism to avoid copy and paste or insecure alternative paths.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.7.1 Logging (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Logging*</para>
+        <para>A common logging format and approach must be used across the system.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.11.2 Unsynchronized state (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Unsynchronized state*</para>
+        <para>High-value logic flows, including authentication, session management and access control, must not share unsynchronized state.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.14.1 Segregation (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Segregation*</para>
+        <para>Enforce segregation of components of differing trust levels through well-defined security controls, firewall rules, API gateways, reverse proxies, cloud-based security groups, or similar mechanisms.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.6.2 Key protection (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Key protection*</para>
+        <para>Consumers of cryptographic services must protect key material and other secrets by using key vaults or API based alternatives.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.6.3 Key replacement (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Key replacement*</para>
+        <para>Cryptographic keys and passwords must be replaceable and must be part of a well-defined process to re-encrypt sensitive data.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.1.6 Design and Architect Security In (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Design and Architect Security In*</para>
+        <para>Security controls must be centralized, simple (economy of design), vetted, secure, and reusable to avoid duplicate, missing, ineffective, or insecure controls.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.1.1 SDLC (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*SDLC*</para>
+        <para>The development process must follow a secure software development lifecycle that addresses security in all stages of development. Make secure coding checklist, security requirements, guideline, or policy available to all developers and testers.</para>
+        <para>Verify that the build pipeline warns of out-of-date or insecure components and takes appropriate actions.</para>
+        <para>Verify the application does not use unsupported, insecure, or deprecated client-side technologies such as NSAPI plugins, Flash, Shockwave, ActiveX, Silverlight, NACL, or client-side Java applets.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.2.4 Authentication paths (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Authentication paths*</para>
+        <para>All authentication pathways and identity management APIs must implement consistent authentication security control strength, such that there are no weaker alternatives.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.4.1 Access Enforcement Points (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Access Enforcement Points*</para>
+        <para>Access controls must be enforced on a trusted layer and not on a untrusted, i.e. on the client-side.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.5.2 Serialization (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Serialization*</para>
+        <para>Serialization should not be used when communicating with untrusted clients. </para>
+        <para>If this is not possible, ensure that adequate integrity controls (and possibly encryption if sensitive data is sent) are enforced to prevent deserialization attacks including object injection.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.5.3 Input validation (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Input validation*</para>
+        <para>Input validation must be enforced on a trusted service layer.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.5.4 Output encoding (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Output encoding*</para>
+        <para>Output encoding must occur close to or by the interpreter for which it is intended.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.11.3 Thread Safe (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Thread Safe*</para>
+        <para>High-value business logic flows, including authentication, session management and access control must be thread safe and resistant to time-of-check and time-of-use race conditions.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>SDLC4 - Document high level architecture and threat model (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Document high level architecture and threat model*</para>
+        <para>Describe high-level system architecture and perform threat modeling on it every critical change and regularly</para>
+      </formalpara>
+      <formalpara>
+        <title>Rationale</title>
+        <para>See https://www.opencre.org/cre/068-102</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>INFO-3 Local Data store (Operational)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Local Data store*</para>
+        <para>If data from an external data source is unavailable information stored locally must be used as a fallback. The local information must be kept updated as long as the external source is available.</para>
+        <para>It should be possible to select which external data that will be stored locally or not.</para>
+      </formalpara>
+      <formalpara>
+        <title>Rationale</title>
+        <para>The application must be resilient and be able to function even without access to external information sources.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-2 Plugins (Maintainability)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Plugins*</para>
+        <para>To be able to support a wide range of information sources, output destinations and asset types the application must be extendable with custom plugins.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>SDLC1 - Build System (Maintainability)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Build System*</para>
+        <para>The application must be built using a suitable build system, such as maven, that provides a replicatable way to build, test and package the application.</para>
+        <para>The configuration of the build system must be documented so it's possible to replicate the building of the application on a local developer machine and in an CI/CD-environment</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>SDLC2 - Dependency Management (Maintainability)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>* Maintain/manage inventory of third party components (https://www.opencre.org/cre/863-521)</para>
+        <para>* Force build pipeline to check outdated/insecure components (https://www.opencre.org/cre/053-751)</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>SDLC3 - Technical system documentation (Maintainability)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Technical system documentation*</para>
+        <para>Documentation about the following must be available:</para>
+        <para>* APIs (exposed/external and internal)</para>
+        <para>* Testcases (description and result)</para>
+        <para>* Known defects</para>
+        <para>* Not implemented requirements</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UI1 - Screen resolutions and sizes (Look_and_Feel)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Screen resolutions and sizes*</para>
+        <para>The user interface must be runnable and usable on different screen resolutions and screen sizes.</para>
+        <para>Typical devices to take into consideration is personal computers, tablets and smartphones.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>UI2 - Platform independence (Portability)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>2</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Platform independence*</para>
+        <para>The UI must be available on the most common operatingsystems (iOS, macOS, Windows, Linux) and system architectures (x86/64, ARM/ARM64) available and it must be easy to support new platforms.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>BACK1 - Platform independence (Portability)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>*Platform independence*</para>
+        <para>The backend of the application must be runnable on Windows and Linux on x86/64 systems.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+  </chapter>
+  <appendix>
+    <title>Roles</title>
+    <table frame="all">
+      <thead>
+        <row>
+          <entry>Role Name</entry>
+          <entry>Type</entry>
+          <entry>Description</entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>Asset Owner</entry>
+          <entry>Stakeholder</entry>
+          <entry>Responsible for an asset, a group of assets (i.e. a system) or a specific type of assets (i.e. network devices).</entry>
+        </row>
+        <row>
+          <entry>Information Security Manager</entry>
+          <entry>Stakeholder</entry>
+          <entry>The Information Security Manager is responsible for ensuring the confidentiality, integrity and availability of an organization’s assets, information, data and IT services.
+He or she is usually involved in an organizational approach to Security Management which has a wider scope than the IT service provider, and includes handling of paper, building access, phone calls etc., for the entire organization.</entry>
+        </row>
+        <row>
+          <entry>Risk Manager</entry>
+          <entry>Stakeholder</entry>
+          <entry>The Risk Manager is responsible for identifying, assessing and controlling risks.
+This includes analyzing the value of assets to the business, identifying threats to those assets, and evaluating how vulnerable each asset is to those threats.</entry>
+        </row>
+        <row>
+          <entry>Product Owner</entry>
+          <entry>Stakeholder</entry>
+          <entry>Main resposible for the delivery of a product such as a service or application.</entry>
+        </row>
+        <row>
+          <entry>IT Operations</entry>
+          <entry>Stakeholder</entry>
+          <entry>Plans and performs day to day operational tasks and infrastructure changes.</entry>
+        </row>
+        <row>
+          <entry>Incident Response Lead</entry>
+          <entry>Stakeholder</entry>
+          <entry>Plans and execute incident response tasks</entry>
+        </row>
+        <row>
+          <entry>Enterprise Architect</entry>
+          <entry>Stakeholder</entry>
+          <entry>The Architect is responsible for maintaining the architecture, i.e. a description of the essential components of a business, a system or an service, including their interrelationships</entry>
+        </row>
+        <row>
+          <entry>Change Manager</entry>
+          <entry>Stakeholder</entry>
+          <entry>The Change Manager controls the lifecycle of all Changes. The primary objective is to enable beneficial Changes to be made, with minimum disruption to IT services.</entry>
+        </row>
+        <row>
+          <entry>Cybersecurity Analyst</entry>
+          <entry>Stakeholder</entry>
+          <entry>Cybersecurity analysts safeguard organizations' sensitive data and infrastructure from cyberattacks. They monitor networks, assess vulnerabilities, respond to breaches, and develop security policies.</entry>
+        </row>
+      </tbody>
+    </table>
+  </appendix>
+  <appendix>
+    <title>Personas</title>
+    <section>
+      <title>Robert Nilsson</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/sOvbgvTRcNDlCvFXFR4aQjEfyJLPS6IR.jpeg"/>
+        </imageobject>
+      </mediaobject>
+      <formalpara>
+        <title>Type</title>
+        <para>Secondary</para>
+      </formalpara>
+      <formalpara>
+        <title>Roles</title>
+        <para>Information Security Manager</para>
+      </formalpara>
+      <formalpara>
+        <title>Overview</title>
+        <para>Robert is a confident and assertive leader with a strong passion for cybersecurity. He is also a highly analytical and detail-oriented individual who is always looking for new ways to protect Acme Corporation's data. Robert is a great communicator who is able to explain complex technical concepts to both technical and non-technical audiences.</para>
+        <para>Strengths:</para>
+        <para>* Strong technical expertise in cybersecurity</para>
+        <para>* Excellent leadership and management skills</para>
+        <para>* Ability to communicate complex technical concepts to non-technical audiences</para>
+        <para>* Passion for cybersecurity and a strong commitment to protecting Acme Corporation's data</para>
+        <para>Weaknesses:</para>
+        <para>* Sometimes can be too focused on technology and forget to consider the business needs</para>
+        <para>* Can be overly cautious and reluctant to take risks</para>
+        <para>* Can be a bit of a perfectionist and can get frustrated when things don't go according to plan</para>
+      </formalpara>
+      <formalpara>
+        <title>Activities</title>
+        <para>* Conduct regular security assessments to identify and mitigate vulnerabilities</para>
+        <para>* Develop and implement security policies and procedures</para>
+        <para>* Manage security tools and technologies</para>
+        <para>* Conduct security awareness training for employees</para>
+        <para>* Investigate and respond to security incidents</para>
+        <para>* Keep up with the latest cybersecurity threats and trends</para>
+        <para>* Stay informed about industry standards and regulations</para>
+        <para>* Collaborate with other departments to ensure cybersecurity is integrated into all business practices</para>
+        <para>* Report on cybersecurity risks and progress to senior management</para>
+      </formalpara>
+      <formalpara>
+        <title>Attitudes</title>
+        <para>* Competitive: Robert is driven to make Acme Corporation the most secure company in its industry. He views cybersecurity as a game of chess, where he is constantly trying to outsmart and outmaneuver potential attackers.</para>
+        <para>* Pragmatic: Robert understands that cybersecurity is not about achieving perfect security. He is willing to take calculated risks in order to achieve business goals.</para>
+        <para>* Data-driven: Robert makes decisions based on data and evidence. He regularly collects and analyzes security metrics to track progress and identify areas for improvement.</para>
+        <para>* People-oriented: Robert recognizes that security is a shared responsibility. He works hard to educate and empower employees to protect the company's data.</para>
+        <para>* Ethical: Robert is committed to upholding the highest ethical standards in his work. He believes that cybersecurity should not come at the expense of privacy or user experience.</para>
+        <para>* Resilient: Robert is able to bounce back from setbacks and failures. He does not let mistakes discourage him from pursuing his goals.</para>
+        <para>* Visionary: Robert has a clear vision for the future of cybersecurity at Acme Corporation. He is constantly looking for ways to innovate and improve the company's security posture.</para>
+      </formalpara>
+      <formalpara>
+        <title>Aptitudes</title>
+        <para>* Technical expertise: Robert has a strong understanding of cybersecurity concepts, technologies, and tools. He is able to identify and assess security risks, implement security controls, and troubleshoot security incidents.</para>
+        <para>* Problem-solving: Robert is able to think critically and creatively to solve complex cybersecurity problems. He is able to break down problems into smaller, manageable tasks and develop effective solutions.</para>
+        <para>* Analytical skills: Robert is able to collect, analyze, and interpret large amounts of data. He is able to identify patterns and trends in data that can help him identify and mitigate security risks.</para>
+        <para>* Communication: Robert is an effective communicator who is able to explain complex technical concepts to both technical and non-technical audiences. He is able to write clearly and concisely, and he is also able to present information in a way that is engaging and informative.</para>
+        <para>* Leadership: Robert is a natural leader who is able to motivate and inspire others. He is able to build strong teams and foster a culture of cybersecurity awareness and compliance.</para>
+        <para>* Adaptability: Robert is able to adapt to changing circumstances and learn new things quickly. He is open to new ideas and approaches, and he is not afraid to experiment with new technologies and methodologies.</para>
+      </formalpara>
+      <formalpara>
+        <title>Motivations</title>
+        <para>* Protecting Acme Corporation's data: Robert is deeply concerned about the potential risks to Acme Corporation's data, including financial loss, reputational damage, and regulatory fines. He is driven to protect the company's data from unauthorized access, modification, or disclosure.</para>
+        <para>* Making a difference: Robert is passionate about cybersecurity and believes that he can make a real difference in protecting people's data and privacy. He is driven to make Acme Corporation the most secure company in its industry and to set an example for other organizations.</para>
+        <para>* Personal fulfillment: Robert finds great satisfaction in solving complex cybersecurity challenges and in working with a team to achieve common goals. He enjoys the intellectual challenge of his work and the feeling of accomplishment that comes from a job well done.</para>
+        <para>* Career advancement: Robert is ambitious and is looking to advance his career in cybersecurity. He is confident that his experience and skills will allow him to reach his goals.</para>
+        <para>* Recognition and respect: Robert is respected by his colleagues and peers for his knowledge and expertise. He is also recognized for his contributions to the company's security posture.</para>
+      </formalpara>
+      <formalpara>
+        <title>Skills</title>
+        <para>* Security Architecture and Design: Robert possesses a deep understanding of security architecture principles and methodologies, enabling him to design and implement robust security solutions for Acme Corporation's IT infrastructure.</para>
+        <para>* Security Vulnerability Assessment and Management: Robert is proficient in identifying, assessing, and prioritizing security vulnerabilities across the company's systems, networks, and applications. He effectively implements mitigation strategies to address these vulnerabilities and minimize potential risks.</para>
+        <para>* Incident Response and Forensics: Robert has expertise in handling cybersecurity incidents, including incident investigation, containment, eradication, and recovery. He utilizes forensic techniques to gather evidence, identify root causes, and prevent future incidents.</para>
+        <para>* Security Policies and Procedures: Robert plays a crucial role in developing and implementing comprehensive security policies and procedures that align with industry standards and regulatory requirements. These policies govern user access, data handling, incident reporting, and other critical security practices.</para>
+        <para>* Risk Management and Compliance: Robert effectively identifies, analyzes, and mitigates cybersecurity risks that could impact Acme Corporation's operations and data assets. He stays abreast of compliance regulations and ensures that the organization's security practices meet relevant standards.</para>
+        <para>* Security Awareness and Training: Robert is responsible for crafting and delivering security awareness training programs for employees at all levels. This training educates employees about cybersecurity threats, best practices, and their role in protecting sensitive data.</para>
+        <para>* Communication and Collaboration: Robert is an effective communicator who can convey complex technical concepts to both technical and non-technical audiences. He fosters strong working relationships with colleagues, other departments, and external partners to achieve security goals.</para>
+        <para>* Leadership and Team Management: Robert demonstrates strong leadership qualities, motivating and inspiring his team to deliver exceptional security outcomes. He effectively delegates tasks, provides guidance, and recognizes team members' contributions.</para>
+        <para>* External Stakeholder Management: Robert maintains positive relationships with external stakeholders, including vendors, partners, and government agencies. He effectively communicates security concerns and collaborates to address them.</para>
+      </formalpara>
+      <formalpara>
+        <title>Intrinsic Trust</title>
+        <para>Robert's intrinsic trust is a cornerstone of his success as an information security manager. His honesty, reliability, ethical conduct, humility, and commitment to others have fostered positive relationships and earned him the trust of those he interacts with. His intrinsic trust has enabled him to build strong teams, resolve conflicts effectively, and make sound decisions that protect the security of the organization and its data.</para>
+      </formalpara>
+      <formalpara>
+        <title>Contextual Trust</title>
+        <para>Robert, as an information security manager at Acme Corporation, demonstrates a high level of contextual trust in his interactions with colleagues, stakeholders, and external partners. This means that he effectively builds trust by understanding the context of each situation and adapting his communication and approach accordingly.</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>Erik Johansson</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/509J68iPlcVMapcGaLeFImMFaeXMRQcc.jpeg"/>
+        </imageobject>
+      </mediaobject>
+      <formalpara>
+        <title>Type</title>
+        <para>Secondary</para>
+      </formalpara>
+      <formalpara>
+        <title>Roles</title>
+        <para>Incident Response Lead</para>
+      </formalpara>
+      <formalpara>
+        <title>Overview</title>
+        <para>Erik is a calm and collected individual with a sharp mind and a quick wit. He is known for his ability to stay cool under pressure and to think clearly in the face of a crisis. Erik is also a very resourceful person and is always able to find a way to solve any problem.</para>
+        <para>Strengths:</para>
+        <para>* Strong technical expertise in incident response</para>
+        <para>* Excellent problem-solving skills</para>
+        <para>* Quick thinking and decisiveness</para>
+        <para>* Calm and collected demeanor under pressure</para>
+        <para>* Resourcefulness and ability to find solutions</para>
+        <para>* Excellent communication and collaboration skills</para>
+        <para>* Ability to build and lead high-performing teams</para>
+        <para>Weaknesses:</para>
+        <para>* Can be a bit too blunt in his communication style</para>
+        <para>* Can be impatient with people who don't understand the technical aspects of incident response</para>
+        <para>Goals:</para>
+        <para>* To develop and implement a comprehensive incident response plan that will protect the company's assets</para>
+        <para>* To train and educate employees on how to identify and respond to cyberattacks</para>
+        <para>* To investigate and contain cyberattacks as quickly and efficiently as possible</para>
+        <para>Challenges:</para>
+        <para>* The ever-evolving threat landscape</para>
+        <para>* The need to stay up-to-date on the latest security threats and vulnerabilities</para>
+        <para>* The challenge of communicating technical information to non-technical audiences</para>
+        <para>* The difficulty of convincing management to invest in incident response preparedness</para>
+      </formalpara>
+      <formalpara>
+        <title>Activities</title>
+        <para>* Develop and maintain a comprehensive incident response plan (IRP). This plan outlines the steps that NordicTech will take to respond to a cyberattack, from identifying the attack to containing it and recovering from it.</para>
+        <para>* Conduct regular security assessments and penetration tests to identify and mitigate vulnerabilities in NordicTech's IT systems.</para>
+        <para>* Train and educate NordicTech employees on cybersecurity best practices, including how to identify and avoid phishing attacks, how to create strong passwords, and how to report suspicious activity.</para>
+        <para>* Respond to security incidents as they occur. This may involve investigating the attack, containing the damage, and restoring systems to normal operation.</para>
+        <para>* Investigate and analyze security incidents to determine the root cause of the attack and identify any weaknesses in NordicTech's security posture.</para>
+        <para>* Document the steps taken to respond to security incidents so that the company can learn from its mistakes and improve its incident response capabilities.</para>
+        <para>* Stay up-to-date on the latest security threats and vulnerabilities by reading industry publications, attending conferences, and participating in online forums.</para>
+        <para>* Communicate with management about the company's cybersecurity posture and recommend any changes that are needed.</para>
+        <para>* Work with other departments at NordicTech to integrate security into the company's overall business processes.</para>
+        <para>* Serve as a liaison with external organizations such as law enforcement and insurance companies in the event of a cyberattack.</para>
+      </formalpara>
+      <formalpara>
+        <title>Attitudes</title>
+        <para>Erik Johansson, the incident response lead at NordicTech, possesses a combination of attitudes that contribute to his effectiveness in handling cybersecurity incidents. Here's a breakdown of his key attitudes:</para>
+        <para>* Professionalism and Integrity: Erik approaches his work with a strong sense of professionalism and integrity. He is dedicated to protecting NordicTech's data and assets, and he always strives to act ethically and responsibly.</para>
+        <para>* Resilience and Determination: Erik is a highly resilient individual who is able to bounce back from setbacks. He is determined to succeed in protecting NordicTech from cyberattacks, and he never gives up in the face of a challenge.</para>
+        <para>* Critical Thinking and Problem-Solving: Erik is a skilled critical thinker and problem solver. He is able to quickly assess a situation and identify the best course of action. He is also able to think creatively and come up with innovative solutions to complex problems.</para>
+        <para>* Teamwork and Collaboration: Erik is a strong team player who is able to collaborate effectively with others. He is able to build strong relationships with his colleagues and partners, and he is always willing to share his expertise and knowledge.</para>
+        <para>* Continuous Learning and Improvement: Erik is committed to continuous learning and improvement. He is always staying up-to-date on the latest security threats and vulnerabilities, and he is always looking for new ways to improve his incident response skills.</para>
+        <para>* Adaptability and Flexibility: Erik is a highly adaptable individual who is able to quickly adapt to changing circumstances. He is able to think on his feet and make decisions under pressure.</para>
+        <para>Overall, Erik Johansson's positive attitude towards his work is a key factor in his success as an incident response lead. He is a highly skilled and experienced professional who is dedicated to protecting NordicTech's data and assets.</para>
+      </formalpara>
+      <formalpara>
+        <title>Aptitudes</title>
+        <para>* Understanding of Cybersecurity Concepts: Erik has a deep understanding of the fundamental concepts and principles of cybersecurity, including threat modeling, vulnerability assessment, risk management, and incident response methodologies.</para>
+        <para>* Ability to Learn and Apply New Technologies: Erik is a quick learner and is always up-to-date on the latest cybersecurity technologies and techniques. He is able to effectively apply new technologies to enhance NordicTech's security posture.</para>
+        <para>* Troubleshooting and Problem-solving: Erik has strong troubleshooting and problem-solving skills, enabling him to identify and resolve security issues quickly and efficiently. He is able to think outside the box and find innovative solutions to complex problems.</para>
+        <para>* Critical Thinking and Deductive Reasoning: Erik is a skilled critical thinker who can analyze large amounts of data and identify patterns and anomalies. He can use deductive reasoning to draw conclusions from available information and make informed decisions.</para>
+        <para>* Abstraction and Pattern Recognition: Erik can effectively abstract complex security issues into their core components and identify patterns or trends that may indicate potential threats or vulnerabilities. This ability allows him to quickly grasp the essence of a problem and develop effective solutions.</para>
+        <para>* Data Analysis and Interpretation: Erik is proficient in data analysis techniques, enabling him to extract meaningful insights from security logs, network traffic, and other data sources. He can interpret these insights to identify and address potential security risks.</para>
+        <para>* Effective Communication: Erik is an articulate and persuasive communicator who can convey technical information to both technical and non-technical audiences. He tailors his communication style to suit the audience and ensures that they understand the information being conveyed.</para>
+        <para>* Active Listening and Understanding: Erik is a keen listener who can effectively understand the needs and concerns of others. He is able to build rapport with stakeholders and gain their trust by actively listening to their inputs.</para>
+        <para>* Storytelling and Persuasion: Erik can effectively craft stories that captivate audiences and communicate complex security concepts in a relatable and engaging manner. He uses storytelling to persuade others to adopt security measures and promote a culture of cybersecurity within the organization.</para>
+        <para>* Motivational and Inspiring Leadership: Erik is a natural leader who can motivate and inspire his team to perform at their best. He sets high standards and expects his team to deliver exceptional results, but he also recognizes and rewards their achievements.</para>
+        <para>* Empathetic and Inclusive Leadership: Erik is empathetic and understanding, creating a supportive and inclusive environment for his team members. He fosters a culture of collaboration and encourages open communication among team members.</para>
+        <para>* Strategic Thinking and Decision-making: Erik can think strategically and make informed decisions under pressure. He considers the long-term implications of his actions and weighs the risks and benefits of different approaches.</para>
+        <para>* Change Management and Adaptability: Erik is adept at adapting to change and can effectively manage the impact of new technologies, evolving threats, and regulatory changes. He is able to identify and implement new processes and procedures to maintain NordicTech's security posture.</para>
+        <para>* Resilience and Flexibility: Erik is resilient in the face of challenges and can adapt to unexpected events or setbacks. He is flexible in his approach and is willing to adjust his plans as needed to achieve the desired outcome.</para>
+        <para>* Continuous Learning and Improvement: Erik is committed to continuous learning and improvement. He actively seeks out new knowledge and skills to enhance his ability to protect NordicTech's data and assets.</para>
+      </formalpara>
+      <formalpara>
+        <title>Motivations</title>
+        <para>* Erik is highly motivated by a strong sense of responsibility for safeguarding NordicTech's valuable data and assets. He understands the potential consequences of a cyberattack, including financial losses, reputational damage, and regulatory penalties.</para>
+        <para>* Erik is motivated by the challenge of staying ahead of evolving cybersecurity threats and ensuring that NordicTech remains a resilient organization. He is driven by a desire to protect the company from harm and maintain its reputation for data security.</para>
+        <para>* Erik finds great satisfaction in solving complex cybersecurity challenges and successfully mitigating incidents. He enjoys the intellectual challenge of identifying and addressing vulnerabilities, and he derives a sense of accomplishment from preventing cyberattacks.</para>
+        <para>* Erik is passionate about his profession and enjoys continuous learning and professional development. He is motivated by the prospect of staying at the forefront of cybersecurity knowledge and techniques.</para>
+      </formalpara>
+      <formalpara>
+        <title>Skills</title>
+        <para>* Incident Response and Forensics: Erik possesses in-depth knowledge of incident response methodologies, including investigation techniques, containment procedures, eradication strategies, and recovery methods. He is skilled in utilizing forensic tools and techniques to gather evidence, identify root causes, and prevent future incidents.</para>
+        <para>* Cybersecurity Technologies: Erik stays abreast of the latest cybersecurity technologies, including intrusion detection systems (IDS), intrusion prevention systems (IPS), firewalls, endpoint security solutions, and data loss prevention (DLP) tools. He understands how these technologies can be effectively integrated into an incident response plan.</para>
+        <para>* Networking and IT Infrastructure: Erik possesses a strong understanding of networking concepts, protocols, and standards. He is able to effectively diagnose network-related issues and implement network security measures to protect against cyberattacks.</para>
+        <para>* Critical Thinking and Deductive Reasoning: Erik is a skilled critical thinker who can analyze complex situations and identify patterns and anomalies. He is able to deduce the likely cause of an incident and formulate a plan to address the issue.</para>
+        <para>* Problem-solving and Decision-making: Erik is adept at identifying and evaluating potential solutions to cybersecurity problems. He can make sound decisions under pressure, considering the potential impact of each action.</para>
+        <para>* Attention to Detail and Analytical Persistence: Erik is meticulous in his approach to incident response, paying close attention to detail and ensuring that all aspects of an incident are thoroughly analyzed. This attention to detail helps him identify and address even the most subtle clues.</para>
+        <para>* Clear and Concise Communication: Erik is an effective communicator who can explain complex technical concepts in a clear and concise manner, both to technical and non-technical audiences. He can tailor his communication style to suit the audience and ensure that they understand the information being conveyed.</para>
+        <para>* Effective Collaboration: Erik is a team player who can collaborate effectively with others, both within his own team and with external stakeholders. He is able to build rapport with colleagues, partners, and incident response teams, fostering a collaborative environment.</para>
+        <para>* Written and Verbal Communication: Erik is proficient in both written and verbal communication, ensuring that incident reports, presentations, and discussions are clear, concise, and informative. He can articulate complex security concepts in a way that is easy for others to understand.</para>
+        <para>* Motivational and Inspiring Leader: Erik is a natural leader who can motivate and inspire his team to perform at their best. He sets high standards and expects his team to deliver exceptional results, but he also recognizes and rewards their achievements.</para>
+        <para>* Decision-making and Influence: Erik has the ability to make sound decisions and influence others to follow his lead. He can clearly articulate his vision and persuade others to adopt his approach to incident response.</para>
+        <para>* Delegation and Empowerment: Erik is a skilled delegator who empowers his team members to take ownership of tasks and responsibilities. He provides clear guidance and support, but he also trusts his team members to make informed decisions.</para>
+      </formalpara>
+      <formalpara>
+        <title>Intrinsic Trust</title>
+        <para>Erik Johansson possesses a high level of intrinsic trust. This means that he is inherently trustworthy and has a strong sense of integrity.</para>
+      </formalpara>
+      <formalpara>
+        <title>Contextual Trust</title>
+        <para>Erik Johansson, as an incident response lead, possesses a high level of contextual trust. This means that he is able to build trust with others by understanding the context of their situation and communicating effectively with them.</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>Isabella Schmidt</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/k2UsrOA29KGQVKbpvWOsSOFA1NOAUIDy.png"/>
+        </imageobject>
+      </mediaobject>
+      <formalpara>
+        <title>Type</title>
+        <para>Secondary</para>
+      </formalpara>
+      <formalpara>
+        <title>Roles</title>
+        <para>Enterprise Architect</para>
+      </formalpara>
+      <formalpara>
+        <title>Overview</title>
+        <para>Isabella Schmidt is a seasoned enterprise architect with over 15 years of experience in the IT industry. She holds a Master of Science in Computer Science from ETH Zurich and has worked in a variety of roles, including software engineer, systems analyst, and project manager. Isabella is a recognized expert in enterprise architecture and is passionate about using technology to solve business problems.</para>
+        <para>Isabella is a highly analytical and strategic thinker with a deep understanding of technology. She is also a gifted communicator and is able to translate complex technical concepts into terms that are easy for non-technical stakeholders to understand. Isabella is a strong leader and is known for her ability to build consensus and motivate teams.</para>
+        <para>Isabella faces a number of challenges in her role as an enterprise architect, including:</para>
+        <para>* Balancing the needs of business stakeholders with the technical realities of IT</para>
+        <para>* Communicating complex technical concepts to non-technical audiences</para>
+        <para>* Staying up-to-date on the latest trends in technology</para>
+        <para>* Navigating the political landscape of large organizations</para>
+        <para>Isabella's goals are to:</para>
+        <para>* Continue to develop her expertise in enterprise architecture</para>
+        <para>* Inspire and mentor other women in the IT industry</para>
+      </formalpara>
+      <formalpara>
+        <title>Activities</title>
+        <para>* Developing and maintaining the enterprise architecture framework: The enterprise architecture framework provides a blueprint for how the organization's IT systems should be designed and implemented. Isabella is responsible for developing and maintaining this framework, ensuring that it aligns with the organization's business goals and strategies.</para>
+        <para>* Conducting business process modeling and analysis: Isabella helps to identify and map out the organization's business processes. This helps to understand how the organization operates and to identify areas where IT can be used to improve efficiency and effectiveness.</para>
+        <para>* Designing and implementing information systems architecture: Isabella designs and implements the organization's information systems architecture. This includes designing databases, applications, and networks to support the organization's business processes.</para>
+        <para>* Overseeing data architecture: Isabella oversees the organization's data architecture. This includes defining data standards, ensuring data quality, and managing data security.</para>
+        <para>* Adopting and integrating new technologies: Isabella evaluates and adopts new technologies that can be used to improve the organization's IT infrastructure and systems. This includes cloud computing, artificial intelligence, and big data.</para>
+        <para>* Communicating with stakeholders: Isabella communicates with various stakeholders, including business leaders, IT professionals, and end users. She explains the organization's IT architecture and how it supports the business.</para>
+        <para>* Project management: Isabella may also be involved in managing IT projects, ensuring that they are completed on time and within budget.</para>
+      </formalpara>
+      <formalpara>
+        <title>Attitudes</title>
+        <para>* Passionate about technology: Isabella is driven by a passion for using technology to solve business problems and improve the world.</para>
+        <para>* Analytical and strategic thinker: Isabella possesses a strong analytical mind and is able to think strategically about complex problems.</para>
+        <para>* Communicator: Isabella is a gifted communicator who is able to translate complex technical concepts into terms that are easy to understand for non-technical stakeholders.</para>
+        <para>* Leader: Isabella is a strong leader who is able to build consensus and motivate teams.</para>
+        <para>* Team player: Isabella is a team player who is always willing to collaborate with others to achieve common goals.</para>
+        <para>* Learner: Isabella is always eager to learn new things, stay up-to-date on the latest trends, and expand her knowledge.</para>
+        <para>* Solution-oriented: Isabella is focused on finding solutions to problems and is not afraid to challenge the status quo.</para>
+      </formalpara>
+      <formalpara>
+        <title>Aptitudes</title>
+        <para>* Technical aptitude: Isabella has a strong technical aptitude and is well-versed in a variety of IT technologies.</para>
+        <para>* Analytical aptitude: Isabella has a strong analytical aptitude and is able to break down complex problems into smaller, more manageable tasks.</para>
+        <para>* Problem-solving aptitude: Isabella has a strong problem-solving aptitude and is able to find creative solutions to challenges.</para>
+        <para>* Communication aptitude: Isabella has a strong communication aptitude and is able to communicate effectively with both technical and non-technical audiences.</para>
+        <para>* Leadership aptitude: Isabella has a strong leadership aptitude and is able to motivate and inspire others.</para>
+        <para>* Teamwork aptitude: Isabella has a strong teamwork aptitude and is able to collaborate effectively with others to achieve common goals.</para>
+        <para>* Adaptability aptitude: Isabella has a strong adaptability aptitude and is able to adjust to new situations and learn new things quickly.</para>
+      </formalpara>
+      <formalpara>
+        <title>Motivations</title>
+        <para>* Making a difference: Isabella is motivated by the desire to make a positive impact on the world. She believes that technology can be used to solve important problems and improve people's lives.</para>
+        <para>* Using her skills and knowledge: Isabella is motivated by the opportunity to use her skills and knowledge to solve complex problems. She enjoys the challenge of tackling difficult projects and coming up with creative solutions.</para>
+        <para>* Creativity and innovation: Isabella is motivated by the opportunity to be creative and innovative. She enjoys finding new ways to use technology to solve problems and improve business processes.</para>
+        <para>* Career growth and advancement: Isabella is motivated by the opportunity for career growth and advancement. She is always looking for ways to learn new things and develop her skills.</para>
+        <para>* Working with a team and contributing to a larger goal: Isabella is motivated by the opportunity to work with a team and contribute to a larger goal. She enjoys the collaborative process of working with others to achieve common objectives.</para>
+      </formalpara>
+      <formalpara>
+        <title>Skills</title>
+        <para>* Enterprise architecture methodology and best practices</para>
+        <para>* Business process modeling and analysis</para>
+        <para>* Information systems architecture</para>
+        <para>* Data architecture</para>
+        <para>* Service-oriented architecture (SOA)</para>
+        <para>* Cloud computing</para>
+        <para>* Strong analytical mind</para>
+        <para>* Ability to break down complex problems into smaller, more manageable tasks</para>
+        <para>* Ability to identify and assess business requirements</para>
+        <para>* Ability to develop and evaluate IT solutions</para>
+        <para>* Creative and innovative approach to problem-solving</para>
+        <para>* Ability to think outside the box</para>
+        <para>* Ability to find creative solutions to challenges</para>
+        <para>* Excellent written and verbal communication skills</para>
+        <para>* Ability to communicate complex technical concepts in a clear and concise way</para>
+        <para>* Ability to translate technical jargon into terms that are easy for non-technical stakeholders to understand</para>
+        <para>* Ability to motivate and inspire others</para>
+        <para>* Ability to build consensus and lead teams</para>
+        <para>* Ability to collaborate effectively with others to achieve common goals</para>
+        <para>* Ability to resolve conflicts and build strong relationships</para>
+        <para>* Ability to adjust to new situations and learn new things quickly</para>
+        <para>* Ability to embrace change and embrace new technology</para>
+      </formalpara>
+      <formalpara>
+        <title>Intrinsic Trust</title>
+        <para>Isabella is likely to have a high level of intrinsic trust. This means that she is generally willing to trust others, even when she does not have personal experience with them or when there is no specific reason to trust them. She is also likely to give people the benefit of the doubt and to be optimistic about their intentions.</para>
+        <para>It is important to note that Isabella's trust levels are not absolute. She is still capable of being cautious and discerning, and she will not blindly trust anyone. However, she is generally more willing to give people the benefit of the doubt and to trust them based on her gut feeling.</para>
+      </formalpara>
+      <formalpara>
+        <title>Contextual Trust</title>
+        <para>Isabella is likely to have a high level of contextual trust. This means that she is able to assess the trustworthiness of others based on the specific context in which she interacts with them. She is also able to adjust her level of trust based on her observations of their behavior and the information she has about them.</para>
+        <para>Overall, Isabella's contextual trust is an asset that allows her to build strong relationships with the people she works with and to make informed decisions about how to best design and implement enterprise architecture solutions.</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>Björn Rasmussen</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/zC9i0pkiPMy3kPVoQeFP0732vyd8GUPz.jpeg"/>
+        </imageobject>
+      </mediaobject>
+      <formalpara>
+        <title>Type</title>
+        <para>Primary</para>
+      </formalpara>
+      <formalpara>
+        <title>Roles</title>
+        <para>IT Operations</para>
+      </formalpara>
+      <formalpara>
+        <title>Overview</title>
+        <para>Björn Rasmussen is a highly experienced IT operations engineer with over 10 years of experience in the industry. He holds a Bachelor of Science in Computer Science from the University of Copenhagen and has worked for various organizations in Denmark, Sweden, and Norway. Björn is passionate about technology and is always looking for new ways to improve the efficiency and effectiveness of IT systems.</para>
+        <para>Björn is a calm and collected individual who is always able to remain level-headed under pressure. He is a strong problem solver and is able to quickly identify and resolve issues. Björn is also a team player and is always willing to help others.</para>
+        <para>Björn faces a number of challenges in his role as an IT operations engineer. These challenges include:</para>
+        <para>* Keeping up with the latest technology</para>
+        <para>* Responding to unexpected outages</para>
+        <para>* Troubleshooting complex issues</para>
+        <para>* Dealing with difficult stakeholders</para>
+      </formalpara>
+      <formalpara>
+        <title>Activities</title>
+        <para>Björn's typical activities include:</para>
+        <para>* Monitoring and maintaining IT systems</para>
+        <para>* Troubleshooting and resolving issues</para>
+        <para>* Implementing new software and hardware</para>
+        <para>* Writing and maintaining scripts</para>
+        <para>* Automating tasks</para>
+        <para>* Providing support to users</para>
+      </formalpara>
+      <formalpara>
+        <title>Attitudes</title>
+        <para>* Passionate about technology: Björn is driven by a passion for technology and is always looking for new ways to learn and improve.</para>
+        <para>* Detail-oriented: Björn is a highly detail-oriented individual who is always paying attention to the smallest details.</para>
+        <para>* Problem-solving: Björn is a skilled problem solver who is able to think creatively and find solutions to difficult problems.</para>
+        <para>* Team player: Björn is a team player who is always willing to help others and share his knowledge.</para>
+        <para>* Learner: Björn is a lifelong learner who is always looking for new ways to improve his skills and knowledge.</para>
+        <para>* Solution-oriented: Björn is focused on finding solutions to problems and is not afraid to challenge the status quo.</para>
+      </formalpara>
+      <formalpara>
+        <title>Aptitudes</title>
+        <para>* Technical aptitude: Björn has a strong technical aptitude and is well-versed in a variety of IT technologies.</para>
+        <para>* Analytical aptitude: Björn has a strong analytical aptitude and is able to break down complex problems into smaller, more manageable tasks.</para>
+        <para>* Problem-solving aptitude: Björn has a strong problem-solving aptitude and is able to find creative solutions to challenges.</para>
+        <para>* Communication aptitude: Björn has a strong communication aptitude and is able to communicate effectively with both technical and non-technical audiences.</para>
+        <para>* Leadership aptitude: Björn has a strong leadership aptitude and is able to motivate and inspire others.</para>
+        <para>* Teamwork aptitude: Björn has a strong teamwork aptitude and is able tocollaborate effectively with others to achieve common goals.</para>
+        <para>* Adaptability aptitude: Björn has a strong adaptability aptitude and is able to adjust to new situations and learn new things quickly.</para>
+      </formalpara>
+      <formalpara>
+        <title>Motivations</title>
+        <para>* The challenge of solving problems: Björn enjoys the challenge of identifying and resolving complex IT issues. He finds it satisfying to find creative solutions to problems that others may have given up on.</para>
+        <para>* The satisfaction of keeping systems up and running: Björn takes pride in ensuring that the IT systems at Nordic Tech Solutions are always running smoothly. He enjoys the feeling of knowing that his work is helping the organization to function effectively.</para>
+        <para>* The opportunity to make a positive impact on the organization: Björn is passionate about using his skills and knowledge to help Nordic Tech Solutions succeed. He believes that IT operations plays a critical role in the organization's success, and he is committed to providing the best possible support to his colleagues.</para>
+        <para>* The desire to stay at the forefront of technology: Björn is always eager to learn about new technologies and how they can be applied to IT operations. He believes that it is important to keep up with the latest trends in order to provide the most effective and efficient IT support possible.</para>
+        <para>* The opportunity to work with a team of talented professionals: Björn enjoys working with his colleagues at Nordic Tech Solutions. He appreciates their expertise and knowledge, and he values the collaborative environment in which they work.</para>
+      </formalpara>
+      <formalpara>
+        <title>Skills</title>
+        <para>Björn possesses a wide range of skills that are essential for success as an IT operations engineer. These skills include:</para>
+        <para>* System administration</para>
+        <para>* Network administration</para>
+        <para>* Troubleshooting</para>
+        <para>* Scripting</para>
+        <para>* Automation</para>
+        <para>* Cloud computing</para>
+      </formalpara>
+      <formalpara>
+        <title>Intrinsic Trust</title>
+        <para>Björn Rasmussen is likely to have a moderate level of intrinsic trust. This means that he is generally trusting of others, but he is also cautious and discerning. He is more likely to trust people who have a proven track record of competence and integrity.</para>
+        <para>Here are some examples of how Björn's intrinsic trust might manifest itself in his work:</para>
+        <para>* Björn is likely to be willing to give new ideas and approaches a chance, but he will also do his due diligence to ensure that they are sound. He is not afraid to challenge conventional wisdom, but he will also make sure that his ideas are well-researched and well-supported.</para>
+        <para>* Björn is likely to be willing to collaborate with others, but he will also be selective about the people he works with. He is only willing to collaborate with people who he trusts and respects.</para>
+        <para>* Björn is likely to be willing to share his knowledge and expertise with others, but he will also make sure that his information is accurate and up-to-date. He does not want to give out information that could be harmful or misleading.</para>
+        <para>Overall, Björn's intrinsic trust is an asset that allows him to be a collaborative and productive member of the team. He is able to build strong relationships with his colleagues, and he is always willing to share his knowledge and expertise. However, he is also cautious and discerning, and he is not afraid to challenge the status quo.</para>
+        <para>It is important to note that Björn's trust levels are not absolute. He is still capable of being deceived or taken advantage of. However, he is generally more willing to give people the benefit of the doubt and to trust them based on his gut feeling.</para>
+      </formalpara>
+      <formalpara>
+        <title>Contextual Trust</title>
+        <para>* If a user reports a problem that Björn does not immediately understand, he will first try to gather more information from the user before jumping to conclusions. He will also try to understand the user's technical background and knowledge level to tailor his communication to their needs.</para>
+        <para>* If Björn receives conflicting information from two different sources, he will weigh the credibility of each source and try to resolve the discrepancy. He will also consider the potential biases of each source and attempt to get additional information to confirm or deny their claims.</para>
+        <para>* If Björn is asked to make a decision about a course of action, he will consider the context of the situation, the available information, and the potential consequences of each option. He will also seek input from other stakeholders and experts to get a more comprehensive view of the situation.</para>
+        <para>These examples illustrate how Björn's contextual trust allows him to make sound judgments and take appropriate actions in the dynamic and ever-changing world of IT operations.</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>Liam Blackwood</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/sGPDkKZPWj5YFNxAMJ3r1Pdhrl8ILMuu.jpeg"/>
+        </imageobject>
+      </mediaobject>
+      <formalpara>
+        <title>Type</title>
+        <para>Primary</para>
+      </formalpara>
+      <formalpara>
+        <title>Roles</title>
+        <para>Product Owner</para>
+      </formalpara>
+      <formalpara>
+        <title>Overview</title>
+        <para>Liam Blackwood is a seasoned product owner with over 10 years of experience in the tech industry. He holds a Master of Science in Software Engineering from the University of Oxford. Liam is passionate about building products that people love to use and is always looking for new ways to innovate.</para>
+        <para>Liam is a passionate and creative individual with a deep interest in music, particularly goth metal. He is a lifelong fan of the genre and enjoys exploring new bands and artists. Liam is also a bit of a geek and enjoys spending time playing video games and watching sci-fi movies.</para>
+        <para>Overall, Liam Blackwood is a highly skilled and experienced product owner who is passionate about building great products. He is a creative and innovative thinker who is always looking for new ways to improve his products. He is also a collaborative and results-oriented leader who is always looking for ways to help his team succeed.</para>
+      </formalpara>
+      <formalpara>
+        <title>Activities</title>
+        <para>* Conducting user research: Liam is constantly gathering feedback from users to understand their needs and pain points. He may conduct surveys, interviews, and usability testing to gather this feedback.</para>
+        <para>* Defining product requirements: Liam works with stakeholders to define the product requirements. This involves documenting the features, functionalities, and specifications of the product.</para>
+        <para>* Creating and managing the product roadmap: Liam is responsible for creating and managing the product roadmap. This involves prioritizing features, setting deadlines, and allocating resources.</para>
+        <para>* Working with designers and engineers: Liam collaborates with designers and engineers to bring the product to life. He provides feedback on designs, helps to resolve technical issues, and ensures that the product meets the requirements.</para>
+        <para>* Presenting product updates to stakeholders: Liam regularly presents product updates to stakeholders. He provides an overview of the product's progress, discusses any challenges, and outlines the next steps.</para>
+        <para>* Monitoring product performance: Liam monitors the product's performance and gathers analytics data. He analyzes this data to identify areas for improvement and make data-driven decisions.</para>
+        <para>* Networking with other product owners: Liam attends industry events and conferences to network with other product owners. He shares ideas, learns from others, and stays up-to-date on the latest trends.</para>
+      </formalpara>
+      <formalpara>
+        <title>Attitudes</title>
+        <para>* Passionate about product development: Liam is driven by a passion for building products that people love to use.</para>
+        <para>* User-centric: Liam believes that products should be designed with the user in mind and is always looking for ways to improve the user experience.</para>
+        <para>* Innovative: Liam is always looking for new ways to innovate and is not afraid to take risks.</para>
+        <para>* Collaborative: Liam is a team player and is always willing to collaborate with others to achieve common goals.</para>
+        <para>* Empathetic: Liam is able to understand the needs of his users and is always looking for ways to improve their experience.</para>
+      </formalpara>
+      <formalpara>
+        <title>Aptitudes</title>
+        <para>* Creative aptitude: Liam has a strong creative aptitude and is able to come up with new and innovative ideas.</para>
+        <para>* Analytical aptitude: Liam has a strong analytical aptitude and is able to identify and solve problems effectively.</para>
+        <para>* Problem-solving aptitude: Liam has a strong problem-solving aptitude and is able to find creative solutions to challenging problems.</para>
+        <para>* Communication aptitude: Liam has a strong communication aptitude and is able to communicate effectively with both technical and non-technical audiences.</para>
+        <para>* Leadership aptitude: Liam has a strong leadership aptitude and is able to motivate and inspire others to achieve common goals.</para>
+        <para>* Teamwork aptitude: Liam has a strong teamwork aptitude and is able to collaborate effectively with others to achieve common goals.</para>
+      </formalpara>
+      <formalpara>
+        <title>Motivations</title>
+        <para>* The satisfaction of building products that people love to use: Liam enjoys seeing people use his products and is proud of the positive impact that they have on people's lives.</para>
+        <para>* The challenge of solving complex problems: Liam enjoys the challenge of identifying and solving complex problems.</para>
+        <para>* The opportunity to make a difference in the world: Liam believes that technology can be used to make a positive impact on the world and is passionate about building products that can help people.</para>
+        <para>* The opportunity to work with talented people: Liam enjoys working with a team of talented people and is constantly learning from them.</para>
+        <para>* The satisfaction of knowing that his work is making a difference: Liam takes pride in knowing that his work is helping to improve people's lives.</para>
+      </formalpara>
+      <formalpara>
+        <title>Skills</title>
+        <para>Liam possesses a diverse set of skills that are essential for success as a product owner. These skills include:</para>
+        <para>* User experience (UX): Liam has a strong understanding of UX principles and is able to create products that are user-friendly and engaging.</para>
+        <para>* Product management: Liam has a deep understanding of product management best practices and is able to manage product roadmaps and backlogs effectively.</para>
+        <para>* Communication: Liam is an excellent communicator and is able to communicate with a wide range of stakeholders, including engineers, designers, and marketing teams.</para>
+        <para>* Problem-solving: Liam is a skilled problem-solver and is able to identify and resolve issues quickly and efficiently.</para>
+        <para>* Leadership: Liam has strong leadership skills and is able to motivate and inspire his team to achieve their goals.</para>
+      </formalpara>
+      <formalpara>
+        <title>Intrinsic Trust</title>
+        <para>-</para>
+      </formalpara>
+      <formalpara>
+        <title>Contextual Trust</title>
+        <para>-</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>Elsa Eriksen</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/X1bVUWGRWXNG1Ab5BMyEQY5nAdl7xIl1.jpeg"/>
+        </imageobject>
+      </mediaobject>
+      <formalpara>
+        <title>Type</title>
+        <para>Primary</para>
+      </formalpara>
+      <formalpara>
+        <title>Roles</title>
+        <para>Asset Owner</para>
+      </formalpara>
+      <formalpara>
+        <title>Overview</title>
+        <para>Elsa Eriksen is a seasoned IT asset manager with over 10 years of experience in the tech industry. She holds a Master of Science in Business Administration from the University of Oslo. Elsa is passionate about managing IT assets effectively and ensuring that they are used efficiently and securely.</para>
+        <para>Elsa is a detail-oriented and organized individual with a strong focus on efficiency. She is also a highly analytical thinker who is able to identify and resolve problems quickly. Elsa is a team player and is always willing to collaborate with others to achieve common goals.</para>
+        <para>She is a strategic thinker who is always looking for ways to improve her processes and make her work more efficient. She is also a collaborative leader who is always looking to empower her team to succeed.</para>
+        <para>Overall, Elsa Eriksen is a highly skilled and experienced IT asset manager who is passionate about managing IT assets effectively and ensuring that they are used efficiently and securely. She is a strategic thinker who is always looking for ways to improve her processes and make her work more efficient. She is also a collaborative leader who is always looking to empower her team to succeed.</para>
+      </formalpara>
+      <formalpara>
+        <title>Activities</title>
+        <para>Her responsibilities encompass the entire lifecycle of IT assets, from procurement and tracking to valuation and disposal. Here's a glimpse into her daily tasks:</para>
+        <para>* Creating and Maintaining Accurate IT Asset Inventories: Elsa ensures that NordCorp maintains a comprehensive inventory of all its IT assets, including computers, smartphones, software licenses, and network devices. This involves collecting data from various sources, verifying accuracy, and continuously updating the inventory.</para>
+        <para>* Tracking the Movement of IT Assets: Elsa tracks the movement of IT assets throughout their lifecycle, from when they are first procured to when they are eventually disposed of. This involves recording asset transfers, assigning asset tags, and maintaining records of asset usage.</para>
+        <para>* Assessing the Value of IT Assets: Elsa evaluates the financial value of IT assets to determine their depreciation schedule and ensure that they are being depreciated correctly. This involves researching market prices, considering asset age and condition, and applying depreciation methods.</para>
+        <para>* Identifying and Selecting IT Assets: Elsa works with stakeholders to identify and select the right IT assets for NordCorp's needs. This involves evaluating vendor proposals, assessing product specifications, and considering budget constraints.</para>
+        <para>* Providing IT Asset Procurement Support: Elsa provides guidance and support to procurement teams when acquiring new IT assets. She reviews purchase orders, ensures compliance with procurement policies, and tracks the delivery of assets.</para>
+        <para>* Coordinating IT Asset Disposal: Elsa oversees the secure and environmentally responsible disposal of IT assets that are no longer needed. This involves identifying disposal options, scheduling asset removal, and ensuring that sensitive data is properly wiped or destroyed.</para>
+        <para>* Ensuring Compliance with IT Asset Management Standards: Elsa stays up-to-date on relevant IT asset management compliance standards and regulations. She ensures that NordCorp's IT asset management practices align with these standards to minimize risks and protect the organization.</para>
+        <para>* Developing and Implementing Process Improvements: Elsa is constantly looking for ways to improve IT asset management processes. She conducts process reviews, identifies areas for improvement, and implements changes to enhance efficiency and effectiveness.</para>
+        <para>* Communicating IT Asset Management Findings: Elsa communicates IT asset management information to relevant stakeholders, including management, IT teams, and finance. She provides regular reports, presents findings, and addresses concerns.</para>
+        <para>* Collaborating with IT Asset Management Teams: Elsa collaborates with IT asset management teams across NordCorp's various locations to ensure consistency in practices and sharing of best practices. She participates in knowledge-sharing sessions and regional meetings.</para>
+      </formalpara>
+      <formalpara>
+        <title>Attitudes</title>
+        <para>* Data-driven: Elsa believes in making decisions based on data and is always looking for ways to improve data-driven processes.</para>
+        <para>* Process-oriented: Elsa is committed to developing and implementing efficient processes to manage IT assets effectively.</para>
+        <para>* Security-conscious: Elsa is aware of the importance of IT asset security and takes proactive measures to protect the organization's assets.</para>
+        <para>* Cost-conscious: Elsa is always looking for ways to save the organization money on IT assets.</para>
+        <para>* Environmentally responsible: Elsa is committed to environmentally responsible IT asset management practices.</para>
+      </formalpara>
+      <formalpara>
+        <title>Aptitudes</title>
+        <para>* Analytical aptitude: Elsa has a strong analytical aptitude and is able to identify trends and patterns in data.</para>
+        <para>* Problem-solving aptitude: Elsa is able to solve problems quickly and efficiently.</para>
+        <para>* Communication aptitude: Elsa is an excellent communicator and is able to communicate effectively with both technical and non-technical audiences.</para>
+        <para>* Leadership aptitude: Elsa has strong leadership skills and is able to motivate and inspire others to achieve common goals.</para>
+        <para>* Teamwork aptitude: Elsa is a team player and is always willing to collaborate with others to achieve common goals.</para>
+      </formalpara>
+      <formalpara>
+        <title>Motivations</title>
+        <para>* The challenge of managing a complex and ever-changing IT landscape: Elsa enjoys the challenge of keeping up with the latest trends and technologies in IT asset management.</para>
+        <para>* The opportunity to make a positive impact on the organization's bottom line: Elsa is proud of the savings she is able to achieve for the organization by managing IT assets effectively.</para>
+        <para>* The satisfaction of ensuring that the organization's IT assets are secure and compliant: Elsa takes pride in her work to protect the organization's assets from security breaches and compliance issues.</para>
+        <para>* The opportunity to work with a talented team: Elsa enjoys working with her colleagues and is always learning from them.</para>
+        <para>* The satisfaction of knowing that her work is making a difference: Elsa takes pride in knowing that her work is helping to protect the organization's assets and save money.</para>
+      </formalpara>
+      <formalpara>
+        <title>Skills</title>
+        <para>* IT asset inventory management: Elsa has expertise in creating and maintaining accurate IT asset inventories.</para>
+        <para>* IT asset tracking: Elsa is able to track the movement of IT assets throughout their lifecycle, from procurement to disposal.</para>
+        <para>* IT asset valuation: Elsa is able to assess the value of IT assets and determine their optimal depreciation schedule.</para>
+        <para>* IT asset procurement: Elsa is able to identify and select the right IT assets for the organization's needs.</para>
+        <para>* IT asset disposal: Elsa is able to dispose of IT assets in a secure and environmentally responsible manner.</para>
+        <para>* Compliance: Elsa is familiar with the relevant IT asset management compliance standards and regulations.</para>
+      </formalpara>
+      <formalpara>
+        <title>Intrinsic Trust</title>
+        <para>-</para>
+      </formalpara>
+      <formalpara>
+        <title>Contextual Trust</title>
+        <para>-</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>Lukas Bauer</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/E16RfrOJ6WdGXwBiMIJn326csgIdR5rO.jpeg"/>
+        </imageobject>
+      </mediaobject>
+      <formalpara>
+        <title>Type</title>
+        <para>Secondary</para>
+      </formalpara>
+      <formalpara>
+        <title>Roles</title>
+        <para>Risk Manager</para>
+      </formalpara>
+      <formalpara>
+        <title>Overview</title>
+        <para>Lukas is a recent graduate of a dual degree program in computer science and business from a prestigious university in Germany. He has always been interested in risk management, and he was drawn to the IT risk management field because of its combination of technical and business skills. After graduating, Lukas worked as an IT risk analyst for a large multinational corporation for two years. In this role, he gained experience in identifying, assessing, and mitigating IT risks. He was also responsible for developing and implementing IT risk management policies and procedures.</para>
+        <para>Lukas is a highly analytical and detail-oriented individual. He is also a strong communicator and is able to explain complex technical concepts to non-technical audiences. He is a team player and enjoys working with others to solve problems.</para>
+      </formalpara>
+      <formalpara>
+        <title>Activities</title>
+        <para>* Conducts risk assessments to identify potential threats and vulnerabilities that could impact the organization's IT systems and data.</para>
+        <para>* Analyzes historical data, industry reports, and expert opinions to assess the likelihood and impact of identified risks.</para>
+        <para>* Classifies risks based on their severity and probability, prioritizing the most critical ones for mitigation.</para>
+        <para>* Creates and maintains comprehensive IT risk management policies and procedures to guide the organization's risk mitigation efforts.</para>
+        <para>* Recommends and implements appropriate IT security controls to mitigate identified risks, such as firewalls, intrusion detection systems, and access control measures.</para>
+        <para>* Collaborates with IT and business teams to integrate risk management strategies into the organization's overall operations.</para>
+        <para>* Continuously monitors the organization's IT environment to detect and respond to emerging threats and vulnerabilities.</para>
+        <para>* Regularly reviews and updates risk assessments to reflect changes in the IT environment and security landscape.</para>
+        <para>* Prepares and delivers regular reports to senior management and other stakeholders, summarizing key risk findings and recommendations.</para>
+        <para>* Effectively communicates risk findings and mitigation plans to technical and non-technical audiences.</para>
+        <para>* Conducts training and awareness sessions for employees to educate them about IT security risks and best practices.</para>
+        <para>* Promotes a culture of cybersecurity within the organization, encouraging employees to report suspicious activities and maintain a secure computing posture.</para>
+        <para>* Regularly researches and analyzes emerging IT risks, security threats, and industry trends.</para>
+        <para>* Attends conferences, seminars, and training workshops to stay abreast of the latest developments in IT security.</para>
+        <para>* Utilizes industry resources, such as cybersecurity publications and compliance frameworks, to enhance his knowledge and expertise.</para>
+      </formalpara>
+      <formalpara>
+        <title>Attitudes</title>
+        <para>Proactive and Vigilant: Lucas is proactive in identifying and assessing IT risks, taking a preventive approach to safeguard the organization's IT assets.</para>
+        <para>Data-Driven and Analytical: Lucas relies on data and analysis to make informed decisions about risk management, ensuring that his efforts are aligned with the organization's goals and objectives.</para>
+        <para>Solution-Oriented and Resourceful: Lucas approaches risk management with a problem-solving mindset, seeking effective and efficient solutions to mitigate identified risks.</para>
+        <para>Team Player and Collaborative: Lucas recognizes the importance of teamwork and collaboration in addressing IT security challenges, working effectively with cross-functional teams.</para>
+        <para>Continuous Learner and Adaptable: Lucas is committed to continuous learning, staying abreast of emerging IT risks and security threats, and adapting his risk management strategies accordingly.</para>
+        <para>Risk-Aware and Responsible: Lucas understands the potential repercussions of IT risks and takes responsibility for implementing effective risk management strategies to protect the organization.</para>
+      </formalpara>
+      <formalpara>
+        <title>Aptitudes</title>
+        <para>Strong understanding of computer systems, networks, and cybersecurity</para>
+        <para>Ability to assess and identify IT risks</para>
+        <para>Knowledge of risk assessment methodologies and tools</para>
+        <para>Familiarity with IT security frameworks and standards</para>
+        <para>Understanding of business operations and processes</para>
+        <para>Ability to translate technical risks into business terms</para>
+        <para>Strong communication skills to communicate risk findings to senior management and other stakeholders</para>
+        <para>Ability to work effectively with cross-functional teams</para>
+        <para>Analytical thinking skills to evaluate complex data and make informed decisions</para>
+        <para>Problem-solving skills to identify and resolve IT security issues</para>
+        <para>Attention to detail to ensure accuracy in risk assessments and mitigation plans</para>
+        <para>Adaptability to keep up with the ever-evolving IT landscape</para>
+        <para>Continuous learning mindset to stay updated on the latest IT risks and security threats</para>
+      </formalpara>
+      <formalpara>
+        <title>Motivations</title>
+        <para>Problem-Solving and Analytical Challenge: Lucas finds fulfillment in identifying and analyzing complex IT security challenges, and enjoys the satisfaction of devising effective solutions.</para>
+        <para>Sense of Purpose and Responsibility: Lucas is driven by a sense of purpose to safeguard the organization's IT assets and protect its data, and takes pride in his contributions to the organization's overall security posture.</para>
+        <para>Continuous Learning and Growth: Lucas is intrinsically motivated to learn new things and stay updated on the latest IT security trends, recognizing the importance of continuous growth in his field.</para>
+        <para>Career Advancement and Recognition: Lucas aspires to advance his career in IT risk management and achieve a senior position, and seeks recognition for his contributions to the organization's security.</para>
+        <para>Contribution to Organizational Success: Lucas takes satisfaction in knowing that his work directly contributes to the organization's overall success and protects its reputation.</para>
+      </formalpara>
+      <formalpara>
+        <title>Skills</title>
+        <para>* Risk assessment and analysis</para>
+        <para>* Risk mitigation strategies</para>
+        <para>* Compliance with industry regulations</para>
+        <para>* IT security and governance</para>
+        <para>* Project management</para>
+        <para>* Communication and presentation skills</para>
+      </formalpara>
+      <formalpara>
+        <title>Intrinsic Trust</title>
+        <para>-</para>
+      </formalpara>
+      <formalpara>
+        <title>Contextual Trust</title>
+        <para>-</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>Malin Andersson</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="resources/QTwtFdR9KEkTSEdDiMDqZZY0PVvkm9eF.png"/>
+        </imageobject>
+      </mediaobject>
+      <formalpara>
+        <title>Type</title>
+        <para>Secondary</para>
+      </formalpara>
+      <formalpara>
+        <title>Roles</title>
+        <para>Change Manager</para>
+      </formalpara>
+      <formalpara>
+        <title>Overview</title>
+        <para>Malin is a highly skilled and motivated change manager with a passion for helping organizations and individuals thrive through change. She possesses a unique combination of empathy, optimism, and data-driven decision-making, making her an invaluable asset to any organization undergoing change.</para>
+        <para>Malin holds a Bachelor of Business Administration (BBA) degree in Organizational Change and Development from the Stockholm Business School. She has extensive experience in the field of change management, having worked for a variety of organizations in both the private and public sectors. She is also a certified change management professional (CCMP) from the Association for Change Management (ACM).</para>
+        <para>Malin is a charismatic and engaging individual with strong communication and interpersonal skills. She is also analytical, results-oriented, and adaptable. These qualities make her a natural leader who can inspire and motivate others to embrace change.</para>
+      </formalpara>
+      <formalpara>
+        <title>Activities</title>
+        <para>Conducting stakeholder analysis: Malin identifies and assesses the needs, concerns, and expectations of key stakeholders. She uses this information to develop a change plan that addresses the needs of stakeholders and mitigates potential resistance.</para>
+        <para>Developing and implementing change plans: Malin creates detailed change plans that outline the steps involved in implementing the change. She is able to break down complex change initiatives into smaller, manageable steps.</para>
+        <para>Communicating change plans and progress: Malin keeps stakeholders informed about the change process through regular communication. She uses a variety of communication channels to reach stakeholders, including emails, newsletters, town hall meetings, and one-on-one conversations.</para>
+      </formalpara>
+      <formalpara>
+        <title>Attitudes</title>
+        <para>Empathetic and understanding: Malin recognizes that change can be challenging and disruptive for individuals, and she strives to create a supportive environment where people feel heard and valued. She believes that empathy is an essential quality for a change leader, as it allows her to understand the perspectives of others and connect with them on a personal level.</para>
+        <para>Positive and optimistic: Malin is a true believer in the power of change to improve organizations and individuals. She maintains a positive outlook even in the face of setbacks, and she believes that with hard work and dedication, any change can be successfully implemented.</para>
+        <para>Data-driven and results-oriented: Malin is not one to rely on gut feelings or intuition. She is a data-driven change leader who uses evidence to inform her decisions and measure the success of her initiatives. She is committed to achieving measurable outcomes for her change initiatives and tracking progress along the way.</para>
+      </formalpara>
+      <formalpara>
+        <title>Aptitudes</title>
+        <para>Strong communication and interpersonal skills: Malin is an excellent communicator who can clearly articulate complex ideas and connect with people from all levels of an organization. She is a natural storyteller, and she uses storytelling to help people understand the benefits of change and how it will impact them personally.</para>
+        <para>Influencing and persuasion skills: Malin is skilled at building rapport with stakeholders and gaining their buy-in. She is able to articulate the value of change in a compelling way and persuade others to adopt it.</para>
+        <para>Problem-solving and conflict resolution skills: Malin is not afraid of challenges. She is skilled at identifying and resolving problems that arise during the change process. She is also a mediator, and she is able to facilitate conversations between stakeholders and help them reach agreement.</para>
+      </formalpara>
+      <formalpara>
+        <title>Motivations</title>
+        <para>Making a positive impact: Malin is motivated by the desire to make a positive impact on organizations and individuals through change. She believes that change can be a force for good, and she is committed to helping organizations achieve their goals and improve the lives of their employees.</para>
+        <para>Solving problems and overcoming challenges: Malin enjoys the challenge of solving complex problems and overcoming resistance to change. She is a problem solver by nature, and she thrives on the challenge of finding creative solutions to challenges.</para>
+        <para>Contributing to organizational success: Malin is committed to helping her organization achieve its goals through successful change management. She recognizes that change is an inevitable part of business, and she believes that change management can help organizations adapt and thrive in a changing world.</para>
+      </formalpara>
+      <formalpara>
+        <title>Skills</title>
+        <para>Change management methodology: Malin is proficient in various change management methodologies, including ADKAR, Kotter's 8-Step Change Model, and McKinsey 7S Framework. She is able to adapt her approach to the specific needs of each change initiative.</para>
+        <para>Project management: Malin has strong project management skills, including planning, organizing, and executing change initiatives. She is able to work effectively with teams to deliver results on time and within budget.</para>
+        <para>Communication and facilitation: Malin is an effective communicator and facilitator who can lead workshops, meetings, and training sessions. She is able to create an engaging and interactive learning environment for participants.</para>
+      </formalpara>
+      <formalpara>
+        <title>Intrinsic Trust</title>
+        <para>Trusting in the value of change: Malin believes in the fundamental value of change and its potential to improve organizations and individuals. She is convinced that change is essential for growth and innovation, and she is committed to helping her organization embrace change and reap its benefits.</para>
+        <para>Trusting in people's ability to adapt: Malin believes that people have the ability to adapt to change and thrive in new environments. She is confident in people's ability to learn new things and embrace new ways of working.</para>
+        <para>Trusting in her own ability to lead change: Malin has confidence in her ability to guide others through the change process and achieve successful outcomes. She is a strong leader who inspires trust and confidence in those around her.</para>
+      </formalpara>
+      <formalpara>
+        <title>Contextual Trust</title>
+        <para>Trusting in the organization's commitment to change: The Navigator assesses the organization's willingness to support change and adapt to new processes.</para>
+        <para>Trusting in the stakeholders' commitment to change: The Navigator identifies and engages stakeholders who are committed to the change effort and can champion its adoption.</para>
+        <para>Trusting in the availability of resources and support: The Navigator ensures that the organization has the necessary resources and support to effectively implement the change.</para>
+      </formalpara>
+    </section>
+  </appendix>
+  <appendix>
+    <title>Goal Tree</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="resources/goals_tree.svg" format="SVG" depth="200mm"/>
+      </imageobject>
+    </mediaobject>
+  </appendix>
+  <appendix>
+    <glossary>
+      <glossentry>
+        <glossterm>Asset</glossterm>
+        <glossdef>
+          <para>Any thing providing a value; hardware, software, information, people etc.</para>
+        </glossdef>
+      </glossentry>
+      <glossentry>
+        <glossterm>Configuration Item</glossterm>
+        <glossdef>
+          <para>Asset that is under change management</para>
+        </glossdef>
+      </glossentry>
+    </glossary>
+    <title>Glossary</title>
+  </appendix>
+</book>
