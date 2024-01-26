@@ -63,7 +63,7 @@
       <title>Overview</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/goals.svg" format="SVG" depth="150mm" align="center" valign="middle"/>
+          <imagedata fileref="goals.svg" format="SVG" depth="150mm" align="center" valign="middle"/>
         </imageobject>
       </mediaobject>
     </section>
@@ -94,6 +94,10 @@
     <section>
       <title>Role Based Access</title>
       <para>Different users need access to different views and functionality in the application. To be able to control this role based access to the system and the information should be used.</para>
+    </section>
+    <section>
+      <title>Efficient asset management</title>
+      <para>To improve productivity and ability to allocate relevant resources it is vital that the enterprise is able manage it's assets in an efficient manner.</para>
     </section>
     <section>
       <title>Represent different types of assets</title>
@@ -131,7 +135,7 @@
       <title>Overview</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/obstacles.svg" format="SVG" depth="150mm" align="center" valign="middle"/>
+          <imagedata fileref="obstacles.svg" format="SVG" depth="150mm" align="center" valign="middle"/>
         </imageobject>
       </mediaobject>
     </section>
@@ -232,7 +236,7 @@
       <title>Overview</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/usecases.svg" format="SVG" depth="200mm"/>
+          <imagedata fileref="usecases.svg" format="SVG" depth="200mm"/>
         </imageobject>
       </mediaobject>
     </section>
@@ -1424,6 +1428,20 @@
       </formalpara>
     </section>
   </chapter>
+  <chapter>
+    <title>Tasks</title>
+    <section>
+      <title>Overview</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="tasks.svg" format="SVG" depth="200mm"/>
+        </imageobject>
+      </mediaobject>
+    </section>
+  </chapter>
+  <chapter>
+    <title>User Stories</title>
+  </chapter>
   <appendix>
     <title>Roles</title>
     <table frame="all">
@@ -1491,7 +1509,7 @@ This includes analyzing the value of assets to the business, identifying threats
       <title>Robert Nilsson</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/sOvbgvTRcNDlCvFXFR4aQjEfyJLPS6IR.jpeg"/>
+          <imagedata fileref="sOvbgvTRcNDlCvFXFR4aQjEfyJLPS6IR.jpeg"/>
         </imageobject>
       </mediaobject>
       <formalpara>
@@ -1579,7 +1597,7 @@ This includes analyzing the value of assets to the business, identifying threats
       <title>Erik Johansson</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/509J68iPlcVMapcGaLeFImMFaeXMRQcc.jpeg"/>
+          <imagedata fileref="509J68iPlcVMapcGaLeFImMFaeXMRQcc.jpeg"/>
         </imageobject>
       </mediaobject>
       <formalpara>
@@ -1691,7 +1709,7 @@ This includes analyzing the value of assets to the business, identifying threats
       <title>Isabella Schmidt</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/k2UsrOA29KGQVKbpvWOsSOFA1NOAUIDy.png"/>
+          <imagedata fileref="k2UsrOA29KGQVKbpvWOsSOFA1NOAUIDy.png"/>
         </imageobject>
       </mediaobject>
       <formalpara>
@@ -1793,7 +1811,7 @@ This includes analyzing the value of assets to the business, identifying threats
       <title>Björn Rasmussen</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/zC9i0pkiPMy3kPVoQeFP0732vyd8GUPz.jpeg"/>
+          <imagedata fileref="zC9i0pkiPMy3kPVoQeFP0732vyd8GUPz.jpeg"/>
         </imageobject>
       </mediaobject>
       <formalpara>
@@ -1883,7 +1901,7 @@ This includes analyzing the value of assets to the business, identifying threats
       <title>Liam Blackwood</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/sGPDkKZPWj5YFNxAMJ3r1Pdhrl8ILMuu.jpeg"/>
+          <imagedata fileref="sGPDkKZPWj5YFNxAMJ3r1Pdhrl8ILMuu.jpeg"/>
         </imageobject>
       </mediaobject>
       <formalpara>
@@ -1957,7 +1975,7 @@ This includes analyzing the value of assets to the business, identifying threats
       <title>Elsa Eriksen</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/X1bVUWGRWXNG1Ab5BMyEQY5nAdl7xIl1.jpeg"/>
+          <imagedata fileref="X1bVUWGRWXNG1Ab5BMyEQY5nAdl7xIl1.jpeg"/>
         </imageobject>
       </mediaobject>
       <formalpara>
@@ -2035,7 +2053,7 @@ This includes analyzing the value of assets to the business, identifying threats
       <title>Lukas Bauer</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/E16RfrOJ6WdGXwBiMIJn326csgIdR5rO.jpeg"/>
+          <imagedata fileref="E16RfrOJ6WdGXwBiMIJn326csgIdR5rO.jpeg"/>
         </imageobject>
       </mediaobject>
       <formalpara>
@@ -2124,7 +2142,7 @@ This includes analyzing the value of assets to the business, identifying threats
       <title>Malin Andersson</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="resources/QTwtFdR9KEkTSEdDiMDqZZY0PVvkm9eF.png"/>
+          <imagedata fileref="QTwtFdR9KEkTSEdDiMDqZZY0PVvkm9eF.png"/>
         </imageobject>
       </mediaobject>
       <formalpara>
@@ -2189,7 +2207,7 @@ This includes analyzing the value of assets to the business, identifying threats
     <title>Goal Tree</title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="resources/goals_tree.svg" format="SVG" depth="200mm"/>
+        <imagedata fileref="goals_tree.svg" format="SVG" depth="200mm"/>
       </imageobject>
     </mediaobject>
   </appendix>

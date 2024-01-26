@@ -36,7 +36,7 @@ Goals
 Overview
 --------
 
-![](resources/goals.svg){height="150mm"}
+![](goals.svg){height="150mm"}
 
 Customizable
 ------------
@@ -84,6 +84,13 @@ Role Based Access
 Different users need access to different views and functionality in the
 application. To be able to control this role based access to the system
 and the information should be used.
+
+Efficient asset management
+--------------------------
+
+To improve productivity and ability to allocate relevant resources it is
+vital that the enterprise is able manage it\'s assets in an efficient
+manner.
 
 Represent different types of assets
 -----------------------------------
@@ -141,7 +148,7 @@ Obstacles
 Overview
 --------
 
-![](resources/obstacles.svg){height="150mm"}
+![](obstacles.svg){height="150mm"}
 
 Integrity\_Threat: Information outdated
 ---------------------------------------
@@ -355,7 +362,7 @@ Use Cases
 Overview
 --------
 
-![](resources/usecases.svg){height="200mm"}
+![](usecases.svg){height="200mm"}
 
 UC1: Add New Asset to Inventory
 -------------------------------
@@ -1657,6 +1664,17 @@ x86/64 systems.
 
 KCL
 
+Tasks
+=====
+
+Overview
+--------
+
+![](tasks.svg){height="200mm"}
+
+User Stories
+============
+
 Roles
 =====
 
@@ -1678,7 +1696,7 @@ Personas
 Robert Nilsson
 --------------
 
-![](resources/sOvbgvTRcNDlCvFXFR4aQjEfyJLPS6IR.jpeg)
+![](sOvbgvTRcNDlCvFXFR4aQjEfyJLPS6IR.jpeg)
 
 **Type.**
 
@@ -1897,7 +1915,7 @@ and adapting his communication and approach accordingly.
 Erik Johansson
 --------------
 
-![](resources/509J68iPlcVMapcGaLeFImMFaeXMRQcc.jpeg)
+![](509J68iPlcVMapcGaLeFImMFaeXMRQcc.jpeg)
 
 **Type.**
 
@@ -2225,7 +2243,7 @@ effectively with them.
 Isabella Schmidt
 ----------------
 
-![](resources/k2UsrOA29KGQVKbpvWOsSOFA1NOAUIDy.png)
+![](k2UsrOA29KGQVKbpvWOsSOFA1NOAUIDy.png)
 
 **Type.**
 
@@ -2457,7 +2475,7 @@ architecture solutions.
 Björn Rasmussen
 ---------------
 
-![](resources/zC9i0pkiPMy3kPVoQeFP0732vyd8GUPz.jpeg)
+![](zC9i0pkiPMy3kPVoQeFP0732vyd8GUPz.jpeg)
 
 **Type.**
 
@@ -2659,7 +2677,7 @@ ever-changing world of IT operations.
 Liam Blackwood
 --------------
 
-![](resources/sGPDkKZPWj5YFNxAMJ3r1Pdhrl8ILMuu.jpeg)
+![](sGPDkKZPWj5YFNxAMJ3r1Pdhrl8ILMuu.jpeg)
 
 **Type.**
 
@@ -2813,7 +2831,7 @@ and inspire his team to achieve their goals.
 Elsa Eriksen
 ------------
 
-![](resources/X1bVUWGRWXNG1Ab5BMyEQY5nAdl7xIl1.jpeg)
+![](X1bVUWGRWXNG1Ab5BMyEQY5nAdl7xIl1.jpeg)
 
 **Type.**
 
@@ -2995,7 +3013,7 @@ compliance standards and regulations.
 Lukas Bauer
 -----------
 
-![](resources/E16RfrOJ6WdGXwBiMIJn326csgIdR5rO.jpeg)
+![](E16RfrOJ6WdGXwBiMIJn326csgIdR5rO.jpeg)
 
 **Type.**
 
@@ -3178,7 +3196,7 @@ overall success and protects its reputation.
 Malin Andersson
 ---------------
 
-![](resources/QTwtFdR9KEkTSEdDiMDqZZY0PVvkm9eF.png)
+![](QTwtFdR9KEkTSEdDiMDqZZY0PVvkm9eF.png)
 
 **Type.**
 
@@ -3335,7 +3353,7 @@ effectively implement the change.
 Goal Tree
 =========
 
-![](resources/goals_tree.svg){height="200mm"}
+![](goals_tree.svg){height="200mm"}
 
 Glossary
 ========
