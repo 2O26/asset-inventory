@@ -36,7 +36,7 @@ Goals
 Overview
 --------
 
-![](resources/goals.svg){height="150mm"}
+![](resources/resources/goals.svg){height="150mm"}
 
 Customizable
 ------------
@@ -148,7 +148,7 @@ Obstacles
 Overview
 --------
 
-![](resources/obstacles.svg){height="150mm"}
+![](resources/resources/obstacles.svg){height="150mm"}
 
 Integrity\_Threat: Information outdated
 ---------------------------------------
@@ -778,6 +778,11 @@ Change deployed
 Requirements
 ============
 
+Overview
+--------
+
+![](resources/requirements.svg){height="150mm"}
+
 CI1 - Unique Identifier (Data)
 ------------------------------
 
@@ -950,8 +955,6 @@ INFO-5 Disable Automatic Information Gathering (Functional)
 
 **Description.**
 
-\*Disable Automatic Information Gathering\*
-
 It must be possible to disable automatic information gathering for a
 given asset.
 
@@ -973,8 +976,6 @@ CI6 - Audit Log (Functional)
 
 **Description.**
 
-\*Audit Log\*
-
 All modifications made must be traceable and show who did the change and
 when the change was made.
 
@@ -993,8 +994,6 @@ AUTH-1 Local User Database (Functional)
 1
 
 **Description.**
-
-\*Local User Database\*
 
 A local user database must be provided that allow users to sign in.
 
@@ -1080,6 +1079,22 @@ fields.
 
 KCL
 
+INFO-8 Secure Data Transmission (Functional)
+--------------------------------------------
+
+**Priority.**
+
+1
+
+**Description.**
+
+All communications to and from the application must be protected against
+eavesdropping and manipulation using suitable encryption methods.
+
+**Originator.**
+
+KCL
+
 AUTH-3 Priority of user databases (Functional)
 ----------------------------------------------
 
@@ -1153,8 +1168,6 @@ ARCH-1.1.2 Threat modeling (Security)
 
 **Description.**
 
-\*Threat modeling\*
-
 Threat modeling should be performed for every design change and sprint
 planning to identify threats, plan for countermeasures, facilitate
 appropriate risk responses, and guide security testing.
@@ -1171,8 +1184,6 @@ ARCH-1.2.2 Component Communication (Security)
 2
 
 **Description.**
-
-\*Component Communication\*
 
 Communications between application components, including APIs,
 middleware and data layers, must be authenticated. Components must have
@@ -1191,8 +1202,6 @@ ARCH-1.2.3 Authentication Mechanism (Security)
 
 **Description.**
 
-\*Authentication Mechanism\*
-
 The application must use a single vetted authentication mechanism that
 is known to be secure, can be extended to include strong authentication,
 and has sufficient logging and monitoring to detect account abuse or
@@ -1210,8 +1219,6 @@ ARCH-1.4.4 Access Control Mechanism (Security)
 2
 
 **Description.**
-
-\*Access Control Mechanism\*
 
 The application must use a single and well-vetted access control
 mechanism for accessing protected data and resources. All requests must
@@ -1266,8 +1273,6 @@ ARCH-1.14.1 Segregation (Security)
 
 **Description.**
 
-\*Segregation\*
-
 Enforce segregation of components of differing trust levels through
 well-defined security controls, firewall rules, API gateways, reverse
 proxies, cloud-based security groups, or similar mechanisms.
@@ -1321,11 +1326,18 @@ ARCH-1.1.6 Design and Architect Security In (Security)
 
 **Description.**
 
-\*Design and Architect Security In\*
-
 Security controls must be centralized, simple (economy of design),
 vetted, secure, and reusable to avoid duplicate, missing, ineffective,
 or insecure controls.
+
+**Rationale.**
+
+An insecure design cannot be fixed by a perfect implementation as by
+definition, needed security controls were never created to defend
+against specific attacks. One of the factors that contribute to insecure
+design is the lack of business risk profiling inherent in the software
+or system being developed, and thus the failure to determine what level
+of security design is required.
 
 **Originator.**
 
@@ -1339,8 +1351,6 @@ ARCH-1.1.1 SDLC (Security)
 1
 
 **Description.**
-
-\*SDLC\*
 
 The development process must follow a secure software development
 lifecycle that addresses security in all stages of development. Make
@@ -1367,8 +1377,6 @@ ARCH-1.2.4 Authentication paths (Security)
 
 **Description.**
 
-\*Authentication paths\*
-
 All authentication pathways and identity management APIs must implement
 consistent authentication security control strength, such that there are
 no weaker alternatives.
@@ -1385,8 +1393,6 @@ ARCH-1.4.1 Access Enforcement Points (Security)
 1
 
 **Description.**
-
-\*Access Enforcement Points\*
 
 Access controls must be enforced on a trusted layer and not on a
 untrusted, i.e. on the client-side.
@@ -1480,8 +1486,6 @@ SDLC4 - Document high level architecture and threat model (Security)
 
 **Description.**
 
-\*Document high level architecture and threat model\*
-
 Describe high-level system architecture and perform threat modeling on
 it every critical change and regularly
 
@@ -1492,6 +1496,27 @@ See https://www.opencre.org/cre/068-102
 **Originator.**
 
 KCL
+
+ARCH-1.9.1 Communication Protection (Security)
+----------------------------------------------
+
+**Priority.**
+
+1
+
+**Description.**
+
+All communications between components SHOULD be encrypted.
+
+If the components are in different containers, systems, sites or cloud
+providers communication MUST be encrypted.
+
+The authenticity of each side in a communication link MUST be validated
+to prevent person-in-the-middle attacks.
+
+**Originator.**
+
+ASVS 4.0.3
 
 INFO-3 Local Data store (Operational)
 -------------------------------------
@@ -1590,8 +1615,6 @@ SDLC3 - Technical system documentation (Maintainability)
 
 **Description.**
 
-\*Technical system documentation\*
-
 Documentation about the following must be available:
 
 \* APIs (exposed/external and internal)
@@ -1646,16 +1669,14 @@ available and it must be easy to support new platforms.
 
 KCL
 
-BACK1 - Platform independence (Portability)
--------------------------------------------
+BACK1 - Platform Support (Portability)
+--------------------------------------
 
 **Priority.**
 
 1
 
 **Description.**
-
-\*Platform independence\*
 
 The backend of the application must be runnable on Windows and Linux on
 x86/64 systems.

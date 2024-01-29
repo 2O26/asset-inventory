@@ -692,6 +692,14 @@
   <chapter>
     <title>Requirements</title>
     <section>
+      <title>Overview</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="requirements.svg" format="SVG" depth="150mm" align="center" valign="middle"/>
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
       <title>CI1 - Unique Identifier (Data)</title>
       <formalpara>
         <title>Priority</title>
@@ -833,7 +841,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Disable Automatic Information Gathering*</para>
         <para>It must be possible to disable automatic information gathering for a given asset.</para>
       </formalpara>
       <formalpara>
@@ -853,7 +860,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Audit Log*</para>
         <para>All modifications made must be traceable and show who did the change and when the change was made.</para>
         <para>It should be possible to produce a diff-view of the change showing changed fields and their old and new values.</para>
       </formalpara>
@@ -870,7 +876,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Local User Database*</para>
         <para>A local user database must be provided that allow users to sign in.</para>
         <para>The database must contain credentials and assigned roles to allow authentication, access control and auditing to work.</para>
       </formalpara>
@@ -941,6 +946,21 @@
       </formalpara>
     </section>
     <section>
+      <title>INFO-8 Secure Data Transmission (Functional)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>All communications to and from the application must be protected against eavesdropping and manipulation using suitable encryption methods.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
       <title>AUTH-3 Priority of user databases (Functional)</title>
       <formalpara>
         <title>Priority</title>
@@ -1001,7 +1021,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Threat modeling*</para>
         <para>Threat modeling should be performed for every design change and sprint planning to identify threats, plan for countermeasures, facilitate appropriate risk responses, and guide security testing.</para>
       </formalpara>
       <formalpara>
@@ -1017,7 +1036,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Component Communication*</para>
         <para>Communications between application components, including APIs, middleware and data layers, must be authenticated. Components must have the least necessary privileges needed.</para>
       </formalpara>
       <formalpara>
@@ -1033,7 +1051,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Authentication Mechanism*</para>
         <para>The application must use a single vetted authentication mechanism that is known to be secure, can be extended to include strong authentication, and has sufficient logging and monitoring to detect account abuse or breaches.</para>
       </formalpara>
       <formalpara>
@@ -1049,7 +1066,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Access Control Mechanism*</para>
         <para>The application must use a single and well-vetted access control mechanism for accessing protected data and resources. All requests must pass through this single mechanism to avoid copy and paste or insecure alternative paths.</para>
       </formalpara>
       <formalpara>
@@ -1097,7 +1113,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Segregation*</para>
         <para>Enforce segregation of components of differing trust levels through well-defined security controls, firewall rules, API gateways, reverse proxies, cloud-based security groups, or similar mechanisms.</para>
       </formalpara>
       <formalpara>
@@ -1145,8 +1160,11 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Design and Architect Security In*</para>
         <para>Security controls must be centralized, simple (economy of design), vetted, secure, and reusable to avoid duplicate, missing, ineffective, or insecure controls.</para>
+      </formalpara>
+      <formalpara>
+        <title>Rationale</title>
+        <para>An insecure design cannot be fixed by a perfect implementation as by definition, needed security controls were never created to defend against specific attacks. One of the factors that contribute to insecure design is the lack of business risk profiling inherent in the software or system being developed, and thus the failure to determine what level of security design is required.</para>
       </formalpara>
       <formalpara>
         <title>Originator</title>
@@ -1161,7 +1179,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*SDLC*</para>
         <para>The development process must follow a secure software development lifecycle that addresses security in all stages of development. Make secure coding checklist, security requirements, guideline, or policy available to all developers and testers.</para>
         <para>Verify that the build pipeline warns of out-of-date or insecure components and takes appropriate actions.</para>
         <para>Verify the application does not use unsupported, insecure, or deprecated client-side technologies such as NSAPI plugins, Flash, Shockwave, ActiveX, Silverlight, NACL, or client-side Java applets.</para>
@@ -1179,7 +1196,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Authentication paths*</para>
         <para>All authentication pathways and identity management APIs must implement consistent authentication security control strength, such that there are no weaker alternatives.</para>
       </formalpara>
       <formalpara>
@@ -1195,7 +1211,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Access Enforcement Points*</para>
         <para>Access controls must be enforced on a trusted layer and not on a untrusted, i.e. on the client-side.</para>
       </formalpara>
       <formalpara>
@@ -1276,7 +1291,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Document high level architecture and threat model*</para>
         <para>Describe high-level system architecture and perform threat modeling on it every critical change and regularly</para>
       </formalpara>
       <formalpara>
@@ -1286,6 +1300,23 @@
       <formalpara>
         <title>Originator</title>
         <para>KCL</para>
+      </formalpara>
+    </section>
+    <section>
+      <title>ARCH-1.9.1 Communication Protection (Security)</title>
+      <formalpara>
+        <title>Priority</title>
+        <para>1</para>
+      </formalpara>
+      <formalpara>
+        <title>Description</title>
+        <para>All communications between components SHOULD be encrypted.</para>
+        <para>If the components are in different containers, systems, sites or cloud providers communication MUST be encrypted.</para>
+        <para>The authenticity of each side in a communication link MUST be validated to prevent person-in-the-middle attacks.</para>
+      </formalpara>
+      <formalpara>
+        <title>Originator</title>
+        <para>ASVS 4.0.3</para>
       </formalpara>
     </section>
     <section>
@@ -1366,7 +1397,6 @@
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Technical system documentation*</para>
         <para>Documentation about the following must be available:</para>
         <para>* APIs (exposed/external and internal)</para>
         <para>* Testcases (description and result)</para>
@@ -1412,14 +1442,13 @@
       </formalpara>
     </section>
     <section>
-      <title>BACK1 - Platform independence (Portability)</title>
+      <title>BACK1 - Platform Support (Portability)</title>
       <formalpara>
         <title>Priority</title>
         <para>1</para>
       </formalpara>
       <formalpara>
         <title>Description</title>
-        <para>*Platform independence*</para>
         <para>The backend of the application must be runnable on Windows and Linux on x86/64 systems.</para>
       </formalpara>
       <formalpara>
