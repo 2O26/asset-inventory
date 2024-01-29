@@ -36,7 +36,7 @@ Goals
 Overview
 --------
 
-![](goals.svg){height="150mm"}
+![](resources/goals.svg){height="150mm"}
 
 Customizable
 ------------
@@ -148,7 +148,7 @@ Obstacles
 Overview
 --------
 
-![](obstacles.svg){height="150mm"}
+![](resources/obstacles.svg){height="150mm"}
 
 Integrity\_Threat: Information outdated
 ---------------------------------------
@@ -362,7 +362,7 @@ Use Cases
 Overview
 --------
 
-![](usecases.svg){height="200mm"}
+![](resources/usecases.svg){height="200mm"}
 
 UC1: Add New Asset to Inventory
 -------------------------------
@@ -1670,7 +1670,7 @@ Tasks
 Overview
 --------
 
-![](tasks.svg){height="200mm"}
+![](resources/tasks.svg){height="200mm"}
 
 User Stories
 ============
@@ -1696,7 +1696,7 @@ Personas
 Robert Nilsson
 --------------
 
-![](sOvbgvTRcNDlCvFXFR4aQjEfyJLPS6IR.jpeg)
+![](resources/sOvbgvTRcNDlCvFXFR4aQjEfyJLPS6IR.jpeg)
 
 **Type.**
 
@@ -1915,7 +1915,7 @@ and adapting his communication and approach accordingly.
 Erik Johansson
 --------------
 
-![](509J68iPlcVMapcGaLeFImMFaeXMRQcc.jpeg)
+![](resources/509J68iPlcVMapcGaLeFImMFaeXMRQcc.jpeg)
 
 **Type.**
 
@@ -2243,7 +2243,7 @@ effectively with them.
 Isabella Schmidt
 ----------------
 
-![](k2UsrOA29KGQVKbpvWOsSOFA1NOAUIDy.png)
+![](resources/k2UsrOA29KGQVKbpvWOsSOFA1NOAUIDy.png)
 
 **Type.**
 
@@ -2475,7 +2475,7 @@ architecture solutions.
 Björn Rasmussen
 ---------------
 
-![](zC9i0pkiPMy3kPVoQeFP0732vyd8GUPz.jpeg)
+![](resources/zC9i0pkiPMy3kPVoQeFP0732vyd8GUPz.jpeg)
 
 **Type.**
 
@@ -2677,7 +2677,7 @@ ever-changing world of IT operations.
 Liam Blackwood
 --------------
 
-![](sGPDkKZPWj5YFNxAMJ3r1Pdhrl8ILMuu.jpeg)
+![](resources/sGPDkKZPWj5YFNxAMJ3r1Pdhrl8ILMuu.jpeg)
 
 **Type.**
 
@@ -2831,7 +2831,7 @@ and inspire his team to achieve their goals.
 Elsa Eriksen
 ------------
 
-![](X1bVUWGRWXNG1Ab5BMyEQY5nAdl7xIl1.jpeg)
+![](resources/X1bVUWGRWXNG1Ab5BMyEQY5nAdl7xIl1.jpeg)
 
 **Type.**
 
@@ -3013,7 +3013,7 @@ compliance standards and regulations.
 Lukas Bauer
 -----------
 
-![](E16RfrOJ6WdGXwBiMIJn326csgIdR5rO.jpeg)
+![](resources/E16RfrOJ6WdGXwBiMIJn326csgIdR5rO.jpeg)
 
 **Type.**
 
@@ -3196,7 +3196,7 @@ overall success and protects its reputation.
 Malin Andersson
 ---------------
 
-![](QTwtFdR9KEkTSEdDiMDqZZY0PVvkm9eF.png)
+![](resources/QTwtFdR9KEkTSEdDiMDqZZY0PVvkm9eF.png)
 
 **Type.**
 
@@ -3353,7 +3353,7 @@ effectively implement the change.
 Goal Tree
 =========
 
-![](goals_tree.svg){height="200mm"}
+![](resources/goals_tree.svg){height="200mm"}
 
 Glossary
 ========
