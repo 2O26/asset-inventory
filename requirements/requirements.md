@@ -36,7 +36,7 @@ Goals
 Overview
 --------
 
-![](resources/resources/goals.svg){height="150mm"}
+![](resources/goals.svg){height="150mm"}
 
 Customizable
 ------------
@@ -148,7 +148,7 @@ Obstacles
 Overview
 --------
 
-![](resources/resources/obstacles.svg){height="150mm"}
+![](resources/obstacles.svg){height="150mm"}
 
 Integrity\_Threat: Information outdated
 ---------------------------------------
