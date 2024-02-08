@@ -1,26 +1,17 @@
-image: docker:latest
-
-services:
-  - docker:dind
+image: cypress/browsers:node14.17.0-chrome88-ff89
 
 stages:
-  - build
   - test
 
-variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
-
-build:
-  stage: build
-  script:
-    - docker build -t my-app .
+before_script:
+  # Install dependencies, assuming your project has a package.json
+  # You might need to adjust commands depending on your project setup
+  - npm install
 
 test:
   stage: test
   script:
-    - docker run --name my-app-container -d my-app
-    - docker exec my-app-container npm run test:cypress
+    # Run Cypress tests
+    - $(npm bin)/cypress run
   only:
     - master
