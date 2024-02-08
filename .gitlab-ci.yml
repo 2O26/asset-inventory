@@ -1,0 +1,24 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+build:
+  stage: build
+  script:
+    - docker build -t my-app .
+
+test:
+  stage: test
+  script:
+    - docker run --name my-app-container -d my-app
+    - docker exec my-app-container npm run test:cypress
+  only:
+    - master
