@@ -1,16 +1,24 @@
 stages:
+  - docker-setup
   - build
   - test
 
-variables:
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: tcp://docker:2375/
+docker-setup:
+  tags:
+    - docker-build
+  stage: docker-setup
+  script:
+    - docker --version
+    - docker images --all
+    - echo "Starting docker"
+    - docker run hello-world
+    - echo "Docker is up"
 
-services:
-  - docker:dind
 build-job:
   stage: build
   image: docker:stable
+  tags:
+    - docker-build
   services:
     - docker:dind
   script:
@@ -21,6 +29,8 @@ build-job:
 cypress-test-job:
   stage: test
   image: cypress/included:9.1.1
+  tags:
+     - docker-build
   services:
     - docker:dind
   script:
