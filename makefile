@@ -16,4 +16,4 @@ down:
 	docker compose -f docker-compose.yaml down
 
 clean:
-	docker rmi --force assinvfront assethandler
+	docker rmi --force assinvfront assethandler networkscan
