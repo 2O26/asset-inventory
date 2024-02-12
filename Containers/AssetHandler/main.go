@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type asset struct {
@@ -16,15 +17,26 @@ type asset struct {
 	MAC    string `json:"mac"`
 }
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-}
-
 // AssethandlerStatusResponse represents the JSON structure of the response.
 type AssethandlerStatusResponse struct {
 	Message string `json:"message"`
 	Time    string `json:"time"` // Add a timestamp field
 	Asset   asset  `json:"asset"`
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+		c.Next()
+	}
 }
 
 func getNetScanStatus() asset {
@@ -61,33 +73,29 @@ func getNetScanStatus() asset {
 	return firstAsset
 }
 
-// AuthStatusHandler handles the /authStatus endpoint.
-func assetHandlerStatus(w http.ResponseWriter, r *http.Request) {
-	// Example: Check some condition to determine auth status
-	// This is where you'd implement your actual authentication check logic.
-	authSuccess := true // Placeholder for actual auth check
-	enableCors(&w)
+func assetHandlerStatus(c *gin.Context) {
 
-	w.Header().Set("Content-Type", "application/json")
+	var authSuccess = true
 
 	if authSuccess {
 		currentTime := time.Now().Format("2006-01-02 15:04:05")
 		firstAsset := getNetScanStatus()
-		response := AssethandlerStatusResponse{Message: "Hello World", Time: currentTime, Asset: firstAsset}
-		json.NewEncoder(w).Encode(response)
+		response := AssethandlerStatusResponse{Message: "Hello world", Time: currentTime, Asset: firstAsset}
+		c.IndentedJSON(http.StatusOK, response)
 	} else {
-		w.WriteHeader(http.StatusUnauthorized) // 401 status code
 		response := AssethandlerStatusResponse{Message: "failed"}
-		json.NewEncoder(w).Encode(response)
+		c.IndentedJSON(http.StatusOK, response)
 	}
 }
 
 func main() {
-	http.HandleFunc("/assetHandlerStatus", assetHandlerStatus)
+	router := gin.Default()
+	// Apply the CORS middleware
+	router.Use(CORSMiddleware())
+
+	router.GET("/assetHandlerStatus", assetHandlerStatus)
 
 	fmt.Println("Starting server at port 8080")
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
+	router.Run(":8080")
 }
