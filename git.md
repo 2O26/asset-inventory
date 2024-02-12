@@ -105,8 +105,6 @@ git pull
 
 To incorporate changes from one branch into another, use the `merge` command.
 
-#### OBS! Should be discussed as a team before merging branches?
-
 ```bash
 # Switch to the branch you want to merge into
 git switch <target-branch>
