@@ -1,0 +1,62 @@
+/* Red Dark Theme */
+/* :root .dark {
+    --main-color: #222222;
+    --secondary-color: #2ecc71;
+    --accent-color: #9b59b6;
+
+    --text-color: #d9d7d7;
+    --text-hover: #ff5454;
+
+    --logo-color: #ff5454;
+
+    --background-color: #1c1c1c;
+
+    --button-color: #ff5454;
+    --button-text: #000000;
+    --button-text-hover: white;
+    --button-hover: #ff5454;
+    --button-active: #5c5c5c;
+    --button-shadow: #0000007e;
+} */
+
+/* Blue Dark Theme */
+:root .dark {
+    --main-color: #222222;
+    --secondary-color: #2ecc71;
+    --accent-color: #9b59b6;
+
+    --text-color: #d9d7d7;
+    --text-hover: #5e93fd;
+
+    --logo-color: #5e93fd;
+
+    --background-color: #1c1c1c;
+
+    --button-color: #5e93fd;
+    --button-text: #000000;
+    --button-text-hover: white;
+    --button-hover: #5e93fd;
+    --button-active: #5c5c5c;
+    --button-shadow: #0000007e;
+}
+
+/* Blue Light Theme */
+:root .light {
+    --main-color: white;
+    --secondary-color: #2ecc71;
+    --accent-color: #9b59b6;
+
+    --text-color: #222222;
+    --text-hover: #4053fb;
+
+    --logo-color: #4053fb;
+
+    --background-color: #bdbdbd;
+
+    --button-color: #5364fe;
+    --button-text: #000000;
+    --button-text-hover: white;
+    --button-hover: #4053fb;
+    --button-active: #5c5c5c;
+    --button-shadow: #5c5c5c6a;
+}
