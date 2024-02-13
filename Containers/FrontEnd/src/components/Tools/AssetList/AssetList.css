@@ -1,0 +1,47 @@
+/* AssetList.css */
+
+.asset-list-container {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--main-color);
+    border-radius: 0.5rem;
+    width: 95vw;
+    padding: 1rem;
+    box-shadow: 0px 4px 32px #0000005c;
+}
+
+/* Style for column headers */
+.headerRow {
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+}
+
+.headerCell {
+    flex: 1;
+    font-weight: bold;
+    padding: 5px;
+}
+
+/* Style for asset rows */
+.assetRow {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    cursor: pointer;
+    color: var(--button-color);
+    border-radius: 0.25rem;
+}
+
+.assetRow:hover {
+    /* filter: brightness(85%); */
+    backdrop-filter: brightness(85%);
+}
+
+/* Style for asset cells */
+.assetCell {
+    flex: 1;
+    padding: 5px;
+    /* Add any additional styling as needed */
+}

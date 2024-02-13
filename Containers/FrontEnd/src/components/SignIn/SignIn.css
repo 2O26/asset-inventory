@@ -1,0 +1,118 @@
+.auth-form-container,
+.login-form {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.auth-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 1rem;
+    max-width: 19rem;
+    width: fit-content;
+    padding: 2rem;
+    margin-top: 3rem;
+    /* margin-bottom: 5rem; */
+    margin-right: 1rem;
+    margin-left: 1rem;
+    color: var(--text-color);
+    background-color: var(--main-color);
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);
+
+}
+
+.auth-form-container h2 {
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.auth-form-container label {
+    margin-left: 0.5rem;
+    display: block;
+}
+
+.login-form {
+    text-align: left;
+}
+
+.auth-form-container .inputFields {
+    margin: 0.5rem 0.5rem;
+    border: none;
+    min-width: 16rem;
+    height: 40px;
+    font-size: 20px;
+    text-indent: 10px;
+    border-radius: 5px;
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+}
+
+.auth-form-container label {
+    text-align: left;
+    text-indent: 2px;
+}
+
+.auth-form-container input {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.auth-form-container input:focus {
+    outline: none;
+}
+
+.AuthBtnContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.auth-form-container .errorMessage,
+.auth-form-container .successMessage {
+    text-align: center;
+    color: rgb(0, 0, 0);
+    width: fit-content;
+    max-width: 14rem;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    margin: auto;
+    margin-top: 0.5rem;
+}
+
+.auth-form-container .errorMessage {
+    background-color: rgb(255, 120, 120);
+}
+
+.auth-form-container .successMessage {
+    background-color: #2FDD92;
+}
+
+.link-container {
+    width: 100%;
+    margin: auto;
+    justify-content: center;
+    text-align: center;
+    display: grid;
+}
+
+.link {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease 0s;
+}
+
+.link:hover {
+    transform: translateY(-0.2rem);
+    /* filter: invert(1); */
+    color: var(--button-color);
+}
