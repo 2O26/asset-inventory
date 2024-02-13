@@ -4,14 +4,14 @@ services:
     image: assinvfront
     ports:
       - 3000:3000
-      - 80:80
+      - 85:85
     volumes:
       - ./Containers/FrontEnd/src:/app/src
 
   assethandler:
     image: assethandler
     ports:
-      - 8080:8080
+      - 8092:8092
 
   networkscan:
     image: networkscan
