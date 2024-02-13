@@ -22,10 +22,9 @@ build-job:
   services:
     - docker:dind
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE --network host .
-    - docker push $CI_REGISTRY_IMAGE
-
+    - make all
+    - make run
+    
 cypress-test-job:
   stage: test
   image: cypress/included:9.1.1
