@@ -11,7 +11,7 @@ services:
   assethandler:
     image: assethandler
     ports:
-      - 8092:8092
+      - 8193:8193
 
   networkscan:
     image: networkscan
