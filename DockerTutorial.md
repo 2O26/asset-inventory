@@ -101,3 +101,17 @@ Navigate to Local Users and Groups > Groups > docker-users.
 Right-click to add the user to the group.
 
 Sign out and sign back in for the changes to take effect.
+
+### Build all images with one command (Visual studio/other)
+
+Windows does not have native support for the make command, however Visual studio does I can not speak on any other workarounds but I imagine they work the same way.
+
+In visual studio if you are using it to manage the repository go to the menu at the top and under the "view" tab choose terminal. (alternatively the default shortcut to open the terminal is "Ctrl+ö")
+
+If you are not using Visual Studio to manage the repository, navigate to the reposiotory folder right click the folder and choose "open with Visual Studio" and then open the terminal.
+
+in the tab that opens use the command nmake.
+
+# Building images / Running single images
+
+Same commands as Linux (shown above)
