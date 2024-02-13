@@ -1,0 +1,35 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+
+}
+
+html {
+  background-color: var(--main-color);
+  height: 100%;
+}
+
+body {
+  width: 100vw;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  text-align: center;
+
+}
+
+.page-container {
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 1000px) {
+
+  /* For smaller screens, adjust the font size */
+  .page-container {
+    flex-direction: column;
+  }
+}

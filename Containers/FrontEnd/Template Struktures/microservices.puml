@@ -1,0 +1,150 @@
+@startuml "MicroServices"
+allow_mixing
+
+node Client
+
+node FrontEndServer
+
+frame API
+
+cloud IPCluster
+cloud FireBase
+
+frame "Micro Services" {
+  ' DB 1
+  class Auth {
+    ..Private..
+    - string EmailAddress
+    - string Password
+    - string SessionId
+    - number AccessLevel
+    ..Methods..
+    + LoginUser()
+    + LogOutUser()
+    + CreateUser()
+    + ValidateSessionId()
+    + GetAccessLevel()
+  }
+
+  ' DB 2
+  class AssetHandeler {
+    ..Private..
+    - objekt scan
+    ..Methods..
+    + SaveScan()
+    + GetScan()
+  }
+
+  class NetworkScan {
+    ..Private..
+    - string subNet
+    - object netScan
+    ..Methods..
+    + ScanNetwork()
+    + ParseScan()
+    + SendScan()
+  }
+
+  class CVEScan {
+    ..Private..
+    - list CVElst
+    ..Methods..
+    + ScanCVE()
+    + ParseScan()
+    + SendScan()
+  }
+
+  class IssueBoard {
+    ..Private..
+    - object issueBoard
+    - string boardID
+    - string boardToken
+    ..Methods..
+    + getIssueBoard()
+    + ParseBoard()
+    + UpdateBoard()
+  }
+
+  class Documentation {
+    ..Private..
+    - object document
+    - string documentID
+    - string documentToken
+    ..Methods..
+    + getDoc()
+    + ParseDoc()
+    + UpdateDoc()
+  }
+
+  class ApiHandeler {
+    ..Methods..
+    + TrelloConnection( boardID, boardToken )
+    + ConfluensConnection( documentID, documentToken )
+  }
+
+  database UserDB {
+    folder Users {
+        json UsersLst {
+          "UID_2342": {
+            "Email Address" : "string",
+            "Phone Number" : "string",
+            "Password (hash)" : "string",
+            "Salt" : "string"
+          }
+          ,
+          "UID_3421" : {
+            "Email Address" : "string",
+            "Phone Number" : "string",
+            "Password (hash)" : "string",
+            "Salt" : "string"
+          }
+        }
+    }
+
+    folder AccessLevel {
+      json AccessLevelLst {
+        "UID_2342": "4",
+        "UID_3421": "1"
+      }
+
+    }
+
+    folder ActiveSessions {
+      json SessionLst {
+        "198342734": {"UserID": "UID_2342", "TimeStamp": "14:05 - 1 jan 2024"},
+        "345983405": {"UserID": "UID_3421", "TimeStamp": "17:36 - 4 feb 2024"}
+      }
+
+    }
+  }
+
+  database AssetDB {
+    folder UID_2342 {
+      frame "Scan 1"
+      frame "Scan 2"
+    }
+    folder UID_3421 {
+      frame "Scan 3"
+      frame "Scan 4"
+    }
+  }
+}
+
+
+Client <--> FrontEndServer
+FrontEndServer <--> API
+API <--> IPCluster
+IPCluster --> Auth
+IPCluster --> AssetHandeler
+IPCluster --> NetworkScan
+IPCluster --> CVEScan
+IPCluster --> IssueBoard
+IPCluster --> Documentation
+IPCluster --> ApiHandeler
+Auth --> UserDB: Must 
+Auth --> FireBase: Maybe 
+AssetHandeler --> AssetDB
+
+
+
+@enduml

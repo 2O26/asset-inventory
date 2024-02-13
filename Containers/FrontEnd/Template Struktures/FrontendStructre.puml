@@ -1,0 +1,96 @@
+@startuml "FrontendStructre"
+
+package "src" {
+    package "assets" {
+        package "styles" {
+            file "colors.css"
+            file "globalStyles.js"
+            file "theme.js"
+        }
+    }
+    package "components" {
+        package "common" {
+            package "NavBar" {
+                file "NavBar.js"
+                file "NavBar.css"
+            }
+            package "Icons" {
+                file "Icon1.js"
+                file "Icon2.js"
+            }
+        }
+        package "SignIn" {
+            file "SignIn.js"
+            file "SignIn.css"
+        }
+        package "Dashboard" {
+            file "Dashboard.js"
+            file "Dashboard.css"
+        }
+        package "About" {
+            file "About.js"
+        }
+        package "Settings" {
+            file "Settings.js"
+            file "Settings.css"
+        }
+        package "Profile" {
+            file "Profile.js"
+            file "Profile.css"
+        }
+        package "Help" {
+            file "Help.js"
+            file "Help.css"
+        }
+        package "Tools" {
+            package "NetworkScanner" {
+                file "NetworkScanner.js"
+                file "NetworkScanner.css"
+            }
+            package "IssueBoard" {
+                file "IssueBoard.js"
+                file "IssueBoard.css"
+            }
+            file "Tools.js"
+            file "Tools.css"
+        }
+    }
+    package "services" {
+        file "ApiService.js"
+    }
+    package "contexts" {
+        file "AuthContext.js"
+        file "ThemeContext.js"
+    }
+    cloud "firebase" 
+    file "App.js"
+    file "index.js"
+    component "Backend"
+    database "DB"
+}
+
+' Connections
+index.js --> App.js
+App.js --> assets
+NavBar.js --> Icons
+App.js --> components
+
+'Direct relationships
+Tools --> Dashboard.js : uses >
+SignIn.js --> AuthContext.js : Set User Context >
+AuthContext.js --> Settings.js : uses >
+AuthContext.js --> Profile.js : uses >
+NetworkScanner.js --> ApiService.js : uses >
+IssueBoard.js --> ApiService.js : uses >
+Settings.js --> Dashboard
+
+AuthContext.js --> firebase : or >
+AuthContext.js --> ApiService.js : or >
+
+ApiService.js --> Backend
+Backend --> DB
+
+
+'... Add other specific relationships
+
+@enduml
