@@ -10,7 +10,10 @@ networkScan:
 	cd ./Containers/NetworkScan && docker build -t networkscan .
 	
 run:
-	docker compose -f docker-compose.yaml up -d && open http://localhost:3000/
+	docker compose -f docker-compose.yaml up -d
+
+open:
+	open http://localhost:3000/
 
 down:
 	docker compose -f docker-compose.yaml down
