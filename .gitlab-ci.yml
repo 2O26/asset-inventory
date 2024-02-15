@@ -33,6 +33,7 @@ cypress-test-job:
   services:
     - docker:dind
   script:
+    - echo "CI_REGISTRY_IMAGE is $CI_REGISTRY_IMAGE"
     - docker pull $CI_REGISTRY_IMAGE
     - docker run -d -p 3000:3000 $CI_REGISTRY_IMAGE
     - sleep 10 # Wait for the application to initialize
