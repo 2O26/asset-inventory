@@ -1,6 +1,9 @@
-FROM node:14
-WORKDIR /usr/src/app
+FROM cypress/included:12.11.0
+
+WORKDIR /app
+
 COPY . .
+
 RUN npm install
-EXPOSE 3000
-CMD ["npm", "start"]
+
+CMD ["npm", "run", "test"]
