@@ -3,11 +3,6 @@ stages:
   - build
   - test
 
-image: docker:stable
-
-services:
-  - docker:dind
-
 docker-setup:
   tags:
     - docker-build
@@ -20,20 +15,22 @@ docker-setup:
     - echo "Docker is up"
 
 build-job:
+  stage: build
+  image: docker:stable
   tags:
     - docker-build
-  stage: build
+  services:
+    - docker:dind
   script:
     - make all
     - make run
     
-cypress-job:
-  tags:
-    - docker-build
+cypress-test-job:
   stage: test
   image: cypress/included:9.1.1
+  tags:
+    - docker-build
+  services:
+    - docker:dind
   script:
-    - echo "CI_REGISTRY_IMAGE is $CI_REGISTRY_IMAGE"
-    - sleep 10 # Wait for the application to initialize
-    - npx cypress run --config baseUrl=http://localhost:3000
-
+    - cypress run
