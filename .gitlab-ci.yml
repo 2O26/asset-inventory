@@ -10,7 +10,7 @@ services:
 
 docker-setup:
   tags:
-  - docker-build
+    - docker-build
   stage: docker-setup
   script:
     - docker --version
@@ -20,6 +20,8 @@ docker-setup:
     - echo "Docker is up"
 
 build-job:
+  tags:
+    - docker-build
   stage: build
   script:
     - make all
