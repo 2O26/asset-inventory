@@ -2,6 +2,9 @@ stages:
   - build
   - test
 
+before_script:
+  - sudo apt-get install make
+
 build-job:
   stage: build
   image: docker:latest
