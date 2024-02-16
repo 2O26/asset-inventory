@@ -1,6 +1,7 @@
 {
   "baseUrl": "http://localhost:3000",
   "integrationFolder": "cypress/integration",
-  "supportFile": false
-
+  "supportFile": false,
+  "pluginsFile": false
 }
+
