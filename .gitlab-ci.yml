@@ -2,23 +2,21 @@ stages:
   - build
   - test
 
-image: docker:stable
-
-services:
-  - docker:dind
-
 build-job:
   stage: build
-  tags:
-    - docker-build
+  image: docker:latest
+  services:
+    - docker:dind
   script:
     - make all
     - make run
-    
-cypress-test-job:
+
+cypress_tests:
   stage: test
-  image: cypress/included:9.1.1
-  tags:
-    - docker-build
+  image: cypress/included:latest
   script:
-    - cypress run
+    - npm install --save-dev cypress
+    - $(npm bin)/cypress verify
+    - $(npm bin)/cypress run --config baseUrl=http://localhost:3000
+  dependencies:
+    - build-job
