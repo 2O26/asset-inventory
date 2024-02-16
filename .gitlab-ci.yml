@@ -9,6 +9,8 @@ services:
   - docker:dind
 
 docker-setup:
+  tags:
+  - docker-build
   stage: docker-setup
   script:
     - docker --version
