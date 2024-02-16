@@ -1,26 +1,16 @@
 stages:
-  - docker-setup
   - build
   - test
 
-docker-setup:
-  tags:
-    - docker-build
-  stage: docker-setup
-  script:
-    - docker --version
-    - docker images --all
-    - echo "Starting docker"
-    - docker run hello-world
-    - echo "Docker is up"
+image: docker:stable
+
+services:
+  - docker:dind
 
 build-job:
   stage: build
-  image: docker:stable
   tags:
     - docker-build
-  services:
-    - docker:dind
   script:
     - make all
     - make run
@@ -30,7 +20,5 @@ cypress-test-job:
   image: cypress/included:9.1.1
   tags:
     - docker-build
-  services:
-    - docker:dind
   script:
     - cypress run
