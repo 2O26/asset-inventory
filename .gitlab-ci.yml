@@ -8,11 +8,13 @@ docker-setup:
     - docker-build
   stage: docker-setup
   script:
+    - docker system prune -f
     - docker --version
     - docker images --all
     - echo "Starting docker"
     - docker run hello-world
     - echo "Docker is up"
+
 
 build-job:
   stage: build
