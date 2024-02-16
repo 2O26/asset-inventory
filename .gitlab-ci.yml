@@ -1,25 +1,38 @@
 stages:
+  - docker-setup
   - build
   - test
 
-before_script:
-  - sudo apt-get install make
+docker-setup:
+  tags:
+    - docker-build
+  stage: docker-setup
+  script:
+    - docker --version
+    - docker images --all
+    - echo "Starting docker"
+    - docker run hello-world
+    - echo "Docker is up"
 
 build-job:
   stage: build
-  image: docker:latest
+  image: docker:stable
+  tags:
+    - docker-build
   services:
     - docker:dind
   script:
     - make all
     - make run
-
-cypress_tests:
+    
+cypress-test-job:
   stage: test
-  image: cypress/included:latest
+  image: cypress/included:9.1.1
+  tags:
+     - docker-build
+  services:
+    - docker:dind
   script:
     - npm install --save-dev cypress
     - $(npm bin)/cypress verify
     - $(npm bin)/cypress run --config baseUrl=http://localhost:3000
-  dependencies:
-    - build-job
