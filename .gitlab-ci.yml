@@ -28,6 +28,8 @@ build-job:
     - make run
     
 cypress-job:
+  tags:
+    - docker-build
   stage: test
   image: cypress/included:9.1.1
   script:
