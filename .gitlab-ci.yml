@@ -34,5 +34,5 @@ cypress-test-job:
     - docker:dind
   script:
     - npm install --save-dev cypress
-    - $(npm bin)/cypress verify
-    - $(npm bin)/cypress run --config baseUrl=http://localhost:3000
+    - cypress verify
+    - cypress run --config baseUrl=http://localhost:3000
