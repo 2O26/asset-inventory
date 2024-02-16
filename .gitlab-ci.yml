@@ -3,10 +3,14 @@ stages:
   - build
   - test
 
+image: docker:stable
+
 docker-setup:
   tags:
     - docker-build
   stage: docker-setup
+  services:
+    - docker:dind
   script:
     - docker system prune -f
     - docker --version
@@ -18,7 +22,6 @@ docker-setup:
 
 build-job:
   stage: build
-  image: docker:stable
   tags:
     - docker-build
   services:
