@@ -31,4 +31,5 @@ cypress-test-job:
      - docker-build
   script:
     - docker run -w /e2e -v $(pwd):/e2e --entrypoint cypress cypress/included:9.1.1 verify
-    - docker run -w /e2e -v $(pwd):/e2e --entrypoint cypress cypress/included:9.1.1 run --config baseUrl=http://localhost:3000
+    - docker run --network="host" -w /e2e -v $(pwd):/e2e --entrypoint cypress cypress/included:9.1.1 run --config baseUrl=http://localhost:3000
+
