@@ -6,15 +6,13 @@ stages:
 
 image: docker:stable
 
-variables:
-  DOCKER_HOST: tcp://docker:2375
-
 docker-setup:
   stage: docker-setup
   services:
     - docker:dind
   script:
     - docker --version
+    - docker -H tcp://docker:2375 images --all
     - docker images --all
     - echo "Starting docker"
     - docker run hello-world
