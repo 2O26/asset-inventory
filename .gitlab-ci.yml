@@ -7,8 +7,6 @@ stages:
 image: docker:stable
 
 docker-setup:
-  tags:
-    - docker-build
   stage: docker-setup
   services:
     - docker:dind
