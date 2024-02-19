@@ -1,5 +1,6 @@
 stages:
   - docker-setup
+  - docker-clean
   - build
   - test
 
@@ -12,13 +13,20 @@ docker-setup:
   services:
     - docker:dind
   script:
-    - docker system prune -f
     - docker --version
     - docker images --all
     - echo "Starting docker"
     - docker run hello-world
     - echo "Docker is up"
 
+docker-clean:
+  stage: docker-clean
+  services:
+    - docker:dind
+  script:
+    - docker ps -a -q -f status=exited | xargs --no-run-if-empty docker rm -v
+    - docker images -f "dangling=true" -q | xargs --no-run-if-empty docker rmi
+    - docker volume ls -qf dangling=true | xargs --no-run-if-empty docker volume rm
 
 build-job:
   stage: build
