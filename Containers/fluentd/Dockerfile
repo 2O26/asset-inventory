@@ -3,6 +3,9 @@ FROM fluent/fluentd:v1.16-debian-1
 # Use root account to use apt
 USER root
 
+# Install nc, netstat
+RUN apt-get update && apt-get install -y netcat net-tools
+
 # below RUN includes plugin as examples elasticsearch is not required
 # you may customize including plugins as you wish
 RUN buildDeps="sudo make gcc g++ libc-dev" \
