@@ -1,0 +1,16 @@
+{
+  "name": "cypresttests",
+  "version": "1.0.0",
+  "description": "Cypress Tests for FrontEnd",
+  "main": "index.js",
+  "scripts": {
+    "cy:spectate": "cypress run --browser chrome --headed",
+    "cy:run": "cypress run",
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^13.6.4"
+  }
+}

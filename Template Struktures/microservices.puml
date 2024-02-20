@@ -29,10 +29,15 @@ frame "Micro Services" {
   ' DB 2
   class AssetHandeler {
     ..Private..
-    - objekt scan
+    - objekt state
     ..Methods..
-    + SaveScan()
-    + GetScan()
+    + SaveState()
+    + GetState()
+    + EditState()
+    + DeleteState()
+    + PluginHandler()
+    + JsonFormatingFrom()
+    + JsonFormatingTo()
   }
 
   class NetworkScan {
@@ -60,6 +65,7 @@ frame "Micro Services" {
     - string boardID
     - string boardToken
     ..Methods..
+    + TrelloConnection( boardID, boardToken )
     + getIssueBoard()
     + ParseBoard()
     + UpdateBoard()
@@ -71,15 +77,10 @@ frame "Micro Services" {
     - string documentID
     - string documentToken
     ..Methods..
+    + ConfluensConnection( documentID, documentToken )
     + getDoc()
     + ParseDoc()
     + UpdateDoc()
-  }
-
-  class ApiHandeler {
-    ..Methods..
-    + TrelloConnection( boardID, boardToken )
-    + ConfluensConnection( documentID, documentToken )
   }
 
   database UserDB {
@@ -140,9 +141,8 @@ IPCluster --> NetworkScan
 IPCluster --> CVEScan
 IPCluster --> IssueBoard
 IPCluster --> Documentation
-IPCluster --> ApiHandeler
-Auth --> UserDB: Must 
-Auth --> FireBase: Maybe 
+Auth --> UserDB: Must
+Auth --> FireBase: Maybe
 AssetHandeler --> AssetDB
 
 
