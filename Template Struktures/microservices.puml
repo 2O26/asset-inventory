@@ -3,11 +3,11 @@ allow_mixing
 
 node Client
 
-node FrontEndServer
+node FrontEnd
 
-frame API
+' frame API
 
-cloud IPCluster
+' cloud IPCluster
 cloud FireBase
 
 frame "Micro Services" {
@@ -83,6 +83,21 @@ frame "Micro Services" {
     + UpdateDoc()
   }
 
+  cloud EFKstack {
+    cloud Kibana {
+
+    } 
+
+    cloud Fluentd {
+
+    }
+
+    cloud Elastic {
+
+    }
+    
+  }
+
   database UserDB {
     folder Users {
         json UsersLst {
@@ -132,18 +147,23 @@ frame "Micro Services" {
 }
 
 
-Client <--> FrontEndServer
-FrontEndServer <--> API
-API <--> IPCluster
-IPCluster --> Auth
-IPCluster --> AssetHandeler
-IPCluster --> NetworkScan
-IPCluster --> CVEScan
-IPCluster --> IssueBoard
-IPCluster --> Documentation
+Client <--> FrontEnd
+FrontEnd <--> AssetHandeler
+FrontEnd <--> Auth
+AssetHandeler <--> NetworkScan
+AssetHandeler <--> CVEScan
+AssetHandeler <--> IssueBoard
+AssetHandeler <--> Documentation
+' EFKstack <-- AssetHandeler
+' EFKstack <-- NetworkScan
+' EFKstack <-- CVEScan
+' EFKstack <-- IssueBoard
+' EFKstack <-- Auth
+' EFKstack <-- UserDB
 Auth --> UserDB: Must
 Auth --> FireBase: Maybe
 AssetHandeler --> AssetDB
+
 
 
 
