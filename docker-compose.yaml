@@ -11,24 +11,73 @@ services:
   assethandler:
     image: assethandler
     ports:
-      - 8080:8080
+      - "8080:8080"
+    # logging:
+    #   driver: "fluentd"
+    #   options:
+    #     fluentd-address: fluentd:24224 # Use fluentd's DNS name.
+    #     tag: assethandler.app
+    # depends_on:
+    #   - fluentd
 
   networkscan:
     image: networkscan
     ports:
-      - 8081:8081
+      - "8081:8081"
 
   dbstorage:
     image: mongo
     restart: always
     command: --quiet --syslog
     ports:
-      - 27017:27017
+      - "27017:27017"
     expose:
       - "27017"
     volumes:
       - dbstorage:/data/db
       - dbconfig:/data/configdb
+
+  ######################################################
+  ### EFK stack (elastic search, fluentd and kibana) ###
+  ######################################################
+
+  # https://docs.fluentd.org/container-deployment/docker-compose
+  fluentd:
+    image: fluentd
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  # https://hub.docker.com/_/elasticsearch
+  # https://www.elastic.co/guide/en/elasticsearch/reference/7.4/secure-cluster.html
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-settings.html
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html
+  elasticsearch:
+    image: elasticsearch 
+    ports:
+      - "9200:9200"
+    
+    #### 
+    # TODO: Ticket I032, Replace later with proper key managment. 
+    #   - Use environmental variable for access keys and passwords
+    #   - usernames and default users
+    ####
+    # environment:
+
+  kibana:
+    image: kibana
+    ports:
+      - "5601:5601"
+    #### 
+    # TODO: Ticket I032, Replace later with proper key managment. 
+    #   - Use environmental variable for access keys and passwords
+    #   - usernames and default users
+    ####
+    # environment:
+    #   - KIBANAPASSWORD=$KIBANAPASSWORD
 
 volumes:
   dbstorage:
