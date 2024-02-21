@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './AssetList.css'
 import { useNavigate } from 'react-router-dom';
+import AddAsset from '../../AddAsset/AddAsset';
 
 const jsonData = {
     "General Info": {
@@ -130,11 +131,12 @@ const jsonData = {
     ]
 }
 
-const getColumnHeaders = (jsonData) => {
+const getColumnHeaders = (data) => {
+
     const columnHeaders = new Set(); // Using a Set to ensure uniqueness of headers
 
     // Loop through each asset to extract keys from standard and plugin information
-    Object.values(jsonData['Asset List']).forEach(asset => {
+    Object.values(data['Asset List']).forEach(asset => {
         // Extract standard keys
         Object.keys(asset.Standard).forEach(key => columnHeaders.add(key));
 
@@ -149,14 +151,11 @@ const getColumnHeaders = (jsonData) => {
 
 export default function AssetList() {
     const navigate = useNavigate()
-    const columnHeaders = getColumnHeaders(jsonData);
-    const wassa = "yolo"
+    const [data, setData] = useState(jsonData)
+    const columnHeaders = getColumnHeaders(data);
 
     const handleClick = (asset) => {
-        return (e) => {
-            e.preventDefault();
-            navigate(`/asset-view`, { state: asset });
-        }
+        navigate(`/asset-view`, { state: asset });
     }
 
 
@@ -175,28 +174,27 @@ export default function AssetList() {
                 <hr style={{ margin: "0.5rem 2rem ", border: "1px solid var(--text-color)" }}></hr>
 
                 {/* Asset information */}
-                {Object.values(jsonData['Asset List']).map(asset => (
-                    <div key={asset.Standard.Name} className='assetRow' onClick={handleClick(asset)}>
-                        {/* Standard information */}
-                        {Object.values(asset.Standard).map((value, index) => (
-                            <div key={index} className='assetCell'>
-                                {value}
-                            </div>
-                        ))}
+                {Object.values(data['Asset List']).map((asset, assetIndex) => (
+                    <div key={assetIndex} className='assetRow' onClick={() => handleClick(asset)}>
+                        {/* Iterate over column headers instead of asset properties */}
+                        {columnHeaders.map((header, headerIndex) => {
+                            // Attempt to find a value from either Standard or Plugin that matches the header
+                            const standardValue = asset.Standard[header];
+                            const pluginValue = asset.Plugin && Object.values(asset.Plugin).find(plugin => plugin[header]);
 
-                        {/* Plugin information */}
-                        {Object.values(asset.Plugin).map(plugin => (
-                            <React.Fragment key={Object.keys(plugin)[0]}>
-                                {Object.values(plugin).map((value, index) => (
-                                    <div key={index} className='assetCell'>
-                                        {value}
-                                    </div>
-                                ))}
-                            </React.Fragment>
-                        ))}
+                            // Determine what to display: a value from Standard, Plugin, or an empty string
+                            const valueToDisplay = standardValue || (pluginValue && pluginValue[header]) || '';
+
+                            return (
+                                <div key={headerIndex} className='assetCell'>
+                                    {valueToDisplay}
+                                </div>
+                            );
+                        })}
                     </div>
                 ))}
             </div>
+            <AddAsset setPrevData={setData} />
         </div>
     );
 };

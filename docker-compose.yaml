@@ -4,32 +4,124 @@ services:
     image: assinvfront
     ports:
       - 3000:3000
-      - 85:85
+      - 80:80
     volumes:
       - ./Containers/FrontEnd/src:/app/src
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224 # TODO: Use fluentd's DNS name.
+        tag: assethandler.app
+    depends_on:
+      fluentd:
+        condition: service_healthy
 
   assethandler:
     image: assethandler
     ports:
-      - 8193:8193
+      - "8080:8080"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224 # TODO: Use fluentd's DNS name.
+        tag: assethandler.app
+    depends_on:
+      fluentd:
+        condition: service_healthy
 
   networkscan:
     image: networkscan
     ports:
-      - 8081:8081
+      - "8081:8081"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224 # TODO: Use fluentd's DNS name.
+        tag: networkscan.app
+    depends_on:
+      fluentd:
+        condition: service_healthy
 
   dbstorage:
     image: mongo
     restart: always
     command: --quiet --syslog
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224 # TODO: Use fluentd's DNS name.
+        tag: dbstorage.app
+    depends_on:
+      fluentd:
+        condition: service_healthy
     ports:
-      - 27017:27017
+      - "27017:27017"
     expose:
       - "27017"
     volumes:
       - dbstorage:/data/db
       - dbconfig:/data/configdb
 
+  ######################################################
+  ### EFK stack (elastic search, fluentd and kibana) ###
+  ######################################################
+
+  # https://docs.fluentd.org/container-deployment/docker-compose
+  fluentd:
+    image: fluentd
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    healthcheck:
+      test: ["CMD", "netstat", "-tuln", "|", "grep", "24224"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+
+  # https://hub.docker.com/_/elasticsearch
+  # https://www.elastic.co/guide/en/elasticsearch/reference/7.4/secure-cluster.html
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-settings.html
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html
+  elasticsearch:
+    image: elasticsearch 
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5  
+    
+    #### 
+    # TODO: Ticket I032, Replace later with proper key managment. 
+    #   - Use environmental variable for access keys and passwords
+    #   - usernames and default users
+    ####
+    # environment:
+
+  kibana:
+    image: kibana
+    ports:
+      - "5601:5601"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5  
+    #### 
+    # TODO: Ticket I032, Replace later with proper key managment. 
+    #   - Use environmental variable for access keys and passwords
+    #   - usernames and default users
+    ####
+    # environment:
+    #   - KIBANAPASSWORD=$KIBANAPASSWORD
+
 volumes:
   dbstorage:
   dbconfig:
+

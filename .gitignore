@@ -2,3 +2,7 @@
 *.DS_Store
 *.vs
 *.vscode
+<<<<<<< HEAD
+=======
+.env
+>>>>>>> origin/develop
