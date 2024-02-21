@@ -38,6 +38,9 @@
     --button-hover: #5e93fd;
     --button-active: #5c5c5c;
     --button-shadow: #0000007e;
+
+    --hr-color-1: rgba(228, 228, 228, 0);
+    --hr-color-2: rgba(228, 228, 228, 0.75);
 }
 
 /* Blue Light Theme */
@@ -59,4 +62,7 @@
     --button-hover: #4053fb;
     --button-active: #5c5c5c;
     --button-shadow: #5c5c5c6a;
+
+    --hr-color-1: rgba(0, 0, 0, 0);
+    --hr-color-2: rgba(0, 0, 0, 0.75);
 }

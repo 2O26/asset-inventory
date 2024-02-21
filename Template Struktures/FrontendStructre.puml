@@ -19,6 +19,10 @@ package "src" {
                 file "Icon2.js"
             }
         }
+        package "AssetView" {
+            file "AssetView.js"
+            file "AssetView.css"
+        }
         package "SignIn" {
             file "SignIn.js"
             file "SignIn.css"
@@ -51,6 +55,10 @@ package "src" {
                 file "IssueBoard.js"
                 file "IssueBoard.css"
             }
+            package "AssetList" {
+            file "AssetList.js"
+            file "AssetList.css"
+        }
             file "Tools.js"
             file "Tools.css"
         }
@@ -58,10 +66,13 @@ package "src" {
     package "services" {
         file "ApiService.js"
     }
-    package "contexts" {
-        file "AuthContext.js"
-        file "ThemeContext.js"
-    }
+
+    frame "AuthContext.js"
+    frame "SaveStateContext.js"
+    ' package "contexts" {
+    '     file "AuthContext.js"
+    '     file "SaveStateContext.js"
+    ' }
     cloud "firebase" 
     file "App.js"
     file "index.js"
@@ -86,6 +97,9 @@ Settings.js --> Dashboard
 
 AuthContext.js --> firebase : or >
 AuthContext.js --> ApiService.js : or >
+
+SaveStateContext.js --> AssetList
+SaveStateContext.js --> AssetView
 
 ApiService.js --> Backend
 Backend --> DB

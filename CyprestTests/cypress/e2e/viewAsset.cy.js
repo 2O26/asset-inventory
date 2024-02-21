@@ -9,12 +9,14 @@ describe('View asset page tests', () => {
         let tmpName = ""
         let tmpType = ""
         let tmpCrit = ""
+        let tmpOwner = ""
         beforeEach('clicking asset in list and saving info', () => {
             cy.get('.assetRow').eq(0)
                 .then((row) => {
                     tmpName = row.find('.assetCell').eq(0).text();
                     tmpType = row.find('.assetCell').eq(1).text();
                     tmpCrit = row.find('.assetCell').eq(2).text();
+                    tmpOwner = row.find('.assetCell').eq(3).text();
                 }).click();
         })
 
@@ -28,6 +30,10 @@ describe('View asset page tests', () => {
 
         it('can verify asset criticality', () => {
             cy.get('.assetItem').contains('Criticality').should('contain', tmpCrit);
+        })
+
+        it('can verify asset Owner', () => {
+            cy.get('.assetItem').contains('Owner').should('contain', tmpOwner);
         })
     })
 
@@ -35,12 +41,14 @@ describe('View asset page tests', () => {
         let tmpName = ""
         let tmpType = ""
         let tmpCrit = ""
+        let tmpOwner = ""
         beforeEach('clicking asset in list and saving info', () => {
             cy.get('.assetRow').eq(1)
                 .then((row) => {
                     tmpName = row.find('.assetCell').eq(0).text();
                     tmpType = row.find('.assetCell').eq(1).text();
                     tmpCrit = row.find('.assetCell').eq(2).text();
+                    tmpOwner = row.find('.assetCell').eq(3).text();
                 }).click();
         })
 
@@ -54,6 +62,10 @@ describe('View asset page tests', () => {
 
         it('can verify asset criticality', () => {
             cy.get('.assetItem').contains('Criticality').should('contain', tmpCrit);
+        })
+
+        it('can verify asset Owner', () => {
+            cy.get('.assetItem').contains('Owner').should('contain', tmpOwner);
         })
     })
 

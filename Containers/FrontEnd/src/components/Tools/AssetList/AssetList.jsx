@@ -22,6 +22,9 @@ const jsonData = {
                 "Name": "PC A",
                 "Type": "Desktop",
                 "Criticality": 1,
+                "Owner": "Joe B",
+                "Date Created": "2024-02-01 15:21",
+                "Date Modified": "2024-02-03 12:36",
             },
             "Plugin": {
                 "Ip Scan": {
@@ -52,7 +55,11 @@ const jsonData = {
             "Standard": {
                 "Name": "PC B",
                 "Type": "Desktop",
-                "Criticality": 1
+                "Criticality": 1,
+                "Owner": "Jimmy J",
+                "Date Created": "2024-02-14 15:26",
+                "Date Modified": "2024-02-18 13:32",
+
             },
             "Plugin": {
                 "Ip Scan": {
@@ -73,6 +80,14 @@ const jsonData = {
                         "CVE-2016-12434",
                         "CVE-2016-43434"
                     ]
+                },
+                "Other Scan": {
+                    "Scan List": [
+                        "Test 1",
+                        "Test 2",
+                        "Test 3",
+                        "Test 4",
+                    ]
                 }
             }
         },
@@ -84,7 +99,11 @@ const jsonData = {
             "Standard": {
                 "Name": "Server A",
                 "Type": "Web server",
-                "Criticality": 4
+                "Criticality": 4,
+                "Owner": "Jesper K",
+                "Date Created": "2024-01-01 12:32",
+                "Date Modified": "2024-01-01 12:32",
+
             },
             "Plugin": {
                 "Ip Scan": {
@@ -141,9 +160,9 @@ const getColumnHeaders = (data) => {
         Object.keys(asset.Standard).forEach(key => columnHeaders.add(key));
 
         // Extract plugin keys
-        Object.values(asset.Plugin).forEach(plugin => {
-            Object.keys(plugin).forEach(key => columnHeaders.add(key));
-        });
+        // Object.values(asset.Plugin).forEach(plugin => {
+        //     Object.keys(plugin).forEach(key => columnHeaders.add(key));
+        // });
     });
 
     return Array.from(columnHeaders); // Convert Set back to an array
@@ -162,7 +181,6 @@ export default function AssetList() {
     return (
         <div className='page-container'>
             <div className='asset-list-container'>
-                {/* Column headers */}
                 <div className='headerRow'>
                     {columnHeaders.map(header => (
                         <div key={header} className='headerCell'>
@@ -176,14 +194,14 @@ export default function AssetList() {
                 {/* Asset information */}
                 {Object.values(data['Asset List']).map((asset, assetIndex) => (
                     <div key={assetIndex} className='assetRow' onClick={() => handleClick(asset)}>
-                        {/* Iterate over column headers instead of asset properties */}
                         {columnHeaders.map((header, headerIndex) => {
                             // Attempt to find a value from either Standard or Plugin that matches the header
                             const standardValue = asset.Standard[header];
-                            const pluginValue = asset.Plugin && Object.values(asset.Plugin).find(plugin => plugin[header]);
+                            // const pluginValue = asset.Plugin && Object.values(asset.Plugin).find(plugin => plugin[header]);
 
                             // Determine what to display: a value from Standard, Plugin, or an empty string
-                            const valueToDisplay = standardValue || (pluginValue && pluginValue[header]) || '';
+                            // const valueToDisplay = standardValue || (pluginValue && pluginValue[header]) || '';
+                            const valueToDisplay = standardValue;
 
                             return (
                                 <div key={headerIndex} className='assetCell'>
