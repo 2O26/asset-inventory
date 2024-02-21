@@ -4,7 +4,7 @@ import './AddAsset.css'
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 
 export default function AddAsset({ setPrevData }) {
-    const [data, setData] = useState({ id: "", name: "", type: "", crit: 0 })
+    const [data, setData] = useState({ id: "", name: "", type: "", crit: 1 })
 
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
@@ -61,13 +61,13 @@ export default function AddAsset({ setPrevData }) {
                     <form onSubmit={handleSubmit} className='asset-form'>
                         <h2 style={{ paddingBottom: "2rem" }}>Add Asset</h2>
                         <label >ID</label>
-                        <input className="inputFields" value={data.id} onChange={(e) => setData({ ...data, id: e.target.value })} placeholder="ID_234241" required />
+                        <input className="inputFields" value={data.id} onChange={(e) => setData({ ...data, id: e.target.value })} placeholder="ID_234241" id="asset-id" name="asset-id" required />
                         <label htmlFor="name">Asset Name</label>
-                        <input className="inputFields" value={data.name} onChange={(e) => setData({ ...data, name: e.target.value })} type="name" placeholder="Server A" id="name" name="name" required />
+                        <input className="inputFields" value={data.name} onChange={(e) => setData({ ...data, name: e.target.value })} type="name" placeholder="Server A" id="asset-name" name="asset-name" required />
                         <label >Criticality</label>
-                        <input className="inputFields" value={data.crit} onChange={(e) => setData({ ...data, crit: e.target.value })} type="number" placeholder="1" required />
+                        <input className="inputFields" value={data.crit} onChange={(e) => setData({ ...data, crit: e.target.value })} type="number" id="asset-criticality" name="asset-criticality" min="1" max="5" required />
                         <label >Type</label>
-                        <input className="inputFields" value={data.type} onChange={(e) => setData({ ...data, type: e.target.value })} placeholder="Web Server" required />
+                        <input className="inputFields" value={data.type} onChange={(e) => setData({ ...data, type: e.target.value })} placeholder="Web Server" id="asset-type" name="asset-type" required />
                         {isLoading && <LoadingSpinner />}
                         {isError && <p className="errorMessage">Could not Add asset</p>}
                         <div className="AuthBtnContainer">

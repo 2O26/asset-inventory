@@ -23,7 +23,7 @@ export default function AssetView() {
                 <div key={postData.state.Standard.Name} >
                     {/* Standard information */}
                     {Object.entries(postData.state.Standard).map(([key, value], index) => (
-                        index === 0 ? <h1 key={key}>{value}</h1> : (
+                        index === 0 ? <h1 key={key} name="asset-name">{value}</h1> : (
                             <div key={key} className='assetItem'>
                                 {key} : {value}
                             </div>
