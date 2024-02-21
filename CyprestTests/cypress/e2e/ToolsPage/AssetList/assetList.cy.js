@@ -1,5 +1,5 @@
 describe('Asset List page tests', () => {
-    const tmpAssetData = { id: "ID_12345", name: "Test PC", crit: 4, type: "Desctop PC" }
+    const tmpAssetData = { id: "ID_12345", name: "Test PC", crit: 4, type: "Desctop PC", owner: "John Doe" }
     beforeEach('visiting Asset List page', () => {
         cy.visit(Cypress.env('baseUrl'))
         cy.contains('Tools').click()
@@ -11,6 +11,7 @@ describe('Asset List page tests', () => {
         cy.get('input.inputFields[name="asset-name"]').type(tmpAssetData.name)
         cy.get('input.inputFields[name="asset-criticality"]').clear().type(tmpAssetData.crit)
         cy.get('input.inputFields[name="asset-type"]').type(tmpAssetData.type)
+        cy.get('input.inputFields[name="asset-owner"]').clear().type(tmpAssetData.owner)
         cy.get('.AuthBtnContainer').find('button.standard-button').contains('Add').click();
         cy.get('.asset-form').should('be.visible')
     })
@@ -21,6 +22,7 @@ describe('Asset List page tests', () => {
         cy.get('input.inputFields[name="asset-id"]').type(tmpAssetData.id)
         cy.get('input.inputFields[name="asset-criticality"]').clear().type(tmpAssetData.crit)
         cy.get('input.inputFields[name="asset-type"]').type(tmpAssetData.type)
+        cy.get('input.inputFields[name="asset-owner"]').clear().type(tmpAssetData.owner)
         cy.get('.AuthBtnContainer').find('button.standard-button').contains('Add').click();
         cy.get('.asset-form').should('be.visible')
     })
@@ -31,6 +33,7 @@ describe('Asset List page tests', () => {
         cy.get('input.inputFields[name="asset-name"]').type(tmpAssetData.name)
         cy.get('input.inputFields[name="asset-criticality"]').clear()
         cy.get('input.inputFields[name="asset-type"]').type(tmpAssetData.type)
+        cy.get('input.inputFields[name="asset-owner"]').clear().type(tmpAssetData.owner)
         cy.get('.AuthBtnContainer').find('button.standard-button').contains('Add').click();
         cy.get('.asset-form').should('be.visible')
     })
@@ -39,6 +42,17 @@ describe('Asset List page tests', () => {
         cy.contains('Add Asset').click()
         cy.get('input.inputFields[name="asset-id"]').type(tmpAssetData.id)
         cy.get('input.inputFields[name="asset-name"]').type(tmpAssetData.name)
+        cy.get('input.inputFields[name="asset-criticality"]').clear().type(tmpAssetData.crit)
+        cy.get('input.inputFields[name="asset-owner"]').clear().type(tmpAssetData.owner)
+        cy.get('.AuthBtnContainer').find('button.standard-button').contains('Add').click();
+        cy.get('.asset-form').should('be.visible')
+    })
+
+    it('can not add asset without owner', () => {
+        cy.contains('Add Asset').click()
+        cy.get('input.inputFields[name="asset-id"]').type(tmpAssetData.id)
+        cy.get('input.inputFields[name="asset-name"]').type(tmpAssetData.name)
+        cy.get('input.inputFields[name="asset-type"]').type(tmpAssetData.type)
         cy.get('input.inputFields[name="asset-criticality"]').clear().type(tmpAssetData.crit)
         cy.get('.AuthBtnContainer').find('button.standard-button').contains('Add').click();
         cy.get('.asset-form').should('be.visible')
@@ -51,6 +65,7 @@ describe('Asset List page tests', () => {
             cy.get('input.inputFields[name="asset-name"]').type(tmpAssetData.name)
             cy.get('input.inputFields[name="asset-criticality"]').clear().type(tmpAssetData.crit)
             cy.get('input.inputFields[name="asset-type"]').type(tmpAssetData.type)
+            cy.get('input.inputFields[name="asset-owner"]').type(tmpAssetData.owner)
             cy.get('.AuthBtnContainer').find('button.standard-button').contains('Add').click();
         })
 
@@ -65,6 +80,7 @@ describe('Asset List page tests', () => {
             cy.get('.asset-list-container').should('contain', tmpAssetData.name)
             cy.get('.asset-list-container').should('contain', tmpAssetData.crit)
             cy.get('.asset-list-container').should('contain', tmpAssetData.type)
+            cy.get('.asset-list-container').should('contain', tmpAssetData.owner)
         })
     })
 })
