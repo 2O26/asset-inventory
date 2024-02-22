@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Tools.css'
-import { AssetListIcon, IpScannerIcon, MacScannerIcon } from '../common/Icons/Icons';
+import { AssetListIcon, IpScannerIcon, MacScannerIcon, LogsIcon } from '../common/Icons/Icons';
 
 export default function Tools() {
 
@@ -21,6 +21,11 @@ export default function Tools() {
                 <MacScannerIcon size={65} />
                 <div> Mac Scanner</div>
             </button>
+            <button className='button-tool'>
+                <LogsIcon size={60} />
+                <div> View Logs</div>
+            </button>
+        
         </div>
-    )
+    );
 }
