@@ -11,6 +11,8 @@ variables:
 
 docker-setup:
   stage: docker-setup
+  tags:
+    - docker-build
   services:
     - docker:dind
   script:
@@ -18,9 +20,12 @@ docker-setup:
     - docker info
     - docker images --all
     - docker run hello-world
+    - docker ps
 
 docker-clean:
   stage: docker-clean
+  tags:
+    - docker-build
   services:
     - docker:dind
   script:
@@ -41,9 +46,7 @@ build-job:
 cypress-test-job:
   stage: test
   tags:
-     - docker-build
+    - docker-build
   script:
-    - docker run -w /e2e -v $(pwd):/e2e --entrypoint cypress cypress/included:9.1.1 verify
-    - docker run -w /e2e -v $(pwd):/e2e --entrypoint cypress cypress/included:9.1.1 run --config baseUrl=http://localhost:3000
-
+    - make test
 
