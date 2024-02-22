@@ -4,6 +4,12 @@ stages:
   - build
   - test
 
+".pre":
+  tags:
+    - docker-build
+  script:
+    - rm -rf cypress/*
+
 image: docker:stable
 
 variables:
@@ -18,6 +24,7 @@ docker-setup:
     - docker info
     - docker images --all
     - docker run hello-world
+    - docker ps
 
 docker-clean:
   stage: docker-clean
