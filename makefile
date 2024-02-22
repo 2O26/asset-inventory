@@ -1,4 +1,4 @@
-all: assInvFront assetHandler networkScan fluentd elasticsearch kibana
+all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypress
 
 assInvFront:
 	cd ./Containers/FrontEnd && docker build -t assinvfront .
@@ -26,3 +26,9 @@ down:
 
 clean:
 	docker rmi --force assinvfront assethandler networkscan fluentd elasticsearch kibana
+
+cypress-test:
+	cd CyprestTests/cypress && npm run cy:run
+
+enviroment-test:
+	curl localhost:89

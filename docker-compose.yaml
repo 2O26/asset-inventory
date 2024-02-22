@@ -4,7 +4,7 @@ services:
     image: assinvfront
     ports:
       - 3000:3000
-      - 80:80
+      - 81:80
     volumes:
       - ./Containers/FrontEnd/src:/app/src
     logging:
@@ -120,6 +120,16 @@ services:
     ####
     # environment:
     #   - KIBANAPASSWORD=$KIBANAPASSWORD
+
+  ######################################################
+  ###   Test Environment (nginx, postgres, jmeter)   ###
+  ######################################################
+
+
+  webserver:
+    image: nginx
+    ports:
+      - "89:80"
 
 volumes:
   dbstorage:
