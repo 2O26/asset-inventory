@@ -17,6 +17,8 @@ variables:
 
 docker-setup:
   stage: docker-setup
+  tags:
+    - docker-build
   services:
     - docker:dind
   script:
@@ -28,6 +30,8 @@ docker-setup:
 
 docker-clean:
   stage: docker-clean
+  tags:
+    - docker-build
   services:
     - docker:dind
   script:
