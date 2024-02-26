@@ -5,7 +5,7 @@ import { MdDashboard } from "react-icons/md";
 import { PiSignInBold, PiSignOutBold, PiShareNetwork } from "react-icons/pi";
 import { CiBoxList, CiBarcode } from "react-icons/ci";
 import { CgDarkMode } from "react-icons/cg";
-
+import { SiElastic } from "react-icons/si";
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
 
@@ -70,3 +70,8 @@ export const SettingsIcon = ({ size = 30 }) => {
     )
 }
 
+export const LogsIcon = ({ size = 30 }) => {
+    return (
+        <SiElastic size={size} />
+    );
+};
