@@ -130,8 +130,28 @@ services:
     image: nginx
     ports:
       - "89:80"
+    networks:
+      - test_network
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+    networks:
+      - test_network
+
+  nmap_scanner:
+    image: instrumentisto/nmap
+    command: ["nmap", "-p", "80", "webserver"]
+    networks:
+      - test_network
 
 volumes:
   dbstorage:
   dbconfig:
 
+networks:
+  test_network:
+    driver: bridge
