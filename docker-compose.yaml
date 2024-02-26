@@ -122,7 +122,7 @@ services:
     #   - KIBANAPASSWORD=$KIBANAPASSWORD
 
   ######################################################
-  ###   Test Environment (nginx, postgres, jmeter)   ###
+  ###     Test Environment (nginx, postgres, nmap)   ###
   ######################################################
 
 
@@ -143,8 +143,8 @@ services:
       - test_network
 
   nmap_scanner:
-    image: instrumentisto/nmap
-    command: ["nmap", "-p", "80", "webserver"]
+    image: securecodebox/nmap
+    command: /bin/sh -c "nmap -p 80 webserver && nmap -p 5432 postgres"
     networks:
       - test_network
 
