@@ -144,7 +144,9 @@ services:
 
   nmap_scanner:
     image: securecodebox/nmap
-    command: /bin/sh -c "nmap -p 80 webserver && nmap -p 5432 postgres"
+    command: /bin/sh -c "nmap -sV -oX /scan_results/output_webserver_nmap.xml -p 80 webserver && nmap -sV -oX /scan_results/output_postgres_nmap.xml -p 80 postgres"
+    volumes:
+      - ./scan_results:/scan_results
     networks:
       - test_network
 
