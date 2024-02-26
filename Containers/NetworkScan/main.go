@@ -1,28 +1,37 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type assetScan struct {
-	ID     string `json:"id"`
-	Status string `json:"status"`
-	IP     string `json:"ip"`
-	MAC    string `json:"mac"`
-}
-
-var hardcodedScan = []assetScan{
-	{ID: "1", Status: "up", IP: "192.168.1.1", MAC: "10:25:96:12:34:56"},
-	{ID: "2", Status: "down", IP: "172.168.1.1", MAC: "20:25:96:12:34:56"},
-	{ID: "3", Status: "dormant", IP: "10.168.1.1", MAC: "30:25:96:12:34:56"},
-}
+// Will get scan array from DB
+var hardcodedScan = json.RawMessage(`
+{
+    "stateID": "20240214-1300A",
+    "dateCreated": "2024-02-14 23:00:00",
+    "dateUpdated": "2024-02-14 23:00:30",
+    "state": {
+        "AID_4123523": {
+            "status": "up",
+            "ipv4addr": "192.168.1.1",
+            "ipv6addr": "10:25:96:12:34:56",
+            "subnet": "192.168.1.0/24"
+        },
+        "AID_5784393": {
+            "status": "down",
+            "ipv4addr": "172.168.1.1",
+            "ipv6addr": "20:25:96:12:34:56",
+            "subnet": "192.168.1.0/24"
+        }
+    }
+}`)
 
 func main() {
 	router := gin.Default()
-	router.GET("/status", getStatus)
-	// router.GET("/albums/:id", getAlbumByID)
+	router.GET("/status", getScan)
 	router.POST("/addMockScan", postMockScan)
 
 	router.Run(":8081")
@@ -32,20 +41,11 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
-func getStatus(c *gin.Context) {
+func getScan(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, hardcodedScan)
 }
 
 func postMockScan(c *gin.Context) {
-	var newAssetScan assetScan
 
-	// Call BindJSON to bind the received JSON to
-	// newAlbum.
-	if err := c.BindJSON(&newAssetScan); err != nil {
-		return
-	}
-
-	// Add the new album to the slice.
-	hardcodedScan = append(hardcodedScan, newAssetScan)
-	c.IndentedJSON(http.StatusCreated, newAssetScan)
+	c.IndentedJSON(http.StatusCreated, hardcodedScan)
 }
