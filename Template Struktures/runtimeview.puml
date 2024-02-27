@@ -1,0 +1,13 @@
+@startuml AssetInventoryRuntimeView
+actor User
+participant "Frontend" as FE
+participant "AssetHandler" as AH
+participant "NetworkScanner" as NS
+
+User -> FE : click(button)
+FE -> AH : getState()
+AH -> NS : scanNetwork()
+NS -> AH : returnNetworkInfo()
+AH --> FE : returnState()
+FE --> User : displayData()
+@enduml

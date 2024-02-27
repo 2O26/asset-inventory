@@ -4,7 +4,7 @@ import './AddAsset.css'
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 
 export default function AddAsset({ setPrevData }) {
-    const [data, setData] = useState({ id: "", name: "", type: "", crit: 1 })
+    const [data, setData] = useState({ id: "", name: "", type: "", crit: 1, owner: "" })
 
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
@@ -22,6 +22,7 @@ export default function AddAsset({ setPrevData }) {
                     "Name": data.name,
                     "Type": data.type,
                     "Criticality": parseInt(data.crit, 10),
+                    "Owner": data.owner
                 },
                 "Plugin": {
                     // Plugins may need to be added or updated elsewhere
@@ -68,6 +69,8 @@ export default function AddAsset({ setPrevData }) {
                         <input className="inputFields" value={data.crit} onChange={(e) => setData({ ...data, crit: e.target.value })} type="number" id="asset-criticality" name="asset-criticality" min="1" max="5" required />
                         <label >Type</label>
                         <input className="inputFields" value={data.type} onChange={(e) => setData({ ...data, type: e.target.value })} placeholder="Web Server" id="asset-type" name="asset-type" required />
+                        <label >Owner</label>
+                        <input className="inputFields" value={data.owner} onChange={(e) => setData({ ...data, owner: e.target.value })} placeholder="John Doe" id="asset-owner" name="asset-owner" required />
                         {isLoading && <LoadingSpinner />}
                         {isError && <p className="errorMessage">Could not Add asset</p>}
                         <div className="AuthBtnContainer">

@@ -1,27 +1,25 @@
 package main
 
 import (
+	"assetinventory/assethandler/jsonhandler"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-type asset struct {
-	ID     string `json:"id"`
-	Status string `json:"status"`
-	IP     string `json:"ip"`
-	MAC    string `json:"mac"`
+type StateResponse struct {
+	Message string                 `json:"message"`
+	State   jsonhandler.FrontState `json:"state"`
 }
 
-// AssethandlerStatusResponse represents the JSON structure of the response.
-type AssethandlerStatusResponse struct {
-	Message string `json:"message"`
-	Time    string `json:"time"` // Add a timestamp field
-	Asset   asset  `json:"asset"`
+type PluginState struct {
+	StateID     string         `json:"stateID"`
+	DateCreated string         `json:"dateCreated"`
+	DateUpdated string         `json:"dateUpdated"`
+	State       map[string]any `json:"state"`
 }
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -39,7 +37,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func getNetScanStatus() asset {
+func getNetScanStatus() json.RawMessage {
 	url := "http://networkscan:8081/status"
 	// url := "http://localhost:8081/status"
 
@@ -51,51 +49,109 @@ func getNetScanStatus() asset {
 	}
 
 	defer response.Body.Close() // Ensure the body is closed after reading
+
+	var netassets PluginState
 	// Read the response body
-	body, err := ioutil.ReadAll(response.Body)
+	json.NewDecoder(response.Body).Decode(&netassets) //puts the response into netassets
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// Convert the body to a string and print
-	fmt.Println(string(body)) // prints out correct output
+	netassetsJSON, _ := json.Marshal(netassets)
+	log.Println("NetscanStatus Gave:", string(netassetsJSON))
+	return netassetsJSON
 
-	// TODO convert body to asset type.
-
-	var firstAsset asset
-	firstAsset.ID = "1"
-	firstAsset.Status = "2"
-	firstAsset.IP = "3"
-	firstAsset.MAC = "4"
-
-	// firstAsset.ID = result[0]["ID"].(string)
-	// firstAsset.Status = result[1]["Status"].(string)
-	// firstAsset.IP = result[2]["IP"].(string)
-	// firstAsset.MAC = result[3]["MAC"].(string)
-
-	return firstAsset
 }
 
-func assetHandlerStatus(c *gin.Context) {
+func getState(c *gin.Context) {
+
+	//GET STATE FROM MONGO HERE
+	PLACEHOLDER := `{
+		"mostRecentUpdate": "2024-02-14 23:35:53",
+		"assets": {
+			"AID_4123523": {
+				"name": "PC-A",
+				"owner": "UID_2332",
+				"dateCreated": "2024-02-14 23:00:00",
+				"dateUpdated": "2024-02-14 23:00:30",
+				"criticality": 2        
+			},
+			"AID_5784393": {
+				"name": "Chromecast",
+				"owner": "UID_2332",
+				"dateCreated": "2024-02-10 20:04:20",
+				"dateUpdated": "2024-02-14 23:00:30",
+				"criticality": 1
+			},
+			"AID_9823482": {
+				"name": "Password Vault",
+				"owner": "UID_2332",
+				"dateCreated": "2024-02-14 23:00:00",
+				"dateUpdated": "2024-02-14 23:00:30",
+				"criticality": 4
+			}
+		},
+		"plugins": {
+			"ipScan": {
+				"pluginStateID": "20240214-1300A"
+			},
+			"macScan": {
+				"pluginStateID": "20240215-0800G"
+			}
+		},
+		"relations": {
+			"RID_2613785": {
+				"from": "ID_4123523",
+				"to": "ID_5784393",
+				"direction": "uni",
+				"owner": "UID_2332",
+				"dateCreated":"2024-02-14 23:35:53"
+			},
+			"RID_6492733": {
+				"from": "ID_5784393",
+				"to": "ID_9823482",
+				"direction": "bi",
+				"owner": "UID_6372",
+				"dateCreated": "2024-01-22 07:32:32"
+			}    
+		}    
+	}
+	`
 
 	var authSuccess = true
 
 	if authSuccess {
-		currentTime := time.Now().Format("2006-01-02 15:04:05")
-		firstAsset := getNetScanStatus()
-		response := AssethandlerStatusResponse{Message: "Hello world", Time: currentTime, Asset: firstAsset}
+
+		pluginStates := make(map[string]json.RawMessage)
+		netassets := getNetScanStatus()
+		pluginStates["netscan"] = netassets
+
+		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(PLACEHOLDER), pluginStates)
+		if err != nil {
+			log.Println(err)
+		}
+
+		var currentState jsonhandler.FrontState
+		json.Unmarshal(currentStateJSON, &currentState)
+		log.Println(string(currentStateJSON))
+		response := StateResponse{Message: "Authentication success.", State: currentState}
 		c.IndentedJSON(http.StatusOK, response)
 	} else {
-		response := AssethandlerStatusResponse{Message: "failed"}
+		response := StateResponse{Message: "Authenication failure."}
 		c.IndentedJSON(http.StatusOK, response)
 	}
 }
 
 func main() {
+
 	router := gin.Default()
 	// Apply the CORS middleware
 	router.Use(CORSMiddleware())
 
-	router.GET("/assetHandlerStatus", assetHandlerStatus)
+	router.GET("/getState", getState)
 
 	fmt.Println("Starting server at port 8080")
 
 	router.Run(":8080")
+
 }
