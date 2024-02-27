@@ -149,7 +149,7 @@ services:
       - ./scan_results:/scan_results
     networks:
       - test_network
-
+      
 volumes:
   dbstorage:
   dbconfig:

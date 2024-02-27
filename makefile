@@ -32,3 +32,6 @@ cypress-test:
 
 enviroment-test:
 	curl localhost:89
+
+nmap-test:
+	docker compose up nmap_scanner
