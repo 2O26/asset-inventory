@@ -39,7 +39,6 @@ func CORSMiddleware() gin.HandlerFunc {
 
 func getNetScanStatus() json.RawMessage {
 	url := "http://networkscan:8081/status"
-	// url := "http://localhost:8081/status"
 
 	// GET request from netscan
 	response, err := http.Get(url)
@@ -63,7 +62,7 @@ func getNetScanStatus() json.RawMessage {
 
 }
 
-func getState(c *gin.Context) {
+func getLatestState(c *gin.Context) {
 
 	//GET STATE FROM MONGO HERE
 	PLACEHOLDER := `{
@@ -148,7 +147,7 @@ func main() {
 	// Apply the CORS middleware
 	router.Use(CORSMiddleware())
 
-	router.GET("/getState", getState)
+	router.GET("/getLatestState", getLatestState)
 
 	fmt.Println("Starting server at port 8080")
 
