@@ -19,7 +19,7 @@ kibana:
 	cd ./Containers/kibana && docker build -t kibana .
 
 run:
-	docker compose -f docker-compose.yaml up -d && open http://localhost:3000/
+	docker compose -f docker-compose.yaml --compatibility up -d && open http://localhost:80/
 
 down:
 	docker compose -f docker-compose.yaml down
