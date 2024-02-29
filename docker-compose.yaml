@@ -95,7 +95,11 @@ services:
       test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
       interval: 30s
       timeout: 10s
-      retries: 5  
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 3G
     
     #### 
     # TODO: Ticket I032, Replace later with proper key managment. 
