@@ -1,2 +1,5 @@
 # https://www.elastic.co/guide/en/kibana/current/settings.html
+
 ## Settings file for kibana 
+server.cors: true
+server.cors.origin: ["http://localhost:80", "http://localhost:80/tools", "http://localhost/tools"] # Replace with your web app's origin
