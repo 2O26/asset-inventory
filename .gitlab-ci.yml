@@ -42,6 +42,7 @@ build-job:
     - docker:dind
   script:
     - make all
+    - free -h
     - make run
     
 cypress-test-job:
