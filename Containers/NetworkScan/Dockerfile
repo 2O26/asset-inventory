@@ -22,6 +22,10 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
+#Install nmap
+RUN apk add --no-cache nmap nmap-scripts lua5.3
+RUN apk add nmap
+
 # Copy the executable from the builder that way we have only what is needed at runtime
 COPY --from=builder /app/networkscan .
 
