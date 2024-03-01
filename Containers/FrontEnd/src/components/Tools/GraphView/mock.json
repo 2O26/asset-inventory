@@ -1,0 +1,349 @@
+{
+    "message": "Authentication success.",
+    "state": {
+        "mostRecentUpdate": "2024-02-14 23:35:53",
+        "assets": {
+            "AID_4123521": {
+                "properties": {
+                    "name": "Server A",
+                    "owner": "UID_2332",
+                    "type": [
+                        "Server",
+                        "Application"
+                    ],
+                    "Date Created": "2024-02-14 23:00:00",
+                    "Date Update": "2024-02-14 23:00:30",
+                    "Criticality": 2
+                },
+                "plugins": {
+                    "Network Scaner": {
+                        "ipv4addr": "192.168.1.1",
+                        "ipv6addr": "10:25:96:12:34:56",
+                        "status": "up",
+                        "subnet": "192.168.1.0/24"
+                    },
+                    "Mac Scaner": {
+                        "Mac Address": "1D9:4C3:53f:Af5"
+                    },
+                    "OS Scaner": {
+                        "OS": "Windows",
+                        "Version": 11.4,
+                        "Version Release Date": "01 Jan 2024"
+                    },
+                    "CVE Scaner": {
+                        "Vulnerability Score": 2,
+                        "CVE List": [
+                            "CVE-2016-12434",
+                            "CVE-2016-43434"
+                        ]
+                    }
+                }
+            },
+            "AID_4123573": {
+                "properties": {
+                    "name": "Switch Z",
+                    "owner": "UID_2332",
+                    "type": [
+                        "Switch"
+                    ],
+                    "Date Created": "2024-02-14 23:00:00",
+                    "Date Update": "2024-02-14 23:00:30",
+                    "Criticality": 2
+                },
+                "plugins": {
+                    "Network Scaner": {
+                        "ipv4addr": "192.168.1.1",
+                        "ipv6addr": "10:25:96:12:34:56",
+                        "status": "up",
+                        "subnet": "192.168.1.0/24"
+                    },
+                    "Mac Scaner": {
+                        "Mac Address": "1D9:4C3:53f:Af5"
+                    },
+                    "OS Scaner": {
+                        "OS": "Windows",
+                        "Version": 11.4,
+                        "Version Release Date": "01 Jan 2024"
+                    },
+                    "CVE Scaner": {
+                        "Vulnerability Score": 2,
+                        "CVE List": [
+                            "CVE-2016-12434",
+                            "CVE-2016-43434"
+                        ]
+                    }
+                }
+            },
+            "AID_4123523": {
+                "properties": {
+                    "name": "PC-A",
+                    "owner": "UID_2332",
+                    "type": [
+                        "Computer",
+                        "Personal"
+                    ],
+                    "Date Created": "2024-02-14 23:00:00",
+                    "Date Update": "2024-02-14 23:00:30",
+                    "Criticality": 2
+                },
+                "plugins": {
+                    "Network Scaner": {
+                        "ipv4addr": "192.168.1.1",
+                        "ipv6addr": "10:25:96:12:34:56",
+                        "status": "up",
+                        "subnet": "192.168.1.0/24"
+                    },
+                    "Mac Scaner": {
+                        "Mac Address": "1D9:4C3:53f:Af5"
+                    },
+                    "OS Scaner": {
+                        "OS": "Windows",
+                        "Version": 11.4,
+                        "Version Release Date": "01 Jan 2024"
+                    },
+                    "CVE Scaner": {
+                        "Vulnerability Score": 2,
+                        "CVE List": [
+                            "CVE-2016-12434",
+                            "CVE-2016-43434"
+                        ]
+                    }
+                }
+            },
+            "AID_4123525": {
+                "properties": {
+                    "name": "PC-B",
+                    "owner": "UID_2332",
+                    "type": [
+                        "Computer",
+                        "Personal"
+                    ],
+                    "Date Created": "2024-02-14 23:00:00",
+                    "Date Update": "2024-02-14 23:00:30",
+                    "Criticality": 2
+                },
+                "plugins": {
+                    "Network Scaner": {
+                        "ipv4addr": "192.168.1.1",
+                        "ipv6addr": "10:25:96:12:34:56",
+                        "status": "up",
+                        "subnet": "192.168.1.0/24"
+                    },
+                    "Mac Scaner": {
+                        "Mac Address": "1D9:4C3:53f:Af5"
+                    },
+                    "OS Scaner": {
+                        "OS": "Windows",
+                        "Version": 11.4,
+                        "Version Release Date": "01 Jan 2024"
+                    },
+                    "CVE Scaner": {
+                        "Vulnerability Score": 2,
+                        "CVE List": [
+                            "CVE-2016-12434",
+                            "CVE-2016-43434"
+                        ]
+                    }
+                }
+            },
+            "AID_4123529": {
+                "properties": {
+                    "name": "PC-C",
+                    "owner": "UID_2332",
+                    "type": [
+                        "Computer",
+                        "Personal"
+                    ],
+                    "Date Created": "2024-02-14 23:00:00",
+                    "Date Update": "2024-02-14 23:00:30",
+                    "Criticality": 2
+                },
+                "plugins": {
+                    "Network Scaner": {
+                        "ipv4addr": "192.168.1.1",
+                        "ipv6addr": "10:25:96:12:34:56",
+                        "status": "up",
+                        "subnet": "192.168.1.0/24"
+                    },
+                    "Mac Scaner": {
+                        "Mac Address": "1D9:4C3:53f:Af5"
+                    },
+                    "OS Scaner": {
+                        "OS": "Windows",
+                        "Version": 11.4,
+                        "Version Release Date": "01 Jan 2024"
+                    },
+                    "CVE Scaner": {
+                        "Vulnerability Score": 2,
+                        "CVE List": [
+                            "CVE-2016-12434",
+                            "CVE-2016-43434"
+                        ]
+                    }
+                }
+            },
+            "AID_4123520": {
+                "properties": {
+                    "name": "Cluster X",
+                    "owner": "UID_2332",
+                    "type": [
+                        "Cluster",
+                        "K9S"
+                    ],
+                    "Date Created": "2024-02-14 23:00:00",
+                    "Date Update": "2024-02-14 23:00:30",
+                    "Criticality": 2
+                },
+                "plugins": {
+                    "Network Scaner": {
+                        "ipv4addr": "192.168.1.1",
+                        "ipv6addr": "10:25:96:12:34:56",
+                        "status": "up",
+                        "subnet": "192.168.1.0/24"
+                    },
+                    "Mac Scaner": {
+                        "Mac Address": "1D9:4C3:53f:Af5"
+                    },
+                    "OS Scaner": {
+                        "OS": "Windows",
+                        "Version": 11.4,
+                        "Version Release Date": "01 Jan 2024"
+                    },
+                    "CVE Scaner": {
+                        "Vulnerability Score": 2,
+                        "CVE List": [
+                            "CVE-2016-12434",
+                            "CVE-2016-43434"
+                        ]
+                    }
+                }
+            },
+            "AID_4123535": {
+                "properties": {
+                    "name": "Webb App A",
+                    "owner": "UID_2332",
+                    "type": [
+                        "Application",
+                        "Web"
+                    ],
+                    "Date Created": "2024-02-14 23:00:00",
+                    "Date Update": "2024-02-14 23:00:30",
+                    "Criticality": 2
+                },
+                "plugins": {
+                    "Network Scaner": {
+                        "ipv4addr": "192.168.1.1",
+                        "ipv6addr": "10:25:96:12:34:56",
+                        "status": "up",
+                        "subnet": "192.168.1.0/24"
+                    },
+                    "Mac Scaner": {
+                        "Mac Address": "1D9:4C3:53f:Af5"
+                    },
+                    "OS Scaner": {
+                        "OS": "Windows",
+                        "Version": 11.4,
+                        "Version Release Date": "01 Jan 2024"
+                    },
+                    "CVE Scaner": {
+                        "Vulnerability Score": 2,
+                        "CVE List": [
+                            "CVE-2016-12434",
+                            "CVE-2016-43434"
+                        ]
+                    }
+                }
+            },
+            "AID_4122535": {
+                "properties": {
+                    "name": "Webb App B",
+                    "owner": "UID_2332",
+                    "type": [
+                        "Application",
+                        "Web"
+                    ],
+                    "Date Created": "2024-02-14 23:00:00",
+                    "Date Update": "2024-02-14 23:00:30",
+                    "Criticality": 2
+                },
+                "plugins": {
+                    "Network Scaner": {
+                        "ipv4addr": "192.168.1.1",
+                        "ipv6addr": "10:25:96:12:34:56",
+                        "status": "up",
+                        "subnet": "192.168.1.0/24"
+                    },
+                    "Mac Scaner": {
+                        "Mac Address": "1D9:4C3:53f:Af5"
+                    },
+                    "OS Scaner": {
+                        "OS": "Windows",
+                        "Version": 11.4,
+                        "Version Release Date": "01 Jan 2024"
+                    },
+                    "CVE Scaner": {
+                        "Vulnerability Score": 2,
+                        "CVE List": [
+                            "CVE-2016-12434",
+                            "CVE-2016-43434"
+                        ]
+                    }
+                }
+            }
+        },
+        "relations": {
+            "RID_2613785": {
+                "from": "ID_4123521",
+                "to": "ID_4123573",
+                "direction": "uni",
+                "owner": "UID_2332",
+                "dateCreated": "2024-02-14 23:35:53"
+            },
+            "RID_6492733": {
+                "from": "ID_4123573",
+                "to": "ID_4123523",
+                "direction": "bi",
+                "owner": "UID_6372",
+                "dateCreated": "2024-01-22 07:32:32"
+            },
+            "RID_6492732": {
+                "from": "ID_4123573",
+                "to": "ID_4123525",
+                "direction": "bi",
+                "owner": "UID_6372",
+                "dateCreated": "2024-01-22 07:32:32"
+            },
+            "RID_6492832": {
+                "from": "ID_4123573",
+                "to": "ID_4123529",
+                "direction": "bi",
+                "owner": "UID_6372",
+                "dateCreated": "2024-01-22 07:32:32"
+            },
+            "RID_2613789": {
+                "from": "ID_4123521",
+                "to": "ID_4123520",
+                "direction": "uni",
+                "owner": "UID_2332",
+                "dateCreated": "2024-02-14 23:35:53"
+            },
+            "RID_2613780": {
+                "from": "ID_4123520",
+                "to": "ID_4123535",
+                "direction": "uni",
+                "owner": "UID_2332",
+                "dateCreated": "2024-02-14 23:35:53"
+            },
+            "RID_2613781": {
+                "from": "ID_4123520",
+                "to": "ID_4122535",
+                "direction": "uni",
+                "owner": "UID_2332",
+                "dateCreated": "2024-02-14 23:35:53"
+            }
+        },
+        "pluginList": [
+            "netscan"
+        ]
+    }
+}

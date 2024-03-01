@@ -8,7 +8,7 @@ describe('Navbar tests', () => {
       cy.contains('Dashboard').click()
     })
     it('can verify correct url', () => {
-      cy.url().should('eq', Cypress.env('baseUrl'))
+      cy.url().should('eq', Cypress.env('baseUrl') + "/")
     })
   })
 
@@ -17,7 +17,7 @@ describe('Navbar tests', () => {
       cy.contains('Tools').click()
     })
     it('can verify correct url', () => {
-      cy.url().should('eq', `${Cypress.env('baseUrl')}tools`)
+      cy.url().should('eq', `${Cypress.env('baseUrl')}/tools`)
     })
   })
 
@@ -26,7 +26,7 @@ describe('Navbar tests', () => {
       cy.contains('Settings').click()
     })
     it('can verify correct url', () => {
-      cy.url().should('eq', `${Cypress.env('baseUrl')}settings`)
+      cy.url().should('eq', `${Cypress.env('baseUrl')}/settings`)
     })
   })
 
@@ -35,7 +35,7 @@ describe('Navbar tests', () => {
       cy.contains('Profile').click()
     })
     it('can verify correct url', () => {
-      cy.url().should('eq', `${Cypress.env('baseUrl')}profile`)
+      cy.url().should('eq', `${Cypress.env('baseUrl')}/profile`)
     })
   })
 
@@ -44,7 +44,7 @@ describe('Navbar tests', () => {
       cy.contains('Sign in').click()
     })
     it('can verify correct url', () => {
-      cy.url().should('eq', `${Cypress.env('baseUrl')}signin`)
+      cy.url().should('eq', `${Cypress.env('baseUrl')}/signin`)
     })
   })
 })

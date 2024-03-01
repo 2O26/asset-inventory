@@ -6,6 +6,7 @@ import { PiSignInBold, PiSignOutBold, PiShareNetwork } from "react-icons/pi";
 import { CiBoxList, CiBarcode } from "react-icons/ci";
 import { CgDarkMode } from "react-icons/cg";
 import { SiElastic } from "react-icons/si";
+import { GrGraphQl } from "react-icons/gr";
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
 
@@ -75,3 +76,9 @@ export const LogsIcon = ({ size = 30 }) => {
         <SiElastic size={size} />
     );
 };
+
+export const GraphIcon = ({ size = 30 }) => {
+    return (
+        <GrGraphQl size={size} />
+    )
+}
