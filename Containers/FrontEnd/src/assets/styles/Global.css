@@ -1,0 +1,19 @@
+.errorMessage,
+.successMessage {
+    text-align: center;
+    color: rgb(0, 0, 0);
+    width: fit-content;
+    max-width: 14rem;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    margin: auto;
+    margin-top: 0.5rem;
+}
+
+.errorMessage {
+    background-color: rgb(255, 120, 120);
+}
+
+.successMessage {
+    background-color: #2FDD92;
+}

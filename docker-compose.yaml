@@ -73,7 +73,7 @@ services:
       - "24224:24224"
       - "24224:24224/udp"
     healthcheck:
-      test: ["CMD", "netstat", "-tuln", "|", "grep", "24224"]
+      test: [ "CMD", "netstat", "-tuln", "|", "grep", "24224" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -88,11 +88,15 @@ services:
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-settings.html
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html
   elasticsearch:
-    image: elasticsearch 
+    image: elasticsearch
     ports:
       - "9200:9200"
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -100,7 +104,6 @@ services:
       resources:
         limits:
           memory: 3G
-    
     #### 
     # TODO: Ticket I032, Replace later with proper key managment. 
     #   - Use environmental variable for access keys and passwords
@@ -113,10 +116,14 @@ services:
     ports:
       - "5601:5601"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:5601/api/status || exit 1"
+        ]
       interval: 30s
       timeout: 10s
-      retries: 5  
+      retries: 5
     #### 
     # TODO: Ticket I032, Replace later with proper key managment. 
     #   - Use environmental variable for access keys and passwords
@@ -127,9 +134,9 @@ services:
 
 
 
-  ######################################################
-  ###     Test Environment (nginx, postgres, nmap)   ###
-  ######################################################
+    ######################################################
+    ###     Test Environment (nginx, postgres, nmap)   ###
+    ######################################################
   webserver:
     image: nginx
     ports:
@@ -153,10 +160,11 @@ services:
       - ./scan_results:/scan_results
     networks:
       - test_network
-      
+
 volumes:
   dbstorage:
   dbconfig:
+
 
 networks:
   test_network:

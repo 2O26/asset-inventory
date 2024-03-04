@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.80 scan initiated Fri Mar  1 11:28:35 2024 as: nmap -sV -oX /scan_results/output_postgres_nmap.xml -p 80 postgres -->
+<nmaprun scanner="nmap" args="nmap -sV -oX /scan_results/output_postgres_nmap.xml -p 80 postgres" start="1709292515" startstr="Fri Mar  1 11:28:35 2024" version="7.80" xmloutputversion="1.04">
+<scaninfo type="connect" protocol="tcp" numservices="1" services="80"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1709292516" endtime="1709292516"><status state="up" reason="conn-refused" reason_ttl="0"/>
+<address addr="172.25.0.2" addrtype="ipv4"/>
+<hostnames>
+<hostname name="postgres" type="user"/>
+<hostname name="asset-inventory_postgres_1.asset-inventory_test_network" type="PTR"/>
+</hostnames>
+<ports><port protocol="tcp" portid="80"><state state="closed" reason="conn-refused" reason_ttl="0"/><service name="http" method="table" conf="3"/></port>
+</ports>
+<times srtt="775" rttvar="3946" to="100000"/>
+</host>
+<runstats><finished time="1709292516" timestr="Fri Mar  1 11:28:36 2024" elapsed="0.46" summary="Nmap done at Fri Mar  1 11:28:36 2024; 1 IP address (1 host up) scanned in 0.46 seconds" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

@@ -1,8 +1,8 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Tools.css'
-import { AssetListIcon, IpScannerIcon, MacScannerIcon, LogsIcon } from '../common/Icons/Icons';
-import {RedirectToLogServer} from './ViewLogs/ViewLogs.jsx';
+import { AssetListIcon, IpScannerIcon, MacScannerIcon, LogsIcon, GraphIcon } from '../common/Icons/Icons';
+import { RedirectToLogServer } from './ViewLogs/ViewLogs.jsx';
 
 export default function Tools() {
 
@@ -26,7 +26,10 @@ export default function Tools() {
                 <LogsIcon size={60} />
                 <div> View Logs</div>
             </button>
-        
+            <button className='button-tool' onClick={() => navigate("/tools/graph-view")}>
+                <GraphIcon size={60} />
+                <div> Graph View</div>
+            </button>
         </div>
     );
 }

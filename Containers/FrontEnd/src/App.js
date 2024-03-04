@@ -9,8 +9,11 @@ import Profile from './components/Profile/Profile';
 import SignIn from './components/SignIn/SignIn';
 import AssetList from './components/Tools/AssetList/AssetList';
 import './assets/styles/colors.css';
+import './assets/styles/Global.css';
 import { useState } from 'react';
 import AssetView from './components/AssetView/AssetView';
+import GraphView from './components/Tools/GraphView/GraphView';
+
 
 document.body.classList.add('dark');
 
@@ -42,8 +45,9 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/tools" element={<Tools />} />
-        <Route path="/asset-view" element={<AssetView />} />
+        <Route path="/asset-view/:assetID" element={<AssetView />} />
         <Route path="/tools/asset-list" element={<AssetList />} />
+        <Route path="/tools/graph-view" element={<GraphView />} />
         {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
       </Routes>
     </BrowserRouter>

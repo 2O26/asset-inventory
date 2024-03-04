@@ -12,11 +12,11 @@ export const AssetHandlerStatus = async () => {
 };
 
 export const GetLatestStatus = async () => {
-    
+
 }
 
 export const EditLatestStatus = async () => {
-    
+
 }
 
 export const LogIn = async (userData) => {
@@ -28,5 +28,14 @@ export const LogIn = async (userData) => {
     });
 
     return response; // No need to call .json() on a plain object
+};
+
+export const GetState = async () => {
+    const response = await fetch('http://localhost:8080/getLatestState');
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok, could not fetch state');
+    }
+    return response.json();
 };
 
