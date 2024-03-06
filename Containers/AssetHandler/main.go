@@ -1,7 +1,9 @@
 package main
 
 import (
+	"assetinventory/assethandler/dbcon"
 	"assetinventory/assethandler/jsonhandler"
+
 	"encoding/json"
 	"fmt"
 	"log"
@@ -153,4 +155,31 @@ func main() {
 
 	router.Run(":8080")
 
+	err := dbcon.SetupDatabase("mongodb://asset-inventory-dbstorage-1:27017/", "scan")
+	if err != nil {
+		log.Fatalf("Could not set up database: %v", err)
+	}
+
+	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
+	assetsHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("assets")}
+	router.POST("/AddScan", func(c *gin.Context) {
+		dbcon.AddScan(scansHelper, c) // Anropa AddScan med dbHelper och Gin context
+	})
+	router.GET("/GetLatestScan", func(c *gin.Context) {
+		dbcon.GetLatestScan(scansHelper, c) // Anropar funktionen med den riktiga databasen
+	})
+
+	router.GET("/PrintAllDocuments", func(c *gin.Context) {
+		dbcon.PrintAllDocuments(assetsHelper, c) // Antag att `assetsHelper` är din `MongoDBHelper` instans
+		dbcon.PrintAllDocuments(scansHelper, c)
+	})
+
+	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
+		dbcon.DeleteAllDocuments(assetsHelper, c)
+	})
+
+	log.Println("Server starting on port 8080...")
+	if err := router.Run(":8080"); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
