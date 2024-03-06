@@ -1,28 +1,39 @@
-all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypress
+.PHONY: all assInvFront assetHandler networkScan fluentd elasticsearch kibana frontendDev dev run down clean cypress-test environment-test frontend-dev
+
+all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypress frontendDev
 
 assInvFront:
-	cd ./Containers/FrontEnd && docker build -t assinvfront .
+	docker build -t assinvfront ./Containers/FrontEnd
+
+frontendDev:
+	cd ./Containers/FrontEnd/ && docker build --file DockerfileDev -t frontenddev .
 
 assetHandler:
-	cd ./Containers/AssetHandler && docker build -t assethandler .
+	docker build -t assethandler ./Containers/AssetHandler
 
 networkScan:
-	cd ./Containers/NetworkScan && docker build -t networkscan .
+	docker build -t networkscan ./Containers/NetworkScan
 
 fluentd:
-	cd ./Containers/fluentd && docker build -t fluentd .
+	docker build -t fluentd ./Containers/fluentd
 
 elasticsearch:
-	cd ./Containers/elasticsearch && docker build -t elasticsearch .
+	docker build -t elasticsearch ./Containers/elasticsearch
 
 kibana:
-	cd ./Containers/kibana && docker build -t kibana .
+	docker build -t kibana ./Containers/kibana
+
+dev:
+	docker compose -f dev-docker-compose.yaml --compatibility up -d
+	open http://localhost:3000/
 
 run:
-	docker compose -f docker-compose.yaml --compatibility up -d && open http://localhost:80/
+	docker compose -f docker-compose.yaml up -d
+	open http://localhost:80/
 
 down:
 	docker compose -f docker-compose.yaml down
+	docker compose -f dev-docker-compose.yaml down
 
 clean:
 	docker rmi --force assinvfront assethandler networkscan fluentd elasticsearch kibana
@@ -30,8 +41,5 @@ clean:
 cypress-test:
 	cd CyprestTests/cypress && npm run cy:run
 
-enviroment-test:
+environment-test:
 	curl localhost:89
-
-nmap-test:
-	docker compose up nmap_scanner

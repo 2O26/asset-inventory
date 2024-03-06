@@ -13,7 +13,7 @@ import './assets/styles/Global.css';
 import { useState } from 'react';
 import AssetView from './components/AssetView/AssetView';
 import GraphView from './components/Tools/GraphView/GraphView';
-
+import NetworkScan from './components/Tools/NetworkScan/NetworkScan';
 
 document.body.classList.add('dark');
 
@@ -48,6 +48,7 @@ function App() {
         <Route path="/asset-view/:assetID" element={<AssetView />} />
         <Route path="/tools/asset-list" element={<AssetList />} />
         <Route path="/tools/graph-view" element={<GraphView />} />
+        <Route path="/tools/network-scan" element={<NetworkScan />} />
         {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
       </Routes>
     </BrowserRouter>
