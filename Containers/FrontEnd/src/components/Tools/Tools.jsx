@@ -14,14 +14,14 @@ export default function Tools() {
                 <AssetListIcon size={60} />
                 <div> Asset List</div>
             </button>
-            <button className='button-tool' onClick={() => navigate("/tools")}>
+            <button className='button-tool' onClick={() => navigate("/tools/network-scan")}>
                 <IpScannerIcon size={55} />
-                <div> IP Scanner</div>
+                <div> Network Scanner</div>
             </button>
-            <button className='button-tool' onClick={() => navigate("/tools")}>
+            {/* <button className='button-tool' onClick={() => navigate("/tools")}>
                 <MacScannerIcon size={65} />
                 <div> Mac Scanner</div>
-            </button>
+            </button> */}
             <button className='button-tool' onClick={() => RedirectToLogServer()}>
                 <LogsIcon size={60} />
                 <div> View Logs</div>

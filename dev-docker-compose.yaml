@@ -1,0 +1,58 @@
+version: "3.8"
+services:
+  frontenddev:
+    image: frontenddev
+    ports:
+      - 3000:3000
+    volumes:
+      - ./Containers/FrontEnd/src:/app/src
+
+  assethandler:
+    image: assethandler
+    ports:
+      - "8080:8080"
+
+  networkscan:
+    image: networkscan
+    ports:
+      - "8081:8081"
+
+  dbstorage:
+    image: mongo
+    restart: always
+    command: --quiet --syslog
+    ports:
+      - "27017:27017"
+    expose:
+      - "27017"
+    volumes:
+      - dbstorage:/data/db
+      - dbconfig:/data/configdb
+
+  ######################################################
+  ###     Test Environment (nginx, postgres, nmap)   ###
+  ######################################################
+  webserver:
+    image: nginx
+    ports:
+      - "89:80"
+    networks:
+      - test_network
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+    networks:
+      - test_network
+
+volumes:
+  dbstorage:
+  dbconfig:
+
+
+networks:
+  test_network:
+    driver: bridge
