@@ -100,6 +100,45 @@ git pull
      git push origin <branch-name>
      ```
 
+## Rebase Branches
+Before creating a merge request, a rebase on develop should be performed to avoid merge conflicts.
+
+### Ensure The Develop Branch is Up to Date
+Before rebasing, ensure the develop branch is up to date.
+
+```bash
+# Switch to develop
+git switch develop
+
+# Pull latest from develop
+git pull origin develop
+```
+### Switch and Rebase
+
+Switch back to the branch which you intend to rebase.
+
+```bash
+git switch <branch-name>
+
+# Start rebase process
+git rebase develop
+```
+### Handle conflicts
+During the rebase, you might encounter conflicts. Git will pause the rebase and allow you to resolve these conflicts manually.
+
+```bash
+# After resolving a conflict in a file, add it to the staging area
+git add <filename>
+
+# Continue rebase process
+git rebase --continue
+```
+### Push the rebase
+Finally push the rebased repository to the remote repository.
+
+```bash
+git push origin <branch-name>
+```
 
 ## Merging Branches
 
