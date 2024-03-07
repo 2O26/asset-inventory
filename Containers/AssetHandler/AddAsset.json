@@ -1,0 +1,13 @@
+{
+    "name": "Server X200",
+    "owner": "IT Department",
+    "type": [
+        "Hardware",
+        "Server",
+        "Rack Mounted"
+    ],
+    "dateCreated": "",
+    "dateUpdated": "",
+    "criticality": 5,
+    "hostname": "server-x200.example.com"
+}

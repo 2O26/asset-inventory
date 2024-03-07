@@ -20,6 +20,8 @@ type DatabaseHelper interface {
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
 	Find(ctx context.Context, filter interface{}) ([]bson.M, error)
 	DeleteMany(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error)
+	UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error)
+	DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error)
 }
 
 func (m *MongoDBHelper) InsertOne(ctx context.Context, document interface{}) (*mongo.InsertOneResult, error) {
@@ -30,6 +32,16 @@ func (m *MongoDBHelper) FindOne(ctx context.Context, filter interface{}, opts ..
 }
 func (m *MongoDBHelper) DeleteMany(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
 	return m.Collection.DeleteMany(ctx, filter)
+}
+
+// Implementing the UpdateOne method for MongoDBHelper
+func (m *MongoDBHelper) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error) {
+	return m.Collection.UpdateOne(ctx, filter, update)
+}
+
+// Implementing the DeleteOne method for MongoDBHelper
+func (m *MongoDBHelper) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
+	return m.Collection.DeleteOne(ctx, filter)
 }
 func (m *MongoDBHelper) Find(ctx context.Context, filter interface{}) ([]bson.M, error) {
 	var results []bson.M
@@ -67,6 +79,16 @@ func (m *MockDB) DeleteMany(ctx context.Context, filter interface{}) (*mongo.Del
 func (m *MockDB) InsertOne(ctx context.Context, document interface{}) (*mongo.InsertOneResult, error) {
 	args := m.Called(ctx, document)
 	return args.Get(0).(*mongo.InsertOneResult), args.Error(1)
+}
+func (m *MockDB) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error) {
+	args := m.Called(ctx, filter, update)
+	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
+}
+
+// Add mock implementation for DeleteOne
+func (m *MockDB) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
+	args := m.Called(ctx, filter)
+	return args.Get(0).(*mongo.DeleteResult), args.Error(1)
 }
 
 func (mdh *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {

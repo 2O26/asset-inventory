@@ -1,0 +1,14 @@
+{
+    "ID": "65e9d9426765de1c93176cae",
+    "name": "Server X20000",
+    "owner": "IT Department",
+    "type": [
+        "Hardware",
+        "Server",
+        "Rack Mounted"
+    ],
+    "dateCreated": "2024-03-07 10:00:00",
+    "dateUpdated": "2024-03-07 10:00:00",
+    "criticality": 10,
+    "hostname": "server-x20000.example.com"
+}
