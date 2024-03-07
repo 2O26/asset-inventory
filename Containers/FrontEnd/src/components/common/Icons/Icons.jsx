@@ -7,6 +7,7 @@ import { CiBoxList, CiBarcode } from "react-icons/ci";
 import { CgDarkMode } from "react-icons/cg";
 import { SiElastic } from "react-icons/si";
 import { GrGraphQl } from "react-icons/gr";
+import { FaInfoCircle } from "react-icons/fa";
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
 
@@ -80,5 +81,11 @@ export const LogsIcon = ({ size = 30 }) => {
 export const GraphIcon = ({ size = 30 }) => {
     return (
         <GrGraphQl size={size} />
+    )
+}
+
+export const InfoIcon = ({ size = 30 }) => {
+    return (
+        <FaInfoCircle size={size} />
     )
 }

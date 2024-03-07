@@ -7,17 +7,19 @@ To create all docker images required to run the cluster, run:
 make all
 ```
 
-# Start cluster 
+# Start cluster
+To run the application with the log-server:
 ```
-docker compose -f docker-compose.yaml up
+make run
+```
+
+To run the application without the log-server, and in Frontend in bind mount mode:
+```
+make dev
 ```
 
 # Shutdown cluster
-Find the directory in which the docker-compose file is located, and run 
+
 ```
-docker compose -f docker-compose.yaml down
-```
-or
-```
-CTRL-C
+make down
 ```

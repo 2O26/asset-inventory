@@ -11,14 +11,6 @@ export const AssetHandlerStatus = async () => {
     return response.json();
 };
 
-export const GetLatestStatus = async () => {
-
-}
-
-export const EditLatestStatus = async () => {
-
-}
-
 export const LogIn = async (userData) => {
     console.log("Email: ", userData.email, ", Password: ", userData.password);
 
@@ -39,3 +31,10 @@ export const GetState = async () => {
     return response.json();
 };
 
+export const EditLatestStatus = async () => {
+
+}
+
+export const startNetScan = async () => {
+    const response = await fetch('http://localhost:8081/startScan');
+}
