@@ -41,6 +41,33 @@
 
     --hr-color-1: rgba(228, 228, 228, 0);
     --hr-color-2: rgba(228, 228, 228, 0.75);
+
+    --graph-bg: rgb(26, 26, 26);
+}
+
+:root .dark {
+    --main-color: #222222;
+    --secondary-color: #2ecc71;
+    --accent-color: #9b59b6;
+
+    --text-color: #d9d7d7;
+    --text-hover: #2a8af6;
+
+    --logo-color: #2a8af6;
+
+    --background-color: #1c1c1c;
+
+    --button-color: #2a8af6;
+    --button-text: #000000;
+    --button-text-hover: white;
+    --button-hover: #2a8af6;
+    --button-active: #5c5c5c;
+    --button-shadow: #0000007e;
+
+    --hr-color-1: rgba(228, 228, 228, 0);
+    --hr-color-2: rgba(228, 228, 228, 0.75);
+
+    --graph-bg: rgb(26, 26, 26);
 }
 
 /* Blue Light Theme */
@@ -65,4 +92,6 @@
 
     --hr-color-1: rgba(0, 0, 0, 0);
     --hr-color-2: rgba(0, 0, 0, 0.75);
+
+    --graph-bg: rgb(222, 222, 222);
 }

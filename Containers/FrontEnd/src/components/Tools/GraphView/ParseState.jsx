@@ -6,12 +6,14 @@ export function ParseState(jsonData) {
         const asset = jsonData.state.assets[assetId];
         const nodeId = assetId;
         const nodeName = asset.properties.name;
-        // const nodeType = asset.properties.type[0]
+        const nodeType = asset.properties.type[0]
+        const nodeStatus = asset.properties.status
         nodes.push({
             id: nodeId,
-            // data: { label: nodeName, type: nodeType },
-            data: { label: nodeName },
-            position: { x: 0, y: 0 } // Assuming initial position
+            data: { label: nodeName, type: nodeType, status: nodeStatus },
+            // data: { label: nodeName },
+            position: { x: 0, y: 0 }, // Assuming initial position
+            type: 'turbo'
         });
     }
 
@@ -28,7 +30,6 @@ export function ParseState(jsonData) {
             target: targetNode,
             type: 'smoothstep',
             animated: directional,
-            style: { stroke: 'var(--text-color)' }
         });
     }
 
