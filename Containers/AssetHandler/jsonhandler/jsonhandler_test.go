@@ -12,24 +12,25 @@ func TestBackToFrontNoPlugin(t *testing.T) {
 		"mostRecentUpdate": "2024-02-14 23:35:53",
 		"assets": {
 			"AID_4123523": {
-				"name": "PC-A",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-14 23:00:00",
-				"dateUpdated": "2024-02-14 23:00:30",
-				"criticality": 2        
+				"Name": "PC-A",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-14 23:00:00",
+				"Updated at": "2024-02-14 23:00:30",
+				"Criticality": 2,
+				"Hostname": "PC-A"
 			},
 			"AID_5784393": {
-				"name": "Chromecast",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-10 20:04:20",
-				"dateUpdated": "2024-02-14 23:00:30",
+				"Name": "Chromecast",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-10 20:04:20",
+				"Updated at": "2024-02-14 23:00:30",
 				"criticality": 1
 			},
 			"AID_9823482": {
-				"name": "Password Vault",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-14 23:00:00",
-				"dateUpdated": "2024-02-14 23:00:30",
+				"Name": "Password Vault",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-14 23:00:00",
+				"Updated at": "2024-02-14 23:00:30",
 				"criticality": 4
 			}
 		},
@@ -65,30 +66,30 @@ func TestBackToFrontNoPlugin(t *testing.T) {
 		"assets": {
 			"AID_4123523": {
 				"properties": {
-					"name": "PC-A",
-					"owner": "UID_2332",
-					"dateCreated": "2024-02-14 23:00:00",
-					"dateUpdated": "2024-02-14 23:00:30",
+					"Name": "PC-A",
+					"Owner": "UID_2332",
+					"Created at": "2024-02-14 23:00:00",
+					"Updated at": "2024-02-14 23:00:30",
 					"criticality": 2
 				},
 				"plugins": {}
 			},
 			"AID_5784393": {
 				"properties": {
-					"name": "Chromecast",
-					"owner": "UID_2332",
-					"dateCreated": "2024-02-10 20:04:20",
-					"dateUpdated": "2024-02-14 23:00:30",
+					"Name": "Chromecast",
+					"Owner": "UID_2332",
+					"Created at": "2024-02-10 20:04:20",
+					"Updated at": "2024-02-14 23:00:30",
 					"criticality": 1
 				},
 				"plugins": {}
 			},
 			"AID_9823482": {
 				"properties": {
-					"name": "Password Vault",
-					"owner": "UID_2332",
-					"dateCreated": "2024-02-14 23:00:00",
-					"dateUpdated": "2024-02-14 23:00:30",
+					"Name": "Password Vault",
+					"Owner": "UID_2332",
+					"Created at": "2024-02-14 23:00:00",
+					"Updated at": "2024-02-14 23:00:30",
 					"criticality": 4
 				},
 				"plugins": {}
@@ -125,24 +126,24 @@ func TestBackToFrontBadPlugin(t *testing.T) {
 		"mostRecentUpdate": "2024-02-14 23:35:53",
 		"assets": {
 			"AID_4123523": {
-				"name": "PC-A",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-14 23:00:00",
-				"dateUpdated": "2024-02-14 23:00:30",
+				"Name": "PC-A",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-14 23:00:00",
+				"Updated at": "2024-02-14 23:00:30",
 				"criticality": 2        
 			},
 			"AID_5784393": {
-				"name": "Chromecast",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-10 20:04:20",
-				"dateUpdated": "2024-02-14 23:00:30",
+				"Name": "Chromecast",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-10 20:04:20",
+				"Updated at": "2024-02-14 23:00:30",
 				"criticality": 1
 			},
 			"AID_9823482": {
-				"name": "Password Vault",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-14 23:00:00",
-				"dateUpdated": "2024-02-14 23:00:30",
+				"Name": "Password Vault",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-14 23:00:00",
+				"Updated at": "2024-02-14 23:00:30",
 				"criticality": 4
 			}
 		},
@@ -176,9 +177,9 @@ func TestBackToFrontBadPlugin(t *testing.T) {
 	plugin := make(map[string]json.RawMessage)
 	plugin["netscan"] = json.RawMessage(`{
 		"sateID": "20240214-1300A",
-		"dateCrated": "2024-02-14 23:00:00"
-		"dateUdated": "2024-02-14 23:00:30",
-		"stae": {
+		"dateCreated": "2024-02-14 23:00:00"
+		"dateUpdated": "2024-02-14 23:00:30",
+		"state": {
 			"AID_412523": {
 				"status": "up",
 				"ipv4add": "192.168.1.1"
@@ -207,24 +208,24 @@ func TestBackToFrontValidData(t *testing.T) {
 		"mostRecentUpdate": "2024-02-14 23:35:53",
 		"assets": {
 			"AID_4123523": {
-				"name": "PC-A",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-14 23:00:00",
-				"dateUpdated": "2024-02-14 23:00:30",
+				"Name": "PC-A",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-14 23:00:00",
+				"Updated at": "2024-02-14 23:00:30",
 				"criticality": 2        
 			},
 			"AID_5784393": {
-				"name": "Chromecast",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-10 20:04:20",
-				"dateUpdated": "2024-02-14 23:00:30",
+				"Name": "Chromecast",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-10 20:04:20",
+				"Updated at": "2024-02-14 23:00:30",
 				"criticality": 1
 			},
 			"AID_9823482": {
-				"name": "Password Vault",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-14 23:00:00",
-				"dateUpdated": "2024-02-14 23:00:30",
+				"Name": "Password Vault",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-14 23:00:00",
+				"Updated at": "2024-02-14 23:00:30",
 				"criticality": 4
 			}
 		},
@@ -288,10 +289,10 @@ func TestBackToFrontValidData(t *testing.T) {
 				},
 				"properties": {
 					"criticality": 2,
-					"dateCreated": "2024-02-14 23:00:00",
-					"dateUpdated": "2024-02-14 23:00:30",
-					"name": "PC-A",
-					"owner": "UID_2332"
+					"Created at": "2024-02-14 23:00:00",
+					"Updated at": "2024-02-14 23:00:30",
+					"Name": "PC-A",
+					"Owner": "UID_2332"
 				}
 			},
 			"AID_5784393": {
@@ -303,10 +304,10 @@ func TestBackToFrontValidData(t *testing.T) {
 				},
 				"properties": {
 					"criticality": 1,
-					"dateCreated": "2024-02-10 20:04:20",
-					"dateUpdated": "2024-02-14 23:00:30",
-					"name": "Chromecast",
-					"owner": "UID_2332"
+					"Created at": "2024-02-10 20:04:20",
+					"Updated at": "2024-02-14 23:00:30",
+					"Name": "Chromecast",
+					"Owner": "UID_2332"
 				}
 			},
 			"AID_9823482": {
@@ -314,10 +315,10 @@ func TestBackToFrontValidData(t *testing.T) {
 				},
 				"properties": {
 					"criticality": 4,
-					"dateCreated": "2024-02-14 23:00:00",
-					"dateUpdated": "2024-02-14 23:00:30",
-					"name": "Password Vault",
-					"owner": "UID_2332"
+					"Created at": "2024-02-14 23:00:00",
+					"Updated at": "2024-02-14 23:00:30",
+					"Name": "Password Vault",
+					"Owner": "UID_2332"
 				}
 			}
 		},
@@ -330,14 +331,14 @@ func TestBackToFrontValidData(t *testing.T) {
 				"dateCreated": "2024-02-14 23:35:53",
 				"direction": "uni",
 				"from": "ID_4123523",
-				"owner": "UID_2332",
+				"Owner": "UID_2332",
 				"to": "ID_5784393"
 			},
 			"RID_6492733": {
 				"dateCreated": "2024-01-22 07:32:32",
 				"direction": "bi",
 				"from": "ID_5784393",
-				"owner": "UID_6372",
+				"Owner": "UID_6372",
 				"to": "ID_9823482"
 			}
 		}

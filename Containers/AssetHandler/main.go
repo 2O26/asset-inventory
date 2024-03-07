@@ -5,7 +5,6 @@ import (
 	"assetinventory/assethandler/jsonhandler"
 
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -71,25 +70,25 @@ func getLatestState(c *gin.Context) {
 		"mostRecentUpdate": "2024-02-14 23:35:53",
 		"assets": {
 			"AID_4123523": {
-				"name": "PC-A",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-14 23:00:00",
-				"dateUpdated": "2024-02-14 23:00:30",
-				"criticality": 2        
+				"Name": "PC-A",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-14 23:00:00",
+				"Updated at": "2024-02-14 23:00:30",
+				"Criticality": 2
 			},
 			"AID_5784393": {
-				"name": "Chromecast",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-10 20:04:20",
-				"dateUpdated": "2024-02-14 23:00:30",
-				"criticality": 1
+				"Name": "Chromecast",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-10 20:04:20",
+				"Updated at": "2024-02-14 23:00:30",
+				"Criticality": 1
 			},
 			"AID_9823482": {
-				"name": "Password Vault",
-				"owner": "UID_2332",
-				"dateCreated": "2024-02-14 23:00:00",
-				"dateUpdated": "2024-02-14 23:00:30",
-				"criticality": 4
+				"Name": "Password Vault",
+				"Owner": "UID_2332",
+				"Created at": "2024-02-14 23:00:00",
+				"Updated at": "2024-02-14 23:00:30",
+				"Criticality": 4
 			}
 		},
 		"plugins": {
@@ -102,20 +101,20 @@ func getLatestState(c *gin.Context) {
 		},
 		"relations": {
 			"RID_2613785": {
-				"from": "ID_4123523",
-				"to": "ID_5784393",
+				"from": "AID_4123523",
+				"to": "AID_5784393",
 				"direction": "uni",
 				"owner": "UID_2332",
 				"dateCreated":"2024-02-14 23:35:53"
 			},
 			"RID_6492733": {
-				"from": "ID_5784393",
-				"to": "ID_9823482",
+				"from": "AID_5784393",
+				"to": "AID_9823482",
 				"direction": "bi",
 				"owner": "UID_6372",
 				"dateCreated": "2024-01-22 07:32:32"
-			}    
-		}    
+			}
+		}
 	}
 	`
 
@@ -147,13 +146,13 @@ func main() {
 
 	router := gin.Default()
 	// Apply the CORS middleware
-	router.Use(CORSMiddleware())
+	// router.Use(CORSMiddleware())
 
-	router.GET("/getLatestState", getLatestState)
+	// router.GET("/getLatestState", getLatestState)
 
-	fmt.Println("Starting server at port 8080")
+	// fmt.Println("Starting server at port 8080")
 
-	router.Run(":8080")
+	// router.Run(":8080")
 
 	err := dbcon.SetupDatabase("mongodb://asset-inventory-dbstorage-1:27017/", "scan")
 	if err != nil {
@@ -168,7 +167,15 @@ func main() {
 	router.GET("/GetLatestScan", func(c *gin.Context) {
 		dbcon.GetLatestScan(scansHelper, c) // Anropar funktionen med den riktiga databasen
 	})
-
+	router.POST("/AddAsset", func(c *gin.Context) {
+		dbcon.AddAsset(assetsHelper, c)
+	})
+	router.POST("/UpdateAsset", func(c *gin.Context) {
+		dbcon.UpdateAsset(assetsHelper, c)
+	})
+	router.POST("/DeleteAsset", func(c *gin.Context) {
+		dbcon.DeleteAsset(assetsHelper, c)
+	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
 		dbcon.PrintAllDocuments(assetsHelper, c) // Antag att `assetsHelper` är din `MongoDBHelper` instans
 		dbcon.PrintAllDocuments(scansHelper, c)
@@ -176,6 +183,7 @@ func main() {
 
 	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
 		dbcon.DeleteAllDocuments(assetsHelper, c)
+		dbcon.DeleteAllDocuments(scansHelper, c)
 	})
 
 	log.Println("Server starting on port 8080...")

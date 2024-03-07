@@ -6,11 +6,13 @@ import (
 )
 
 type Asset struct {
-	Name        string `json:"name"`
-	Owner       string `json:"owner"`
-	DateCreated string `json:"dateCreated"`
-	DateUpdated string `json:"dateUpdated"`
-	Criticality int    `json:"criticality"`
+	Name        string   `json:"Name"`
+	Owner       string   `json:"Owner"`
+	Type        []string `json:"Type"` // array with type -> subtype -> subsubtype, etc
+	DateCreated string   `json:"Created at"`
+	DateUpdated string   `json:"Updated at"`
+	Criticality int      `json:"Criticality"`
+	Hostname    string   `json:"Hostname"`
 }
 
 type FrontAsset struct {

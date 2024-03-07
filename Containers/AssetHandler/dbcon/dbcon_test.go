@@ -28,7 +28,7 @@ func TestAddScan(t *testing.T) {
 				"owner": "UID_2332",
 				"dateCreated": "2024-02-14 23:00:00",
 				"dateUpdated": "2024-02-14 23:00:30",
-				"criticality": 2        
+				"criticality": 2
 			},
 			"AID_5784393": {
 				"name": "Chromecast",
