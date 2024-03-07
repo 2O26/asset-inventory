@@ -4,6 +4,8 @@ all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypress
 
 all-dev: assetHandler networkScan frontendDev
 
+all-dev: assetHandler networkScan frontendDev
+
 assInvFront:
 	docker build -t assinvfront ./Containers/FrontEnd
 
