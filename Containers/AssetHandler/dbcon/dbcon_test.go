@@ -14,9 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// MockDB - Mock implementering av DatabaseHelper
-
-// TestAddScan - Testfall för AddScan
+// TestAddScan - Test case for AddScan
 func TestAddScan(t *testing.T) {
 	mockDB := new(MockDB)
 	mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("Scan")).Return(&mongo.InsertOneResult{}, nil)
@@ -81,6 +79,7 @@ func TestAddScan(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+// TestGetLatestScan - Test case for GetLatestScan
 func TestGetLatestScan(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
@@ -110,4 +109,33 @@ func TestGetLatestScan(t *testing.T) {
 	}
 
 	// Additional assertions for other fields of Scan can be added here
+}
+
+// TestAddAsset - Test case for AddAsset
+func TestAddAsset(t *testing.T) {
+	mockDB := new(MockDB)
+	mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("Asset")).Return(&mongo.InsertOneResult{}, nil)
+
+	var asset = []byte(`{
+        "name": "PC-B",
+        "owner": "UID_2332",
+        "dateCreated": "2024-02-14 23:00:00",
+        "dateUpdated": "2024-02-14 23:00:30",
+        "criticality": 5
+    }`)
+
+	gin.SetMode(gin.TestMode)                                                   // Test mode to prevent logging
+	w := httptest.NewRecorder()                                                 // Response Recorder to capture HTTP response
+	c, _ := gin.CreateTestContext(w)                                            // Simulate incoming HTTP request
+	c.Request, _ = http.NewRequest("POST", "/AddAsset", bytes.NewBuffer(asset)) // Simulate POST request
+
+	AddAsset(mockDB, c) // Call AddAsset
+
+	assert.Equal(t, http.StatusOK, w.Code) // Assert OK response
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response) // Parse response
+
+	assert.NoError(t, err)                                           // Assert no error from parsing
+	assert.Equal(t, "Asset added successfully", response["message"]) // Assert response "Asset added successfully"
 }

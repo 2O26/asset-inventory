@@ -4,4 +4,5 @@ use (
 	./Containers/AssetHandler
 	./Containers/AssetHandler/jsonhandler
 	./Containers/NetworkScan
+	./Containers/AssetHandler/dbcon
 )
