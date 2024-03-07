@@ -1,4 +1,4 @@
-import { GetState } from '../../Services/ApiService'
+import { GetState } from '../../Services/ApiService.js'
 import { useQuery } from '@tanstack/react-query';
 import jsonData from './mock.json';
 import ELK from 'elkjs/lib/elk.bundled.js';
@@ -12,16 +12,16 @@ import ReactFlow, {
     Background,
     useNodesState,
     useEdgesState,
-    useReactFlow,
+    useReactFlow
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner.jsx';
 import { ParseState } from './ParseState.jsx';
 import { useNavigate } from 'react-router-dom';
+import './GraphView.css'
+import { CustomNodeComponent } from './CustomNode.jsx';
 
-// Crete Icon map here
-const typeMap = { "Server": "se", "Switch": "sv", "Computer": "COMP", "Cluster": "CLU", "Application": "App" }
 
 const elk = new ELK();
 
@@ -60,7 +60,7 @@ const getLayoutedElements = (nodes, edges, options = {}) => {
         .then((layoutedGraph) => ({
             nodes: layoutedGraph.children.map((node) => ({
                 ...node,
-                position: { x: node.x, y: node.y },
+                position: { x: node.x, y: node.y }
             })),
 
             edges: layoutedGraph.edges,
@@ -68,7 +68,13 @@ const getLayoutedElements = (nodes, edges, options = {}) => {
         .catch(console.error);
 };
 
+const nodeTypes = {
+    turbo: CustomNodeComponent
+};
 
+const defaultEdgeOptions = {
+    markerEnd: 'edge-circle',
+};
 
 function LayoutFlow({ initialNodes, initialEdges }) {
     const navigate = useNavigate()
@@ -100,7 +106,7 @@ function LayoutFlow({ initialNodes, initialEdges }) {
 
     // Calculate the initial layout on mount.
     useLayoutEffect(() => {
-        onLayout({ direction: 'DOWN', useInitialNodes: true });
+        onLayout({ direction: 'RIGHT', useInitialNodes: true });
     }, []);
 
     return (
@@ -112,6 +118,9 @@ function LayoutFlow({ initialNodes, initialEdges }) {
             onEdgesChange={onEdgesChange}
             fitView
             onNodeClick={onNodeClick}
+            nodeTypes={nodeTypes}
+            // edgeTypes={edgeTypes}
+            defaultEdgeOptions={defaultEdgeOptions}
         >
             <Controls />
             <MiniMap />
@@ -121,22 +130,44 @@ function LayoutFlow({ initialNodes, initialEdges }) {
 
                 <button onClick={() => onLayout({ direction: 'RIGHT' })}>horizontal layout</button>
             </Panel>
+            <svg>
+                <defs>
+                    <linearGradient id="edge-gradient">
+                        <stop offset="0%" stopColor="#a8c7ea" />
+                        {/* <stop offset="0%" stopColor="#ae53ba" /> */}
+                        <stop offset="100%" stopColor="#2a8af6" />
+                    </linearGradient>
+
+                    <marker
+                        id="edge-circle"
+                        viewBox="-5 -5 10 10"
+                        refX="0"
+                        refY="0"
+                        markerUnits="strokeWidth"
+                        markerWidth="10"
+                        markerHeight="10"
+                        orient="auto"
+                    >
+                        <circle stroke="#2a8af6" fill='var(--main-color)' strokeOpacity="0.75" r="2" cx="0" cy="0" />
+                    </marker>
+                </defs>
+            </svg>
         </ReactFlow>
     );
 }
 
 export default function GraphView() {
-    const { data, isLoading, isError, error } = useQuery({
-        queryKey: ['getState'],
-        queryFn: GetState,
-        enabled: true
-    });
+    // const { data, isLoading, isError, error } = useQuery({
+    //     queryKey: ['getState'],
+    //     queryFn: GetState,
+    //     enabled: true
+    // });
 
-    if (isLoading) return <LoadingSpinner />;
-    if (isError) return <div className='errorMessage'>{error.message}</div>;
+    // if (isLoading) return <LoadingSpinner />;
+    // if (isError) return <div className='errorMessage'>{error.message}</div>;
 
-    const parsedState = ParseState(data);
-    // const parsedState = ParseState(jsonData);
+    // const parsedState = ParseState(data);
+    const parsedState = ParseState(jsonData);
 
     return (
         <div style={{ width: '100vw', height: '90vh' }}>

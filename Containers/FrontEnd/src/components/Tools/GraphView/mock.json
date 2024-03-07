@@ -13,7 +13,8 @@
                     ],
                     "Date Created": "2024-02-14 23:00:00",
                     "Date Update": "2024-02-14 23:00:30",
-                    "Criticality": 2
+                    "Criticality": 2,
+                    "status": "active"
                 },
                 "plugins": {
                     "Network Scaner": {
@@ -48,7 +49,8 @@
                     ],
                     "Date Created": "2024-02-14 23:00:00",
                     "Date Update": "2024-02-14 23:00:30",
-                    "Criticality": 2
+                    "Criticality": 2,
+                    "status": "active"
                 },
                 "plugins": {
                     "Network Scaner": {
@@ -84,7 +86,8 @@
                     ],
                     "Date Created": "2024-02-14 23:00:00",
                     "Date Update": "2024-02-14 23:00:30",
-                    "Criticality": 2
+                    "Criticality": 2,
+                    "status": "alert"
                 },
                 "plugins": {
                     "Network Scaner": {
@@ -120,7 +123,8 @@
                     ],
                     "Date Created": "2024-02-14 23:00:00",
                     "Date Update": "2024-02-14 23:00:30",
-                    "Criticality": 2
+                    "Criticality": 2,
+                    "status": "active"
                 },
                 "plugins": {
                     "Network Scaner": {
@@ -156,7 +160,8 @@
                     ],
                     "Date Created": "2024-02-14 23:00:00",
                     "Date Update": "2024-02-14 23:00:30",
-                    "Criticality": 2
+                    "Criticality": 2,
+                    "status": "active"
                 },
                 "plugins": {
                     "Network Scaner": {
@@ -192,7 +197,8 @@
                     ],
                     "Date Created": "2024-02-14 23:00:00",
                     "Date Update": "2024-02-14 23:00:30",
-                    "Criticality": 2
+                    "Criticality": 2,
+                    "status": "offline"
                 },
                 "plugins": {
                     "Network Scaner": {
@@ -228,7 +234,8 @@
                     ],
                     "Date Created": "2024-02-14 23:00:00",
                     "Date Update": "2024-02-14 23:00:30",
-                    "Criticality": 2
+                    "Criticality": 2,
+                    "status": "active"
                 },
                 "plugins": {
                     "Network Scaner": {
@@ -264,7 +271,8 @@
                     ],
                     "Date Created": "2024-02-14 23:00:00",
                     "Date Update": "2024-02-14 23:00:30",
-                    "Criticality": 2
+                    "Criticality": 2,
+                    "status": "alert"
                 },
                 "plugins": {
                     "Network Scaner": {
