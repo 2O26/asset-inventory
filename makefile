@@ -1,8 +1,8 @@
 .PHONY: all assInvFront assetHandler networkScan fluentd elasticsearch kibana frontendDev dev run down clean cypress-test environment-test frontend-dev
 
-all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypress frontendDev
+all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypress
 
-all-dev: assInvFront assetHandler networkScan frontendDev
+all-dev: assetHandler networkScan frontendDev
 
 assInvFront:
 	docker build -t assinvfront ./Containers/FrontEnd
