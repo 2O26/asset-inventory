@@ -3,6 +3,7 @@ package dbcon
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -138,4 +141,50 @@ func TestAddAsset(t *testing.T) {
 
 	assert.NoError(t, err)                                           // Assert no error from parsing
 	assert.Equal(t, "Asset added successfully", response["message"]) // Assert response "Asset added successfully"
+}
+
+// TestDeleteAsset
+func TestDeleteAsset(t *testing.T) {
+	mockDB := new(MockDB)
+	testAssetID := "65e9d9426765de1c93176cae"
+
+	// Convert string to ObjectID
+	objID, err := primitive.ObjectIDFromHex(testAssetID)
+	if err != nil {
+		t.Fatalf("Failed to convert hex string to ObjectID: %v", err)
+	}
+
+	// Mock asset
+	mockAsset := bson.M{
+		"_id":         objID,
+		"name":        "Server X20000",
+		"owner":       "IT Department",
+		"type":        []string{"Hardware", "Server", "Rack Mounted"},
+		"dateCreated": "2024-03-07 10:00:00",
+		"dateUpdated": "2024-03-07 10:00:00",
+		"criticality": 10,
+		"hostname":    "server-x20000.example.com",
+	}
+
+	mockDB.On("FindOne", mock.Anything, bson.M{"_id": objID}).Return(mongo.NewSingleResultFromDocument(mockAsset, nil, nil))
+	mockDB.On("DeleteOne", mock.Anything, bson.M{"_id": objID}).Return(&mongo.DeleteResult{DeletedCount: 1}, nil)
+
+	// Prepare the JSON payload for the DELETE request, including the ID of the asset to be deleted.
+	var deleteAssetData = []byte(fmt.Sprintf(`{"id": "%s"}`, testAssetID))
+
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request, _ = http.NewRequest("POST", "/DeleteAsset", bytes.NewBuffer(deleteAssetData))
+
+	DeleteAsset(mockDB, c)
+
+	// Check if the HTTP status code is OK
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &response) // Parse the HTTP response
+	assert.NoError(t, err)                          // Check there's no error
+
+	assert.Equal(t, "Asset deleted successfully", response["message"])
 }
