@@ -6,6 +6,8 @@ all-dev: assetHandler networkScan frontendDev
 
 all-dev: assetHandler networkScan frontendDev
 
+all-dev: assetHandler networkScan frontendDev
+
 assInvFront:
 	docker build -t assinvfront ./Containers/FrontEnd
 

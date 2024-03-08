@@ -35,6 +35,40 @@ export const EditLatestStatus = async () => {
 
 }
 
-export const startNetScan = async () => {
-    const response = await fetch('http://localhost:8081/startScan');
+export const StartNetScan = async (scanSettings) => {
+    console.log("cmdSelection", scanSettings.cmdSelection);
+    console.log("IPRanges: ", scanSettings.IPRanges);
+
+    const response = fetch('http://localhost:8081/startNetScan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scanSettings)
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok, could not fetch state');
+    }
+    return response.json();
+}
+
+export const AddIPranges = async (IPRange) => {
+    console.log("IPRange: ", IPRange);
+    // TODO: Uncomment 
+    const response = fetch('http://localhost:8082/AddIPranges', { // Configuration Container
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+    });
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok, could not fetch state');
+    }
+    return response.json();
+}
+
+export const GetIPranges = async (IPRange) => {
+    const response = fetch('http://localhost:8082/GetIPranges');
+    if (!response.ok) {
+        throw new Error('Network response was not ok, could not fetch state');
+    }
+    return response.json();
 }
