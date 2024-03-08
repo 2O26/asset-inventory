@@ -1,7 +1,6 @@
 package main
 
 import (
-	"assetinventory/assethandler/dbcon"
 	"assetinventory/assethandler/jsonhandler"
 
 	"encoding/json"
@@ -168,37 +167,37 @@ func main() {
 
 	router.GET("/getLatestState", getLatestState)
 
-	err := dbcon.SetupDatabase("mongodb://asset-inventory-dbstorage-1:27017/", "scan")
-	if err != nil {
-		log.Fatalf("Could not set up database: %v", err)
-	}
+	// err := dbcon.SetupDatabase("mongodb://asset-inventory-dbstorage-1:27017/", "scan")
+	// if err != nil {
+	// 	log.Fatalf("Could not set up database: %v", err)
+	// }
 
-	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
-	assetsHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("assets")}
-	router.POST("/AddScan", func(c *gin.Context) {
-		dbcon.AddScan(scansHelper, c) // Anropa AddScan med dbHelper och Gin context
-	})
-	router.GET("/GetLatestScan", func(c *gin.Context) {
-		dbcon.GetLatestScan(scansHelper, c) // Anropar funktionen med den riktiga databasen
-	})
-	router.POST("/AddAsset", func(c *gin.Context) {
-		dbcon.AddAsset(assetsHelper, c)
-	})
-	router.POST("/UpdateAsset", func(c *gin.Context) {
-		dbcon.UpdateAsset(assetsHelper, c)
-	})
-	router.POST("/DeleteAsset", func(c *gin.Context) {
-		dbcon.DeleteAsset(assetsHelper, c)
-	})
-	router.GET("/PrintAllDocuments", func(c *gin.Context) {
-		dbcon.PrintAllDocuments(assetsHelper, c) // Antag att `assetsHelper` är din `MongoDBHelper` instans
-		dbcon.PrintAllDocuments(scansHelper, c)
-	})
+	// scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
+	// assetsHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("assets")}
+	// router.POST("/AddScan", func(c *gin.Context) {
+	// 	dbcon.AddScan(scansHelper, c) // Anropa AddScan med dbHelper och Gin context
+	// })
+	// router.GET("/GetLatestScan", func(c *gin.Context) {
+	// 	dbcon.GetLatestScan(scansHelper, c) // Anropar funktionen med den riktiga databasen
+	// })
+	// router.POST("/AddAsset", func(c *gin.Context) {
+	// 	dbcon.AddAsset(assetsHelper, c)
+	// })
+	// router.POST("/UpdateAsset", func(c *gin.Context) {
+	// 	dbcon.UpdateAsset(assetsHelper, c)
+	// })
+	// router.POST("/DeleteAsset", func(c *gin.Context) {
+	// 	dbcon.DeleteAsset(assetsHelper, c)
+	// })
+	// router.GET("/PrintAllDocuments", func(c *gin.Context) {
+	// 	dbcon.PrintAllDocuments(assetsHelper, c) // Antag att `assetsHelper` är din `MongoDBHelper` instans
+	// 	dbcon.PrintAllDocuments(scansHelper, c)
+	// })
 
-	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
-		dbcon.DeleteAllDocuments(assetsHelper, c)
-		dbcon.DeleteAllDocuments(scansHelper, c)
-	})
+	// router.GET("/DeleteAllDocuments", func(c *gin.Context) {
+	// 	dbcon.DeleteAllDocuments(assetsHelper, c)
+	// 	dbcon.DeleteAllDocuments(scansHelper, c)
+	// })
 
 	log.Println("Server starting on port 8080...")
 	if err := router.Run(":8080"); err != nil {
