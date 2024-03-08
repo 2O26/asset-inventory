@@ -2,9 +2,14 @@
 Follow the instructions to download docker (see other tutorial)
 
 # Creating images
-To create all docker images required to run the cluster, run:
+To create all docker images required to run the cluster with logs, run:
 ```
 make all
+```
+
+To create all docker images required to run 'make dev':
+```
+make all-dev
 ```
 
 # Start cluster

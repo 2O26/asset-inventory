@@ -1,0 +1,7 @@
+.netScanConfig {
+    display: flex;
+    justify-content: left;
+    gap: 8px;
+    flex-direction: column;
+    text-align: left;
+}

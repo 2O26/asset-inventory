@@ -12,14 +12,14 @@
     /* This makes the container a flex container */
     align-items: center;
     /* This aligns items vertically in the middle */
-    gap: 8px;
+    gap: 2rem;
     /* This adds some space between the flex items */
 }
 
 .IPField {
     display: flex;
     justify-content: left;
-    gap: 8px;
+    gap: 2rem;
     flex-direction: column;
     text-align: left;
 }
@@ -32,15 +32,37 @@
 .cmd-radio-label {
     display: flex;
     color: var(--text-color);
-    margin-bottom: 10px;
+    margin-bottom: 2rem;
     /* Size of radio button and the rest for the label */
     /* Aligns the radio button and text vertically */
 }
 
 input[type="radio"] {
     margin-top: 0;
-    margin-right: 10px;
-    margin-left: 10px;
+    margin-right: 2rem;
+    margin-left: 2rem;
+    order: -1;
+    color: var(--text-color);
+    transform: scale(1.5);
+}
+
+.checkbox-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.range-checkbox-label {
+    display: flex;
+    color: var(--text-color);
+    margin-bottom: 10px;
+    /* Size of radio button and the rest for the label */
+    /* Aligns the radio button and text vertically */
+}
+
+input[type="checkbox"] {
+    margin-top: 0;
+    margin-right: 2rem;
+    margin-left: 2rem;
     order: -1;
     color: var(--text-color);
     transform: scale(1.5);
@@ -76,7 +98,7 @@ input[type="checkbox"] {
 .cmd-selection {
     display: flex;
     justify-content: left;
-    gap: 8px;
+    gap: 2rem;
     flex-direction: column;
     text-align: left;
 }
@@ -91,13 +113,10 @@ input[type="checkbox"] {
     display: none;
     /* Style your tooltip */
     position: absolute;
-    /* left: 100%;
-    top: 0;
-    width: 200px;
-    padding: 10px; */
+    padding: 0.5rem;
     background-color: transparent;
     border: 1px solid #421818;
-    border-radius: 4px;
+    /* border-radius: 2rem; */
 }
 
 .info-icon-container:hover .info-content {
@@ -106,14 +125,14 @@ input[type="checkbox"] {
 
 .infoBox {
 
-    position: 'absolute';
-    bottom: '100%';
-    left: '50%';
-    transform: 'translateX(-50%)';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
     /* backgroundColor: 'var(--text-color)'; */
-    border: '1px solid #ccc';
+    border: 1px solid #ccc;
     /* borderRadius: '4px'; */
-    padding: '8px';
+    padding: 4rem;
     /* marginTop: '8px';
     zIndex: 1; */
 }

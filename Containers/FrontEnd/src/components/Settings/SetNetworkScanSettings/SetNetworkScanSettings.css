@@ -1,0 +1,38 @@
+.networkScanTitleConfig {
+    display: flex;
+    justify-content: left;
+    gap: 2rem;
+    flex-direction: column;
+    text-align: left;
+    margin-left: 2rem;
+}
+
+.rangeConfigIP {
+    display: flex;
+    justify-content: left;
+    gap: 2rem;
+    flex-direction: column;
+    text-align: left;
+    margin-left: 2rem;
+    margin-top: 0.5rem;
+}
+
+.scansettingsText {
+    font-size: 1.3rem;
+    color: var(--text-color);
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.ip-range-input {
+    border: 2px solid blue;
+    padding: 1rem;
+    width: 30rem;
+    font-size: 1.3rem;
+    /* Additional styles */
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: left;
+}
