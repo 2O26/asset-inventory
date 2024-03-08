@@ -1,18 +1,14 @@
 import { Handle, Position } from 'reactflow';
-import { useCallback } from 'react';
-import { FiCloud } from 'react-icons/fi';
-import { ActiveIcon, AlertIcon, ApplicationIcon, ClusterIcon, ComputerIcon, OfflineIcon, ServerIcon, SwitchIcon } from './NodeIcons';
+import { ActiveIcon, AlertIcon, ApplicationIcon, ClusterIcon, ComputerIcon, IoTIcon, OfflineIcon, ServerIcon, SwitchIcon } from './NodeIcons';
 
 const iconTypeMap = {
-    "Server": <ServerIcon />, "Switch": <SwitchIcon />, "Computer": <ComputerIcon />, "Cluster": <ClusterIcon />, "Application": <ApplicationIcon />
+    "Server": <ServerIcon />, "Switch": <SwitchIcon />, "PC": <ComputerIcon />, "Cluster": <ClusterIcon />, "Application": <ApplicationIcon />, "IoT": <IoTIcon />,
 }
 
 const statusMap = { "alert": <AlertIcon />, "active": <ActiveIcon />, "offline": <OfflineIcon /> }
 
 
 export const CustomNodeComponent = ({ data }) => {
-    console.log(data)
-
     return (
         <>
             <div className="cloud gradient">
@@ -20,10 +16,11 @@ export const CustomNodeComponent = ({ data }) => {
                     {iconTypeMap[data.type]}
                 </div>
             </div>
-            <div className="wrapper gradient">
+            {/* <div className={`${data.selected && "selected-view"} wrapper gradient `}> */}
+            <div className={`wrapper gradient `}>
                 <div className="inner">
                     <div className="body">
-                        {data.status && statusMap[data.status]}
+                        {/* {data.status && statusMap[data.status]} */}
                         <div>
                             <div className="title">{data.label}</div>
                             {data.type && <div className="subline">{data.type}</div>}

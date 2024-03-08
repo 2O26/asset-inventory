@@ -5,7 +5,7 @@
     /* --node-box-shadow: 10px 0 15px rgba(42, 138, 246, 0.3), -10px 0 15px rgba(233, 42, 103, 0.3); */
     --color-1: #2a8af6;
     --color-2: #84b8f4;
-    --color-3: #72aef3;
+    --color-3: #0031c4;
     --color-4: rgba(42, 138, 246, 0);
     /* --color-1: #2a8af6;
     --color-2: #a853ba;
@@ -63,6 +63,18 @@
     z-index: -1;
 }
 
+.selected-view.wrapper.gradient:before {
+    content: '';
+    background: conic-gradient(from -160deg at 50% 50%,
+            var(--color-3) 0deg,
+            var(--color-2) 120deg,
+            var(--color-1) 240deg,
+            var(--color-4) 360deg);
+    animation: spinner 4s linear infinite;
+    transform: translate(-50%, -50%) rotate(0deg);
+    z-index: -1;
+}
+
 @keyframes spinner {
     100% {
         transform: translate(-50%, -50%) rotate(-360deg);
@@ -71,7 +83,6 @@
 
 .react-flow__node-turbo .inner {
     background: var(--main-color);
-    /* background: black; */
     padding: 16px 20px;
     border-radius: var(--node-border-radius);
     display: flex;
@@ -79,6 +90,14 @@
     justify-content: center;
     flex-grow: 1;
     position: relative;
+}
+
+.react-flow__node-turbo.selected .inner {
+    background: var(--selected-node);
+}
+
+.react-flow__node-turbo .selected-view .inner {
+    background: var(--selected-node);
 }
 
 .react-flow__node-turbo .icon {

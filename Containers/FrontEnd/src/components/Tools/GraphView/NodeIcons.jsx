@@ -5,6 +5,8 @@ import { BiLogoKubernetes } from "react-icons/bi";
 import { IoLogoAppleAr } from "react-icons/io5";
 import { BiError } from "react-icons/bi";
 import { RiRadioButtonLine } from "react-icons/ri";
+import { FaChromecast } from "react-icons/fa6";
+import { BsPcDisplay } from "react-icons/bs";
 
 export const ServerIcon = ({ size = 20 }) => {
     return (
@@ -18,9 +20,9 @@ export const SwitchIcon = ({ size = 18 }) => {
     )
 }
 
-export const ComputerIcon = ({ size = 17 }) => {
+export const ComputerIcon = ({ size = 15 }) => {
     return (
-        <FaComputer size={size} />
+        <BsPcDisplay size={size} />
     )
 }
 
@@ -36,22 +38,25 @@ export const ApplicationIcon = ({ size = 20 }) => {
     )
 }
 
+export const IoTIcon = ({ size = 17 }) => {
+    return (
+        <FaChromecast size={size} />
+    )
+}
+
 export const AlertIcon = ({ size = 15 }) => {
     return (
         <BiError size={size} color={"yellow"} />
-        // <BiError size={size} />
     )
 }
 export const ActiveIcon = ({ size = 15 }) => {
     return (
         <RiRadioButtonLine size={size} color={"green"} />
-        // <RiRadioButtonLine size={size} />
     )
 }
 
 export const OfflineIcon = ({ size = 15 }) => {
     return (
         <RiRadioButtonLine size={size} color={"red"} />
-        // <RiRadioButtonLine size={size} />
     )
 }
