@@ -168,7 +168,7 @@ func main() {
 
 	router.GET("/getLatestState", getLatestState)
 
-	err := dbcon.SetupDatabase("mongodb://asset-inventory_dbstorage_1:27017/", "scan")
+	err := dbcon.SetupDatabase("mongodb://asset-inventory-dbstorage-1:27017/", "scan")
 	if err != nil {
 		log.Fatalf("Could not set up database: %v", err)
 	}
