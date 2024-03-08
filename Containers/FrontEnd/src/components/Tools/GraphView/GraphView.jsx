@@ -2,7 +2,7 @@ import { GetState } from '../../Services/ApiService.js'
 import { useQuery } from '@tanstack/react-query';
 import jsonData from './mock.json';
 import ELK from 'elkjs/lib/elk.bundled.js';
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import ReactFlow, {
     ReactFlowProvider,
     addEdge,
@@ -21,6 +21,7 @@ import { ParseState } from './ParseState.jsx';
 import { useNavigate } from 'react-router-dom';
 import './GraphView.css'
 import { CustomNodeComponent } from './CustomNode.jsx';
+import CustomEdge from './CustomEdge.jsx';
 
 
 const elk = new ELK();
@@ -68,22 +69,26 @@ const getLayoutedElements = (nodes, edges, options = {}) => {
         .catch(console.error);
 };
 
+
 const nodeTypes = {
     turbo: CustomNodeComponent
+};
+
+const edgeTypes = {
+    turbo: CustomEdge
 };
 
 const defaultEdgeOptions = {
     markerEnd: 'edge-circle',
 };
 
-function LayoutFlow({ initialNodes, initialEdges }) {
+function LayoutFlow({ initialNodes, initialEdges, selectedAsset }) {
     const navigate = useNavigate()
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { fitView } = useReactFlow();
 
     const onNodeClick = (event, node) => {
-        console.log(node.data.type);
         navigate(`/asset-view/${node.id}`);
     };
 
@@ -104,10 +109,23 @@ function LayoutFlow({ initialNodes, initialEdges }) {
         [nodes, edges]
     );
 
+    useEffect(() => {
+        // Remove class name from all nodes
+        const elements = document.querySelectorAll('.react-flow__nodes > div[data-id]');
+        elements.forEach(el => el.classList.remove('selected'));
+
+        // Add class name to selected node
+        const element = document.querySelector(`.react-flow__nodes > div[data-id="${selectedAsset}"]`)
+        if (element) {
+            element.classList.add('selected');
+        }
+    }, [nodes, selectedAsset])
+
     // Calculate the initial layout on mount.
     useLayoutEffect(() => {
         onLayout({ direction: 'RIGHT', useInitialNodes: true });
     }, []);
+
 
     return (
         <ReactFlow
@@ -119,7 +137,7 @@ function LayoutFlow({ initialNodes, initialEdges }) {
             fitView
             onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
-            // edgeTypes={edgeTypes}
+            edgeTypes={edgeTypes}
             defaultEdgeOptions={defaultEdgeOptions}
         >
             <Controls />
@@ -156,24 +174,30 @@ function LayoutFlow({ initialNodes, initialEdges }) {
     );
 }
 
-export default function GraphView() {
-    // const { data, isLoading, isError, error } = useQuery({
-    //     queryKey: ['getState'],
-    //     queryFn: GetState,
-    //     enabled: true
-    // });
+export default function GraphView({ width = '100vw', selectedAsset = null }) {
+    const { data, isLoading, isError, error } = useQuery({
+        queryKey: ['getState'],
+        queryFn: GetState,
+        enabled: true
+    });
 
-    // if (isLoading) return <LoadingSpinner />;
-    // if (isError) return <div className='errorMessage'>{error.message}</div>;
+    if (isLoading) return <LoadingSpinner />;
+    if (isError) return <div className='errorMessage'>{error.message}</div>;
 
-    // const parsedState = ParseState(data);
-    const parsedState = ParseState(jsonData);
+    const parsedState = ParseState(data, selectedAsset);
+
+    // const parsedState = ParseState(jsonData, selectedAsset);
+
 
     return (
-        <div style={{ width: '100vw', height: '90vh' }}>
-            <ReactFlowProvider>
-                <LayoutFlow initialNodes={parsedState.nodes} initialEdges={parsedState.edges} />
-            </ReactFlowProvider>
+        <div style={{ width: width, height: '90vh' }}>
+            {parsedState ?
+                <ReactFlowProvider>
+                    <LayoutFlow initialNodes={parsedState.nodes} initialEdges={parsedState.edges} selectedAsset={selectedAsset} />
+                </ReactFlowProvider>
+                :
+                <LoadingSpinner />
+            }
         </div>
 
     )

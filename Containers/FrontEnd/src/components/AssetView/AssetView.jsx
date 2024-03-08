@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 import './AssetView.css';
 import { AssetInfo } from './AssetInfo';
+import GraphView from '../Tools/GraphView/GraphView';
 
 export default function AssetView() {
     let { assetID } = useParams();
@@ -26,6 +27,7 @@ export default function AssetView() {
     return (
         <div className='asset-view-container'>
             {/* Button Section */}
+            <GraphView width='75vw' selectedAsset={assetID} />
             <div className='button-plus-info'>
                 <div className="button-container">
                     <button

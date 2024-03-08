@@ -5,9 +5,9 @@
         "assets": {
             "AID_4123521": {
                 "properties": {
-                    "name": "Server A",
-                    "owner": "UID_2332",
-                    "type": [
+                    "Name": "Server A",
+                    "Owner": "UID_2332",
+                    "Type": [
                         "Server",
                         "Application"
                     ],
@@ -42,9 +42,9 @@
             },
             "AID_4123573": {
                 "properties": {
-                    "name": "Switch Z",
-                    "owner": "UID_2332",
-                    "type": [
+                    "Name": "Switch Z",
+                    "Owner": "UID_2332",
+                    "Type": [
                         "Switch"
                     ],
                     "Date Created": "2024-02-14 23:00:00",
@@ -78,10 +78,10 @@
             },
             "AID_4123523": {
                 "properties": {
-                    "name": "PC-A",
-                    "owner": "UID_2332",
-                    "type": [
-                        "Computer",
+                    "Name": "PC-A",
+                    "Owner": "UID_2332",
+                    "Type": [
+                        "PC",
                         "Personal"
                     ],
                     "Date Created": "2024-02-14 23:00:00",
@@ -115,10 +115,10 @@
             },
             "AID_4123525": {
                 "properties": {
-                    "name": "PC-B",
-                    "owner": "UID_2332",
-                    "type": [
-                        "Computer",
+                    "Name": "PC-B",
+                    "Owner": "UID_2332",
+                    "Type": [
+                        "PC",
                         "Personal"
                     ],
                     "Date Created": "2024-02-14 23:00:00",
@@ -152,10 +152,10 @@
             },
             "AID_4123529": {
                 "properties": {
-                    "name": "PC-C",
-                    "owner": "UID_2332",
-                    "type": [
-                        "Computer",
+                    "Name": "PC-C",
+                    "Owner": "UID_2332",
+                    "Type": [
+                        "PC",
                         "Personal"
                     ],
                     "Date Created": "2024-02-14 23:00:00",
@@ -189,9 +189,9 @@
             },
             "AID_4123520": {
                 "properties": {
-                    "name": "Cluster X",
-                    "owner": "UID_2332",
-                    "type": [
+                    "Name": "Cluster X",
+                    "Owner": "UID_2332",
+                    "Type": [
                         "Cluster",
                         "K9S"
                     ],
@@ -226,9 +226,9 @@
             },
             "AID_4123535": {
                 "properties": {
-                    "name": "Webb App A",
-                    "owner": "UID_2332",
-                    "type": [
+                    "Name": "Webb App A",
+                    "Owner": "UID_2332",
+                    "Type": [
                         "Application",
                         "Web"
                     ],
@@ -263,9 +263,9 @@
             },
             "AID_4122535": {
                 "properties": {
-                    "name": "Webb App B",
-                    "owner": "UID_2332",
-                    "type": [
+                    "Name": "Webb App B",
+                    "Owner": "UID_2332",
+                    "Type": [
                         "Application",
                         "Web"
                     ],
@@ -301,50 +301,50 @@
         },
         "relations": {
             "RID_2613785": {
-                "from": "ID_4123521",
-                "to": "ID_4123573",
+                "from": "AID_4123521",
+                "to": "AID_4123573",
                 "direction": "uni",
                 "owner": "UID_2332",
                 "dateCreated": "2024-02-14 23:35:53"
             },
             "RID_6492733": {
-                "from": "ID_4123573",
-                "to": "ID_4123523",
+                "from": "AID_4123573",
+                "to": "AID_4123523",
                 "direction": "bi",
                 "owner": "UID_6372",
                 "dateCreated": "2024-01-22 07:32:32"
             },
             "RID_6492732": {
-                "from": "ID_4123573",
-                "to": "ID_4123525",
+                "from": "AID_4123573",
+                "to": "AID_4123525",
                 "direction": "bi",
                 "owner": "UID_6372",
                 "dateCreated": "2024-01-22 07:32:32"
             },
             "RID_6492832": {
-                "from": "ID_4123573",
-                "to": "ID_4123529",
+                "from": "AID_4123573",
+                "to": "AID_4123529",
                 "direction": "bi",
                 "owner": "UID_6372",
                 "dateCreated": "2024-01-22 07:32:32"
             },
             "RID_2613789": {
-                "from": "ID_4123521",
-                "to": "ID_4123520",
+                "from": "AID_4123521",
+                "to": "AID_4123520",
                 "direction": "uni",
                 "owner": "UID_2332",
                 "dateCreated": "2024-02-14 23:35:53"
             },
             "RID_2613780": {
-                "from": "ID_4123520",
-                "to": "ID_4123535",
+                "from": "AID_4123520",
+                "to": "AID_4123535",
                 "direction": "uni",
                 "owner": "UID_2332",
                 "dateCreated": "2024-02-14 23:35:53"
             },
             "RID_2613781": {
-                "from": "ID_4123520",
-                "to": "ID_4122535",
+                "from": "AID_4123520",
+                "to": "AID_4122535",
                 "direction": "uni",
                 "owner": "UID_2332",
                 "dateCreated": "2024-02-14 23:35:53"
