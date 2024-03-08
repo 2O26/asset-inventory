@@ -143,6 +143,57 @@ func TestAddAsset(t *testing.T) {
 	assert.Equal(t, "Asset added successfully", response["message"]) // Assert response "Asset added successfully"
 }
 
+func TestUpdateAsset(t *testing.T) {
+	mockDB := new(MockDB)
+	testAssetID := "65e9d9426765de1c93176cae"
+
+	objID, err := primitive.ObjectIDFromHex(testAssetID)
+	if err != nil {
+		t.Fatalf("Failed to convert hex string to ObjectID: %v", err)
+	}
+
+	mockAsset := bson.M{
+		"_id":         objID,
+		"name":        "Server X20000",
+		"owner":       "IT Department",
+		"type":        []string{"Hardware", "Server", "Rack Mounted"},
+		"dateCreated": "2024-03-07 10:00:00",
+		"dateUpdated": "2024-03-07 10:00:00",
+		"criticality": 10,
+		"hostname":    "server-x20000.example.com",
+	}
+
+	mockDB.On("FindOne", mock.Anything, bson.M{"_id": objID}).Return(mongo.NewSingleResultFromDocument(mockAsset, nil, nil))
+
+	mockDB.On("UpdateOne", mock.Anything, bson.M{"_id": objID}, mock.Anything).Return(&mongo.UpdateResult{ModifiedCount: 1}, nil)
+
+	// Prepare the JSON payload for the update request.
+	var updateAssetData = []byte(fmt.Sprintf(`{
+        "id": "%s",
+        "name": "Server X20001",
+        "owner": "IT Department",
+        "type": ["Hardware", "Server", "Rack Mounted"],
+        "dateCreated": "2024-03-07 10:00:00",
+        "dateUpdated": "2024-03-07 11:00:00",
+        "criticality": 10,
+        "hostname": "server-x20001.example.com"
+    }`, testAssetID))
+
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request, _ = http.NewRequest("POST", "/UpdateAsset", bytes.NewBuffer(updateAssetData))
+
+	UpdateAsset(mockDB, c)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "Asset updated successfully", response["message"])
+}
+
 // TestDeleteAsset
 func TestDeleteAsset(t *testing.T) {
 	mockDB := new(MockDB)
