@@ -8,7 +8,7 @@ import (
 type Asset struct {
 	Name        string   `json:"Name"`
 	Owner       string   `json:"Owner"`
-	Type        []string `json:"Type"` // array with type -> subtype -> subsubtype, etc
+	Type        []string `json:"Type"` // array with type -> subtype -> sub-subtype, etc
 	DateCreated string   `json:"Created at"`
 	DateUpdated string   `json:"Updated at"`
 	Criticality int      `json:"Criticality"`
@@ -24,7 +24,7 @@ type Plugin struct {
 	PluginStateID string `json:"pluginStateID"`
 }
 
-// Relations will stay the same between front and back data
+// Relation 'Relations will stay the same between front and back data'
 type Relation struct {
 	From        string `json:"from"`
 	To          string `json:"to"`
@@ -54,7 +54,7 @@ type PluginState struct {
 	State       map[string]any `json:"state"`
 }
 
-// Takes a state, an arbitrary amount of pluginnames and plugindata and formats the output to the style used in frontend.
+// BackToFront Takes a state, an arbitrary amount of plugin names and plugin data and formats the output to the style used in frontend.
 // Only one plugins map should be sent to the function.
 func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage) (json.RawMessage, error) {
 
@@ -84,7 +84,7 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 
 			err := json.Unmarshal(value, &temp)
 			if err != nil {
-				return nil, errors.New(("could not unmarshal pluginState json"))
+				return nil, errors.New("could not unmarshal pluginState json")
 			}
 
 			pluginStates[key] = temp
@@ -115,15 +115,20 @@ func copyAssets(inAssets map[string]Asset, outAssets map[string]FrontAsset) {
 }
 
 func insertPluginData(inAssets map[string]FrontAsset, plugins map[string]PluginState) {
-	for _, pluginState := range plugins {
+	for pluginName, pluginState := range plugins {
 		for pluginAssetName, pluginAsset := range pluginState.State {
-			for assetName, asset := range inAssets {
-				if pluginAssetName == assetName { //have match, now insert data
-					inAsset := FrontAsset{
-						Asset:   asset.Asset, // Embed the original Asset data directly
-						Plugins: pluginAsset.(map[string]any),
-					}
-					inAssets[assetName] = inAsset
+			asset, found := inAssets[pluginAssetName]
+			if found {
+				// If a Plugins map already exists, merge with existing data
+				if asset.Plugins == nil {
+					asset.Plugins = map[string]any{}
+				}
+				asset.Plugins[pluginName] = pluginAsset.(map[string]any)
+			} else {
+				// If not found, create a new entry with plugin data
+				inAssets[pluginAssetName] = FrontAsset{
+					Asset:   asset.Asset,
+					Plugins: map[string]any{pluginName: pluginAsset.(map[string]any)},
 				}
 			}
 		}

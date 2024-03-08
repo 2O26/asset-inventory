@@ -1,12 +1,14 @@
 package dbcon
 
 import (
-	"context"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"time"
+)
 
-	"github.com/gin-gonic/gin"
+import (
+	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
