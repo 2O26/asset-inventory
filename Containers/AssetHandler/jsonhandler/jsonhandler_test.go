@@ -14,24 +14,28 @@ func TestBackToFrontNoPlugin(t *testing.T) {
 			"AID_4123523": {
 				"Name": "PC-A",
 				"Owner": "UID_2332",
+				"Type": ["Computer", "Desktop"],
 				"Created at": "2024-02-14 23:00:00",
 				"Updated at": "2024-02-14 23:00:30",
 				"Criticality": 2,
-				"Hostname": "PC-A"
+				"Hostname": "Desktop-123"
 			},
 			"AID_5784393": {
 				"Name": "Chromecast",
 				"Owner": "UID_2332",
+				"Type": ["IoT", "Media"],
 				"Created at": "2024-02-10 20:04:20",
 				"Updated at": "2024-02-14 23:00:30",
-				"criticality": 1
+				"Criticality": 1,
+				"Hostname": "LivingRoom"
 			},
 			"AID_9823482": {
 				"Name": "Password Vault",
 				"Owner": "UID_2332",
+				"Type": ["Server", "Database"],
 				"Created at": "2024-02-14 23:00:00",
 				"Updated at": "2024-02-14 23:00:30",
-				"criticality": 4
+				"Criticality": 4
 			}
 		},
 		"plugins": {
@@ -68,9 +72,11 @@ func TestBackToFrontNoPlugin(t *testing.T) {
 				"properties": {
 					"Name": "PC-A",
 					"Owner": "UID_2332",
+					"Type": ["Computer", "Desktop"],	
 					"Created at": "2024-02-14 23:00:00",
 					"Updated at": "2024-02-14 23:00:30",
-					"criticality": 2
+					"Criticality": 2,
+					"Hostname": "Desktop-123"
 				},
 				"plugins": {}
 			},
@@ -78,9 +84,11 @@ func TestBackToFrontNoPlugin(t *testing.T) {
 				"properties": {
 					"Name": "Chromecast",
 					"Owner": "UID_2332",
+					"Type": ["IoT", "Media"],
 					"Created at": "2024-02-10 20:04:20",
 					"Updated at": "2024-02-14 23:00:30",
-					"criticality": 1
+					"Criticality": 1,
+					"Hostname": "LivingRoom"
 				},
 				"plugins": {}
 			},
@@ -88,9 +96,11 @@ func TestBackToFrontNoPlugin(t *testing.T) {
 				"properties": {
 					"Name": "Password Vault",
 					"Owner": "UID_2332",
+					"Type": ["Server", "Database"],
 					"Created at": "2024-02-14 23:00:00",
 					"Updated at": "2024-02-14 23:00:30",
-					"criticality": 4
+					"Criticality": 4,
+					"Hostname": ""
 				},
 				"plugins": {}
 			}
@@ -116,7 +126,7 @@ func TestBackToFrontNoPlugin(t *testing.T) {
 	out, err := BackToFront(json.RawMessage(in), nil)
 	diff, err2 := jsondiff.Compare(out, json.RawMessage(want))
 	if err != nil || err2 != nil || diff != nil {
-		t.Fatalf("Input did not create correct output. Difference is %s. Error: %s.", diff.String(), err)
+		t.Fatalf("Input did not create correct output. Difference is %s. Error1: %s. Error2: %s", diff.String(), err, err2)
 	}
 
 }
@@ -128,33 +138,29 @@ func TestBackToFrontBadPlugin(t *testing.T) {
 			"AID_4123523": {
 				"Name": "PC-A",
 				"Owner": "UID_2332",
+				Type": ["Computer", "Desktop"],	
 				"Created at": "2024-02-14 23:00:00",
 				"Updated at": "2024-02-14 23:00:30",
-				"criticality": 2        
+				"Criticality": 2        
 			},
 			"AID_5784393": {
 				"Name": "Chromecast",
 				"Owner": "UID_2332",
+				"Type": ["IoT", "Media"],
 				"Created at": "2024-02-10 20:04:20",
 				"Updated at": "2024-02-14 23:00:30",
-				"criticality": 1
+				"Criticality": 1
 			},
 			"AID_9823482": {
 				"Name": "Password Vault",
 				"Owner": "UID_2332",
+				"Type": ["Server", "Database"],
 				"Created at": "2024-02-14 23:00:00",
 				"Updated at": "2024-02-14 23:00:30",
-				"criticality": 4
+				"Criticality": 4
 			}
 		},
-		"plugins": {
-			"ipScan": {
-				"pluginStateID": "20240214-1300A"
-			},
-			"macScan": {
-				"pluginStateID": "20240215-0800G"
-			}
-		},
+		"plugins": {},
 		"relations": {
 			"RID_2613785": {
 				"from": "ID_4123523",
@@ -176,21 +182,21 @@ func TestBackToFrontBadPlugin(t *testing.T) {
 
 	plugin := make(map[string]json.RawMessage)
 	plugin["netscan"] = json.RawMessage(`{
-		"sateID": "20240214-1300A",
+		"stateID": "20240214-1300A",
 		"dateCreated": "2024-02-14 23:00:00"
 		"dateUpdated": "2024-02-14 23:00:30",
 		"state": {
 			"AID_412523": {
-				"status": "up",
-				"ipv4add": "192.168.1.1"
-				"ipv6addr": "10:25:96:12:34:56",
-				"subnet": "192.168.1.0/24"
+				"Status": "up",
+				"IPV4 Address": "192.168.1.1"
+				"IPV6 Address": "10:25:96:12:34:56",
+				"Subnet": "192.168.1.0/24"
 			},
 			"AID_5784393": {
-				"status": "down",
-				"ipv4addr": "172.168.1.1",
-				"ipv6adr": "20:25:96:12:34:56",
-				"subnet": "192.168.1.0/24"
+				"Status": "down",
+				"IPV4 Address": "172.168.1.1",
+				"IPV6 Address": "20:25:96:12:34:56",
+				"Subnet": "192.168.1.0/24"
 			}
 		}
 	}`)
@@ -210,44 +216,49 @@ func TestBackToFrontValidData(t *testing.T) {
 			"AID_4123523": {
 				"Name": "PC-A",
 				"Owner": "UID_2332",
+				"Type": ["Computer", "Desktop"],
 				"Created at": "2024-02-14 23:00:00",
 				"Updated at": "2024-02-14 23:00:30",
-				"criticality": 2        
+				"Criticality": 2,
+				"Hostname": "Desktop-123"
 			},
 			"AID_5784393": {
 				"Name": "Chromecast",
 				"Owner": "UID_2332",
+				"Type": ["IoT", "Media"],
 				"Created at": "2024-02-10 20:04:20",
 				"Updated at": "2024-02-14 23:00:30",
-				"criticality": 1
+				"Criticality": 1,
+				"Hostname": "LivingRoom"
 			},
 			"AID_9823482": {
 				"Name": "Password Vault",
 				"Owner": "UID_2332",
+				"Type": ["Server", "Database"],
 				"Created at": "2024-02-14 23:00:00",
 				"Updated at": "2024-02-14 23:00:30",
-				"criticality": 4
+				"Criticality": 4
 			}
 		},
 		"plugins": {
-			"ipScan": {
+			"netscan": {
 				"pluginStateID": "20240214-1300A"
 			},
-			"macScan": {
-				"pluginStateID": "20240215-0800G"
+			"osscan": {
+				"pluginStateID": "20240417-1400B"
 			}
 		},
 		"relations": {
 			"RID_2613785": {
-				"from": "ID_4123523",
-				"to": "ID_5784393",
+				"from": "AID_4123523",
+				"to": "AID_5784393",
 				"direction": "uni",
 				"owner": "UID_2332",
 				"dateCreated":"2024-02-14 23:35:53"
 			},
 			"RID_6492733": {
-				"from": "ID_5784393",
-				"to": "ID_9823482",
+				"from": "AID_5784393",
+				"to": "AID_9823482",
 				"direction": "bi",
 				"owner": "UID_6372",
 				"dateCreated": "2024-01-22 07:32:32"
@@ -255,91 +266,118 @@ func TestBackToFrontValidData(t *testing.T) {
 		}    
 	}
 	`
-	var hardcodedScan = json.RawMessage(`
+	var netscan = json.RawMessage(`
 	{
 		"stateID": "20240214-1300A",
 		"dateCreated": "2024-02-14 23:00:00",
 		"dateUpdated": "2024-02-14 23:00:30",
 		"state": {
 			"AID_4123523": {
-				"status": "up",
-				"ipv4addr": "192.168.1.1",
-				"ipv6addr": "10:25:96:12:34:56",
-				"subnet": "192.168.1.0/24"
+				"Status": "up",
+				"IPV4 Address": "192.168.1.1",
+				"IPV6 Address": "10:25:96:12:34:56",
+				"Subnet": "192.168.1.0/24"
 			},
 			"AID_5784393": {
-				"status": "down",
-				"ipv4addr": "172.168.1.1",
-				"ipv6addr": "20:25:96:12:34:56",
-				"subnet": "192.168.1.0/24"
+				"Status": "down",
+				"IPV4 Address": "172.168.1.1",
+				"IPV6 Address": "20:25:96:12:34:56",
+				"Subnet": "192.168.1.0/24"
 			}
 		}
 	}`)
 	plugin := make(map[string]json.RawMessage)
-	plugin["netscan"] = hardcodedScan
+	plugin["netscan"] = netscan
+	var osscan = json.RawMessage(`
+	{
+		"stateID": "20240417-1400B",
+		"dateCreated": "2024-02-30 23:00:00",
+		"dateUpdated": "2024-02-31 23:00:30",
+		"state": {
+			"AID_4123523": {
+				"OS": "Windows XP"
+			}
+		}
+	}`)
+
+	plugin["osscan"] = osscan
 
 	want := `{
 		"assets": {
 			"AID_4123523": {
 				"plugins": {
-					"ipv4addr": "192.168.1.1",
-					"ipv6addr": "10:25:96:12:34:56",
-					"status": "up",
-					"subnet": "192.168.1.0/24"
+					"netscan": {
+						"IPV4 Address": "192.168.1.1",
+						"IPV6 Address": "10:25:96:12:34:56",
+						"Status": "up",
+						"Subnet": "192.168.1.0/24"
+					},
+					"osscan": {
+						"OS": "Windows XP"
+					}
 				},
 				"properties": {
-					"criticality": 2,
+					"Criticality": 2,
 					"Created at": "2024-02-14 23:00:00",
 					"Updated at": "2024-02-14 23:00:30",
 					"Name": "PC-A",
-					"Owner": "UID_2332"
+					"Owner": "UID_2332",
+					"Type": ["Computer", "Desktop"],
+					"Hostname": "Desktop-123"
 				}
 			},
 			"AID_5784393": {
 				"plugins": {
-					"ipv4addr": "172.168.1.1",
-					"ipv6addr": "20:25:96:12:34:56",
-					"status": "down",
-					"subnet": "192.168.1.0/24"
+					"netscan": {
+						"IPV4 Address": "172.168.1.1",
+						"IPV6 Address": "20:25:96:12:34:56",
+						"Status": "down",
+						"Subnet": "192.168.1.0/24"
+					}
 				},
 				"properties": {
-					"criticality": 1,
+					"Criticality": 1,
 					"Created at": "2024-02-10 20:04:20",
 					"Updated at": "2024-02-14 23:00:30",
 					"Name": "Chromecast",
-					"Owner": "UID_2332"
+					"Owner": "UID_2332",
+					"Type": ["IoT", "Media"],
+					"Hostname": "LivingRoom"
 				}
 			},
 			"AID_9823482": {
 				"plugins": {
 				},
 				"properties": {
-					"criticality": 4,
+					"Criticality": 4,
 					"Created at": "2024-02-14 23:00:00",
 					"Updated at": "2024-02-14 23:00:30",
 					"Name": "Password Vault",
-					"Owner": "UID_2332"
+					"Owner": "UID_2332",
+					"Type": ["Server", "Database"],
+					"Hostname": ""
 				}
 			}
 		},
 		"mostRecentUpdate": "2024-02-14 23:35:53",
 		"pluginList": [
-			"netscan"
+			"netscan",
+			"osscan"
 		],
 		"relations": {
 			"RID_2613785": {
 				"dateCreated": "2024-02-14 23:35:53",
 				"direction": "uni",
-				"from": "ID_4123523",
-				"Owner": "UID_2332",
-				"to": "ID_5784393"
+				"from": "AID_4123523",
+				"owner": "UID_2332",
+				"to": "AID_5784393"
 			},
 			"RID_6492733": {
 				"dateCreated": "2024-01-22 07:32:32",
 				"direction": "bi",
-				"from": "ID_5784393",
-				"Owner": "UID_6372",
-				"to": "ID_9823482"
+				"from": "AID_5784393",
+				"owner": "UID_6372",
+				"to": "AID_9823482"
 			}
 		}
 	}`
@@ -348,7 +386,7 @@ func TestBackToFrontValidData(t *testing.T) {
 	diff, err2 := jsondiff.Compare(out, json.RawMessage(want))
 
 	if err != nil || err2 != nil || diff != nil {
-		t.Fatalf("Input did not create correct output. Difference is %s. Error: %s.", diff.String(), err)
+		t.Fatalf("Input did not create correct output. Difference is %s. Error: %s. Error2: %s. Output JSON for debugging: %s", diff.String(), err, err2, string(out))
 	}
 
 }

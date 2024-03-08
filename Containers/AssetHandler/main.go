@@ -72,20 +72,25 @@ func getLatestState(c *gin.Context) {
 			"AID_4123523": {
 				"Name": "PC-A",
 				"Owner": "UID_2332",
+				"Type": ["PC", "Windows"],
 				"Created at": "2024-02-14 23:00:00",
 				"Updated at": "2024-02-14 23:00:30",
-				"Criticality": 2
+				"Criticality": 2,
+				"Hostname": "Desktop-123"
 			},
 			"AID_5784393": {
 				"Name": "Chromecast",
 				"Owner": "UID_2332",
+				"Type": ["IoT", "Media"],
 				"Created at": "2024-02-10 20:04:20",
 				"Updated at": "2024-02-14 23:00:30",
-				"Criticality": 1
+				"Criticality": 1,
+				"Hostname": "LivingRoom"
 			},
 			"AID_9823482": {
 				"Name": "Password Vault",
 				"Owner": "UID_2332",
+				"Type": ["Server", "Database"],
 				"Created at": "2024-02-14 23:00:00",
 				"Updated at": "2024-02-14 23:00:30",
 				"Criticality": 4
@@ -113,8 +118,8 @@ func getLatestState(c *gin.Context) {
 				"direction": "bi",
 				"owner": "UID_6372",
 				"dateCreated": "2024-01-22 07:32:32"
-			}
-		}
+			}    
+		}    
 	}
 	`
 
@@ -125,6 +130,19 @@ func getLatestState(c *gin.Context) {
 		pluginStates := make(map[string]json.RawMessage)
 		netassets := getNetScanStatus()
 		pluginStates["netscan"] = netassets
+		var mockOSScan = json.RawMessage(`
+		{
+			"stateID": "20240417-1400B",
+			"dateCreated": "2024-02-30 23:00:00",
+			"dateUpdated": "2024-02-31 23:00:30",
+			"state": {
+				"AID_4123523": {
+					"OS": "Windows XP"
+				}
+			}
+		}`)
+
+		pluginStates["osscan"] = mockOSScan
 
 		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(PLACEHOLDER), pluginStates)
 		if err != nil {
@@ -146,13 +164,9 @@ func main() {
 
 	router := gin.Default()
 	// Apply the CORS middleware
-	// router.Use(CORSMiddleware())
+	router.Use(CORSMiddleware())
 
-	// router.GET("/getLatestState", getLatestState)
-
-	// fmt.Println("Starting server at port 8080")
-
-	// router.Run(":8080")
+	router.GET("/getLatestState", getLatestState)
 
 	err := dbcon.SetupDatabase("mongodb://asset-inventory-dbstorage-1:27017/", "scan")
 	if err != nil {
