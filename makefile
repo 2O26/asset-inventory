@@ -30,7 +30,7 @@ kibana:
 	docker build -t kibana ./Containers/kibana
 
 dev:
-	docker compose -f dev-docker-compose.yaml --compatibility up -d
+	docker compose -f dev-docker-compose.yaml up -d
 	open http://localhost:3000/
 
 run:
