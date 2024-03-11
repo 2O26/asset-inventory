@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBezierPath } from 'reactflow';
+import { getSmoothStepPath } from 'reactflow';
 
 export default function CustomEdge(props) {
     const {
@@ -17,7 +17,7 @@ export default function CustomEdge(props) {
     const xEqual = sourceX === targetX;
     const yEqual = sourceY === targetY;
 
-    const [edgePath] = getBezierPath({
+    const [edgePath] = getSmoothStepPath({
         // we need this little hack in order to display the gradient for a straight line
         sourceX: xEqual ? sourceX + 0.0001 : sourceX,
         sourceY: yEqual ? sourceY + 0.0001 : sourceY,
