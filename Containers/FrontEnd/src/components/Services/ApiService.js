@@ -51,24 +51,42 @@ export const StartNetScan = async (scanSettings) => {
 }
 
 export const AddIPranges = async (IPRange) => {
-    console.log("IPRange: ", IPRange);
-    // TODO: Uncomment 
-    const response = fetch('http://localhost:8082/AddIPranges', { // Configuration Container
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-    });
-
-    if (!response.ok) {
+    try {
+        const response = await fetch('http://localhost:3001/addIPranges', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ iprange: IPRange })
+        });
+        const resData = await response.json();
+        // console.log(resData);
+        return resData;
+    } catch (err) {
+        console.error(err);
         throw new Error('Network response was not ok, could not fetch state');
     }
-    return response.json();
+}
+
+export const RmIPrange = async (IPRange) => {
+    try {
+        const response = await fetch('http://localhost:3001/removeIPrange', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ iprange: IPRange })
+        });
+        const resData = await response.json();
+        // console.log(resData);
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not fetch state');
+    }
 }
 
 export const GetIPranges = async (IPRange) => {
-    const response = fetch('http://localhost:8082/GetIPranges');
+    const response = await fetch('http://localhost:3001/getIPranges');
     if (!response.ok) {
         throw new Error('Network response was not ok, could not fetch state');
     }
     return response.json();
 }
+

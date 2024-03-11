@@ -1,0 +1,17 @@
+{
+    "name": "confighandler",
+    "version": "1.0.0",
+    "description": "Config handler; Takes care of configurations from the frontend.",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "nodemon src/server.js",
+        "start": "nodemon src/server.js"
+    },
+    "author": "Avid BTH student who loves programming ;)",
+    "license": "NONE",
+    "dependencies": {
+        "express": "^4.18.1",
+        "socket.io": "^4.5.0",
+        "mongoose": "^6.3.3"
+    }
+}
