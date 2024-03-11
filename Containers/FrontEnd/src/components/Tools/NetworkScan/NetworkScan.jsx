@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import './NetworkScan.css';
-import { StartNetScan } from '../../Services/ApiService';
-import { useQuery } from '@tanstack/react-query';
-import { useMutation } from "@tanstack/react-query";
+import { StartNetScan, GetIPranges } from '../../Services/ApiService';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
 
@@ -11,6 +10,12 @@ export default function NetworkScanPage() {
     const [scanSettings, setScanSettings] = useState({
         cmdSelection: '', // or null, if you prefer
         IPRanges: {}
+    });
+
+    const { data, isLoadingQue, isErrorQue, error, refetch } = useQuery({
+        queryKey: ['IPranges'],
+        queryFn: GetIPranges,
+        enabled: true
     });
 
     const { mutate, isLoading, isError } = useMutation({
@@ -80,9 +85,9 @@ export default function NetworkScanPage() {
                             </div>
                             <input
                                 type="radio"
-                                value="1"
+                                value="simple"
                                 name="scantype"
-                                checked={scanSettings.cmdSelection === '1'}
+                                checked={scanSettings.cmdSelection === 'simple'}
                                 onChange={changeScanCMD}
                             />
                         </label>
@@ -98,9 +103,9 @@ export default function NetworkScanPage() {
                             </div>
                             <input
                                 type="radio"
-                                value="2"
+                                value="extensive"
                                 name="scantype"
-                                checked={scanSettings.cmdSelection === '2'} // Control the component
+                                checked={scanSettings.cmdSelection === 'extensive'} // Control the component
                                 onChange={changeScanCMD} // Handle the change
                             />
                         </label>
@@ -108,48 +113,22 @@ export default function NetworkScanPage() {
 
                 </div>
 
-                <div>
-                    <div className='IPField'>
-                        <p className='text-desc'> Please select an IP range or subnet to scan: </p>
-                        {/* TO DO: Dynamically fetch these from the configuration/settings page */}
-                        <div className="checkbox-container">
-                            <label className='range-checkbox-label'>
-                                <p className='text-desc'> 10.10.1.0/24 </p>
-                                <input
-                                    type="checkbox"
-                                    value="10.10.1.0/24"
-                                    name="rangetype"
-                                    checked={scanSettings.IPRanges["10.10.1.0/24"] || false}
-                                    onChange={changeScanRange}
-                                />
-                            </label>
-                        </div>
-                        <div className="checkbox-container">
-                            <label className='range-checkbox-label'>
-                                <p className='text-desc'> 192.168.1.1-192.168.1.24 </p>
-                                <input
-                                    type="checkbox"
-                                    value="192.168.1.1-192.168.1.24"
-                                    name="rangetype"
-                                    checked={scanSettings.IPRanges["192.168.1.1-192.168.1.24"] || false} // Control the component
-                                    onChange={changeScanRange} // Handle the change
-                                />
-                            </label>
-                        </div>
-                        <div className="checkbox-container">
-                            <label className='range-checkbox-label'>
-                                <p className='text-desc'> 172.168.1.0/32 </p>
-                                <input
-                                    type="checkbox"
-                                    value="172.168.1.0/32"
-                                    name="rangetype"
-                                    checked={scanSettings.IPRanges["172.168.1.0/32"] || false} // Control the component
-                                    onChange={changeScanRange} // Handle the change
-                                />
-                            </label>
-                        </div>
-                    </div>
+                <div className='IPField'>
+                    <p className='text-desc'> Please select an IP range or subnet to scan: </p>
+                    {data && Array.isArray(data.ipranges) && data.ipranges.map((iprange, index) => (
+                        <label className='range-checkbox-label' key={index}>
+                            <p className='text-desc'>{iprange}</p>
+                            <input
+                                type="checkbox"
+                                value={iprange}
+                                name="rangetype"
+                                checked={scanSettings.IPRanges[iprange] || false}
+                                onChange={changeScanRange}
+                            />
+                        </label>
+                    ))}
                 </div>
+
                 {isLoading && <LoadingSpinner />}
                 <div className='buttonContainer'>
                     <button className='standard-button' disabled={isLoading} type="submit">

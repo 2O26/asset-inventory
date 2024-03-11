@@ -8,7 +8,7 @@ import { CgDarkMode } from "react-icons/cg";
 import { SiElastic } from "react-icons/si";
 import { GrGraphQl } from "react-icons/gr";
 import { FaInfoCircle } from "react-icons/fa";
-
+import { IoIosRemoveCircle } from "react-icons/io";
 // get icons from HERE: https://react-icons.github.io/react-icons/
 
 
@@ -87,5 +87,11 @@ export const GraphIcon = ({ size = 30 }) => {
 export const InfoIcon = ({ size = 30 }) => {
     return (
         <FaInfoCircle size={size} />
+    )
+}
+
+export const RemoveIcon = ({ size = 30 }) => {
+    return (
+        <IoIosRemoveCircle size={size} />
     )
 }

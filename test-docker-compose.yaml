@@ -6,6 +6,11 @@ services:
       - 3000:3000
     volumes:
       - ./Containers/FrontEnd/src:/app/src
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:3000/ || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   assethandler:
     image: assethandler
@@ -47,6 +52,36 @@ services:
     volumes:
       - configstorage:/data/db
       - configdbconfig:/data/configdb
+
+  ######################################################
+  ###     Test Environment (nginx, postgres, cypress)   ###
+  ######################################################
+  webserver:
+    image: nginx
+    ports:
+      - "89:80"
+    networks:
+      - test_network
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+    networks:
+      - test_network
+
+  cypress:
+    image: cypresslocal
+    depends_on:
+      frontenddev:
+        condition: service_healthy
+      # - dbstorage
+      # - assethandler
+      # - configstorage
+      # - confighandler
+      # - networkscan
 
 volumes:
   configstorage:
