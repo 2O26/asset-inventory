@@ -6,13 +6,15 @@
     --color-1: #2a8af6;
     --color-2: #84b8f4;
     --color-3: #0031c4;
-    --color-4: rgba(42, 138, 246, 0);
+    /* --color-4: rgba(42, 138, 246, 0); */
+    --color-4: #d8eaff;
     /* --color-1: #2a8af6;
     --color-2: #a853ba;
     --color-3: #e92a67;
     --color-4: rgba(42, 138, 246, 0); */
     background-color: var(--graph-bg);
     color: var(--text-color);
+    /* box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);s */
 }
 
 .react-flow__node-turbo {
@@ -175,7 +177,7 @@
 }
 
 .react-flow__controls button:hover {
-    background-color: rgb(37, 37, 37);
+    background-color: #2a8af6;
 }
 
 .react-flow__controls button:first-child {
@@ -197,4 +199,17 @@
 
 .react-flow__attribution a {
     color: var(--color-1);
+}
+
+.dark .react-flow__minimap {
+    background-color: var(--selected-node);
+}
+
+.dark .react-flow__minimap-mask {
+    fill: rgb(34, 34, 34, 0.6);
+    border-radius: 1rem;
+}
+
+.dark .react-flow__minimap-node {
+    fill: rgb(34, 34, 34)
 }

@@ -20,30 +20,6 @@
 } */
 
 /* Blue Dark Theme */
-:root .dark {
-    --main-color: #222222;
-    --secondary-color: #2ecc71;
-    --accent-color: #9b59b6;
-
-    --text-color: #d9d7d7;
-    --text-hover: #5e93fd;
-
-    --logo-color: #5e93fd;
-
-    --background-color: #1c1c1c;
-
-    --button-color: #5e93fd;
-    --button-text: #000000;
-    --button-text-hover: white;
-    --button-hover: #5e93fd;
-    --button-active: #5c5c5c;
-    --button-shadow: #0000007e;
-
-    --hr-color-1: rgba(228, 228, 228, 0);
-    --hr-color-2: rgba(228, 228, 228, 0.75);
-
-    --graph-bg: rgb(26, 26, 26);
-}
 
 :root .dark {
     --main-color: #222222;
@@ -67,7 +43,7 @@
     --hr-color-1: rgba(228, 228, 228, 0);
     --hr-color-2: rgba(228, 228, 228, 0.75);
 
-    --graph-bg: rgb(26, 26, 26);
+    --graph-bg: rgb(21, 21, 21);
     --selected-node: #000000;
 }
 

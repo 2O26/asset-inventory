@@ -139,15 +139,16 @@ function LayoutFlow({ initialNodes, initialEdges, selectedAsset }) {
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             defaultEdgeOptions={defaultEdgeOptions}
+            attributionPosition='bottom-left'
         >
-            <Controls />
-            <MiniMap />
+            <Controls position="bottom-right" />
+            <MiniMap position="bottom-left" />
             <Background variant="dots" gap={12} size={1} />
-            <Panel position="top-right">
+            {/* <Panel position="top-right">
                 <button onClick={() => onLayout({ direction: 'DOWN' })}>vertical layout</button>
 
                 <button onClick={() => onLayout({ direction: 'RIGHT' })}>horizontal layout</button>
-            </Panel>
+            </Panel> */}
             <svg>
                 <defs>
                     <linearGradient id="edge-gradient">
