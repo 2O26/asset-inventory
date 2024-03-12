@@ -17,6 +17,9 @@ RUN go mod download
 # Copy source code to container
 COPY *.go ./
 
+# Run tests for jsonhandler and dbcon
+RUN go test assetinventory/... -v
+
 # Compile the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /assethandler
 # Expose port 8080 (the port that the API is listening to)
