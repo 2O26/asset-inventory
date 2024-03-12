@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
     "encoding/xml"
     "time"
-    
+    "math/rand" // This is a tmp package for generating random MAC addresses
 )
 
 // Will get scan array from DB
@@ -34,23 +34,31 @@ var hardcodedScan = json.RawMessage(`
     }
 }`)
 
-type Asset struct {
-    Status  string `json:"status"`
-    IPv4Addr string `json:"ipv4addr"`
-    IPv6Addr string `json:"ipv6addr"`
-    Subnet   string `json:"subnet"`
-}
+// Global variable to store the scan result
+var scanResultGlobal Scan
 
 type Scan struct {
-    StateID     string           `json:"stateID"`
-    DateCreated string           `json:"dateCreated"`
-    DateUpdated string           `json:"dateUpdated"`
-    State       map[string]Asset `json:"state"`
+    StateID     string
+    DateCreated string
+    DateUpdated string
+    State       map[string]Asset
+}
+
+type Asset struct {
+    Status       string
+    IPv4Addr     string
+    IPv6Addr     string
+    Subnet       string
+    Hostname     string 
+    KernelVersion string // Changed from OS to KernelVersion
+    MACAddr      string // New field for MAC addresses
 }
 
 type Host struct {
     Status Status `xml:"status"`
     Address []Address `xml:"address"`
+    Hostnames []Hostname `xml:"hostnames>hostname"` 
+    OS OS `xml:"os>osmatch"` 
 }
 
 type Status struct {
@@ -65,9 +73,32 @@ type Address struct {
 type Nmaprun struct {
     Hosts []Host `xml:"host"`
 }
+
+type ScanRequest struct {
+    IPRanges     map[string]bool `json:"IPRanges"`
+    CmdSelection string          `json:"cmdSelection"`
+}
+
+type Hostname struct {
+    Name string `xml:"name,attr"` // New field for hostname
+}
+
+type OS struct {
+    Name string `xml:"name,attr"` // This struct might be better named as KernelVersion
+}
+
+func fillWithRandomMACAddresses(scan *Scan) {
+    macAddressTemplate := "00:00:00:%02x:%02x:%02x"
+    for key := range scan.State {
+        state := scan.State[key] // Get the struct value from the map
+        state.MACAddr = fmt.Sprintf(macAddressTemplate, rand.Intn(256), rand.Intn(256), rand.Intn(256)) // Modify the struct value
+        scan.State[key] = state // Put the struct value back into the map
+    }
+}
+
 func main() {
 	router := gin.Default()
-	router.GET("/status", getScan)
+	router.GET("/getScanResult", getScan)
 	router.POST("/startNetScan", postNetScan)
 
 	router.Run(":8081")
@@ -77,20 +108,21 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
-func performScan(target string) (string, error) {
-    cmd := exec.Command("nmap", "-sV", "-oX", "-", target)
+func performScan(target string) (Scan, error) {
+    fmt.Printf("performScan\n")
+    cmd := exec.Command("nmap", "-O", "-R", "-oX", "-", target)
     var stderr strings.Builder
     cmd.Stderr = &stderr
     out, err := cmd.Output()
     if err != nil {
-        return "", fmt.Errorf("%s: %s", err, stderr.String())
+        return Scan{}, fmt.Errorf("%s: %s", err, stderr.String())
     }
 
     // Unmarshal XML to struct
     var nmaprun Nmaprun
     err = xml.Unmarshal(out, &nmaprun)
     if err != nil {
-        return "", fmt.Errorf("xml.Unmarshal: %s", err)
+        return Scan{}, fmt.Errorf("xml.Unmarshal: %s", err)
     }
 
     scan := Scan{
@@ -101,7 +133,7 @@ func performScan(target string) (string, error) {
     }
 
     for _, host := range nmaprun.Hosts {
-        var ipv4, ipv6 string
+        var ipv4, ipv6, hostname, kernelVersion string
         for _, address := range host.Address {
             if address.AddrType == "ipv4" {
                 ipv4 = address.Addr
@@ -109,40 +141,51 @@ func performScan(target string) (string, error) {
                 ipv6 = address.Addr
             }
         }
+        if len(host.Hostnames) > 0 {
+            hostname = host.Hostnames[0].Name
+        }
+        kernelVersion = host.OS.Name
         scan.State[ipv4] = Asset{
-            Status:  host.Status.State,
+            Status:   host.Status.State,
             IPv4Addr: ipv4,
             IPv6Addr: ipv6,
-            Subnet:   "", // Replace with actual subnet
+            Subnet:   target, // Store the target subnet
+            Hostname: hostname, // Store the hostname
+            KernelVersion: kernelVersion, // Store the OS information
+            MACAddr:  "", // MAC address is empty for now
         }
     }
 
-    jsonOut, err := json.Marshal(scan)
-    if err != nil {
-        return "", fmt.Errorf("json.Marshal: %s", err)
-    }
-
-    return string(jsonOut), nil
+    return scan, nil
 }
 
 func getScan(c *gin.Context) {
-    target := c.Query("target") // get the target from the query parameters
-    scanResult, err := performScan(target)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    
-    var scan Scan
-    err = json.Unmarshal([]byte(scanResult), &scan)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    
-    c.JSON(http.StatusOK, scan)
+    fmt.Printf("getScan\n")
+    // Send the global scan result to the requester
+    c.JSON(http.StatusOK, scanResultGlobal)
 }
 func postNetScan(c *gin.Context) {
+    fmt.Printf("postNetScan\n")
+    var req ScanRequest
 
-	c.IndentedJSON(http.StatusCreated, hardcodedScan)
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    // Perform the scan for each target in the request
+    for target, _ := range req.IPRanges {
+        scanResult, err := performScan(target)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+        fillWithRandomMACAddresses(&scanResult) // This is a tmp function to fill the MAC addresses
+
+        scanResultGlobal = scanResult
+    }
+
+    fmt.Printf("Finished postNetScan\n")
+
+    c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully"})
 }
