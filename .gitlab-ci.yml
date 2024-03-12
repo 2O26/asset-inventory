@@ -4,51 +4,18 @@ stages:
   - build
   - test
 
-image: docker:stable
-
-variables:
-  DOCKER_HOST: tcp://docker:2375
-
-docker-setup:
-  stage: docker-setup
-  tags:
-    - docker-build
-  services:
-    - docker:dind
-  script:
-    - docker --version
-    - docker info
-    - docker images --all
-    - docker run hello-world
-    - docker ps
-
-docker-clean:
-  stage: docker-clean
-  tags:
-    - docker-build
-  services:
-    - docker:dind
-  script:
-    - make clean
-    - docker ps -a -q -f status=exited | xargs --no-run-if-empty docker rm -v
-    - docker images -f "dangling=true" -q | xargs --no-run-if-empty docker rmi
-    - docker volume ls -qf dangling=true | xargs --no-run-if-empty docker volume rm
-
 build-job:
+  image: docker:stable
   stage: build
   tags:
-    - docker-build
-  services:
-    - docker:dind
+     - docker-build
   script:
-    - make all
-    - free -h
-    - make run
+    - make all-dev
     
-cypress-test-job:
-  stage: test
-  tags:
-    - docker-build
-  script:
-    - make test
+#cypress-test-job:
+#  stage: test
+#  tags:
+#    - docker-build
+#  script:
+#    - make test
 

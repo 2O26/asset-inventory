@@ -10,7 +10,7 @@ services:
   assethandler:
     image: assethandler
     ports:
-      - "8080:8080"
+      - "8085:8085"
 
   networkscan:
     image: networkscan
