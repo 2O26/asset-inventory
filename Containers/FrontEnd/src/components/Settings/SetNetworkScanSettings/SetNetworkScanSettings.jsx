@@ -5,14 +5,17 @@ import { AddIPranges, GetIPranges, RmIPrange } from '../../Services/ApiService';
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { RemoveIcon } from "../../common/Icons/Icons";
 
+
 export default function SetNetworkScanSettings() {
     const [expandAddIPrange, setExpandAddIPrange] = useState(false);
     const [IPRange, setIPRange] = useState("");
     const [addIPRangeSuccess, setAddIPRangeSuccess] = useState(false);
     const [addIPRangeFail, setAddIPRangeFail] = useState(false);
     const [rangeFromAdd, setRangeFromAdd] = useState();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedIpRange, setSelectedIpRange] = useState(null);
 
-    const { mutate: mutateAdd, isLoadingMutAdd, isErrorMutAdd } = useMutation({
+    const { mutate: mutateAdd, isloading: isLoadingMutAdd, isError: isErrorMutAdd } = useMutation({
         mutationFn: AddIPranges, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
@@ -20,6 +23,7 @@ export default function SetNetworkScanSettings() {
                 setRangeFromAdd(data.range); // If I want to use the data
                 setAddIPRangeFail(false);
                 setAddIPRangeSuccess(true);
+                refetch();
                 // console.log("IP range added sucessfully:", data);
             } else if (data.success === "wrong format") {
                 setAddIPRangeSuccess(false);
@@ -27,8 +31,8 @@ export default function SetNetworkScanSettings() {
                 // console.log("Could not add IP range sucessfully");
             }
             else {
-                setAddIPRangeFail(true);
-                console.log("Could not add IP range sucessfully");
+                setAddIPRangeSuccess(false);
+                console.log("Could not add IP range sucessfully. Error: ", data.success);
             }
         },
         onError: (error) => {
@@ -37,7 +41,7 @@ export default function SetNetworkScanSettings() {
         }
     });
 
-    const { mutate: mutateRm, isLoadingMutRm, isErrorMutRm } = useMutation({
+    const { mutate: mutateRm, isloading: isLoadingMutRm, isError: isErrorMutRm } = useMutation({
         mutationFn: RmIPrange, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
@@ -45,6 +49,7 @@ export default function SetNetworkScanSettings() {
                 setRangeFromAdd(data.range); // If I want to use the data
                 setAddIPRangeFail(false);
                 setAddIPRangeSuccess(true);
+                refetch();
                 // console.log("IP range added sucessfully:", data);
             } else if (data.success === "wrong format") {
                 setAddIPRangeSuccess(false);
@@ -52,8 +57,8 @@ export default function SetNetworkScanSettings() {
                 // console.log("Could not add IP range sucessfully");
             }
             else {
-                setAddIPRangeFail(true);
-                console.log("Could not add IP range sucessfully");
+                setAddIPRangeSuccess(false);
+                console.log("Could not add IP range sucessfully. Error: ", data.success);
             }
         },
         onError: (error) => {
@@ -93,6 +98,13 @@ export default function SetNetworkScanSettings() {
         mutateRm(iprange);
     };
 
+    const handleRemoveClick = (iprange) => {
+        if (window.confirm("Are you sure you want to delete this item?")) {
+            removeIpRange(iprange);
+        }
+    };
+
+
     return (
         <div>
             <div className='networkScanTitleConfig'>
@@ -106,7 +118,7 @@ export default function SetNetworkScanSettings() {
                             <li key={index} className='iprangelist'>
                                 <span className="iprange-text">{iprange}</span>
                                 <button
-                                    onClick={() => removeIpRange(iprange)}
+                                    onClick={() => handleRemoveClick(iprange)}
                                     className="remove-ip-range-btn"
                                     title="Remove IP range"
                                     aria-label='Remove'
@@ -114,11 +126,11 @@ export default function SetNetworkScanSettings() {
                                     <span className="tooltip-text">Remove IP range</span>
                                     < RemoveIcon />
                                 </button>
+
                             </li>
                         ))}
                     </ul>
                 </div>
-
                 <div>
                     {expandAddIPrange ? null : <button className='standard-button' onClick={expandIPrange}> Add IP range</button>}
                     {expandAddIPrange ? <div>
@@ -132,7 +144,6 @@ export default function SetNetworkScanSettings() {
                                 onChange={handleChange} // Update the state when the input changes
                                 className='ip-range-input'
                             >
-
                             </input>
                             {isLoadingMutAdd && <LoadingSpinner />}
                             {addIPRangeSuccess &&
@@ -158,7 +169,7 @@ export default function SetNetworkScanSettings() {
                 </div>
             </div>
 
-        </div>
+        </div >
 
     )
 }

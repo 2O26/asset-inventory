@@ -70,9 +70,9 @@ services:
     restart: always
     command: [ "mongod", "--port", "27018", "--quiet", "--syslog" ]
     ports:
-      - "27017:27017"
+      - "27018:27018"
     expose:
-      - "27017"
+      - "27018"
     volumes:
       - configstorage:/data/db
       - configdbconfig:/data/configdb
@@ -146,27 +146,6 @@ services:
     ####
     # environment:
     #   - KIBANAPASSWORD=$KIBANAPASSWORD
-
-
-
-    ######################################################
-    ###     Test Environment (nginx, postgres, nmap)   ###
-    ######################################################
-  webserver:
-    image: nginx
-    ports:
-      - "89:80"
-    networks:
-      - test_network
-
-  postgres:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: example
-    ports:
-      - "5432:5432"
-    networks:
-      - test_network
 
 volumes:
   configstorage:

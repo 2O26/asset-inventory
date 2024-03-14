@@ -57,14 +57,9 @@ app.post("/removeIPrange", (req, res) => {
     const configHandler = new ConfigHandler();
     configHandler.connect()
         .then(() => configHandler.removeIPrange(req.body.iprange))
-        .then((result) => {
-            if (result) {
-                // If a document was found and removed
-                res.json({ responseFromServer: "Succeeded to remove IPrange!", success: "success", range: req.body.iprange });
-            } else {
-                // If no document matched the IP range to be removed
-                res.json({ responseFromServer: "IPrange not found in the database.", success: "Not Found IP range", range: req.body.iprange });
-            }
+        .then(() => {
+            res.json({ responseFromServer: "Succeeded to remove IPrange!", success: "success", range: req.body.iprange });
+            // If no document matched the IP range to be removed
         }).catch((err) => {
             res.json({ responseFromServer: "Failure to remove IPrange due to database error.", success: "database error", range: req.body.iprange });
         });

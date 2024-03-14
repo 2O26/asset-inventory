@@ -38,7 +38,7 @@ class ConfigHandler {
 
     async removeIPrange(IPrange) {
         try {
-            const result = await IPRangeSchema.findOneAndRemove({ IPRange: IPrange });
+            await IPRangeSchema.findOneAndRemove({ IPRange: IPrange });
         } catch (err) {
             console.log(`Error while removing IP range:`, err.message);
         }
