@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Containers",
+    "\\Containers\\AssetHandler",
+    "\\Containers\\NetworkScan"
   ],
-  "SelectedNode": "\\docker-compose.yaml",
   "PreviewInSolutionExplorer": false
 }
