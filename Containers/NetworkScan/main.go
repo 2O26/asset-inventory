@@ -6,6 +6,7 @@ import (
     "os/exec"
     "strings"
     "fmt"
+    "regexp"
 	"github.com/gin-gonic/gin"
     "encoding/xml"
     "time"
@@ -108,8 +109,25 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
+func validNmapTarget(nmapTarget string) bool {
+    //Example of strings able to be handled "192.168.1.0/24, 172.15.1.1-100, 10.10.1.145"
+    regex := `^(\b(?:\d{1,3}\.){3}\d{1,3}(?:/\d{1,2})?|\b(?:\d{1,3}\.){3}\d{1,3}-\d{1,3}\b)$` // `` Have to be used instead of "" or the regex breaks
+    
+    // regex first boundry matches an IPV4 address and an aditional optional CIDR notation -> (.1/24). OR an IPV4 address range with after a "-"
+    match, err := regexp.MatchString(regex, nmapTarget)
+
+    if err != nil {
+        return false
+    }
+    return match
+} 
+
+
 func performScan(target string) (Scan, error) {
     fmt.Printf("performScan\n")
+        if validNmapTarget(target) == false{     //Validation of nmap parameters
+        return Scan{}, fmt.Errorf("Invalid nmap target!")
+    }
     cmd := exec.Command("nmap", "-O", "-R", "-oX", "-", target)
     var stderr strings.Builder
     cmd.Stderr = &stderr
