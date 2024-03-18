@@ -1,6 +1,12 @@
 # Installation
 Follow the instructions to download docker tutorial
 
+## Dependencies
+```
+make
+docker
+```
+
 # Creating images
 To create all docker images required to run the cluster with logs, run:
 ```
