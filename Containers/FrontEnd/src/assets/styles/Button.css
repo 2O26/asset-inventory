@@ -1,3 +1,10 @@
+  .standard-button-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    width: 100%;
+  }
+
   .standard-button {
     margin: 1rem;
     width: 140px;

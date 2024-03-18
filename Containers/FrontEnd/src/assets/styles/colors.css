@@ -21,6 +21,11 @@
 
 /* Blue Dark Theme */
 
+:root {
+    --error-color: rgb(255, 120, 120);
+    --success-color: #2FDD92;
+}
+
 :root .dark {
     --main-color: #222222;
     --secondary-color: #2ecc71;

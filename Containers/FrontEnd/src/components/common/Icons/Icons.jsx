@@ -8,7 +8,10 @@ import { CgDarkMode } from "react-icons/cg";
 import { SiElastic } from "react-icons/si";
 import { GrGraphQl } from "react-icons/gr";
 import { FaInfoCircle } from "react-icons/fa";
-import { IoIosRemoveCircle } from "react-icons/io";
+import { IoIosRemoveCircle, IoIosAddCircle } from "react-icons/io";
+import { CgArrowsH } from "react-icons/cg";
+import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
+import { MdAddLink } from "react-icons/md";
 // get icons from HERE: https://react-icons.github.io/react-icons/
 
 
@@ -90,8 +93,34 @@ export const InfoIcon = ({ size = 30 }) => {
     )
 }
 
-export const RemoveIcon = ({ size = 30 }) => {
+export const RemoveIcon = ({ size = 30, color = null }) => {
     return (
-        <IoIosRemoveCircle size={size} />
+        <IoIosRemoveCircle size={size} color={color} />
+    )
+}
+export const AddIcon = ({ size = 30, color = null }) => {
+    return (
+        <IoIosAddCircle size={size} color={color} />
+    )
+}
+
+export const ConnectionIcon = ({ size = 30, color = null }) => {
+    return (
+        <CgArrowsH size={size} color={color} />
+    )
+}
+export const CheckIcon = ({ size = 30, color = null }) => {
+    return (
+        <CiCircleCheck size={size} color={color} />
+    )
+}
+export const CrossIcon = ({ size = 30, color = null }) => {
+    return (
+        <CiCircleRemove size={size} color={color} />
+    )
+}
+export const LinkAddIcon = ({ size = 30, color = null }) => {
+    return (
+        <MdAddLink size={size} color={color} />
     )
 }
