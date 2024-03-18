@@ -90,3 +90,17 @@ export const GetIPranges = async (IPRange) => {
     return response.json();
 }
 
+export const UpdateAsset = async (data) => {
+    try {
+        const response = await fetch('http://localhost:8080/UpdateAsset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not fetch state');
+    }
+}

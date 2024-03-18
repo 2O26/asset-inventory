@@ -1,7 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import { AddIcon, CheckIcon, ConnectionIcon, CrossIcon, LinkAddIcon, RemoveIcon } from '../common/Icons/Icons';
+import { UpdateAsset } from '../Services/ApiService';
+import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
+import { useMutation } from '@tanstack/react-query';
 
-export default function EditAsset({ assetData, assetID, relationData }) {
+export default function EditAsset({ assetData, assetID, relationData, refetch }) {
+    const [errorMessage, setErrorMessage] = useState(null)
+    const { mutate, isPending, isError, error, isSuccess } = useMutation({
+        mutationFn: UpdateAsset, // Directly pass the LogIn function
+        onSuccess: (data) => {
+            // Handle success logic here, no need for useEffect
+            if (data.success) {
+                console.log("Asset Updated");
+                setErrorMessage(null)
+                refetch()
+            } else {
+                setErrorMessage("Could not update asset")
+            }
+        },
+        onError: (error) => {
+            // Optionally handle error state
+            console.error("Update error:", error);
+        }
+    });
+
     const dontDisplayList = ["Created at", "Updated at", "Hostname"];
     const [properties, setProperties] = useState({});
     const [relations, setRelations] = useState({});
@@ -19,7 +41,7 @@ export default function EditAsset({ assetData, assetID, relationData }) {
         console.log("updated properties info: ", properties);
         console.log("added relations: ", addedRelations);
         e.preventDefault();
-        // mutate({assetID: properties, "removedRelations": removedRelations, "addedRelations": addedRelations});
+        mutate({ "updatedAsset": { assetID: properties }, "removedRelations": removedRelations, "addedRelations": addedRelations });
         // refetch() asset data etc.
 
 
@@ -150,13 +172,14 @@ export default function EditAsset({ assetData, assetID, relationData }) {
                 </div>
                 {showButtons &&
                     <div className="standard-button-container">
-                        <button className="standard-button" type="submit">Save</button>
-                        <button className="standard-button" onClick={handleReset}>Cancel</button>
-                        {/* <button className="standard-button" disabled={isLoading} type="submit">Save</button>
-                    <button className="standard-button" disabled={isLoading} type="submit">Cancel</button> */}
+                        <button className="standard-button" disabled={isPending} type="submit">Save</button>
+                        <button className="standard-button" disabled={isPending} onClick={handleReset}>Cancel</button>
                     </div>
 
                 }
+                {isPending && <LoadingSpinner />}
+                {isError && <div className='errorMessage'>{error.message}</div>}
+                {errorMessage && <div className='errorMessage'>{errorMessage}</div>}
             </form>
         </div>
     )

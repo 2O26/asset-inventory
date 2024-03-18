@@ -81,7 +81,7 @@ export default function AssetView() {
                     {selectedView === 'History' && (
                         <AssetInfo data={data} assetID={assetID} title={"History Page"} showPluginInfo={false}></AssetInfo>)}
                     {selectedView === 'Edit' && (
-                        <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations}></EditAsset>)}
+                        <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch}></EditAsset>)}
                 </div>
             }
         </div>
