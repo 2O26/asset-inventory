@@ -14,15 +14,30 @@ function isValidSubnet(ip) {
 }
 
 function isValidIpRange(ipRange) {
-    const parts = ipRange.split('-');
-    if (parts.length !== 2 || !isValidIp(parts[0]) || !isValidIp(parts[1])) {
+    // Split the input into the IP part and the range part
+    const [ipPart, rangeEnd] = ipRange.split('-');
+    if (!ipPart || !rangeEnd) {
+        return false; // Ensure both parts exist
+    }
+
+    if (!isValidIp(ipPart)) {
         return false;
     }
 
-    const startIpNum = convertIpToNumber(parts[0]);
-    const endIpNum = convertIpToNumber(parts[1]);
+    const octets = ipPart.split('.');
+    if (octets.length !== 4) {
+        return false; // Ensure there are exactly 4 octets
+    }
 
-    return startIpNum <= endIpNum;
+    const lastOctetNum = parseInt(octets[3], 10);
+    const rangeEndNum = parseInt(rangeEnd, 10);
+
+    if (isNaN(lastOctetNum) || isNaN(rangeEndNum) || lastOctetNum < 0 || lastOctetNum > 255 || rangeEndNum < 0 || rangeEndNum > 255) {
+        return false;
+    }
+
+    // Ensure the range is in ascending order
+    return lastOctetNum < rangeEndNum;
 }
 
 function IPRangechecker(IPRange) {
