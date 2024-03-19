@@ -6,7 +6,9 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
 
 export default function NetworkScanPage() {
-    // const [IPRanges, setIPRanges] = useState({});
+    const [deployedNetscan, setDeployedNetscan] = useState(false);
+    const [failedNetscan, setFailedNetscan] = useState(false);
+
     const [scanSettings, setScanSettings] = useState({
         cmdSelection: '', // or null, if you prefer
         IPRanges: {}
@@ -19,18 +21,23 @@ export default function NetworkScanPage() {
     });
 
     const { mutate, isLoading, isError } = useMutation({
-        mutationFn: StartNetScan, // Directly pass the LogIn function
+        mutationFn: StartNetScan,
         onSuccess: (data) => {
-            // Handle success logic here, no need for useEffect
             if (data.success) {
-
+                setDeployedNetscan(true);
+                setFailedNetscan(false)
             } else {
+                // TODO: Error handle if erronous response
+                // - Error 1: Not responding
+                // - Error 2: Already scanning
+                setDeployedNetscan(false);
+                setFailedNetscan(true)
                 console.log("Could not start scan");
             }
         },
         onError: (error) => {
             // Optionally handle error state
-            console.error("Login error:", error);
+            console.error("Scan error:", error);
         }
     });
 
@@ -57,14 +64,9 @@ export default function NetworkScanPage() {
 
     const attemptToScan = (event) => {
         event.preventDefault();
-        // Use mutate with the input data
-
-        // TODO: Uncomment
+        setDeployedNetscan(false);
         mutate(scanSettings);
 
-        // TODO: Error handle if erronous response
-        // - Error 1: Not responding
-        // - Error 2: Already scanning
     }
 
     return (
@@ -129,11 +131,24 @@ export default function NetworkScanPage() {
                     ))}
                 </div>
 
-                {isLoading && <LoadingSpinner />}
+
                 <div className='buttonContainer'>
                     <button className='standard-button' disabled={isLoading} type="submit">
                         <div> Start scan </div>
                     </button>
+                </div>
+                <div>
+                    {isLoading && <LoadingSpinner />}
+                    {deployedNetscan &&
+                        <div className='resultText'>
+                            <p className='successText'>Successfully started scanning IP range ✅</p>
+                        </div>
+                    }
+                    {failedNetscan &&
+                        <div className='resultText'>
+                            <p className='successText'> Failed to start scanning IP range. ❌</p>
+                        </div>
+                    }
                 </div>
             </form>
         </div>

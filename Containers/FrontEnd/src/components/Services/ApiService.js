@@ -36,18 +36,26 @@ export const EditLatestStatus = async () => {
 }
 
 export const StartNetScan = async (scanSettings) => {
-    console.log("cmdSelection", scanSettings.cmdSelection);
-    console.log("IPRanges: ", scanSettings.IPRanges);
+    // console.log("cmdSelection", scanSettings.cmdSelection);
+    // console.log("IPRanges: ", scanSettings.IPRanges);
 
-    const response = fetch('http://localhost:8081/startNetScan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(scanSettings)
-    });
-    if (!response.ok) {
+    try {
+        const response = await fetch('http://localhost:8081/startNetScan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(scanSettings)
+        });
+
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
         throw new Error('Network response was not ok, could not fetch state');
     }
-    return response.json();
+    // if (!response.ok) {
+    //     throw new Error('Network response was not ok, could not fetch state');
+    // }
+    // return response.json();
 }
 
 export const AddIPranges = async (IPRange) => {

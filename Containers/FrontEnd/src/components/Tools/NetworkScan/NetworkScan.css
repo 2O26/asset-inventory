@@ -136,3 +136,14 @@ input[type="checkbox"] {
     /* marginTop: '8px';
     zIndex: 1; */
 }
+
+.resultText {
+    display: flex;
+    justify-content: left;
+}
+
+.successText {
+    margin-top: 0.3rem;
+    color: var(--text-color);
+
+}
