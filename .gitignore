@@ -1,9 +1,7 @@
 # misc
 *.DS_Store
-*.vs
+.vs/
 *.vscode
 *.idea
-<<<<<<< HEAD
-=======
 .env
->>>>>>> origin/develop
+
