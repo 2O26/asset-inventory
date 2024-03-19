@@ -11,7 +11,7 @@ export default function SignIn() {
     const [userData, setUserData] = useState({ email: "", password: "" });
 
     // Setup mutation
-    const { mutate, isLoading, isError } = useMutation({
+    const { mutate, isPending, isError } = useMutation({
         mutationFn: LogIn, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
@@ -59,10 +59,10 @@ export default function SignIn() {
                         name="password"
                         required
                     />
-                    {isLoading && <LoadingSpinner />}
+                    {isPending && <LoadingSpinner />}
                     {isError && <p className="errorMessage">Sign In Failed</p>}
                     <div className="AuthBtnContainer">
-                        <button className="standard-button" disabled={isLoading} type="submit">Sign in</button>
+                        <button className="standard-button" disabled={isPending} type="submit">Sign in</button>
                     </div>
                     {/* Links */}
                 </form>

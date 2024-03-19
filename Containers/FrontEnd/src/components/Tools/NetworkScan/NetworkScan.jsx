@@ -14,13 +14,13 @@ export default function NetworkScanPage() {
         IPRanges: {}
     });
 
-    const { data, isLoadingQue, isErrorQue, error, refetch } = useQuery({
+    const { data, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['IPranges'],
         queryFn: GetIPranges,
         enabled: true
     });
 
-    const { mutate, isLoading, isError } = useMutation({
+    const { mutate, isPending, isError: isErrorMut, error: errorMut } = useMutation({
         mutationFn: StartNetScan,
         onSuccess: (data) => {
             if (data.success) {
@@ -117,6 +117,8 @@ export default function NetworkScanPage() {
 
                 <div className='IPField'>
                     <p className='text-desc'> Please select an IP range or subnet to scan: </p>
+                    {isLoading && <LoadingSpinner />}
+                    {isError && <div className='errorMessage'>{error.message}</div>}
                     {data && Array.isArray(data.ipranges) && data.ipranges.map((iprange, index) => (
                         <label className='range-checkbox-label' key={index}>
                             <p className='text-desc'>{iprange}</p>
@@ -133,12 +135,12 @@ export default function NetworkScanPage() {
 
 
                 <div className='buttonContainer'>
-                    <button className='standard-button' disabled={isLoading} type="submit">
+                    <button className='standard-button' disabled={isPending} type="submit">
                         <div> Start scan </div>
                     </button>
                 </div>
                 <div>
-                    {isLoading && <LoadingSpinner />}
+                    {isPending && <LoadingSpinner />}
                     {deployedNetscan &&
                         <div className='resultText'>
                             <p className='successText'>Successfully started scanning IP range ✅</p>

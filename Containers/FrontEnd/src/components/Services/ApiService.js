@@ -70,7 +70,7 @@ export const AddIPranges = async (IPRange) => {
         return resData;
     } catch (err) {
         console.error(err);
-        throw new Error('Network response was not ok, could not fetch state');
+        throw new Error('Network response was not ok, could not add IP range');
     }
 }
 
@@ -86,19 +86,22 @@ export const RmIPrange = async (IPRange) => {
         return resData;
     } catch (err) {
         console.error(err);
-        throw new Error('Network response was not ok, could not fetch state');
+        throw new Error('Network response was not ok, could not remove IP range');
     }
 }
 
-export const GetIPranges = async (IPRange) => {
-    const response = await fetch('http://localhost:3001/getIPranges');
-    if (!response.ok) {
-        throw new Error('Network response was not ok, could not fetch state');
+export const GetIPranges = async () => {
+    try {
+        const response = await fetch('http://localhost:3001/getIPranges');
+        return response.json();
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch IP ranges');
     }
-    return response.json();
 }
 
 export const UpdateAsset = async (data) => {
+    console.log("Edit Data:", data);
     try {
         const response = await fetch('http://localhost:8080/UpdateAsset', {
             method: 'POST',

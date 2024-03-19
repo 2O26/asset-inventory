@@ -15,7 +15,7 @@ export default function SetNetworkScanSettings() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedIpRange, setSelectedIpRange] = useState(null);
 
-    const { mutate: mutateAdd, isloading: isLoadingMutAdd, isError: isErrorMutAdd } = useMutation({
+    const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
         mutationFn: AddIPranges, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
@@ -41,7 +41,7 @@ export default function SetNetworkScanSettings() {
         }
     });
 
-    const { mutate: mutateRm, isloading: isLoadingMutRm, isError: isErrorMutRm } = useMutation({
+    const { mutate: mutateRm, isPending: isPendingMutRm, isError: isErrorMutRm, error: errorMutRm } = useMutation({
         mutationFn: RmIPrange, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
@@ -68,7 +68,7 @@ export default function SetNetworkScanSettings() {
     });
 
 
-    const { data, isLoadingQue, isErrorQue, error, refetch } = useQuery({
+    const { data, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['IPranges'],
         queryFn: GetIPranges,
         enabled: true
@@ -113,6 +113,8 @@ export default function SetNetworkScanSettings() {
             <div className='rangeConfigIP'>
                 <div>
                     <p className='scansettingsText'> Current IP ranges:</p>
+                    {(isLoading || isPendingMutAdd || isPendingMutRm) && <LoadingSpinner />}
+                    {isError && <div className='errorMessage'>{error.message}</div>}
                     <ul>
                         {data && Array.isArray(data.ipranges) && data.ipranges.map((iprange, index) => (
                             <li key={index} className='iprangelist'>
@@ -145,7 +147,7 @@ export default function SetNetworkScanSettings() {
                                 className='ip-range-input'
                             >
                             </input>
-                            {isLoadingMutAdd && <LoadingSpinner />}
+                            {isPendingMutAdd && <LoadingSpinner />}
                             {addIPRangeSuccess &&
                                 <div>
                                     <p className='successText'>Successfully added IP range: {rangeFromAdd} ✅</p>
@@ -156,8 +158,10 @@ export default function SetNetworkScanSettings() {
                                     <p className='successText'> Failed to add IP range: {rangeFromAdd}. Wrong format. ❌</p>
                                 </div>
                             }
+                            {isErrorMutRm && <div className='errorMessage'>{errorMutRm.message}</div>}
+                            {isErrorMutAdd && <div className='errorMessage'>{errorMutAdd.message}</div>}
                             <div className='buttonContainer'>
-                                <button className='standard-button' disabled={isLoadingMutAdd} type="submit">
+                                <button className='standard-button' disabled={isPendingMutAdd} type="submit">
                                     <div> Add IP range </div>
                                 </button>
                                 <button className='standard-button' onClick={expandIPrange}>

@@ -37,11 +37,8 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
 
 
     const handleSubmit = (e) => {
-        console.log("remove RID: ", removedRelations);
-        console.log("updated properties info: ", properties);
-        console.log("added relations: ", addedRelations);
         e.preventDefault();
-        mutate({ "updatedAsset": { assetID: properties }, "removedRelations": removedRelations, "addedRelations": addedRelations });
+        mutate({ "updatedAsset": { [assetID]: properties }, "removedRelations": removedRelations, "addedRelations": addedRelations });
         // refetch() asset data etc.
 
 
@@ -99,9 +96,9 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                                         setShowButtons(true);
                                     }}
                                     id={key}
-                                    type={(key == "Criticality") ? "number" : "text"}
-                                    min={(key == "Criticality") ? 1 : null}
-                                    max={(key == "Criticality") ? 5 : null}
+                                    type={(key === "Criticality") ? "number" : "text"}
+                                    min={(key === "Criticality") ? 1 : null}
+                                    max={(key === "Criticality") ? 5 : null}
                                     name={key}
                                 />
                             </div>
