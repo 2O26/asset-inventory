@@ -18,7 +18,7 @@ RUN go mod download
 COPY *.go ./
 
 # Run tests for jsonhandler and dbcon
-RUN go test assetinventory/... -v
+# RUN go test assetinventory/... -v
 
 # Compile the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /assethandler

@@ -1,6 +1,7 @@
 package dbcon
 
 import (
+	"assetinventory/assethandler/jsonhandler"
 	"context"
 	"time"
 
@@ -92,40 +93,46 @@ func (m *MockDB) DeleteOne(ctx context.Context, filter interface{}) (*mongo.Dele
 }
 
 func (mdh *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
-	scan := Scan{
+	scan := jsonhandler.BackState{
 		MostRecentUpdate: time.Date(2024, 2, 28, 14, 3, 58, 169000000, time.UTC),
-		Assets: map[string]Asset{
+		Assets: map[string]jsonhandler.Asset{
 			"AID_4123523": {
 				Name:        "PC-A",
 				Owner:       "UID_2332",
+				Type:        []string{"PC", "Windows"},
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 2,
+				Hostname:    "Desktop-123",
 			},
 			"AID_5784393": {
 				Name:        "Chromecast",
 				Owner:       "UID_2332",
+				Type:        []string{"IoT", "Media"},
 				DateCreated: "2024-02-10 20:04:20",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 1,
+				Hostname:    "LivingRoom",
 			},
 			"AID_9823482": {
 				Name:        "Password Vault",
 				Owner:       "UID_2332",
+				Type:        []string{"Server", "Database"},
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 4,
+				Hostname:    "Vault-123",
 			},
 		},
-		Plugins: map[string]PluginState{
+		Plugins: map[string]jsonhandler.Plugin{
 			"ipScan": {
-				StateID: "20240214-1300A",
+				PluginStateID: "20240214-1300A",
 			},
 			"macScan": {
-				StateID: "20240215-0800G",
+				PluginStateID: "20240215-0800G",
 			},
 		},
-		Relations: map[string]Relation{
+		Relations: map[string]jsonhandler.Relation{
 			"RID_2613785": {
 				From:        "ID_4123523",
 				To:          "ID_5784393",
