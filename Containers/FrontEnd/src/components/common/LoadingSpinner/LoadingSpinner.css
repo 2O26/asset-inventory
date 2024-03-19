@@ -1,27 +1,37 @@
-@keyframes spinner {
-  0% {
-    transform: rotate(0deg);
-  }
+.spinner {
+  width: 2.5em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+}
 
+.spinner circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 3;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate4 {
   100% {
     transform: rotate(360deg);
   }
 }
 
-.loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 5px solid var(--button-color);
-  border-top: 5px solid var(--background-color);
-  border-radius: 50%;
-  animation: spinner 1.5s linear infinite;
-  margin: auto;
-  margin-top: 0.825rem;
+@keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
 }
-
-
-
-/* .spinner-container {
-  justify-content: center;
-  align-items: center;
-} */

@@ -3,8 +3,8 @@ import "./LoadingSpinner.css";
 
 export default function LoadingSpinner() {
   return (
-    <div className="spinner-container">
-      <div className="loading-spinner"></div>
-    </div>
+    <svg className="spinner" viewBox="25 25 50 50">
+      <circle r="20" cy="50" cx="50"></circle>
+    </svg>
   );
 }
