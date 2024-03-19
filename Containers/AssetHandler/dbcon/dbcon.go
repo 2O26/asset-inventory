@@ -1,67 +1,18 @@
 package dbcon
 
 import (
-	"github.com/gin-gonic/gin"
+	"assetinventory/assethandler/jsonhandler"
+	"context"
 	"log"
 	"net/http"
 	"time"
-)
 
-import (
-	"context"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-// Assuming these types are defined as per your provided structure
-// type Asset struct {
-// 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-// 	Name        string             `json:"name"`
-// 	Owner       string             `json:"owner"`
-// 	DateCreated string             `json:"dateCreated"`
-// 	DateUpdated string             `json:"dateUpdated"`
-// 	Criticality int                `json:"criticality"`
-// }
-
-type Asset struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Name        string             `json:"Name"`
-	Owner       string             `json:"Owner"`
-	Type        []string           `json:"Type"` // array with type -> subtype -> subsubtype, etc
-	DateCreated string             `json:"Created at"`
-	DateUpdated string             `json:"Updated at"`
-	Criticality int                `json:"Criticality"`
-	Hostname    string             `json:"Hostname"`
-}
-
-type Scan struct {
-	ID               primitive.ObjectID     `bson:"_id,omitempty" json:"id,omitempty"`
-	MostRecentUpdate time.Time              `bson:"mostRecentUpdate" json:"mostRecentUpdate"`
-	Assets           map[string]Asset       `json:"assets"`
-	Plugins          map[string]PluginState `json:"plugins"`
-	Relations        map[string]Relation    `json:"relations"`
-}
-
-type Plugin struct {
-	PluginStateID string `json:"pluginStateID"`
-}
-
-type PluginState struct {
-	StateID     string         `json:"stateID"`
-	DateCreated string         `json:"dateCreated"`
-	DateUpdated string         `json:"dateUpdated"`
-	State       map[string]any `json:"state"`
-}
-
-type Relation struct {
-	From        string `json:"from"`
-	To          string `json:"to"`
-	Direction   string `json:"direction"`
-	Owner       string `json:"owner"`
-	DateCreated string `json:"dateCreated"`
-}
 
 var client *mongo.Client
 var dbName string
@@ -91,7 +42,7 @@ func GetCollection(collectionName string) *mongo.Collection {
 }
 
 func AddScan(db DatabaseHelper, c *gin.Context) {
-	var newScan Scan
+	var newScan jsonhandler.BackState
 
 	if err := c.ShouldBindJSON(&newScan); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -100,6 +51,20 @@ func AddScan(db DatabaseHelper, c *gin.Context) {
 
 	newScan.MostRecentUpdate = time.Now()
 
+	updatedAssets := make(map[string]jsonhandler.Asset)
+	for _, asset := range newScan.Assets {
+		assetID := primitive.NewObjectID().Hex() // Generate a new ID
+		updatedAssets[assetID] = asset           // Use the new ID as the key
+	}
+	newScan.Assets = updatedAssets
+
+	// Update relations with new IDs
+	updatedRelations := make(map[string]jsonhandler.Relation)
+	for _, relation := range newScan.Relations {
+		relationID := primitive.NewObjectID().Hex() // Generate a new ID
+		updatedRelations[relationID] = relation     // Use the new ID as the key
+	}
+	newScan.Relations = updatedRelations
 	result, err := db.InsertOne(context.TODO(), newScan)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while inserting new scan"})
@@ -110,10 +75,10 @@ func AddScan(db DatabaseHelper, c *gin.Context) {
 }
 
 func GetLatestScan(db DatabaseHelper, c *gin.Context) {
-	var scan Scan
+	var scan jsonhandler.BackState
 
 	// Find the latest scan based on the mostRecentUpdate field
-	// Sorting by -1 to ensure the latest document is returned first
+	// Sorting by -1 to ensure the latest document is returned first mostRecentUpdate
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&scan)
 	if err != nil {
 		log.Printf("Failed to retrieve the latest scan: %v", err)
@@ -125,107 +90,174 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"latestScan": scan})
+	c.JSON(http.StatusOK, scan)
 }
 
-func AddAsset(db DatabaseHelper, c *gin.Context) {
-	var newAsset Asset
-
-	// Bind JSON to the newAsset struct
-	if err := c.ShouldBindJSON(&newAsset); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
-		return
-	}
-	// Update the dateUpdated field to the current time
-	currentTime := time.Now().Format("2006-01-02 15:04:05")
-	newAsset.DateCreated = currentTime
-	newAsset.DateUpdated = currentTime
-	result, err := db.InsertOne(context.TODO(), newAsset)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while inserting new Asset"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Asset added successfully", "result": result})
-
+type AssetRequest struct {
+	AddAsset        []jsonhandler.Asset          `json:"addAsset"`        // To add new assets
+	RemoveAsset     []string                     `json:"removeAsset"`     // Asset IDs to remove
+	UpdatedAsset    map[string]jsonhandler.Asset `json:"updateAsset"`     // Asset ID to updated Asset mapping
+	AddRelations    []jsonhandler.Relation       `json:"addRelations"`    // Relations to add
+	RemoveRelations []string                     `json:"removeRelations"` // Relation IDs to remove
 }
 
-func UpdateAsset(db DatabaseHelper, c *gin.Context) {
-	var updateAsset Asset
+func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
+	var req AssetRequest
 
-	// Bind JSON to the updateAsset struct
-	if err := c.ShouldBindJSON(&updateAsset); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
+	// Bind JSON to the req struct
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data: " + err.Error()})
+		return
+	}
+	// Find the latest scan to update
+	var latestScan jsonhandler.BackState
+	if err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&latestScan); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while retrieving the latest scan: " + err.Error()})
+		return
+	}
+	// Check if there are no assets in the latest scan
+	if latestScan.Assets == nil {
+		c.JSON(http.StatusOK, gin.H{"message": "No assets found in the latest scan"})
+		return
+	}
+	// Check if there are no assets in the latest scan
+	if latestScan.Relations == nil {
+		c.JSON(http.StatusOK, gin.H{"message": "No relation found in the latest scan"})
+		return
+	}
+	// Check if there are no relations in the latest scan
+	if len(latestScan.Relations) == 0 && len(req.AddRelations) == 0 && len(req.RemoveRelations) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No relations found in the latest scan"})
+		// Consider if you want to end the function here or continue with other operations
 		return
 	}
 
-	filter := bson.M{"_id": updateAsset.ID}
-
-	// Attempt to find the existing asset to ensure it exists before updating
-	var existingAsset Asset
-	err := db.FindOne(context.TODO(), filter).Decode(&existingAsset)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			// If no existing asset is found, return an error
-			c.JSON(http.StatusNotFound, gin.H{"error": "Asset does not exist"})
-		} else {
-			// If an error occurs during the find operation, return an internal server error
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if asset exists"})
+	// Adding new assets
+	if len(req.AddAsset) > 0 {
+		for _, newAsset := range req.AddAsset {
+			newAssetID := primitive.NewObjectID().Hex() // Generate new ID
+			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+			newAsset.DateUpdated = newAsset.DateCreated
+			latestScan.Assets[newAssetID] = newAsset
 		}
-		return
-	}
-	// Update the dateUpdated field to the current time
-	currentTime := time.Now().Format("2006-01-02 15:04:05")
-	updateAsset.DateUpdated = currentTime
-	updateAsset.DateCreated = existingAsset.DateCreated
-	// Proceed with the update if the asset exists
-	update := bson.M{"$set": updateAsset}
-	updateResult, updateErr := db.UpdateOne(context.TODO(), filter, update)
-	if updateErr != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while updating existing asset"})
-		return
+		update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
+		_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add new assets: " + err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Asset added successfully to the latest scan"})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Asset updated successfully", "result": updateResult})
+	// Updating assets
+	if len(req.UpdatedAsset) > 0 {
+		for assetID, updatedAsset := range req.UpdatedAsset {
+			if existingAsset, exists := latestScan.Assets[assetID]; exists {
+				updatedAsset.DateUpdated = time.Now().Format("2006-01-02 15:04:05") // Optionally set/update DateUpdated here
+				updatedAsset.DateCreated = existingAsset.DateCreated
+				latestScan.Assets[assetID] = updatedAsset
+			} else {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Asset not found"})
+				return
+			}
+		}
+		update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
+		result, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update assets: " + err.Error()})
+			return
+		}
+		if result.ModifiedCount == 0 {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "No assets were updated"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Asset updated successfully in the latest scan"})
+	}
+
+	// Removing assets and their related relations
+	if len(req.RemoveAsset) > 0 && req.RemoveAsset != nil {
+		for _, assetID := range req.RemoveAsset {
+			delete(latestScan.Assets, assetID)
+			for relationID, relation := range latestScan.Relations {
+				if relation.From == assetID || relation.To == assetID {
+					delete(latestScan.Relations, relationID)
+				}
+			}
+		}
+		update := bson.M{"$set": bson.M{"assets": latestScan.Assets, "relations": latestScan.Relations}}
+		_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove assets and related relations: " + err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Asset and related relations removed successfully from the latest scan"})
+	}
+	// Adding new relations
+	if len(req.AddRelations) > 0 {
+		for _, newRelation := range req.AddRelations {
+			newRelationID := primitive.NewObjectID().Hex() // Generate new ID for each added relation
+			latestScan.Relations[newRelationID] = newRelation
+		}
+		update := bson.M{"$set": bson.M{"relations": latestScan.Relations}}
+		_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Fialed to ass relation: " + err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Relations added successfully to the latest scan"})
+	}
+
+	// Removing specified relations
+	if len(req.RemoveRelations) > 0 {
+		for _, relationID := range req.RemoveRelations {
+			delete(latestScan.Relations, relationID)
+		}
+		update := bson.M{"$set": bson.M{"relations": latestScan.Relations}}
+		_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove relation: " + err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Relations removed successfully from the latest scan"})
+	}
 }
 
 func DeleteAsset(db DatabaseHelper, c *gin.Context) {
-	var DeleteAsset Asset
-	// Bind JSON to the assetData struct to get the name of the asset to delete
-	if err := c.ShouldBindJSON(&DeleteAsset); err != nil {
+	var deleteAssetRequest struct {
+		ID primitive.ObjectID `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&deleteAssetRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
 		return
 	}
 
-	filter := bson.M{"_id": DeleteAsset.ID}
-
-	// Attempt to find the asset to ensure it exists before deleting
-	var existingAsset Asset
-	err := db.FindOne(context.TODO(), filter).Decode(&existingAsset)
+	var latestScan jsonhandler.BackState
+	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&latestScan)
 	if err != nil {
+		log.Printf("Failed to retrieve the latest scan: %v", err)
 		if err == mongo.ErrNoDocuments {
-			// If no existing asset is found, return an error
-			c.JSON(http.StatusNotFound, gin.H{"error": "Asset does not exist"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "No scans found"})
 		} else {
-			// If an error occurs during the find operation, return an internal server error
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if asset exists"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while retrieving the latest scan"})
 		}
 		return
 	}
 
-	// Proceed with the deletion if the asset exists
-	deleteResult, deleteErr := db.DeleteOne(context.TODO(), filter)
-	if deleteErr != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while deleting existing asset"})
+	_, exists := latestScan.Assets[deleteAssetRequest.ID.Hex()]
+	if !exists {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Asset does not exist in the latest scan"})
+		return
+	}
+	delete(latestScan.Assets, deleteAssetRequest.ID.Hex())
+
+	update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
+	_, updateErr := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+	if updateErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating scan after deleting asset"})
 		return
 	}
 
-	// Check if an asset was actually deleted
-	if deleteResult.DeletedCount == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No asset was deleted, asset may not exist"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Asset deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Asset deleted successfully from the latest scan"})
 }
 
 func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {

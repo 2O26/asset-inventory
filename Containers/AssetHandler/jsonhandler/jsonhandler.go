@@ -3,6 +3,9 @@ package jsonhandler
 import (
 	"encoding/json"
 	"errors"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Asset struct {
@@ -34,7 +37,8 @@ type Relation struct {
 }
 
 type BackState struct {
-	MostRecentUpdate string              `json:"mostRecentUpdate"`
+	ID               primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
+	MostRecentUpdate time.Time           `json:"mostRecentUpdate"`
 	Assets           map[string]Asset    `json:"assets"`
 	Plugins          map[string]Plugin   `json:"plugins"`
 	Relations        map[string]Relation `json:"relations"`
@@ -69,7 +73,7 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 	}
 
 	// copy stuff here
-	out.MostRecentUpdate = in.MostRecentUpdate
+	out.MostRecentUpdate = in.MostRecentUpdate.Format(time.RFC3339)
 
 	out.Relations = in.Relations
 	copyAssets(in.Assets, outAssets) //written by Gemini

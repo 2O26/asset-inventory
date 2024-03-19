@@ -3,12 +3,15 @@ package main
 import (
 	"assetinventory/assethandler/dbcon"
 	"assetinventory/assethandler/jsonhandler"
+	"context"
+	"time"
 
 	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type StateResponse struct {
@@ -64,68 +67,34 @@ func getNetScanStatus() json.RawMessage {
 }
 
 func getLatestState(c *gin.Context) {
-
-	//GET STATE FROM MONGO HERE
-	PLACEHOLDER := `{
-		"mostRecentUpdate": "2024-02-14 23:35:53",
-		"assets": {
-			"AID_4123523": {
-				"Name": "PC-A",
-				"Owner": "UID_2332",
-				"Type": ["PC", "Windows"],
-				"Created at": "2024-02-14 23:00:00",
-				"Updated at": "2024-02-14 23:00:30",
-				"Criticality": 2,
-				"Hostname": "Desktop-123"
-			},
-			"AID_5784393": {
-				"Name": "Chromecast",
-				"Owner": "UID_2332",
-				"Type": ["IoT", "Media"],
-				"Created at": "2024-02-10 20:04:20",
-				"Updated at": "2024-02-14 23:00:30",
-				"Criticality": 1,
-				"Hostname": "LivingRoom"
-			},
-			"AID_9823482": {
-				"Name": "Password Vault",
-				"Owner": "UID_2332",
-				"Type": ["Server", "Database"],
-				"Created at": "2024-02-14 23:00:00",
-				"Updated at": "2024-02-14 23:00:30",
-				"Criticality": 4
-			}
-		},
-		"plugins": {
-			"ipScan": {
-				"pluginStateID": "20240214-1300A"
-			},
-			"macScan": {
-				"pluginStateID": "20240215-0800G"
-			}
-		},
-		"relations": {
-			"RID_2613785": {
-				"from": "AID_4123523",
-				"to": "AID_5784393",
-				"direction": "uni",
-				"owner": "UID_2332",
-				"dateCreated":"2024-02-14 23:35:53"
-			},
-			"RID_6492733": {
-				"from": "AID_5784393",
-				"to": "AID_9823482",
-				"direction": "bi",
-				"owner": "UID_6372",
-				"dateCreated": "2024-01-22 07:32:32"
-			}    
-		}    
-	}
-	`
-
+	// Simulate authentication
 	var authSuccess = true
 
 	if authSuccess {
+		url := "http://localhost:8080/GetLatestScan"
+		resp, err := http.Get(url)
+
+		if err != nil {
+			log.Printf("Failed to get latest scan: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get latest scan"})
+			return
+		}
+		defer resp.Body.Close()
+		var scanResult jsonhandler.BackState
+		// Läs in responskroppen
+		err = json.NewDecoder(resp.Body).Decode(&scanResult)
+		if err != nil {
+			log.Printf("Failed to decode latest scan: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode latest scan data"})
+			return
+		}
+
+		scanResultJSON, err := json.Marshal(scanResult)
+		if err != nil {
+			log.Printf("Failed to marshal scanResult: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare scan data"})
+			return
+		}
 
 		pluginStates := make(map[string]json.RawMessage)
 		netassets := getNetScanStatus()
@@ -144,7 +113,7 @@ func getLatestState(c *gin.Context) {
 
 		pluginStates["osscan"] = mockOSScan
 
-		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(PLACEHOLDER), pluginStates)
+		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil)
 		if err != nil {
 			log.Println(err)
 		}
@@ -158,6 +127,103 @@ func getLatestState(c *gin.Context) {
 		response := StateResponse{Message: "Authenication failure."}
 		c.IndentedJSON(http.StatusOK, response)
 	}
+}
+func addInitialScan(scansHelper dbcon.DatabaseHelper) {
+	// Add initial scan
+	initialScan := jsonhandler.BackState{
+		ID:               primitive.NewObjectID(),
+		MostRecentUpdate: time.Now(),
+		Assets: map[string]jsonhandler.Asset{
+			"65f8671cfe55e5c76465d840": {
+				Name:        "PC-A",
+				Owner:       "UID_2332",
+				Type:        []string{"PC", "Windows"},
+				DateCreated: "2024-02-14 23:00:00",
+				DateUpdated: "2024-02-14 23:00:30",
+				Criticality: 2,
+				Hostname:    "Desktop-123",
+			},
+			"65f8671cfe55e5c76465d841": {
+				Name:        "Chromecast",
+				Owner:       "UID_2332",
+				Type:        []string{"IoT", "Media"},
+				DateCreated: "2024-02-10 20:04:20",
+				DateUpdated: "2024-02-14 23:00:30",
+				Criticality: 1,
+				Hostname:    "LivingRoom",
+			},
+			"65f8671cfe55e5c76465d842": {
+				Name:        "Password Vault",
+				Owner:       "UID_2332",
+				Type:        []string{"Server", "Database"},
+				DateCreated: "2024-02-14 23:00:00",
+				DateUpdated: "2024-02-14 23:00:30",
+				Criticality: 4,
+				Hostname:    "Vault-123",
+			},
+			"65f8671cfe55e5c76465d843": {
+				Name:        "Smart Thermostat",
+				Owner:       "UID_2332",
+				Type:        []string{"IoT", "HVAC"},
+				DateCreated: "2024-03-01 12:15:00",
+				DateUpdated: "2024-03-18 09:50:00",
+				Criticality: 2,
+				Hostname:    "Thermostat-1",
+			},
+			"65f8671cfe55e5c76465d844": {
+				Name:        "Work Laptop",
+				Owner:       "UID_6372",
+				Type:        []string{"Laptop", "Windows"},
+				DateCreated: "2024-02-25 08:30:00",
+				DateUpdated: "2024-03-18 10:00:00",
+				Criticality: 3,
+				Hostname:    "Work-Laptop-56",
+			},
+		},
+		Plugins: map[string]jsonhandler.Plugin{
+			"ipScan": {
+				PluginStateID: "20240214-1300A",
+			},
+			"macScan": {
+				PluginStateID: "20240215-0800G",
+			},
+		},
+		Relations: map[string]jsonhandler.Relation{
+			"65f8671cfe55e5c76465d845": {
+				From:        "65f8671cfe55e5c76465d840",
+				To:          "65f8671cfe55e5c76465d841",
+				Direction:   "uni",
+				Owner:       "UID_2332",
+				DateCreated: "2024-02-14 23:35:53",
+			},
+			"65f8671cfe55e5c76465d846": {
+				From:        "65f8671cfe55e5c76465d841",
+				To:          "65f8671cfe55e5c76465d842",
+				Direction:   "bi",
+				Owner:       "UID_6372",
+				DateCreated: "2024-01-22 07:32:32",
+			},
+			"65f8671cfe55e5c76465d847": {
+				From:        "65f8671cfe55e5c76465d842",
+				To:          "65f8671cfe55e5c76465d843",
+				Direction:   "uni",
+				Owner:       "UID_2332",
+				DateCreated: "2024-03-01 12:30:00",
+			},
+			"65f8671cfe55e5c76465d848": {
+				From:        "65f8671cfe55e5c76465d840",
+				To:          "65f8671cfe55e5c76465d844",
+				Direction:   "uni",
+				Owner:       "UID_6372",
+				DateCreated: "2024-03-05 14:20:00",
+			},
+		},
+	}
+	_, err := scansHelper.InsertOne(context.Background(), initialScan)
+	if err != nil {
+		log.Fatalf("Failed to add initial scan: %v", err)
+	}
+	log.Println("Initial scan added successfully")
 }
 
 func main() {
@@ -174,29 +240,23 @@ func main() {
 	}
 
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
-	assetsHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("assets")}
+	// assetsHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("assets")}
+	addInitialScan(scansHelper)
 	router.POST("/AddScan", func(c *gin.Context) {
-		dbcon.AddScan(scansHelper, c) // Anropa AddScan med dbHelper och Gin context
+		dbcon.AddScan(scansHelper, c)
 	})
 	router.GET("/GetLatestScan", func(c *gin.Context) {
-		dbcon.GetLatestScan(scansHelper, c) // Anropar funktionen med den riktiga databasen
+		dbcon.GetLatestScan(scansHelper, c)
 	})
-	router.POST("/AddAsset", func(c *gin.Context) {
-		dbcon.AddAsset(assetsHelper, c)
-	})
-	router.POST("/UpdateAsset", func(c *gin.Context) {
-		dbcon.UpdateAsset(assetsHelper, c)
-	})
-	router.POST("/DeleteAsset", func(c *gin.Context) {
-		dbcon.DeleteAsset(assetsHelper, c)
+
+	router.POST("/assetHandler", func(c *gin.Context) {
+		dbcon.ManageAssetsAndRelations(scansHelper, c)
 	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
-		dbcon.PrintAllDocuments(assetsHelper, c) // Antag att `assetsHelper` är din `MongoDBHelper` instans
 		dbcon.PrintAllDocuments(scansHelper, c)
 	})
 
 	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
-		dbcon.DeleteAllDocuments(assetsHelper, c)
 		dbcon.DeleteAllDocuments(scansHelper, c)
 	})
 
@@ -204,4 +264,5 @@ func main() {
 	if err := router.Run(":8080"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+
 }
