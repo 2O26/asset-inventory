@@ -1,9 +1,11 @@
 package main
 
 import (
+	"assetinventory/networkscan/dbcon"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"log"
 	"math/rand" // This is a tmp package for generating random MAC addresses
 	"net/http"
 	"os/exec"
@@ -118,8 +120,19 @@ func main() {
 
 	router.Use(CORSMiddleware())
 	router.GET("/getScanResult", getScan)
-	router.POST("/startNetScan", postNetScan)
 
+
+	err := dbcon.SetupDatabase("mongodb://netscanstorage:27019", "scan")
+	if err != nil {
+		log.Fatalf("Error setting up database: %v", err)
+	}
+	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
+	router.POST("/startNetScan", func (c *gin.Context) {
+		postNetScan(scansHelper, c)
+	})
+
+
+	}
 	router.Run(":8081")
 }
 
@@ -195,7 +208,7 @@ func getScan(c *gin.Context) {
 	// Send the global scan result to the requester
 	c.JSON(http.StatusOK, scanResultGlobal)
 }
-func postNetScan(c *gin.Context) {
+func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 	var req ScanRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -217,6 +230,8 @@ func postNetScan(c *gin.Context) {
 	}
 
 	fmt.Printf("Finished postNetScan\n")
+
+	dbcon.AddScan(db, scanResultGlobal)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
 }
