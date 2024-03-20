@@ -24,6 +24,18 @@ services:
     volumes:
       - ./Containers/ConfigHandler/src:/app/src
 
+  netscanstorage:
+    image: mongo
+    restart: always
+    command: [ "mongod", "--port", "27019", "--quiet", "--syslog" ]
+    ports:
+      - "27019:27019"
+    expose:
+      - "27019"
+    volumes:
+      - netscanstorage:/data/db
+      - netscanconfig:/data/configdb
+
   dbstorage:
     image: mongo
     restart: always
@@ -53,6 +65,8 @@ volumes:
   configdbconfig:
   dbstorage:
   dbconfig:
+  netscanstorage:
+  netscanconfig:
 
 
 networks:
