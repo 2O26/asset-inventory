@@ -2,7 +2,8 @@ go 1.22.0
 
 use (
 	./Containers/AssetHandler
-	./Containers/AssetHandler/jsonhandler
 	./Containers/AssetHandler/dbcon
+	./Containers/AssetHandler/jsonhandler
 	./Containers/NetworkScan
+	./Containers/NetworkScan/dbcon-networkscan
 )
