@@ -101,17 +101,32 @@ export const GetIPranges = async () => {
 }
 
 export const UpdateAsset = async (data) => {
-    console.log("Edit Data:", data);
-    try {
-        const response = await fetch('http://localhost:8080/UpdateAsset', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        const resData = await response.json();
-        return resData;
-    } catch (err) {
-        console.error(err);
-        throw new Error('Network response was not ok, could not fetch state');
+
+    const response = await fetch('http://localhost:8080/assetHandler', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    console.log(response)
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
     }
+    return response.json();
+
+    // console.log("Edit Data:", data);
+    // try {
+    //     console.log("HERE 1");
+
+    //     const response = await fetch('http://localhost:8080/assetHandler', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify(data)
+    //     });
+
+    //     return response.json();
+    // } catch (err) {
+    //     console.error(err);
+    //     throw new Error('Network response was not ok, could not fetch state');
+    // }
 }
