@@ -17,3 +17,54 @@
 .successMessage {
     background-color: #2FDD92;
 }
+
+.center-flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+}
+
+.center-flex-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+}
+
+.arrow-container {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 5px;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 600;
+    margin: 0;
+    background-color: var(--background-color);
+}
+
+.arrow {
+    border: solid var(--text-color);
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+}
+
+.down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+}
+
+.up {
+    transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
+}
