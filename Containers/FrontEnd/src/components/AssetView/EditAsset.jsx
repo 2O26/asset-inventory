@@ -15,7 +15,7 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
     const [addedRelations, setAddedRelations] = useState([]);
     const [showAddRelation, setShowAddRelation] = useState(false)
 
-    const emptyRelation = { "from": "", "to": "", "owner": "wassa", "direction": "uni" };
+    const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "uni" };
     const [newRelationData, setNewRelationData] = useState(emptyRelation)
 
     const { mutate, isPending, isError, error, isSuccess } = useMutation({
