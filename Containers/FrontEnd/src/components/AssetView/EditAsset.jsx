@@ -24,7 +24,7 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
             // Handle success logic here, no need for useEffect
             refetch()
             window.location.reload()
-            console.log("message: ", data);
+            console.log("data: ", data);
             // handleUpdate()
             // handleReset()
             // if (data.message) {
@@ -41,19 +41,29 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // const mutationObject = { "updateAsset": { [assetID]: properties }, "removeRelations": removedRelations, "addRelations": addedRelations };
-        // const mutationObject = { "addRelations": addedRelations };
-        const mutationObject = { "removeRelations": removedRelations, "addRelations": addedRelations };
-        console.log(JSON.stringify(mutationObject, null, 2));
 
+        // Initialize a local object to accumulate changes
+        let mutationObject = {};
+
+        if (properties !== assetData.properties) {
+            mutationObject["updateAsset"] = { [assetID]: properties };
+        }
+
+        if (removedRelations.length !== 0) {
+            mutationObject["removeRelations"] = removedRelations;
+        }
+
+        if (addedRelations.length !== 0) {
+            mutationObject["addRelations"] = addedRelations;
+        }
+
+        // Proceed with the mutation operation
         mutate(mutationObject);
-        // refetch() asset data etc.
 
-
-        // maybe  handleReset() but should not be needed (instead of row below)
+        // Other logic...
         setShowButtons(false);
-
     };
+
     const handleReset = () => {
         setProperties(assetData.properties);
         setRelations(relationData);
@@ -96,19 +106,33 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                             !dontDisplayList.includes(key) &&
                             <div className='inputContainer'>
                                 <label className='inputLabel'>{key}</label>
-                                <input
-                                    className="inputFields"
-                                    value={value}
-                                    onChange={(e) => {
-                                        setProperties({ ...properties, [key]: e.target.value });
-                                        setShowButtons(true);
-                                    }}
-                                    id={key}
-                                    type={(key === "Criticality") ? "number" : "text"}
-                                    min={(key === "Criticality") ? 1 : null}
-                                    max={(key === "Criticality") ? 5 : null}
-                                    name={key}
-                                />
+                                {(key === "Criticality") ?
+                                    <input
+                                        className="inputFields"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setProperties({ ...properties, [key]: parseInt(e.target.value, 10) || 1 });
+                                            setShowButtons(true);
+                                        }}
+                                        id={key}
+                                        type="number"
+                                        min={1}
+                                        max={5}
+                                        name={key}
+                                    />
+                                    :
+                                    <input
+                                        className="inputFields"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setProperties({ ...properties, [key]: e.target.value });
+                                            setShowButtons(true);
+                                        }}
+                                        id={key}
+                                        type="text"
+                                        name={key}
+                                    />
+                                }
                             </div>
                         }
                     </div>
