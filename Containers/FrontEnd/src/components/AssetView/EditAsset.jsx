@@ -6,23 +6,6 @@ import { useMutation } from '@tanstack/react-query';
 
 export default function EditAsset({ assetData, assetID, relationData, refetch }) {
     const [errorMessage, setErrorMessage] = useState(null)
-    const { mutate, isPending, isError, error, isSuccess } = useMutation({
-        mutationFn: UpdateAsset, // Directly pass the LogIn function
-        onSuccess: (data) => {
-            // Handle success logic here, no need for useEffect
-            if (data.success) {
-                console.log("Asset Updated");
-                setErrorMessage(null)
-                refetch()
-            } else {
-                setErrorMessage("Could not update asset")
-            }
-        },
-        onError: (error) => {
-            // Optionally handle error state
-            console.error("Update error:", error);
-        }
-    });
 
     const dontDisplayList = ["Created at", "Updated at", "Hostname"];
     const [properties, setProperties] = useState({});
@@ -32,13 +15,38 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
     const [addedRelations, setAddedRelations] = useState([]);
     const [showAddRelation, setShowAddRelation] = useState(false)
 
-    const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "" };
+    const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "uni" };
     const [newRelationData, setNewRelationData] = useState(emptyRelation)
 
+    const { mutate, isPending, isError, error, isSuccess } = useMutation({
+        mutationFn: UpdateAsset, // Directly pass the LogIn function
+        onSuccess: (data) => {
+            // Handle success logic here, no need for useEffect
+            refetch()
+            window.location.reload()
+            console.log("message: ", data);
+            // handleUpdate()
+            // handleReset()
+            // if (data.message) {
+            //     setErrorMessage(null)
+            // } else {
+            //     setErrorMessage("Could not update asset")
+            // }
+        },
+        onError: (error) => {
+            // Optionally handle error state
+            console.error("Update error:", error.message);
+        }
+    });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        mutate({ "updatedAsset": { [assetID]: properties }, "removedRelations": removedRelations, "addedRelations": addedRelations });
+        // const mutationObject = { "updateAsset": { [assetID]: properties }, "removeRelations": removedRelations, "addRelations": addedRelations };
+        // const mutationObject = { "addRelations": addedRelations };
+        const mutationObject = { "removeRelations": removedRelations, "addRelations": addedRelations };
+        console.log(JSON.stringify(mutationObject, null, 2));
+
+        mutate(mutationObject);
         // refetch() asset data etc.
 
 
