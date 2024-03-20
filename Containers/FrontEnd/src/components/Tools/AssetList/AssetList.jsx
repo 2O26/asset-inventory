@@ -5,6 +5,8 @@ import AddAsset from '../../AddAsset/AddAsset';
 import { GetState } from '../../Services/ApiService';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
+import { SearchIcon } from '../../common/Icons/Icons'; // Import your icon component
+
 
 const getColumnHeaders = (data) => {
     const columnHeaders = new Set();
@@ -25,14 +27,18 @@ export function SearchBar({ onSearch }) {
     };
 
     return (
-        <div>
-            <input
-                type="text"
-                value={searchTerm}
-                onChange={handleInputChange}
-                placeholder="Search..."
-                className="SearchBar"
-            />
+        <div className="SearchBar">
+            <div className="searchIconWrapper">
+                <SearchIcon size={30} /> 
+            </div>
+            <div className="inputWrapper">
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={handleInputChange}
+                    placeholder="Search..."
+                />
+            </div>
         </div>
     );
 }
