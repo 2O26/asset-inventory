@@ -16,5 +16,6 @@ jobs:
     - name: Build and Test
       run: |
         make all-test
+        docker-compose -f test-docker-compose.yaml up -d
         cd Containers/Cypress/cypress/ && npm install && npm run cy:run
         
