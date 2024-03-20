@@ -12,7 +12,10 @@ import { IoIosRemoveCircle, IoIosAddCircle } from "react-icons/io";
 import { CgArrowsH } from "react-icons/cg";
 import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
 import { MdAddLink } from "react-icons/md";
+import { CiSearch } from "react-icons/ci";
 // get icons from HERE: https://react-icons.github.io/react-icons/
+
+
 
 
 export const ThemeIcon = ({ size = 30 }) => {
@@ -24,6 +27,12 @@ export const ThemeIcon = ({ size = 30 }) => {
 export const MacScannerIcon = ({ size = 30 }) => {
     return (
         <CiBarcode size={size} />
+    )
+}
+
+export const SearchIcon = ({ size = 30 }) => {
+    return (
+        <CiSearch size={size} />
     )
 }
 
