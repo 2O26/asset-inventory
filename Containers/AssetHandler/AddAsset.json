@@ -1,13 +1,40 @@
 {
-    "name": "Server X200",
-    "owner": "IT Department",
-    "type": [
-        "Hardware",
-        "Server",
-        "Rack Mounted"
+    "addAsset": [
+        {
+            "name": "New PS5",
+            "owner": "IT Department",
+            "type": [
+                "Gaming Console",
+                "PlayStation"
+            ],
+            "criticality": 5,
+            "hostname": "PS5-1"
+        }
     ],
-    "dateCreated": "",
-    "dateUpdated": "",
-    "criticality": 5,
-    "hostname": "server-x200.example.com"
+    "removeAsset": [
+        "65f8671cfe55e5c76465d842"
+    ],
+    "updateAsset": {
+        "65f8671cfe55e5c76465d841": {
+            "name": "Work Laptop",
+            "owner": "UID_6372",
+            "type": [
+                "Laptop",
+                "Windows"
+            ],
+            "criticality": 4,
+            "hostname": "Work-Laptop-56"
+        }
+    },
+    "addRelations": [
+        {
+            "from": "65f8671cfe55e5c76465d840",
+            "to": "65f8671cfe55e5c76465d844",
+            "direction": "uni",
+            "owner": "UID_6372"
+        }
+    ],
+    "removeRelations": [
+        "65fafa26ec9a5699235bbd4b"
+    ]
 }
