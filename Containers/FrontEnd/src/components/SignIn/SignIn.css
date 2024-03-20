@@ -39,6 +39,11 @@
     text-align: left;
 }
 
+.auth-form-container label {
+    text-align: left;
+    text-indent: 2px;
+}
+
 .auth-form-container .inputFields {
     margin: 0.5rem 0.5rem;
     border: none;
@@ -51,11 +56,6 @@
     border-right-style: hidden;
     border-left-style: hidden;
     border-bottom-style: hidden;
-}
-
-.auth-form-container label {
-    text-align: left;
-    text-indent: 2px;
 }
 
 .auth-form-container input {

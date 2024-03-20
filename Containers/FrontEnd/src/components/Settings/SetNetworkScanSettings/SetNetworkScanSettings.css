@@ -1,41 +1,54 @@
 .networkScanTitleConfig {
     display: flex;
-    justify-content: left;
-    gap: 2rem;
-    flex-direction: column;
-    text-align: left;
-    margin-left: 2rem;
+    justify-content: center;
+    color: var(--text-color)
 }
 
 .rangeConfigIP {
     display: flex;
-    justify-content: left;
-    width: 40rem;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
     gap: 2rem;
     flex-direction: column;
-    text-align: left;
-    margin-left: 2rem;
-    margin-top: 0.5rem;
+    text-align: center;
+    width: 20vw;
 }
 
 .scansettingsText {
     font-size: 1.3rem;
     color: var(--text-color);
-    margin-top: 0.4rem;
-    margin-bottom: 0.4rem;
+    margin: 1rem 0.4rem 0 0;
+    text-align: left;
+    /* margin-left: 1rem; */
 }
 
 .ip-range-input {
-    border: 2px solid blue;
-    padding: 1rem;
-    width: 30rem;
-    font-size: 1.3rem;
-    /* Additional styles */
+    /* margin: 0.5rem 0.5rem; */
+    border: none;
+    min-width: 22rem;
+    height: 40px;
+    font-size: 20px;
+    text-indent: 10px;
+    border-radius: 5px;
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
 }
 
-.buttonContainer {
+.settings-container input {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.settings-container input:focus {
+    outline: none;
+}
+
+.buttonContainerNetScan {
     display: flex;
-    justify-content: left;
+    justify-content: center;
 }
 
 .successText {
@@ -49,7 +62,7 @@
     justify-content: space-between;
     /* Puts maximum space between children */
     align-items: center;
-    padding-right: 3rem;
+    /* padding-right: 3rem; */
 
     color: var(--text-color);
     font-size: 1.2rem;
@@ -66,6 +79,7 @@
     color: var(--text-color);
     background-color: transparent;
     border: none;
+    margin-left: 1rem;
 }
 
 .remove-ip-range-btn .tooltip-text {

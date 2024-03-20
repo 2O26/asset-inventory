@@ -108,7 +108,7 @@ export default function SetNetworkScanSettings() {
     return (
         <div>
             <div className='networkScanTitleConfig'>
-                <h2 style={{ color: "var(--text-color)", marginTop: "4rem" }}> Network Scan Settings</h2>
+                <h2 > Network Scan Settings</h2>
             </div>
             <div className='rangeConfigIP'>
                 <div>
@@ -126,7 +126,7 @@ export default function SetNetworkScanSettings() {
                                     aria-label='Remove'
                                 >
                                     <span className="tooltip-text">Remove IP range</span>
-                                    < RemoveIcon />
+                                    < RemoveIcon color={"var(--error-color)"} />
                                 </button>
 
                             </li>
@@ -160,7 +160,7 @@ export default function SetNetworkScanSettings() {
                             }
                             {isErrorMutRm && <div className='errorMessage'>{errorMutRm.message}</div>}
                             {isErrorMutAdd && <div className='errorMessage'>{errorMutAdd.message}</div>}
-                            <div className='buttonContainer'>
+                            <div className='buttonContainerNetScan'>
                                 <button className='standard-button' disabled={isPendingMutAdd} type="submit">
                                     <div> Add IP range </div>
                                 </button>

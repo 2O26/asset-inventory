@@ -24,6 +24,10 @@
 :root {
     --error-color: rgb(255, 120, 120);
     --success-color: #2FDD92;
+    --box-shadow: 0px -8px 15px rgba(0, 0, 0, 0.15);
+    /* --box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.15),
+        -8px 8px 15px rgba(0, 0, 0, 0.15),
+        0px 8px 15px rgba(0, 0, 0, 0.15); */
 }
 
 :root .dark {
