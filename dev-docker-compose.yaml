@@ -27,7 +27,7 @@ services:
   netscanstorage:
     image: mongo
     restart: always
-    command: --quiet --syslog
+    command: [ "mongod", "--port", "27019", "--quiet", "--syslog" ]
     ports:
       - "27019:27019"
     expose:

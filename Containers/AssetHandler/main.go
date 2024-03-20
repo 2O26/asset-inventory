@@ -240,7 +240,7 @@ func main() {
 	}
 
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
-	// assetsHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("assets")}
+	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
 	addInitialScan(scansHelper)
 	router.POST("/AddScan", func(c *gin.Context) {
 		dbcon.AddScan(scansHelper, c)

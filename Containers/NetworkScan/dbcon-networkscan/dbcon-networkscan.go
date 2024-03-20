@@ -1,16 +1,15 @@
-package dbcon
+package dbcon_networkscan
 
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
 	"time"
 )
-
-var scanResultGlobal Scan
 
 type Scan struct {
 	StateID     string
@@ -85,21 +84,39 @@ func SetupDatabase(uri string, databaseName string) error {
 	return nil
 }
 
-func AddScan(db DatabaseHelper, c *gin.Context) {
-	var newScan Scan
+func GetCollection(collectionName string) *mongo.Collection {
+	return client.Database(dbName).Collection(collectionName)
+}
 
-	if err := c.ShouldBindJSON(&newScan); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+func AddScan(db DatabaseHelper, scan Scan) {
 
-	newScan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+	scan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
 
-	result, err := db.InsertOne(context.TODO(), newScan)
+	result, err := db.InsertOne(context.TODO(), scan)
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while inserting new scan"})
+		log.Fatalf("Could not insert scan: %s", err)
+	}
+
+	log.Printf("OK!, %v", result)
+
+}
+
+func GetLatestScan(db DatabaseHelper, c *gin.Context) {
+	var scan Scan
+
+	// Find the latest scan based on the mostRecentUpdate field
+	// Sorting by -1 to ensure the latest document is returned first mostRecentUpdate
+	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&scan)
+	if err != nil {
+		log.Printf("Failed to retrieve the latest scan: %v", err)
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"error": "No scans found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while retrieving the latest scan"})
+		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Scan added successfully", "result": result})
+	c.JSON(http.StatusOK, scan)
 }

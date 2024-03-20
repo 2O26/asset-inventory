@@ -1,4 +1,4 @@
-module assetinventory/dbcon
+module assetinventory/assethandler/dbcon
 
 go 1.22.0
 

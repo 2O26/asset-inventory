@@ -8,7 +8,8 @@ FROM golang:alpine as builder
 WORKDIR /app
 # go.mod : describes modules properties, including dependencies on other modules and on versions on Go
 # go.sum : file contains cryptographic hashes for each module version that your project depends on. (maintains integrity and reproducibility)
-COPY go.mod go.sum ./ 
+COPY go.mod go.sum ./
+COPY ./dbcon-networkscan ./dbcon-networkscan
 # install the Go modules necessary to compile it.
 RUN go mod download 
 # Copy source code to container
