@@ -2,9 +2,9 @@ name: make all-test
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "ci/cd" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop", "ci/cd" ]
 
 jobs:
   build-and-test:
@@ -16,3 +16,4 @@ jobs:
     - name: Build and Test
       run: |
         make all-test
+        cd Containers/Cypress/cypress/ && npm run cy:run
