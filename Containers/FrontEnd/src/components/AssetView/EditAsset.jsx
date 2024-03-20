@@ -6,23 +6,6 @@ import { useMutation } from '@tanstack/react-query';
 
 export default function EditAsset({ assetData, assetID, relationData, refetch }) {
     const [errorMessage, setErrorMessage] = useState(null)
-    const { mutate, isPending, isError, error, isSuccess } = useMutation({
-        mutationFn: UpdateAsset, // Directly pass the LogIn function
-        onSuccess: (data) => {
-            // Handle success logic here, no need for useEffect
-            if (data.success) {
-                console.log("Asset Updated");
-                setErrorMessage(null)
-                refetch()
-            } else {
-                setErrorMessage("Could not update asset")
-            }
-        },
-        onError: (error) => {
-            // Optionally handle error state
-            console.error("Update error:", error);
-        }
-    });
 
     const dontDisplayList = ["Created at", "Updated at", "Hostname"];
     const [properties, setProperties] = useState({});
@@ -32,20 +15,55 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
     const [addedRelations, setAddedRelations] = useState([]);
     const [showAddRelation, setShowAddRelation] = useState(false)
 
-    const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "" };
+    const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "uni" };
     const [newRelationData, setNewRelationData] = useState(emptyRelation)
 
+    const { mutate, isPending, isError, error, isSuccess } = useMutation({
+        mutationFn: UpdateAsset, // Directly pass the LogIn function
+        onSuccess: (data) => {
+            // Handle success logic here, no need for useEffect
+            refetch()
+            window.location.reload()
+            console.log("data: ", data);
+            // handleUpdate()
+            // handleReset()
+            // if (data.message) {
+            //     setErrorMessage(null)
+            // } else {
+            //     setErrorMessage("Could not update asset")
+            // }
+        },
+        onError: (error) => {
+            // Optionally handle error state
+            console.error("Update error:", error.message);
+        }
+    });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        mutate({ "updatedAsset": { [assetID]: properties }, "removedRelations": removedRelations, "addedRelations": addedRelations });
-        // refetch() asset data etc.
 
+        // Initialize a local object to accumulate changes
+        let mutationObject = {};
 
-        // maybe  handleReset() but should not be needed (instead of row below)
+        if (properties !== assetData.properties) {
+            mutationObject["updateAsset"] = { [assetID]: properties };
+        }
+
+        if (removedRelations.length !== 0) {
+            mutationObject["removeRelations"] = removedRelations;
+        }
+
+        if (addedRelations.length !== 0) {
+            mutationObject["addRelations"] = addedRelations;
+        }
+
+        // Proceed with the mutation operation
+        mutate(mutationObject);
+
+        // Other logic...
         setShowButtons(false);
-
     };
+
     const handleReset = () => {
         setProperties(assetData.properties);
         setRelations(relationData);
@@ -88,19 +106,33 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                             !dontDisplayList.includes(key) &&
                             <div className='inputContainer'>
                                 <label className='inputLabel'>{key}</label>
-                                <input
-                                    className="inputFields"
-                                    value={value}
-                                    onChange={(e) => {
-                                        setProperties({ ...properties, [key]: e.target.value });
-                                        setShowButtons(true);
-                                    }}
-                                    id={key}
-                                    type={(key === "Criticality") ? "number" : "text"}
-                                    min={(key === "Criticality") ? 1 : null}
-                                    max={(key === "Criticality") ? 5 : null}
-                                    name={key}
-                                />
+                                {(key === "Criticality") ?
+                                    <input
+                                        className="inputFields"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setProperties({ ...properties, [key]: parseInt(e.target.value, 10) || 1 });
+                                            setShowButtons(true);
+                                        }}
+                                        id={key}
+                                        type="number"
+                                        min={1}
+                                        max={5}
+                                        name={key}
+                                    />
+                                    :
+                                    <input
+                                        className="inputFields"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setProperties({ ...properties, [key]: e.target.value });
+                                            setShowButtons(true);
+                                        }}
+                                        id={key}
+                                        type="text"
+                                        name={key}
+                                    />
+                                }
                             </div>
                         }
                     </div>
