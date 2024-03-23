@@ -51,9 +51,3 @@ down:
 
 clean:
 	docker rmi --force assinvfront assethandler networkscan fluentd elasticsearch kibana confighandler frontenddev
-
-cypress-test:
-	cd CyprestTests/ && npm run cy:run
-
-environment-test:
-	curl localhost:89

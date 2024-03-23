@@ -130,3 +130,27 @@ export const UpdateAsset = async (data) => {
     //     throw new Error('Network response was not ok, could not fetch state');
     // }
 }
+
+export const UploadCycloneDX = async (data) => {
+    const uploadURL = 'http://localhost:8080/uploadCycloneDX';
+
+    try {
+        const response = await fetch(uploadURL, {
+            method: 'POST',
+            body: data,
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            alert('File uploaded successfully');
+            return data;
+            // Handle success scenario (e.g., showing the uploaded file's details)
+        } else {
+            // Handle server errors or invalid responses
+            alert('Failed to upload file');
+        }
+    } catch (error) {
+        // Handle network errors
+        alert('Error uploading file: ' + error.message);
+    }
+}

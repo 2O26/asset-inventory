@@ -3,12 +3,14 @@ FROM node:latest
 RUN npm install -g nodemon
 EXPOSE 3001
 WORKDIR /app
-COPY . .
-RUN npm install
-ENV DEBUG='configHandler:*'
 
+COPY package*.json ./
+RUN npm install
+
+ENV DEBUG='configHandler:*'
+COPY . .
 ENTRYPOINT ["npm", "start"]
-# ENTRYPOINT ["npm", "run"]
+# CMD ["npm", "build"]
 
 # Build step #2
 ## TODO: Deploy on Alpine or NGINX

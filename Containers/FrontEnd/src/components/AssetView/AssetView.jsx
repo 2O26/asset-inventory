@@ -7,6 +7,7 @@ import './AssetView.css';
 import { AssetInfo } from './AssetInfo';
 import GraphView from '../Tools/GraphView/GraphView';
 import EditAsset from './EditAsset';
+import { CycloneDXuploader } from './CycloneDXuploader';
 
 export default function AssetView() {
     let { assetID } = useParams();
@@ -77,7 +78,10 @@ export default function AssetView() {
                     </div>
                     {/* Conditionally render content based on selectedView */}
                     {selectedView === 'Information' && (
-                        <AssetInfo data={data} assetID={assetID} showPluginInfo={true} ></AssetInfo>)}
+                        <div>
+                            <AssetInfo data={data} assetID={assetID} showPluginInfo={true} ></AssetInfo>
+                            <CycloneDXuploader data={data} assetID={assetID} showPluginInfo={true} />
+                        </div>)}
                     {selectedView === 'History' && (
                         <AssetInfo data={data} assetID={assetID} title={"History Page"} showPluginInfo={false}></AssetInfo>)}
                     {selectedView === 'Edit' && (
