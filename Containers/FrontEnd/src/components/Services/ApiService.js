@@ -107,28 +107,13 @@ export const UpdateAsset = async (data) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     });
-    console.log(response)
 
     if (!response.ok) {
-        throw new Error('Network response was not ok');
+        return response.json().then(error => {
+            throw new Error(error.error || 'Something went wrong.');
+        });
     }
     return response.json();
-
-    // console.log("Edit Data:", data);
-    // try {
-    //     console.log("HERE 1");
-
-    //     const response = await fetch('http://localhost:8080/assetHandler', {
-    //         method: 'POST',
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify(data)
-    //     });
-
-    //     return response.json();
-    // } catch (err) {
-    //     console.error(err);
-    //     throw new Error('Network response was not ok, could not fetch state');
-    // }
 }
 
 export const UploadCycloneDX = async (data) => {

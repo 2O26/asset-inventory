@@ -7,7 +7,8 @@ import { useMutation } from '@tanstack/react-query';
 export default function EditAsset({ assetData, assetID, relationData, refetch }) {
     const [errorMessage, setErrorMessage] = useState(null)
 
-    const dontDisplayList = ["Created at", "Updated at", "Hostname"];
+    // const dontDisplayList = ["Created at", "Updated at", "Hostname"];
+    const dontDisplayList = ["Created at", "Updated at"];
     const [properties, setProperties] = useState({});
     const [relations, setRelations] = useState({});
     const [showButtons, setShowButtons] = useState(false);
@@ -23,15 +24,8 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
             refetch()
+            window.alert(data.messages)
             window.location.reload()
-            console.log("data: ", data);
-            // handleUpdate()
-            // handleReset()
-            // if (data.message) {
-            //     setErrorMessage(null)
-            // } else {
-            //     setErrorMessage("Could not update asset")
-            // }
         },
         onError: (error) => {
             // Optionally handle error state
@@ -46,7 +40,11 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
         let mutationObject = {};
 
         if (properties !== assetData.properties) {
-            mutationObject["updateAsset"] = { [assetID]: properties };
+            const formatedProperties = properties
+            if (!Array.isArray(formatedProperties.Type)) {
+                formatedProperties.Type = properties.Type.split(',').map(item => item.trim())
+            }
+            mutationObject["updateAsset"] = { [assetID]: formatedProperties };
         }
 
         if (removedRelations.length !== 0) {
