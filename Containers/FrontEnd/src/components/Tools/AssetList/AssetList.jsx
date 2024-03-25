@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import './AssetList.css';
 import { useNavigate } from 'react-router-dom';
 import AddAsset from '../../AddAsset/AddAsset';
+import RemoveAsset from '../../RemoveAsset/RemoveAsset';
 import { GetState } from '../../Services/ApiService';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
-import { SearchIcon } from '../../common/Icons/Icons'; // Import your icon component
-
+import { SearchIcon } from '../../common/Icons/Icons';
 
 const getColumnHeaders = (data) => {
-    const columnHeaders = new Set();
+    const columnHeaders = new Set(['Select']);
     Object.values(data.state.assets).forEach(asset => {
         Object.keys(asset.properties).forEach(key => columnHeaders.add(key));
     });
@@ -23,13 +23,13 @@ export function SearchBar({ onSearch }) {
     const handleInputChange = (event) => {
         const term = event.target.value;
         setSearchTerm(term);
-        onSearch(term); // Call onSearch function with the updated search term
+        onSearch(term);
     };
 
     return (
         <div className="SearchBar">
             <div className="searchIconWrapper">
-                <SearchIcon size={30} /> 
+                <SearchIcon size={30} />
             </div>
             <div className="inputWrapper">
                 <input
@@ -52,27 +52,52 @@ export default function AssetList() {
     });
     const [filteredAssets, setFilteredAssets] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [checkedItems, setCheckedItems] = useState({});
+    const [isRemoveVisible, setIsRemoveVisible] = useState(false);
 
     useEffect(() => {
         if (data) {
             const columnHeaders = getColumnHeaders(data);
             if (searchTerm === '') {
-                // If search term is empty, show all assets
                 setFilteredAssets(Object.entries(data.state.assets));
             } else {
-                // Filter assets based on the search term
                 const filteredAssets = Object.entries(data.state.assets).filter(([key, value]) => {
-                    // Check if the name matches the search term (assuming name is the first header)
-                    return value.properties[columnHeaders[0]].toLowerCase().includes(searchTerm.toLowerCase());
+                    return value.properties[columnHeaders[1]].toLowerCase().includes(searchTerm.toLowerCase());
                 });
                 setFilteredAssets(filteredAssets);
             }
+
+            const initialCheckState = Object.keys(data.state.assets).reduce((acc, key) => {
+                acc[key] = false;
+                return acc;
+            }, {});
+            setCheckedItems(initialCheckState);
         }
     }, [data, searchTerm]);
 
     const handleClick = (assetID) => {
         navigate(`/asset-view/${assetID}`);
     }
+
+    const handleCheckboxChange = (id) => {
+        setCheckedItems(prevState => {
+            const newState = {
+                ...prevState,
+                [id]: !prevState[id]
+            };
+
+            const anyChecked = Object.values(newState).some(checked => checked);
+            setIsRemoveVisible(anyChecked);
+
+            return newState;
+        });
+    };
+
+    const handleAssetRemoval = () => {
+        setIsRemoveVisible(false);
+        setCheckedItems({});
+        refetch();
+    };
 
     if (isLoading) return <LoadingSpinner />;
     if (isError) return <div className='errorMessage'>{error.message}</div>;
@@ -82,8 +107,8 @@ export default function AssetList() {
             <div><SearchBar onSearch={setSearchTerm} /></div>
             <div className='asset-list-container'>
                 <div className='headerRow'>
-                    {Object.keys(data.state.assets).length > 0 && Object.keys(data.state.assets[Object.keys(data.state.assets)[0]].properties).map(header => (
-                        <div key={header} className='headerCell'>
+                    {data && getColumnHeaders(data).map(header => (
+                        <div key={header} className={`headerCell ${header === 'Select' ? 'checkbox-header' : ''}`}>
                             {header}
                         </div>
                     ))}
@@ -91,10 +116,21 @@ export default function AssetList() {
 
                 <hr style={{ margin: "0.5rem 2rem ", border: "1px solid var(--text-color)" }}></hr>
                 {filteredAssets.map(([key, value]) => (
-                    <div key={key} className='assetRow' onClick={() => handleClick(key)}>
+                    <div key={key} className='assetRow'>
+                        <div className='assetCell'>
+                            <input
+                                type="checkbox"
+                                checked={checkedItems[key] || false}
+                                onChange={() => handleCheckboxChange(key)}
+                            />
+                        </div>
                         {Object.keys(value.properties).map((header, headerIndex) => {
                             return (
-                                <div key={headerIndex} className='assetCell'>
+                                <div
+                                    key={headerIndex}
+                                    className='assetCell'
+                                    onClick={() => handleClick(key)}
+                                >
                                     {value.properties[header]}
                                 </div>
                             );
@@ -102,7 +138,15 @@ export default function AssetList() {
                     </div>
                 ))}
             </div>
-            <AddAsset />
+            <div className='actions-container'>
+                <AddAsset />
+                {isRemoveVisible && (
+                    <RemoveAsset
+                        checkedItems={checkedItems}
+                        onAssetRemoved={handleAssetRemoval}
+                    />
+                )}
+            </div>
         </div>
     );
-};
+}
