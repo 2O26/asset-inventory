@@ -83,3 +83,7 @@
     padding: 5px;
     /* Add any additional styling as needed */
 }
+
+input[type='checkbox'] {
+    accent-color: #5e93fd;
+}
