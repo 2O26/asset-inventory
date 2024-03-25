@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { GetState } from '../Services/ApiService'
 import { CycloneDXuploader } from './CycloneDXuploader';
+import { FileUploader } from "react-drag-drop-files";
 
 
 export default function EditAsset({ assetData, assetID, relationData, refetch }) {
@@ -150,6 +151,7 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                 <hr />
 
                 <div >
+                    <hr />
                     <h3>Relations </h3>
                     <div className='relation-content_button'>
                         <div className="relations-container" >

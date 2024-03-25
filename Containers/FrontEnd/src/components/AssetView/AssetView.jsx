@@ -7,7 +7,6 @@ import './AssetView.css';
 import { AssetInfo } from './AssetInfo';
 import GraphView from '../Tools/GraphView/GraphView';
 import EditAsset from './EditAsset';
-import { CycloneDXuploader } from './CycloneDXuploader';
 
 export default function AssetView() {
     let { assetID } = useParams();

@@ -1,0 +1,13 @@
+.custom-file-uploader {
+    margin-top: 10px;
+    height: 200px; /* Set the height you prefer */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #ccc; /* Example styling */
+  }
+/*CSSing the file uploader doesn't seem to work/be possible. Leaving the file here in case I figure out how to do it later.*/
+
+.custom-file-uploader h1 {
+    font-size: 0.8rem; /* Adjust the font size as needed */
+  }
