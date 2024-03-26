@@ -4,7 +4,7 @@ var dbServer = 'configstorage:27018';
 const dbName = 'netscanConfig';
 
 var IPRangeSchema = require('../Schemas/IPRangeSchema');
-
+var RecurringScanSchema = require('../Schemas/RecurringScanSchema');
 
 class ConfigHandler {
     constructor() { }
@@ -39,6 +39,28 @@ class ConfigHandler {
     async removeIPrange(IPrange) {
         try {
             await IPRangeSchema.findOneAndRemove({ IPRange: IPrange });
+        } catch (err) {
+            console.log(`Error while removing IP range:`, err.message);
+        }
+    }
+
+    async getRecurringScans() {
+        const recurringScans = await RecurringScanSchema.find().exec();
+        return recurringScans;
+    }
+
+    async addRecurringScan(recurringScan) {
+        const newRange_instance = new RecurringScanSchema({ plugin: recurringScan.plugin, time: recurringScan.time, IpRange: recurringScan.IpRange });
+        try {
+            await newRange_instance.save();
+        } catch (err) {
+            console.log('Error while inserting test text:', err.message);
+        }
+    }
+
+    async removeRecurringScan(recurringScan) {
+        try {
+            await RecurringScanSchema.findOneAndRemove({ plugin: recurringScan.plugin, time: recurringScan.time, IpRange: recurringScan.IpRange });
         } catch (err) {
             console.log(`Error while removing IP range:`, err.message);
         }

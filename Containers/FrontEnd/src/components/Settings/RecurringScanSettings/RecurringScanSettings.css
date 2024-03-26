@@ -1,0 +1,55 @@
+.reoccurringkScanTitleConfig {
+    display: flex;
+    justify-content: center;
+    color: var(--text-color)
+}
+
+.reoccuringScan-input {
+    /* margin: 0.5rem 0.5rem; */
+    border: none;
+    min-width: 22rem;
+    height: 40px;
+    font-size: 20px;
+    text-indent: 10px;
+    border-radius: 5px;
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+}
+
+.remove-ip-range-btn {
+    white-space: nowrap;
+    color: var(--text-color);
+    background-color: transparent;
+    border: none;
+    margin-left: 1rem;
+}
+
+
+.remove-ip-range-btn .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -60px;
+    /* Use half of the width value to align it center */
+
+    /* Fade in tooltip - animations */
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.remove-ip-range-btn:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}

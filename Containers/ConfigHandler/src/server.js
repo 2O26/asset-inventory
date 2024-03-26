@@ -1,6 +1,7 @@
 const express = require("express");
-const { IPRangechecker } = require("./formatchecker");
+const { IPRangechecker, RecurringScanFormat } = require("./formatchecker");
 const ConfigHandler = require("./DatabaseConn/configdbconn");
+const { CronoScanAdd, CronoScanRm } = require("./CronoScan");
 
 // const app = express(express.json());
 const app = express();
@@ -62,6 +63,49 @@ app.post("/removeIPrange", (req, res) => {
             // If no document matched the IP range to be removed
         }).catch((err) => {
             res.json({ responseFromServer: "Failure to remove IPrange due to database error.", success: "database error", range: req.body.iprange });
+        });
+});
+
+
+app.get("/getRecurring", (req, res) => {
+    const configHandler = new ConfigHandler();
+    configHandler.connect()
+        .then(() => configHandler.getRecurringScans())
+        .then(result => {
+            res.json({ recurring: result })
+        }).catch((err) => {
+            console.log('Could not fetch recurring scans from database. Error', err);
+        });
+})
+
+app.post("/addRecurring", async (req, res) => {
+    const configHandler = new ConfigHandler();
+
+    if (RecurringScanFormat(req.body.recurring)) {
+        await CronoScanAdd(req.body.recurring);
+        configHandler.connect()
+            .then(() => configHandler.addRecurringScan(req.body.recurring))
+            .then(() => {
+                res.json({ responseFromServer: "Succeeded to add recurring scan!!", success: "success", recurring: req.body.recurring });
+            }).catch((err) => {
+                res.json({ responseFromServer: "Failure to add recurring scan!!", success: "database failure", recurring: req.body.recurring });
+            });
+    } else {
+        res.json({ responseFromServer: "Failure to add recurring scan!!", success: "wrong format", recurring: req.body.recurring });
+    }
+});
+
+app.post("/removeRecurring", async (req, res) => {
+
+    const configHandler = new ConfigHandler();
+    await CronoScanRm(req.body.recurring);
+    configHandler.connect()
+        .then(() => configHandler.removeRecurringScan(req.body.recurring))
+        .then(() => {
+            res.json({ responseFromServer: "Succeeded to remove recurring scan!", success: "success", range: req.body.recurring });
+            // If no document matched the IP range to be removed
+        }).catch((err) => {
+            res.json({ responseFromServer: "Failure to remove recurring scan due to database error.", success: "database error", recurring: req.body.recurring });
         });
 
 });
