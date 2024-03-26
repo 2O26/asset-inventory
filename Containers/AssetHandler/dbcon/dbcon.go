@@ -120,10 +120,10 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 		return
 	}
 	// Check if there are no assets nad relations in the latest scan
-	if latestScan.Assets == nil && latestScan.Relations == nil {
-		c.JSON(http.StatusOK, gin.H{"message": "No assets or relations found in the latest scan"})
-		return
-	}
+	// if latestScan.Assets == nil && latestScan.Relations == nil {
+	// 	c.JSON(http.StatusOK, gin.H{"message": "No assets or relations found in the latest scan"})
+	// 	return
+	// }
 	// Check if there are no operation in the request
 	if len(req.AddAsset) == 0 && len(req.UpdatedAsset) == 0 && len(req.RemoveAsset) == 0 && len(req.AddRelations) == 0 && len(req.RemoveRelations) == 0 {
 		log.Printf("The request does not contain any operations to perform.\n")
@@ -139,7 +139,7 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 	messages, errors = addRelations(req, latestScan, db, messages, errors)
 
 	// Send the response as a list of messages
-	if len(messages) > 0 || len(errors) > 0 {
+	if len(messages) > 0 {
 		log.Printf("Messages: %v\n, Errors: %v\n", messages, errors)
 		c.JSON(http.StatusOK, gin.H{"messages": messages, "errors": errors})
 	} else {
@@ -149,6 +149,7 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 }
 
 // getLatestScan retrieves the latest scan from the database and returns it along with any error that occurs.
+
 func getLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 	var latestScan jsonhandler.BackState
 	if err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&latestScan); err != nil {
@@ -330,9 +331,10 @@ func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db Data
 			if err != nil {
 				log.Printf("Failed to remove relations: %v\n", err)
 				errors = append(errors, "Failed to remove relation: "+err.Error())
+			} else {
+				log.Printf("Relations removed successfully from the latest scan.\n")
+				messages = append(messages, "Relations removed successfully from the latest scan")
 			}
-			log.Printf("Relations removed successfully from the latest scan.\n")
-			messages = append(messages, "Relations removed successfully from the latest scan")
 		}
 	}
 	return messages, errors
