@@ -6,4 +6,6 @@ use (
 	./Containers/AssetHandler/jsonhandler
 	./Containers/NetworkScan
 	./Containers/NetworkScan/dbcon-networkscan
+	./Containers/CycloneDX
+	./Containers/CycloneDX/dbcon-cyclonedx
 )
