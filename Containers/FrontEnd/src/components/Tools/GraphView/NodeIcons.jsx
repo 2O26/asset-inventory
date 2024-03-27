@@ -7,6 +7,13 @@ import { BiError } from "react-icons/bi";
 import { RiRadioButtonLine } from "react-icons/ri";
 import { FaChromecast } from "react-icons/fa6";
 import { BsPcDisplay } from "react-icons/bs";
+import { IoIosLaptop } from "react-icons/io";
+
+export const LaptopIcon = ({ size = 20 }) => {
+    return (
+        <IoIosLaptop size={size} />
+    )
+}
 
 export const ServerIcon = ({ size = 20 }) => {
     return (

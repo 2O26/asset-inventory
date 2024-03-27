@@ -12,8 +12,6 @@ export default function SetNetworkScanSettings() {
     const [addIPRangeSuccess, setAddIPRangeSuccess] = useState(false);
     const [addIPRangeFail, setAddIPRangeFail] = useState(false);
     const [rangeFromAdd, setRangeFromAdd] = useState();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [selectedIpRange, setSelectedIpRange] = useState(null);
 
     const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
         mutationFn: AddIPranges, // Directly pass the LogIn function
@@ -92,6 +90,7 @@ export default function SetNetworkScanSettings() {
         setExpandAddIPrange(!expandAddIPrange);
         setAddIPRangeSuccess(false);
         setAddIPRangeFail(false);
+        // console.log(data.ipranges)
     };
 
     const removeIpRange = (iprange) => {

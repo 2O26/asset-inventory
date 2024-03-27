@@ -53,6 +53,30 @@ services:
       - configstorage:/data/db
       - configdbconfig:/data/configdb
 
+  keycloakstorage:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: keycloak_local
+    ports:
+      - "8085:8085"
+      - "8443:8443"
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloakstorage:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin # makeTheDevelopersLifesH4RDbySettingAwaytoLongPassword!
+    depends_on:
+      - keycloakstorage
+
   ######################################################
   ###     Test Environment (nginx, postgres, cypress)   ###
   ######################################################
@@ -74,6 +98,8 @@ services:
 
   cypress:
     image: cypresslocal
+    volumes:
+      - ./Containers/Cypress/coverage/lcov-report:/app/coverage/lcov-report/
     depends_on:
       frontenddev:
         condition: service_healthy
@@ -88,6 +114,8 @@ volumes:
   configdbconfig:
   dbstorage:
   dbconfig:
+  keycloak_data:
+  test_coverage:
 
 
 networks:

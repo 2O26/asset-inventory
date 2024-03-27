@@ -4,7 +4,7 @@
   "description": "Cypress Tests for FrontEnd",
   "main": "index.js",
   "scripts": {
-    "cy:spectate": "cypress run --browser chrome --headed && open coverage/lcov-report/index.html",
+    "cy:spectate": "cypress run --browser chrome --headed",
     "cy:run": "cypress run && open coverage/lcov-report/index.html",
     "test": "test"
   },

@@ -31,14 +31,7 @@ export const GetState = async () => {
     return response.json();
 };
 
-export const EditLatestStatus = async () => {
-
-}
-
 export const StartNetScan = async (scanSettings) => {
-    // console.log("cmdSelection", scanSettings.cmdSelection);
-    // console.log("IPRanges: ", scanSettings.IPRanges);
-
     try {
         const response = await fetch('http://localhost:8081/startNetScan', {
             method: 'POST',
@@ -56,6 +49,16 @@ export const StartNetScan = async (scanSettings) => {
     //     throw new Error('Network response was not ok, could not fetch state');
     // }
     // return response.json();
+}
+
+export const GetIPranges = async () => {
+    try {
+        const response = await fetch('http://localhost:3001/getIPranges');
+        return response.json();
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch IP ranges');
+    }
 }
 
 export const AddIPranges = async (IPRange) => {
@@ -90,13 +93,45 @@ export const RmIPrange = async (IPRange) => {
     }
 }
 
-export const GetIPranges = async () => {
+export const GetRecurring = async () => {
     try {
-        const response = await fetch('http://localhost:3001/getIPranges');
+        const response = await fetch('http://localhost:3001/getRecurring');
         return response.json();
+
     } catch (err) {
         console.error(err);
-        throw new Error('Could not fetch IP ranges');
+        throw new Error('Could not fetch reoccuring scans');
+    }
+}
+
+export const AddRecurring = async (recurring) => {
+    try {
+        const response = await fetch('http://localhost:3001/addRecurring', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(recurring)
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not add reoccuring scan');
+    }
+}
+
+export const RmRecurring = async (recurring) => {
+    try {
+        const response = await fetch('http://localhost:3001/removeRecurring', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recurring: recurring })
+        });
+        const resData = await response.json();
+        // console.log(resData);
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not remove reoccuring scan');
     }
 }
 
@@ -107,28 +142,13 @@ export const UpdateAsset = async (data) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     });
-    console.log(response)
 
     if (!response.ok) {
-        throw new Error('Network response was not ok');
+        return response.json().then(error => {
+            throw new Error(error.error || 'Something went wrong.');
+        });
     }
     return response.json();
-
-    // console.log("Edit Data:", data);
-    // try {
-    //     console.log("HERE 1");
-
-    //     const response = await fetch('http://localhost:8080/assetHandler', {
-    //         method: 'POST',
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify(data)
-    //     });
-
-    //     return response.json();
-    // } catch (err) {
-    //     console.error(err);
-    //     throw new Error('Network response was not ok, could not fetch state');
-    // }
 }
 
 export const UploadCycloneDX = async (data) => {

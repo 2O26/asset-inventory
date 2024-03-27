@@ -13,10 +13,8 @@ import { CgArrowsH } from "react-icons/cg";
 import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
 import { MdAddLink } from "react-icons/md";
 import { CiSearch } from "react-icons/ci";
+
 // get icons from HERE: https://react-icons.github.io/react-icons/
-
-
-
 
 export const ThemeIcon = ({ size = 30 }) => {
     return (

@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
-import SetNetworkScanSettings from './SetNetworkScanSettings/SetNetworkScanSettings'
-import DasboardSettings from './DasboardSettings/DasboardSettings'
+import SetNetworkScanSettings from './SetNetworkScanSettings/SetNetworkScanSettings';
+import DasboardSettings from './DasboardSettings/DasboardSettings';
+import RecurringScanSettings from './RecurringScanSettings/RecurringScanSettings';
 import './Settings.css'
 
 const settingsDict = {
     "Network Scan Settings": <SetNetworkScanSettings />,
-    "Dashboard Settings": <DasboardSettings />
+    "Dashboard Settings": <DasboardSettings />,
+    "Recurring Scan Settings": < RecurringScanSettings />
 };
 
 export default function Settings() {

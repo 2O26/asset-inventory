@@ -1,3 +1,5 @@
+const Plugins = require('./Plugins.js');
+
 
 function convertIpToNumber(ip) {
     return ip.split('.').reduce((acc, octet) => acc * 256 + parseInt(octet, 10), 0);
@@ -40,6 +42,17 @@ function isValidIpRange(ipRange) {
     return lastOctetNum < rangeEndNum;
 }
 
+function cronFormat(cronString) {
+    // this regex is not correct
+    const cronPattern = /^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+L?|\*(\/\d+)?|L(-\d+)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$/;
+
+    return cronPattern.test(cronString);
+}
+
+function validPlugin(pluginName) {
+    return Plugins.includes(pluginName);
+}
+
 function IPRangechecker(IPRange) {
 
     if (isValidIp(IPRange) || isValidSubnet(IPRange) || isValidIpRange(IPRange)) {
@@ -49,4 +62,12 @@ function IPRangechecker(IPRange) {
     return false;
 }
 
-module.exports = { IPRangechecker };
+function RecurringScanFormat(recurring) {
+
+    if (IPRangechecker(recurring.IpRange) && cronFormat(recurring.time) && validPlugin(recurring.plugin)) {
+        return true;
+    }
+    return false;
+}
+
+module.exports = { IPRangechecker, RecurringScanFormat };

@@ -1,8 +1,9 @@
 import { Handle, Position } from 'reactflow';
-import { ActiveIcon, AlertIcon, ApplicationIcon, ClusterIcon, ComputerIcon, IoTIcon, OfflineIcon, ServerIcon, SwitchIcon } from './NodeIcons';
+import { ActiveIcon, AlertIcon, ApplicationIcon, ClusterIcon, ComputerIcon, IoTIcon, LaptopIcon, OfflineIcon, ServerIcon, SwitchIcon } from './NodeIcons';
 
 const iconTypeMap = {
     "Server": <ServerIcon />, "Switch": <SwitchIcon />, "PC": <ComputerIcon />, "Cluster": <ClusterIcon />, "Application": <ApplicationIcon />, "IoT": <IoTIcon />,
+    "Laptop": <LaptopIcon />
 }
 
 const statusMap = { "alert": <AlertIcon />, "active": <ActiveIcon />, "offline": <OfflineIcon /> }

@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var IPRangeSchema = new Schema({
-    // timestamp: String,
     IPRange: String
 });
 
