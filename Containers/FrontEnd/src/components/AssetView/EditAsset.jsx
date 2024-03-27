@@ -6,7 +6,6 @@ import { useMutation } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { GetState } from '../Services/ApiService'
 import { CycloneDXuploader } from './CycloneDXuploader';
-import { FileUploader } from "react-drag-drop-files";
 
 
 export default function EditAsset({ assetData, assetID, relationData, refetch }) {
