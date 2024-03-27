@@ -120,10 +120,10 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 		return
 	}
 	// Check if there are no assets nad relations in the latest scan
-	if latestScan.Assets == nil && latestScan.Relations == nil {
-		c.JSON(http.StatusOK, gin.H{"message": "No assets or relations found in the latest scan"})
-		return
-	}
+	// if latestScan.Assets == nil && latestScan.Relations == nil {
+	// 	c.JSON(http.StatusOK, gin.H{"message": "No assets or relations found in the latest scan"})
+	// 	return
+	// }
 	// Check if there are no operation in the request
 	if len(req.AddAsset) == 0 && len(req.UpdatedAsset) == 0 && len(req.RemoveAsset) == 0 && len(req.AddRelations) == 0 && len(req.RemoveRelations) == 0 {
 		log.Printf("The request does not contain any operations to perform.\n")
@@ -139,7 +139,7 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 	messages, errors = addRelations(req, latestScan, db, messages, errors)
 
 	// Send the response as a list of messages
-	if len(messages) > 0 || len(errors) > 0 {
+	if len(messages) > 0 {
 		log.Printf("Messages: %v\n, Errors: %v\n", messages, errors)
 		c.JSON(http.StatusOK, gin.H{"messages": messages, "errors": errors})
 	} else {
@@ -149,6 +149,7 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 }
 
 // getLatestScan retrieves the latest scan from the database and returns it along with any error that occurs.
+
 func getLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 	var latestScan jsonhandler.BackState
 	if err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&latestScan); err != nil {
@@ -187,6 +188,11 @@ func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 	if len(req.UpdatedAsset) > 0 {
 		// Loop through the updated assets and update them in the latest scan
 		for assetID, updatedAsset := range req.UpdatedAsset {
+			if assetID == "" {
+				log.Printf("Asset ID is empty.\n")
+				messages = append(messages, "Asset ID is empty")
+				continue
+			}
 			if existingAsset, exists := latestScan.Assets[assetID]; exists {
 				updatedAsset.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
 				updatedAsset.DateCreated = existingAsset.DateCreated
@@ -215,7 +221,17 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 	if len(req.RemoveAsset) > 0 && req.RemoveAsset != nil {
 		// Loop through the assets to remove and delete them from the latest scan
 		for _, assetID := range req.RemoveAsset {
-			delete(latestScan.Assets, assetID)
+			if assetID == "" {
+				log.Printf("Asset ID is empty.\n")
+				messages = append(messages, "Asset ID is empty")
+				continue
+			}
+			if _, exists := latestScan.Assets[assetID]; exists {
+				delete(latestScan.Assets, assetID)
+			} else if !exists {
+				log.Printf("Cannot remove asset, asset with ID %s not found.\n", assetID)
+				messages = append(messages, "Cannot remove asset, Asset not found")
+			}
 			// Loop through the relations to remove and delete them from the latest scan
 			for relationID, relation := range latestScan.Relations {
 				if relation.From == assetID || relation.To == assetID {
@@ -246,8 +262,8 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			key := fmt.Sprintf("%s-%s", relation.From, relation.To)
 			existingRelations[key] = true
 		}
-		// Prepare a slice to hold any new relations that will be added
-		var newRelations []jsonhandler.Relation
+
+		var anyNewRelationsAdded bool
 		for _, newRelation := range req.AddRelations {
 			key := fmt.Sprintf("%s-%s", newRelation.From, newRelation.To)
 			// Check if the assets in the relation exist in latestScan.Assets
@@ -266,24 +282,24 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				newRelationID := primitive.NewObjectID().Hex()
 				newRelation.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 				latestScan.Relations[newRelationID] = newRelation
-				newRelations = append(newRelations, newRelation)
+				existingRelations[key] = true // Update existingRelations to include this new relation
+				anyNewRelationsAdded = true
+			} else {
+				log.Printf("No new relations were added as they already exist.\n")
+				messages = append(messages, "No new relations were added as they already exist")
 			}
-
 		}
-		// After processing all new relations, check if any were actually added that are not duplicates and add them to the latest scan
-		if len(newRelations) > 0 {
+
+		// After processing all new relations, update the scan if any new relations were added
+		if anyNewRelationsAdded {
 			update := bson.M{"$set": bson.M{"relations": latestScan.Relations}}
 			if _, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update); err != nil {
 				log.Printf("Failed to add new relations: %v\n", err)
 				errors = append(errors, "Failed to add new relations: "+err.Error())
+			} else {
+				log.Printf("New relations added successfully to the latest scan.\n")
+				messages = append(messages, "New relations added successfully to the latest scan")
 			}
-			// If the update is successful, return a success message
-			log.Printf("New relations added successfully to the latest scan.\n")
-			messages = append(messages, "New relations added successfully to the latest scan")
-		} else {
-			// If no new relations were added (all were duplicates), return a message indicating so
-			log.Printf("No new relations were added as they already exist.\n")
-			messages = append(messages, "No new relations were added as they already exist")
 		}
 	}
 	return messages, errors
@@ -295,12 +311,17 @@ func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db Data
 		// Loop through the relations to remove and delete them from the latest scan
 		var removedRelations []string
 		for _, relationID := range req.RemoveRelations {
+			if relationID == "" {
+				log.Printf("Relation ID is empty.\n")
+				messages = append(messages, "Asset ID is empty")
+				continue
+			}
 			if _, exists := latestScan.Relations[relationID]; exists {
 				delete(latestScan.Relations, relationID)
 				removedRelations = append(removedRelations, relationID)
 			} else {
 				log.Printf("Failed to remove relation, Relation with ID %s not found in the latest scan.\n", relationID)
-				messages = append(messages, fmt.Sprintf("Failed to remove relation, Relation with ID %s not found in the latest scan", relationID))
+				messages = append(messages, "Failed to remove relation, Relation not found in the latest scan")
 			}
 		}
 		// Update the latest scan with the removed relations
@@ -310,9 +331,10 @@ func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db Data
 			if err != nil {
 				log.Printf("Failed to remove relations: %v\n", err)
 				errors = append(errors, "Failed to remove relation: "+err.Error())
+			} else {
+				log.Printf("Relations removed successfully from the latest scan.\n")
+				messages = append(messages, "Relations removed successfully from the latest scan")
 			}
-			log.Printf("Relations removed successfully from the latest scan.\n")
-			messages = append(messages, "Relations removed successfully from the latest scan")
 		}
 	}
 	return messages, errors

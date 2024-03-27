@@ -1,9 +1,7 @@
 package dbcon
 
 import (
-	"assetinventory/assethandler/jsonhandler"
 	"context"
-	"time"
 
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson"
@@ -66,6 +64,7 @@ func (m *MongoDBHelper) Find(ctx context.Context, filter interface{}) ([]bson.M,
 
 type MockDB struct {
 	mock.Mock
+	DecodeHook func(v interface{}) error
 }
 
 func (m *MockDB) Find(ctx context.Context, filter interface{}) ([]bson.M, error) {
@@ -86,80 +85,12 @@ func (m *MockDB) UpdateOne(ctx context.Context, filter interface{}, update inter
 	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
 }
 
-// Add mock implementation for DeleteOne
 func (m *MockDB) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
 	args := m.Called(ctx, filter)
 	return args.Get(0).(*mongo.DeleteResult), args.Error(1)
 }
 
-func (mdh *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
-	scan := jsonhandler.BackState{
-		MostRecentUpdate: time.Date(2024, 2, 28, 14, 3, 58, 169000000, time.UTC),
-		Assets: map[string]jsonhandler.Asset{
-			"AID_4123523": {
-				Name:        "PC-A",
-				Owner:       "UID_2332",
-				Type:        []string{"PC", "Windows"},
-				DateCreated: "2024-02-14 23:00:00",
-				DateUpdated: "2024-02-14 23:00:30",
-				Criticality: 2,
-				Hostname:    "Desktop-123",
-			},
-			"AID_5784393": {
-				Name:        "Chromecast",
-				Owner:       "UID_2332",
-				Type:        []string{"IoT", "Media"},
-				DateCreated: "2024-02-10 20:04:20",
-				DateUpdated: "2024-02-14 23:00:30",
-				Criticality: 1,
-				Hostname:    "LivingRoom",
-			},
-			"AID_9823482": {
-				Name:        "Password Vault",
-				Owner:       "UID_2332",
-				Type:        []string{"Server", "Database"},
-				DateCreated: "2024-02-14 23:00:00",
-				DateUpdated: "2024-02-14 23:00:30",
-				Criticality: 4,
-				Hostname:    "Vault-123",
-			},
-		},
-		Plugins: map[string]jsonhandler.Plugin{
-			"ipScan": {
-				PluginStateID: "20240214-1300A",
-			},
-			"macScan": {
-				PluginStateID: "20240215-0800G",
-			},
-		},
-		Relations: map[string]jsonhandler.Relation{
-			"RID_2613785": {
-				From:        "ID_4123523",
-				To:          "ID_5784393",
-				Direction:   "uni",
-				Owner:       "UID_2332",
-				DateCreated: "2024-02-14 23:35:53",
-			},
-			"RID_6492733": {
-				From:        "ID_5784393",
-				To:          "ID_9823482",
-				Direction:   "bi",
-				Owner:       "UID_6372",
-				DateCreated: "2024-01-22 07:32:32",
-			},
-		},
-	}
-
-	bsonDoc, err := bson.Marshal(scan)
-	if err != nil {
-		panic("Failed to marshal mock scan data: " + err.Error())
-	}
-	var doc bson.D
-	err = bson.Unmarshal(bsonDoc, &doc)
-	if err != nil {
-		panic("Failed to unmarshal mock scan data: " + err.Error())
-	}
-
-	return mongo.NewSingleResultFromDocument(doc, nil, nil)
-
+func (m *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
+	args := m.Called(ctx, filter, opts)
+	return args.Get(0).(*mongo.SingleResult)
 }
