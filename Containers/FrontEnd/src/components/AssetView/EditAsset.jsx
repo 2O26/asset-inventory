@@ -3,6 +3,10 @@ import { AddIcon, CheckIcon, ConnectionIcon, CrossIcon, LinkAddIcon, RemoveIcon 
 import { UpdateAsset } from '../Services/ApiService';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 import { useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { GetState } from '../Services/ApiService'
+import { CycloneDXuploader } from './CycloneDXuploader';
+
 
 export default function EditAsset({ assetData, assetID, relationData, refetch }) {
     const [errorMessage, setErrorMessage] = useState(null)
@@ -18,6 +22,11 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
 
     const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "uni" };
     const [newRelationData, setNewRelationData] = useState(emptyRelation)
+    const { data, isLoading} = useQuery({
+        queryKey: ['getState'],
+        queryFn: GetState,
+        enabled: true
+    });
 
     const { mutate, isPending, isError, error, isSuccess } = useMutation({
         mutationFn: UpdateAsset, // Directly pass the LogIn function
@@ -139,6 +148,7 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                 <hr />
 
                 <div >
+                    <hr />
                     <h3>Relations </h3>
                     <div className='relation-content_button'>
                         <div className="relations-container" >
@@ -204,6 +214,12 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                     </div>
 
                 }
+
+                <hr />
+                <div>
+                    <CycloneDXuploader data={data} assetID={assetID} showPluginInfo={true} />
+                </div>
+
                 {isPending && <LoadingSpinner />}
                 {isError && <div className='errorMessage'>{error.message}</div>}
                 {errorMessage && <div className='errorMessage'>{errorMessage}</div>}
