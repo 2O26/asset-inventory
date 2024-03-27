@@ -24,6 +24,11 @@ services:
     volumes:
       - ./Containers/ConfigHandler/src:/app/src
 
+  cyclonedx:
+    image: cyclonedx
+    ports:
+      - "8082:8082"
+
   netscanstorage:
     image: mongo
     restart: always
@@ -60,6 +65,18 @@ services:
       - configstorage:/data/db
       - configdbconfig:/data/configdb
 
+  cyclonedxstorage:
+    image: mongo
+    restart: always
+    command: [ "mongod", "--port", "27020", "--quiet", "--syslog" ]
+    ports:
+      - "27020:27020"
+    expose:
+      - "27020"
+    volumes:
+      - cyclonedxstorage:/data/db
+      - cyclonedxconfig:/data/configdb
+
   keycloakstorage:
     image: postgres:latest
     environment:
@@ -92,6 +109,8 @@ volumes:
   netscanstorage:
   netscanconfig:
   keycloak_data:
+  cyclonedxstorage:
+  cyclonedxconfig:
 
 
 networks:
