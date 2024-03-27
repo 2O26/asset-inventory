@@ -98,6 +98,8 @@ services:
 
   cypress:
     image: cypresslocal
+    volumes:
+      - ./Containers/Cypress/coverage/lcov-report:/app/coverage/lcov-report/
     depends_on:
       frontenddev:
         condition: service_healthy
@@ -113,6 +115,7 @@ volumes:
   dbstorage:
   dbconfig:
   keycloak_data:
+  test_coverage:
 
 
 networks:
