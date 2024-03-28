@@ -1,7 +1,10 @@
 const express = require("express");
+const cron = require('node-cron');
+//const cronParser = require('cron-parser');
+const Plugins = require('./Plugins.js');
 const { IPRangechecker, RecurringScanFormat } = require("./formatchecker");
 const ConfigHandler = require("./DatabaseConn/configdbconn");
-const { CronoScanAdd, CronoScanRm } = require("./CronoScan");
+const { IsCronDue } = require("./CronoScan");
 
 // const app = express(express.json());
 const app = express();
@@ -80,9 +83,7 @@ app.get("/getRecurring", (req, res) => {
 
 app.post("/addRecurring", async (req, res) => {
     const configHandler = new ConfigHandler();
-
     if (RecurringScanFormat(req.body.recurring)) {
-        await CronoScanAdd(req.body.recurring);
         configHandler.connect()
             .then(() => configHandler.addRecurringScan(req.body.recurring))
             .then(() => {
@@ -98,7 +99,6 @@ app.post("/addRecurring", async (req, res) => {
 app.post("/removeRecurring", async (req, res) => {
 
     const configHandler = new ConfigHandler();
-    await CronoScanRm(req.body.recurring);
     configHandler.connect()
         .then(() => configHandler.removeRecurringScan(req.body.recurring))
         .then(() => {
@@ -108,4 +108,54 @@ app.post("/removeRecurring", async (req, res) => {
             res.json({ responseFromServer: "Failure to remove recurring scan due to database error.", success: "database error", recurring: req.body.recurring });
         });
 
+});
+
+cron.schedule('* * * * *', async () => {
+    /* Every minute fetch from the database and see if any matching cron jobs */
+
+    const configHandler = new ConfigHandler();
+    configHandler.connect()
+        .then(() => configHandler.getRecurringScans())
+        .then(async result => {
+
+            let IpToScanWplugin = {}
+            let scanSettings = { cmdSelection: 'simple' }
+            scanSettings['IpRange'] = scanSettings['IpRange'] || {};
+
+            Object.keys(Plugins).forEach(pluginName => {
+                IpToScanWplugin[pluginName] = scanSettings; // is this a shallow or hard copy. Does change to one change all?
+            })
+
+            result.forEach(recurring => {
+                if (IsCronDue(recurring.time) === true) {
+                    IpToScanWplugin[recurring.plugin]['IpRange'][recurring.IpRange] = true;
+                }
+            });
+
+            Object.keys(IpToScanWplugin).forEach(async pluginType => {
+                if (Object.keys(IpToScanWplugin[pluginType]['IpRange']).length !== 0) {
+                    try {
+                        // console.log(scanSettings);
+                        const response = await fetch(
+                            Plugins[pluginType], {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(IpToScanWplugin[pluginType])
+                        });
+
+                        const resData = await response.json();
+                        return resData;
+                    } catch (err) {
+                        console.error(err);
+                        throw new Error('Network response was not ok, could not fetch state');
+                    }
+                }
+            });
+
+        })
+        .catch((err) => {
+            console.log('Could not perform scan. Error', err);
+        });
+
+    // console.log('running a task every minute');
 });

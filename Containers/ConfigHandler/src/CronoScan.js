@@ -1,62 +1,27 @@
-const fs = require('fs');
 
 
-function CronoScanAdd(recurring) {
-    // mount dir /app
-    const dir = "/app";
-    let filename = ""
-    filename += recurring.plugin;
-    filename += recurring.time;
-    filename += recurring.IpRange;
-    filename += ".sh"; // bash file
-    console.log(filename);
-
-
-    const scanSettings = {
-        commandSelection: 'simple',
-        IPRanges: {
-            // Modifiable IP address and its status
-            [recurring.IpRange]: true
-        }
-    };
-    const scanSettingsJson = JSON.stringify(scanSettings);
-
-    const curlCommand = `curl -X POST http://networkscan:8081/startNetScan \\
-       -H "Content-Type: application/json" \\
-       -d '${scanSettingsJson.replace(/'/g, "'\\''")}'`;
-
-
-    console.log(curlCommand);
+function IsCronDue(cronSchedule) {
     try {
-        fs.writeFileSync(filename, curlCommand);
-        console.log('File has been written successfully.');
+        const now = new Date();
+        const [minute, hour, dayOfMonth, month, dayOfWeek] = cronSchedule.split(' ').map(s => s.trim());
+
+        // console.log(minute);
+        // console.log(now.getMinutes());
+        // Cron months start from 1 (January) to 12 (December), JavaScript months from 0 to 11
+        const matchesMonth = month === '*' || parseInt(month) === now.getMonth() + 1;
+        const matchesDayOfMonth = dayOfMonth === '*' || parseInt(dayOfMonth) === now.getDate();
+        // Day of week in both cron and JavaScript is 0 (Sunday) to 6 (Saturday)
+        const matchesDayOfWeek = dayOfWeek === '*' || parseInt(dayOfWeek) === now.getDay();
+        const matchesHour = hour === '*' || parseInt(hour) === now.getHours();
+        const matchesMinute = minute === '*' || parseInt(minute) === now.getMinutes();
+
+        return matchesMonth && matchesDayOfMonth && matchesDayOfWeek && matchesHour && matchesMinute;
     } catch (err) {
-        console.error('Error writing file:', err);
+        console.error('Error parsing cron expression:', err.message);
+        return false;
     }
-
-    try {
-        // 0o755 sets read/write/execute permissions for the owner, and read/execute permissions for group and others
-        fs.chmodSync(filename, 0o755);
-        console.log('Execute permission has been set successfully.');
-    } catch (err) {
-        console.error('Error setting execute permission:', err);
-    }
-
-
-    // TODO: Modify crontab file to get the cronjob
-
 }
 
-function CronoScanRm(recurring) {
-    const dir = "/app";
-    // Remove bash script that sends curl request to assethandler for this particalular 
-    // Modify crontab file, i.e, remove line in questopm
-}
 
-function CronoScanEdit(recurring) {
-    const dir = "/app";
-    // Remove bash script to send curl request to assethandler
-    // Modify crontab file, i.e, 
-}
 
-module.exports = { CronoScanAdd, CronoScanRm, CronoScanEdit };
+module.exports = { IsCronDue };

@@ -65,6 +65,7 @@ export default function NetworkScanPage() {
     const attemptToScan = (event) => {
         event.preventDefault();
         setDeployedNetscan(false);
+        console.log(scanSettings);
         mutate(scanSettings);
 
     }

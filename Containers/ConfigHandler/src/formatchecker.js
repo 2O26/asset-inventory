@@ -50,7 +50,7 @@ function cronFormat(cronString) {
 }
 
 function validPlugin(pluginName) {
-    return Plugins.includes(pluginName);
+    return pluginName in Plugins;
 }
 
 function IPRangechecker(IPRange) {
