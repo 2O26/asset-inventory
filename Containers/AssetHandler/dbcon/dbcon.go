@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"regexp"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -40,6 +42,33 @@ func SetupDatabase(uri string, databaseName string) error {
 
 func GetCollection(collectionName string) *mongo.Collection {
 	return client.Database(dbName).Collection(collectionName)
+}
+
+func isValidName(hostName string) bool {
+	valid := regexp.MustCompile(`^\b[A-Za-z0-9 -._]*[A-Za-z0-9]$`)
+	
+	return valid.MatchString(hostName)
+}
+
+func isValidOwner(ownerName string) bool {
+	for _, char := range ownerName{
+		if !unicode.IsLetter(char) && char != ' ' && char != '-' {
+			return false
+		}
+	}
+	return true
+
+}
+
+func isValidType(assetTypes []string) bool {
+	for _, t := range assetTypes {
+		for _, char := range t {
+			if !unicode.IsLetter(char) && char != '-' && char != ' '{
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func AddScan(db DatabaseHelper, c *gin.Context) {
@@ -164,11 +193,17 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 	if len(req.AddAsset) > 0 {
 		// Loop through the new assets and add them to the latest scan
 		for _, newAsset := range req.AddAsset {
+			if !(isValidName(newAsset.Name) && isValidOwner(newAsset.Owner) && isValidType(newAsset.Type)) {
+				log.Printf("Error user input contains illegal charachters!")
+				errors = append(errors, "Failed to add new assets")
+				return messages, errors
+			}
 			newAssetID := primitive.NewObjectID().Hex()
 			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 			newAsset.DateUpdated = newAsset.DateCreated
 			latestScan.Assets[newAssetID] = newAsset
 		}
+		
 		// Update the latest scan with the new assets
 		update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
 		_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
