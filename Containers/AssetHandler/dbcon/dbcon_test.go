@@ -290,6 +290,74 @@ func TestGetLatestScan(t *testing.T) {
 
 }
 
+
+func TestIsValidName(t *testing.T) {
+    tests := []struct {
+		target string
+		result bool
+	 }{
+		{"PC-A", true},
+		{"domain.com", true},
+		{"Johans Laptop", true},
+		{"@me", false},
+		{":)", false},
+		{`PC-A"; DROPT TABLE USERS; --`, false},
+	}
+
+		for _, test := range tests {
+		  valid := isValidName(test.target)
+		  if valid != test.result{
+		    	t.Errorf("Host Namet: %s is %t it should be %t", test.target, valid, test.result)
+		  }
+		 }
+
+}
+
+func TestIsValidOwner(t *testing.T) {
+    tests := []struct {
+		target string
+		 result bool
+	 }{
+		{"Victor Vidin", true},
+		{"Henrik Goransson",true},
+		{"Karl-Fredrik af Chapman", true},
+		{"IT Departementet", true},
+		{"Knowit", true},
+		{"me :)", false},
+		{`Kalle"; DROP TABLE users; --`, false},
+		{"hej, jag har stulit dina uppgifter!", false},
+		{"F#ck U!", false},
+	}
+		
+		for _, test := range tests {
+		  valid := isValidOwner(test.target)
+		  if valid != test.result{
+				t.Errorf("Owner Name: %s is %t it should be %t", test.target, valid, test.result)
+		  }
+		}
+}
+
+func TestIsValidType(t *testing.T) {
+    tests := []struct {
+		target []string
+		result bool
+	 }{
+		{[]string{"hardware","Server","Rack mounted"},true},
+		{[]string{"Windows"," Laptop"}, true},
+		{[]string{"Linux","Virtual Machine","Computer"}, true},
+		{[]string{"me -.9, lol"}, false},
+		{[]string{"12","34","1234"}, false},
+		{[]string{`Laptop, Windows"; DROP TABLE users; --'`}, false},
+	}
+
+		for _, test := range tests {
+		  valid := isValidType(test.target)
+		  if valid != test.result{
+				t.Errorf("The Type: %s is %t it should be %t", test.target, valid, test.result)
+		  }
+		}
+}
+
 func TestManageAssetsAndRelations(t *testing.T) {
 	mockDB := new(MockDB)
 
