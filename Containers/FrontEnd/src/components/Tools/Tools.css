@@ -1,10 +1,41 @@
 .tools-container {
-    width: 100vw;
     display: flex;
-    flex-direction: row;
-    padding: 2rem;
-    justify-content: left;
+    width: 100%; /* Span the width of the whole page */
+    height: 100vh;
 
+  }
+  
+  .view-tools,
+  .scan-tools {
+    flex: 1; /* Each section takes up equal space */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tools-header {
+    margin-top: 1rem; /* Adjust top margin as needed */
+    text-align: center;
+    color: var(--text-color);
+    font-size: 30px;
+  }
+  
+  .view-tool-objects,
+  .scan-tool-objects{
+    flex-direction: row;
+    justify-content: left;
+    align-items: left;
+  }
+
+  .vertical-line {
+    position: absolute;
+    height: 70%;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    width: 1px; /* Adjust the width as needed */
+    background-color: var(--text-color);
+    left: 50%; /* Position it in the middle */
+    transform: translateX(-50%); /* Center it horizontally */
+    z-index: 1; /* Ensure it's above other content */
 }
 
 .button-tool {
