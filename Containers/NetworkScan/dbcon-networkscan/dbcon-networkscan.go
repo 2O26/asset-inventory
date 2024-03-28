@@ -19,13 +19,14 @@ type Scan struct {
 }
 
 type Asset struct {
-	Status        string
-	IPv4Addr      string
-	IPv6Addr      string
-	Subnet        string
-	Hostname      string
-	KernelVersion string // Changed from OS to KernelVersion
-	MACAddr       string // New field for MAC addresses
+    Status        string
+    IPv4Addr      string
+    IPv6Addr      string
+    Subnet        string
+    Hostname      string
+    KernelVersion string
+    MACAddr       string
+    OpenPorts     []int // Add this line
 }
 
 type Host struct {
