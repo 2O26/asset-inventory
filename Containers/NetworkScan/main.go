@@ -127,7 +127,8 @@ func main() {
 	}
 }
 
-func validNmapTarget(nmapTarget string) bool {
+// OBS!!! THIS IS CURRENTLY NOT IN USE WE NEED TO CONNECT THE CODE
+func validNmapTarget(nmapTarget string) bool { 
 	//Example of strings able to be handled "192.168.1.0/24, 172.15.1.1-100, 10.10.1.145"
 	regex := `^(\b(?:\d{1,3}\.){3}\d{1,3}(?:/\d{1,2})?|\b(?:\d{1,3}\.){3}\d{1,3}-\d{1,3}\b)$` // `` Have to be used instead of "" or the regex breaks
 
@@ -237,6 +238,7 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
     var req dbcon.ScanRequest
 
     if err := c.ShouldBindJSON(&req); err != nil {
+        fmt.Printf("Error 1: %+v\n", err)
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
@@ -249,6 +251,7 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
     for target := range req.IPRanges {
         scanResult, err := performScan(target, req.CmdSelection)
         if err != nil {
+            fmt.Printf("Error 2: %+v\n", err)
             c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
             return
         }
