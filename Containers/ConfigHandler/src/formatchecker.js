@@ -55,10 +55,13 @@ function validPlugin(pluginName) {
 
 function IPRangechecker(IPRange) {
 
-    if (isValidIp(IPRange) || isValidSubnet(IPRange) || isValidIpRange(IPRange)) {
+    // IP, IP+subnet, IPrange
+    // if (isValidIp(IPRange) || isValidSubnet(IPRange) || isValidIpRange(IPRange)) {
+    //     return true;
+    // }
+    if (isValidSubnet(IPRange)) {
         return true;
     }
-    // return ipRegex.test(IPRange);
     return false;
 }
 
