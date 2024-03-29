@@ -1,27 +1,11 @@
-.reoccurringkScanTitleConfig {
-    display: flex;
-    justify-content: center;
+.reoccurringkScan-container {
     color: var(--text-color)
-}
-
-.reoccuringScan-input {
-    /* margin: 0.5rem 0.5rem; */
-    border: none;
-    min-width: 22rem;
-    height: 40px;
-    font-size: 20px;
-    text-indent: 10px;
-    border-radius: 5px;
-    border-top-style: hidden;
-    border-right-style: hidden;
-    border-left-style: hidden;
-    border-bottom-style: hidden;
 }
 
 .remove-ip-range-btn {
     white-space: nowrap;
     color: var(--text-color);
-    background-color: transparent;
+    /* background-color: transparent; */
     border: none;
     margin-left: 1rem;
 }
@@ -52,4 +36,14 @@
 .remove-ip-range-btn:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
+}
+
+.interval-text {
+    max-width: 20vw;
+    margin-top: 0.5rem;
+    word-wrap: break-word;
+    /* Old syntax, supported in older browsers */
+    overflow-wrap: break-word;
+    /* Standard syntax */
+    text-align: left;
 }

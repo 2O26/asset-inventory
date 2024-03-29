@@ -4,7 +4,7 @@
     color: var(--text-color)
 }
 
-.rangeConfigIP {
+.ip-range-config {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,14 +13,6 @@
     flex-direction: column;
     text-align: center;
     width: 20vw;
-}
-
-.scansettingsText {
-    font-size: 1.3rem;
-    color: var(--text-color);
-    margin: 1rem 0.4rem 0 0;
-    text-align: left;
-    /* margin-left: 1rem; */
 }
 
 .ip-range-input {
@@ -54,57 +46,4 @@
 .successText {
     margin-top: 0.3rem;
     color: var(--text-color);
-}
-
-.iprangelist {
-    display: flex;
-    /* Establishes this element as a flex container */
-    justify-content: space-between;
-    /* Puts maximum space between children */
-    align-items: center;
-    /* padding-right: 3rem; */
-
-    color: var(--text-color);
-    font-size: 1.2rem;
-    margin-top: 0.3rem;
-}
-
-.iprange-text {
-    flex-grow: 1;
-    text-align: left;
-}
-
-.remove-ip-range-btn {
-    white-space: nowrap;
-    color: var(--text-color);
-    background-color: transparent;
-    border: none;
-    margin-left: 1rem;
-}
-
-.remove-ip-range-btn .tooltip-text {
-    visibility: hidden;
-    width: 120px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-
-    /* Position the tooltip */
-    position: absolute;
-    z-index: 1;
-    bottom: 100%;
-    left: 50%;
-    margin-left: -60px;
-    /* Use half of the width value to align it center */
-
-    /* Fade in tooltip - animations */
-    opacity: 0;
-    transition: opacity 0.3s, visibility 0.3s;
-}
-
-.remove-ip-range-btn:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
 }

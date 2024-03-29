@@ -109,25 +109,24 @@ export default function SetNetworkScanSettings() {
             <div className='networkScanTitleConfig'>
                 <h2 > Network Scan Settings</h2>
             </div>
-            <div className='rangeConfigIP'>
+            <div className=''>
                 <div>
-                    <p className='scansettingsText'> Current IP ranges:</p>
+                    <p className='settingsText'> Current IP ranges:</p>
                     {(isLoading || isPendingMutAdd || isPendingMutRm) && <LoadingSpinner />}
                     {isError && <div className='errorMessage'>{error.message}</div>}
                     <ul>
                         {data && Array.isArray(data.ipranges) && data.ipranges.map((iprange, index) => (
-                            <li key={index} className='iprangelist'>
-                                <span className="iprange-text">{iprange}</span>
+                            <li key={index} className='list-container'>
+                                <span className="span-text">{iprange}</span>
                                 <button
                                     onClick={() => handleRemoveClick(iprange)}
-                                    className="remove-ip-range-btn"
-                                    title="Remove IP range"
+                                    className="remove-btn"
+                                    // title="Remove IP range"
                                     aria-label='Remove'
                                 >
                                     <span className="tooltip-text">Remove IP range</span>
-                                    < RemoveIcon color={"var(--error-color)"} />
+                                    < RemoveIcon color={"var(--error-color)"}> </RemoveIcon>
                                 </button>
-
                             </li>
                         ))}
                     </ul>
@@ -135,7 +134,7 @@ export default function SetNetworkScanSettings() {
                 <div>
                     {expandAddIPrange ? null : <button className='standard-button' onClick={expandIPrange}> Add IP range</button>}
                     {expandAddIPrange ? <div>
-                        <p className='scansettingsText'>  Enter IP range to add: </p>
+                        <p className='settingsText'>  Enter IP range to add: </p>
                         <form onSubmit={addIPrange}>
                             <input
                                 type="IP range"

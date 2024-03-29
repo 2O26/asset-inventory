@@ -30,7 +30,7 @@
 
 :root .dark {
     --main-color: #222222;
-    --secondary-color: #2ecc71;
+    --secondary-color: #161616;
     --accent-color: #9b59b6;
 
     --text-color: #d9d7d7;
@@ -56,8 +56,8 @@
 
 /* Blue Light Theme */
 :root .light {
-    --main-color: white;
-    --secondary-color: #2ecc71;
+    --main-color: #FFF;
+    --secondary-color: #d3d3d3;
     --accent-color: #9b59b6;
 
     --text-color: #222222;
