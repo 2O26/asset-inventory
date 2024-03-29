@@ -29,16 +29,16 @@ export const CycloneDXuploader = ({ assetID }) => {
 
     return (
         <div>
-            <h1>Upload CycloneDX File</h1>
+            <h3>Upload CycloneDX File</h3>
             <div className="container">
                 <FileUploader
                     handleChange={handleFileChange}
                     name="file"
-                    types={['XML', 'JSON', 'PNG', 'JPG']}
-                    className="custom-file-uploader"/>            
+                    types={['JSON']}
+                    className="custom-file-uploader" />
             </div>
-                <p>Drag and drop your file here or click to select a file.</p>
-                <p>XML, JSON, PNG, JPG are currently supported.</p>
+            <p>Drag and drop your file here or click to select a file.</p>
+            <p style={{ marginTop: "0.5rem" }}>Supported formats: JSON</p>
         </div>
     );
 };
