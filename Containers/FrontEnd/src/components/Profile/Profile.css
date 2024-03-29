@@ -1,0 +1,13 @@
+.profile-container {
+    width: 20rem;
+    display: flex;
+    flex-direction: column;
+    margin-top: 2rem;
+    gap: 1rem;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    background-color: var(--main-color);
+    box-shadow: var(--box-shadow);
+    text-align: left;
+    color: var(--text-color);
+}

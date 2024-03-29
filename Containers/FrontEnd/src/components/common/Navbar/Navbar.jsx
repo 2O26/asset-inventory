@@ -1,10 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 import './Navbar.css'
-import { UserIcon, ToolsIcon, DashboardIcon, SettingsIcon, LogInIcon, ThemeIcon } from '../Icons/Icons';
+import { UserIcon, ToolsIcon, DashboardIcon, SettingsIcon, LogInIcon, ThemeIcon, LogOutIcon } from '../Icons/Icons';
+import UserService from '../../Services/UserService';
 
 
 export default function Navbar({ toggleTheme }) {
+
+  const { doLogout } = UserService
 
   return (
     <div className='navbar'>
@@ -33,8 +36,11 @@ export default function Navbar({ toggleTheme }) {
         <li>
           <Link to="/profile"> <UserIcon />Profile</Link>
         </li>
-        <li>
+        {/* <li>
           <Link to="/signin"> <LogInIcon />Sign in</Link>
+        </li> */}
+        <li>
+          <Link onClick={() => doLogout()}> <LogOutIcon />Log Out</Link>
         </li>
         <li>
           <Link onClick={toggleTheme} ><ThemeIcon /></Link>
