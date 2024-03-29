@@ -17,11 +17,14 @@ export const CycloneDXuploader = ({ assetID }) => {
     });
 
     const handleFileChange = (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('assetID', assetID);
+        if (window.confirm(`Are you sure you want to upload the file ${file.name}`)) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('assetID', assetID);
+            mutateAdd(formData);
+        }
 
-        mutateAdd(formData);
+
     };
 
     if (isPendingMutAdd) return <LoadingSpinner />;
