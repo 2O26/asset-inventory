@@ -1,4 +1,5 @@
 import React from 'react'
+import './Icons.css'
 import { FaUserCircle, FaTools } from 'react-icons/fa'
 import { FaGear } from "react-icons/fa6";
 import { MdDashboard } from "react-icons/md";
@@ -7,12 +8,13 @@ import { CiBoxList, CiBarcode } from "react-icons/ci";
 import { CgDarkMode } from "react-icons/cg";
 import { SiElastic } from "react-icons/si";
 import { GrGraphQl } from "react-icons/gr";
-import { FaInfoCircle } from "react-icons/fa";
-import { IoIosRemoveCircle, IoIosAddCircle } from "react-icons/io";
+import { IoIosRemoveCircle, IoIosAddCircle, IoIosInformationCircleOutline } from "react-icons/io";
 import { CgArrowsH } from "react-icons/cg";
 import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
 import { MdAddLink } from "react-icons/md";
 import { CiSearch } from "react-icons/ci";
+
+
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
 
@@ -94,9 +96,13 @@ export const GraphIcon = ({ size = 30 }) => {
     )
 }
 
-export const InfoIcon = ({ size = 30 }) => {
+export const InfoIcon = ({ size = 30, component: Component, text = null }) => {
     return (
-        <FaInfoCircle size={size} />
+        <div class="info-container">
+            <IoIosInformationCircleOutline size={size} />
+            {Component && <div class="info-component"> <Component />  </div>}
+            {text && <div class="info-text">  {text}  </div>}
+        </div>
     )
 }
 

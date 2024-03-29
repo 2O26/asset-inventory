@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import { useMutation, useQuery } from "@tanstack/react-query";
+import cronstrue from 'cronstrue';
 
 import { GetIPranges, AddRecurring, GetRecurring, RmRecurring } from '../../Services/ApiService';
 import Plugins from '../../Tools/Plugins';
 
 import './RecurringScanSettings.css'
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
-import { RemoveIcon } from "../../common/Icons/Icons";
+import { InfoIcon, RemoveIcon } from "../../common/Icons/Icons";
+import CronMap from './CronMap'
 
 export default function RecurringScanSettings() {
     const [expandAddCronSettings, setExpandAddCronSettings] = useState(false);
     const [iprange, setIprange] = useState('');
-    const [timeinterval, setTimeinterval] = useState("");
+    const [timeinterval, setTimeinterval] = useState("* * * * *");
     const [pluginType, setPluginType] = useState(Plugins.length > 0 ? Plugins[0] : '');
     const [addRecurringSuccess, setRecurringSuccess] = useState(false);
     const [addRecurringFail, setRecurringFail] = useState(false);
     const [recurringFromAdd, setRecurringFromAdd] = useState(false);
+    const [readableExpression, setReadableExpression] = useState('');
+
+    const usageText = ""
 
     const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
         mutationFn: AddRecurring, // Directly pass the LogIn function
@@ -85,7 +90,7 @@ export default function RecurringScanSettings() {
     const addRecurringScan = (event) => {
         event.preventDefault();
         mutateAdd({ recurring: { time: timeinterval, IpRange: iprange, plugin: pluginType } });
-        setTimeinterval("");
+        setTimeinterval("* * * * *");
         setRecurringSuccess(false);
         setRecurringFail(false);
     }
@@ -117,7 +122,14 @@ export default function RecurringScanSettings() {
         if (ipRangesData && Array.isArray(ipRangesData.ipranges)) {
             setIprange(ipRangesData.ipranges[0]);
         }
-    }, [ipRangesData]);
+        try {
+            const humanReadable = cronstrue.toString(timeinterval);
+            setReadableExpression(humanReadable);
+        } catch (error) {
+            console.error("Error parsing cron expression", error);
+            setReadableExpression("Invalid cron expression");
+        }
+    }, [ipRangesData, timeinterval]);
 
     if (!recurringData || !Array.isArray(recurringData.recurring) || recurringData.recurring === null) {
         // TODO : return error
@@ -130,27 +142,26 @@ export default function RecurringScanSettings() {
     }
 
     return (
-        <div>
-            <h2 className='recurringScanTitleConfig'>
-                Crono Settings
+        <div className='reoccurringkScan-container'>
+            <h2>
+                Cron Settings
             </h2>
             <div>
-                <p className=''> Current recurring scans:</p>
+                <p className="settingsText"> Current recurring scans:</p>
                 {(isLoadingRecurring || isPendingMutAdd || isPendingMutRm) && <LoadingSpinner />}
                 {isErrorRecurring && <div className='errorMessage'>{errorRecurring.message}</div>}
                 <ul>
 
                     {recurringData.recurring.map((plugin, index) => (
-                        <li key={index} className='plugin-list'>
-                            <span className="plugin-name">{plugin.plugin}: </span>
-                            <span className="plugin-time">{plugin.time}</span>
-                            <span className="plugin-iprange">{plugin.IpRange}</span>
+                        <li key={index} className='list-container'>
+                            <span className="span-text">{plugin.plugin}: {plugin.time} {plugin.IpRange}</span>
                             <button
                                 onClick={() => handleRemoveClick({ plugin: plugin.plugin, time: plugin.time, IpRange: plugin.IpRange })}
-                                className="remove-plugin-btn"
+                                className="remove-btn"
                                 title="Remove recurring scan"
                                 aria-label='Remove'
                             >
+                                <span className="tooltip-text">Remove Cron Job</span>
                                 <RemoveIcon color={"var(--error-color)"} />
                             </button>
                         </li>
@@ -160,14 +171,14 @@ export default function RecurringScanSettings() {
             </div>
 
             <div>
-                {expandAddCronSettings ? null : <button className='standard-button' onClick={expandCronSettings}> Add  recurring scan</button>}
+                {expandAddCronSettings ? null : <button className='standard-button' onClick={expandCronSettings}> Add Scan Job</button>}
                 {
                     expandAddCronSettings ?
                         <div>
                             <form onSubmit={addRecurringScan}>
                                 <div>
-                                    <p className='scansettingsText'>  IP range to recurringly scan: </p>
-                                    <select value={iprange} onChange={handleIPChange}>
+                                    <p className='settingsText'>  IP range to recurringly scan: </p>
+                                    <select className='select-container' value={iprange} onChange={handleIPChange}>
                                         {ipRangesData.ipranges.map((iprange, index) => (
                                             <option key={iprange}>
                                                 {iprange}
@@ -176,20 +187,24 @@ export default function RecurringScanSettings() {
                                     </select>
                                 </div>
                                 <div>
-                                    <p className='scansettingsText'>  Time interval to perform the scan: </p>
+                                    <p className='settingsText'>  Time interval to perform the scan
+                                        <InfoIcon size={22} component={CronMap} />
+                                        : </p>
                                     <input
                                         type="RecurringScanTime"
                                         id="RecurringScanInputTime"
                                         name="RecurringScanTime"
                                         value={timeinterval} // Set the value of the input to the state
                                         onChange={handleTimeChange} // Update the state when the input changes
-                                        className='recurringScan-input'
+                                        className='inputFields'
+                                        placeholder='e.g. 0 0 * * 1'
                                     >
                                     </input>
                                 </div>
+                                <div className='interval-text'>Interval: {readableExpression}.</div>
                                 <div>
-                                    <p className='scansettingsText'>  Plugin type: </p>
-                                    <select value={pluginType} onChange={handlePluginChange}>
+                                    <p className='settingsText'>  Plugin type: </p>
+                                    <select className='select-container' value={pluginType} onChange={handlePluginChange}>
                                         {Plugins.map((plugintype, index) => (
                                             <option key={plugintype}>
                                                 {plugintype}
@@ -212,7 +227,7 @@ export default function RecurringScanSettings() {
                                 {isErrorMutAdd && <div className='errorMessage'>{errorMutAdd.message}</div>}
                                 <div className='buttonContainerNetScan'>
                                     <button className='standard-button' disabled={isPendingMutAdd} type="submit">
-                                        <div> Add IP range </div>
+                                        <div> Add Job </div>
                                     </button>
                                     <button className='standard-button' onClick={expandCronSettings}>
                                         <div> Cancel </div>

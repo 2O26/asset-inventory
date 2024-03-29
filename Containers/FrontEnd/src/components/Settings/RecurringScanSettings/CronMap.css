@@ -1,0 +1,33 @@
+.cron-table {
+    /* width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; */
+    /* Optional: helps with consistent column widths */
+    text-align: left;
+}
+
+.cron-table th,
+.cron-table td {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+}
+
+.cron-table th {
+    /* background-color: var(--main-color);s */
+    background-color: var(--secondary-color);
+}
+
+/* Optional: Add zebra striping to rows */
+.cron-table tbody tr:nth-child(odd) {
+    background-color: var(--main-color);
+    color: var(--text-color)
+}
+
+/* Optional: Add hover effect to rows */
+.dark .cron-table tbody tr:hover {
+    background-color: #3b3b3b;
+}
+
+.light .cron-table tbody tr:hover {
+    background-color: #ebebeb;
+}

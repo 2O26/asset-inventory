@@ -1,0 +1,47 @@
+.info-container {
+    position: relative;
+    /* Anchor for the absolute positioning of the tooltip */
+    display: inline-block;
+    /* So it doesn't take up the full width */
+    white-space: nowrap;
+}
+
+.info-text,
+.info-component {
+    visibility: hidden;
+    width: auto;
+    height: auto;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    text-align: center;
+    border-radius: 0.2rem;
+    padding: 0.2rem;
+    font-weight: 100;
+
+    /* Positioning */
+    position: absolute;
+    z-index: 2;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -60px;
+    /* Half of the width to center it */
+
+    /* Fade in */
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.info-component {
+    bottom: 100%;
+    left: 50%;
+    margin-left: -24rem;
+    padding: 1rem;
+    box-shadow: var(--box-shadow);
+}
+
+
+.info-container:hover .info-text,
+.info-container:hover .info-component {
+    visibility: visible;
+    opacity: 1;
+}
