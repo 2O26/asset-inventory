@@ -42,3 +42,19 @@ if [ "$CREATE_CLIENT_RESPONSE" = "201" ]; then
 else
   echo "Failed to create client, server responded with HTTP status $CREATE_CLIENT_RESPONSE."
 fi
+
+# User data
+USER_DATA='{"firstName":"Test","lastName":"Testsson", "username":"test@email.com" ,"email":"test@email.com", "enabled":"true", "credentials":[{"type":"password","value":"passwd","temporary":false}]}'
+
+# Use the token to create a new user
+CREATE_USER_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$KEYCLOAK_URL/admin/realms/$REALM_NAME/users" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d "$USER_DATA")
+
+# # Check if the user was created successfully
+if [ "$CREATE_USER_RESPONSE" = "201" ]; then
+  echo "User successfully created."
+else
+  echo "Failed to create user, server responded with HTTP status $CREATE_USER_RESPONSE."
+fi
