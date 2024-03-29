@@ -2,9 +2,9 @@ name: make all-test
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "ci/cd" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop", "ci/cd" ]
 
 jobs:
   build-and-test:
@@ -16,3 +16,10 @@ jobs:
     - name: Build and Test
       run: |
         make all-test
+        docker-compose -f test-docker-compose.yaml up -d
+        docker-compose -f test-docker-compose.yaml run --rm cypress
+        exit_code=$?
+        if [ $exit_code -ne 0 ]; then
+          echo "Cypress tests failed with exit code $exit_code"
+          exit $exit_code
+        fi
