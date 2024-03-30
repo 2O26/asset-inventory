@@ -58,12 +58,9 @@ RUN git clone https://github.com/CycloneDX/cyclonedx-cli.git
 WORKDIR ./cyclonedx-cli
 RUN dotnet publish src/cyclonedx/cyclonedx.csproj --configuration Release --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output bin/linux-x64
 
-ENTRYPOINT ["/cyclonedx"]
-CMD ["--help"]
 
 
-#FROM golang:1.22.0-alpine as go-builder
-# FROM golang:latest AS build-stage
+#FROM golang:1.22.0-alpine
 #WORKDIR /app
 # go.mod : describes modules properties, including dependencies on other modules and on versions on Go
 # go.sum : file contains cryptographic hashes for each module version that your project depends on. (maintains integrity and reproducibility)
@@ -74,21 +71,22 @@ CMD ["--help"]
 # Copy source code to container
 #COPY *.go ./
 
-# Run tests for jsonhandler and dbcon-networkscan
-# RUN go test assetinventory/... -v
+#COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/linux-x64 /bin
 
 # Compile the application
 #RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
 # Expose port 8080 (the port that the API is listening to)
+#EXPOSE 8082
 
-
-#FROM alpine:latest
-
-#RUN apk add --no-cache ca-certificates
-#RUN apk add --no-cache alpine-sdk
-
-#COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/ /cyclonedx
-# Run the binary
 #ENTRYPOINT ["/cyclonedx"]
 
-#CMD ["--help"]
+
+FROM golang:1.22.0-alpine
+
+WORKDIR /app
+COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/linux-x64 /bin
+COPY ./bom.json ./bom.json
+COPY ./bom.xml ./bom.xml
+RUN apk add --no-cache python3 icu
+
+ENTRYPOINT ["python3", "-m", "http.server", "8082"]
