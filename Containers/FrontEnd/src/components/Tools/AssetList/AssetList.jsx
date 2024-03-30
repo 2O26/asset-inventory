@@ -114,7 +114,8 @@ export default function AssetList() {
                     ))}
                 </div>
 
-                <hr style={{ margin: "0.5rem 2rem ", border: "1px solid var(--text-color)" }}></hr>
+                {/* <hr style={{ margin: "0.5rem 2rem ", border: "1px solid var(--text-color)" }}></hr> */}
+                <hr />
                 {filteredAssets.map(([key, value]) => (
                     <div key={key} className='assetRow'>
                         <div className='assetCell'>

@@ -47,8 +47,10 @@
     --button-active: #5c5c5c;
     --button-shadow: #0000007e;
 
+    /* --hr-color-1: rgba(228, 228, 228, 0);
+    --hr-color-2: rgba(228, 228, 228, 0.75); */
     --hr-color-1: rgba(228, 228, 228, 0);
-    --hr-color-2: rgba(228, 228, 228, 0.75);
+    --hr-color-2: rgba(42, 138, 246, 0.75);
 
     --graph-bg: rgb(21, 21, 21);
     --selected-node: #000000;
@@ -75,7 +77,7 @@
     --button-shadow: #5c5c5c6a;
 
     --hr-color-1: rgba(0, 0, 0, 0);
-    --hr-color-2: rgba(0, 0, 0, 0.75);
+    --hr-color-2: rgba(64, 83, 251, 0.75);
 
     --graph-bg: rgb(222, 222, 222);
     --selected-node: #b3c9fd;
