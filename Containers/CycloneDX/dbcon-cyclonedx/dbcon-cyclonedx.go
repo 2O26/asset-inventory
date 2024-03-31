@@ -44,7 +44,7 @@ func GetCollection(collectionName string) *mongo.Collection {
 	return client.Database(dbName).Collection(collectionName)
 }
 
-// Assuming `db` is an interface to MongoDB with a method `InsertOne` that inserts a document.
+// SaveCycloneDX saves the CycloneDX file data to the database.
 func SaveCycloneDX(db DatabaseHelper, sbomData []byte, assetID string) error {
 	doc := CycloneDXDocument{
 		ID:       assetID,
