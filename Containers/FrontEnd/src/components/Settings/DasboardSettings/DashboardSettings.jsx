@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { dashboardTools } from '../../Tools/Tools';
+import { SaveDashboardConfig } from '../../Services/ApiService';
 import './DashboardSettings.css'
+import { useMutation } from '@tanstack/react-query';
+import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
+
+function sortDictByValues(dict) {
+    return Object.entries(dict)
+        .filter(([key, value]) => value !== 0)
+        .sort((a, b) => a[1] - b[1])
+        .map(([key]) => key);
+}
 
 export default function DashboardSettings() {
     const [showButtons, setShowButtons] = useState(false);
@@ -9,6 +19,17 @@ export default function DashboardSettings() {
     // Initialize leftLst and rightLst as state variables, with each key from toolsObject set to an initial value of 0
     const [leftLst, setLeftLst] = useState(Object.keys(toolsObject).reduce((acc, key) => ({ ...acc, [key]: 0 }), {}));
     const [rightLst, setRightLst] = useState(Object.keys(toolsObject).reduce((acc, key) => ({ ...acc, [key]: 0 }), {}));
+
+    const { mutate, isPending, isError, error } = useMutation({
+        mutationFn: SaveDashboardConfig,
+        onSuccess: (data) => {
+            console.log(data);
+            window.alert("Settings Saved")
+        },
+        onError: (error) => {
+            console.error("Save Dashboard Config: ", error);
+        }
+    });
 
     // Handler for changing values in leftLst
     const handleLeftInputChange = (key, value) => {
@@ -23,9 +44,11 @@ export default function DashboardSettings() {
     };
 
     const handleSave = () => {
-        console.log("left list: ", leftLst)
-        console.log("right list: ", rightLst)
+        console.log("left list: ", sortDictByValues(leftLst))
+        console.log("right list: ", sortDictByValues(rightLst))
+        mutate({ "leftList": sortDictByValues(leftLst), "rightList": sortDictByValues(rightLst) })
     }
+
     return (
         <div className='center-flex-column '>
             <div className='dashboard-settings-container'>
@@ -61,9 +84,11 @@ export default function DashboardSettings() {
                     ))}
                 </div>
             </div>
+            {isPending && <LoadingSpinner />}
+            {isError && <div className='errorMessage'>{error.message}</div>}
             <div className='standard-button-container'>
-                <button className="standard-button" onClick={() => handleSave()}>Save</button>
-                <button className="standard-button" >Cancel</button>
+                <button className="standard-button" disabled={isPending} onClick={() => handleSave()}>Save</button>
+                <button className="standard-button" disabled={isPending} >Cancel</button>
 
             </div>
         </div>

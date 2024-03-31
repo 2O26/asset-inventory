@@ -1,4 +1,6 @@
 // ApiServices.js
+import UserService from './UserService';
+
 
 export const AssetHandlerStatus = async () => {
     // assethandler status check
@@ -136,7 +138,6 @@ export const RmRecurring = async (recurring) => {
 }
 
 export const UpdateAsset = async (data) => {
-
     const response = await fetch('http://localhost:8080/assetHandler', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -174,3 +175,20 @@ export const UploadCycloneDX = async (data) => {
         alert('Error uploading file: ' + error.message);
     }
 }
+
+
+export const SaveDashboardConfig = async (data) => {
+    const response = await fetch('http://localhost:8080/storeDashboardConfig', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
+            'Authorization': `Bearer ${UserService.getToken()}`,
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok, could not fetch state');
+    }
+    return response.json();
+};
