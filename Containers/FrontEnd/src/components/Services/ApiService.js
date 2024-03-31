@@ -153,7 +153,7 @@ export const UpdateAsset = async (data) => {
 }
 
 export const UploadCycloneDX = async (data) => {
-    const uploadURL = 'http://localhost:8080/uploadCycloneDX';
+    const uploadURL = 'http://localhost:8082/uploadCycloneDX';
 
     try {
         const response = await fetch(uploadURL, {

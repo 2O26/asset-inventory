@@ -4,10 +4,11 @@ import (
 	dbcon "assetinventory/cyclonedx/dbcon-cyclonedx"
 	"bytes"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func uploadCycloneDX(c *gin.Context) {
@@ -38,14 +39,6 @@ func uploadCycloneDX(c *gin.Context) {
 	fmt.Printf("MIME Header: %+v\n", file.Header)
 	fmt.Printf("Asset ID: %s\n", assetID) // Print the assetID
 
-	// Create a new file in the current working directory
-	//dst := "./" + file.Filename
-	//if err := c.SaveUploadedFile(file, dst); err != nil {
-	//c.JSON(http.StatusInternalServerError, gin.H{
-	//	"error": "Failed to save the file",
-	//})
-	//return
-	//}
 	// Read the file content into a byte slice
 	fileContent, err := file.Open()
 	if err != nil {
@@ -99,13 +92,25 @@ func main() {
 	router := gin.Default()
 	// Apply the CORS middleware
 	router.Use(CORSMiddleware())
-	router.POST("/uploadCycloneDX", uploadCycloneDX)
+
 	err := dbcon.SetupDatabase("mongodb://cyclonedxstorage:27020/", "SBOM")
 	if err != nil {
 		log.Fatalf("Could not set up database: %v", err)
 	}
+	router.POST("/uploadCycloneDX", uploadCycloneDX)
+	sbomHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
 
-	//scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
+	router.GET("/getCycloneDXFile", func(c *gin.Context) {
+		dbcon.GetCycloneDXFile(sbomHelper, c)
+	})
+	router.GET("/PrintAllDocuments", func(c *gin.Context) {
+		dbcon.PrintAllDocuments(sbomHelper, c)
+	})
+
+	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
+		dbcon.DeleteAllDocuments(sbomHelper, c)
+	})
+	//sbomHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
 	log.Println("Server starting on port 8082...")
 	if err := router.Run(":8082"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
