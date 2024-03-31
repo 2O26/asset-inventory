@@ -2,6 +2,7 @@ package dbcon_cyclonedx
 
 import (
 	"context"
+
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -87,4 +88,8 @@ func (m *MockDB) UpdateOne(ctx context.Context, filter interface{}, update inter
 func (m *MockDB) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
 	args := m.Called(ctx, filter)
 	return args.Get(0).(*mongo.DeleteResult), args.Error(1)
+}
+func (m *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
+	args := m.Called(ctx, filter, opts)
+	return args.Get(0).(*mongo.SingleResult)
 }

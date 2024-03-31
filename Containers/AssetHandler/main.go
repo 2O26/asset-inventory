@@ -4,7 +4,6 @@ import (
 	"assetinventory/assethandler/dbcon"
 	"assetinventory/assethandler/jsonhandler"
 	"context"
-	"fmt"
 	"time"
 
 	"encoding/json"
@@ -227,42 +226,6 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 	log.Println("Initial scan added successfully")
 }
 
-func uploadCycloneDX(c *gin.Context) {
-	// Limit the size of the request body to 10MB
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 10<<20)
-
-	// Retrieve the file from the form data
-	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid file upload attempt",
-		})
-		return
-	}
-	// Fetch the assetID from the POST request
-	assetID := c.PostForm("assetID")
-
-	// Log the file information
-	fmt.Printf("Uploaded File: %+v\n", file.Filename)
-	fmt.Printf("File Size: %+v\n", file.Size)
-	fmt.Printf("MIME Header: %+v\n", file.Header)
-	fmt.Printf("Asset ID: %s\n", assetID) // Print the assetID
-
-	// Create a new file in the current working directory
-	dst := "./" + file.Filename
-	if err := c.SaveUploadedFile(file, dst); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to save the file",
-		})
-		return
-	}
-
-	// Respond to the client
-	c.JSON(http.StatusOK, gin.H{
-		"message": fmt.Sprintf("File uploaded successfully: %s", file.Filename),
-	})
-}
-
 func main() {
 
 	router := gin.Default()
@@ -270,7 +233,7 @@ func main() {
 	router.Use(CORSMiddleware())
 
 	router.GET("/getLatestState", getLatestState)
-	router.POST("/uploadCycloneDX", uploadCycloneDX)
+	// router.POST("/uploadCycloneDX", uploadCycloneDX)
 
 	err := dbcon.SetupDatabase("mongodb://dbstorage:27017/", "scan")
 	if err != nil {
