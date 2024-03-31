@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import { SearchIcon } from '../../common/Icons/Icons';
 
-const NarrowList = ['Name', 'Criticality', 'Type', 'Owner']
+const NarrowList = ['Name', 'Owner', 'Type', 'Criticality']
 
 const getColumnHeaders = (data, isNarrowView, isDashboard) => {
     const columnHeaders = new Set();
