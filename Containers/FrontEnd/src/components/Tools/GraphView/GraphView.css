@@ -14,7 +14,8 @@
     --color-4: rgba(42, 138, 246, 0); */
     background-color: var(--graph-bg);
     color: var(--text-color);
-    /* box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);s */
+    box-shadow: var(--box-shadow);
+    border-radius: 0.25rem;
 }
 
 .react-flow__node-turbo {

@@ -82,7 +82,7 @@ const defaultEdgeOptions = {
     markerEnd: 'edge-circle',
 };
 
-function LayoutFlow({ initialNodes, initialEdges, selectedAsset }) {
+function LayoutFlow({ initialNodes, initialEdges, selectedAsset, isDashboard }) {
     const navigate = useNavigate()
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -142,7 +142,7 @@ function LayoutFlow({ initialNodes, initialEdges, selectedAsset }) {
             attributionPosition='bottom-left'
         >
             <Controls position="bottom-right" />
-            <MiniMap position="bottom-left" />
+            {!isDashboard && <MiniMap position="bottom-left" />}
             <Background variant="dots" gap={12} size={1} />
             {/* <Panel position="top-right">
                 <button onClick={() => onLayout({ direction: 'DOWN' })}>vertical layout</button>
@@ -175,7 +175,7 @@ function LayoutFlow({ initialNodes, initialEdges, selectedAsset }) {
     );
 }
 
-export default function GraphView({ width = '100vw', selectedAsset = null }) {
+export default function GraphView({ width = '100vw', height = '90vh', selectedAsset = null, isDashboard = true }) {
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ['getState'],
         queryFn: GetState,
@@ -191,10 +191,10 @@ export default function GraphView({ width = '100vw', selectedAsset = null }) {
 
 
     return (
-        <div style={{ width: width, height: '90vh' }}>
+        <div style={{ width: width, height: height }}>
             {parsedState ?
                 <ReactFlowProvider>
-                    <LayoutFlow initialNodes={parsedState.nodes} initialEdges={parsedState.edges} selectedAsset={selectedAsset} />
+                    <LayoutFlow initialNodes={parsedState.nodes} initialEdges={parsedState.edges} selectedAsset={selectedAsset} isDashboard={isDashboard} />
                 </ReactFlowProvider>
                 :
                 <LoadingSpinner />

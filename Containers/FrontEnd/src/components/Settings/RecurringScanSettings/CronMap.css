@@ -10,6 +10,7 @@
 .cron-table td {
     border: 1px solid #ccc;
     padding: 0.5rem;
+    box-shadow: var(--box-shadow);
 }
 
 .cron-table th {

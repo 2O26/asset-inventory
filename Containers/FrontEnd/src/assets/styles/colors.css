@@ -25,13 +25,13 @@
     --error-color: rgb(255, 120, 120);
     --success-color: #2FDD92;
     /* --box-shadow: 0px -8px 15px rgba(0, 0, 0, 0.15); */
-    --box-shadow: 0px 8px -15px rgba(0, 0, 0, 0.15);
+    --box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 :root .dark {
     --main-color: #222222;
     --secondary-color: #161616;
-    --accent-color: #9b59b6;
+    --accent-color: #2a8af6;
 
     --text-color: #d9d7d7;
     --text-hover: #2a8af6;
@@ -60,7 +60,7 @@
 :root .light {
     --main-color: #FFF;
     --secondary-color: #d3d3d3;
-    --accent-color: #9b59b6;
+    --accent-color: #4053fb;
 
     --text-color: #222222;
     --text-hover: #4053fb;
