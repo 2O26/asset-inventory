@@ -25,13 +25,13 @@
     --error-color: rgb(255, 120, 120);
     --success-color: #2FDD92;
     /* --box-shadow: 0px -8px 15px rgba(0, 0, 0, 0.15); */
-    --box-shadow: 0px 8px -15px rgba(0, 0, 0, 0.15);
+    --box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 :root .dark {
     --main-color: #222222;
     --secondary-color: #161616;
-    --accent-color: #9b59b6;
+    --accent-color: #2a8af6;
 
     --text-color: #d9d7d7;
     --text-hover: #2a8af6;
@@ -47,8 +47,10 @@
     --button-active: #5c5c5c;
     --button-shadow: #0000007e;
 
+    /* --hr-color-1: rgba(228, 228, 228, 0);
+    --hr-color-2: rgba(228, 228, 228, 0.75); */
     --hr-color-1: rgba(228, 228, 228, 0);
-    --hr-color-2: rgba(228, 228, 228, 0.75);
+    --hr-color-2: rgba(42, 138, 246, 0.75);
 
     --graph-bg: rgb(21, 21, 21);
     --selected-node: #000000;
@@ -58,7 +60,7 @@
 :root .light {
     --main-color: #FFF;
     --secondary-color: #d3d3d3;
-    --accent-color: #9b59b6;
+    --accent-color: #4053fb;
 
     --text-color: #222222;
     --text-hover: #4053fb;
@@ -75,7 +77,7 @@
     --button-shadow: #5c5c5c6a;
 
     --hr-color-1: rgba(0, 0, 0, 0);
-    --hr-color-2: rgba(0, 0, 0, 0.75);
+    --hr-color-2: rgba(64, 83, 251, 0.75);
 
     --graph-bg: rgb(222, 222, 222);
     --selected-node: #b3c9fd;

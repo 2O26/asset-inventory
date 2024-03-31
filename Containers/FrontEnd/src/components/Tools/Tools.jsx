@@ -4,6 +4,22 @@ import './Tools.css';
 import { AssetListIcon, IpScannerIcon, LogsIcon, GraphIcon } from '../common/Icons/Icons';
 import { RedirectToLogServer } from './ViewLogs/ViewLogs.jsx';
 
+import AssetList from './AssetList/AssetList.jsx';
+import GraphView from './GraphView/GraphView.jsx';
+
+export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = {}) => (
+    {
+        "Asset List": {
+            "icon": <AssetListIcon size={size} />,
+            "component": <AssetList width={width} height={height} isDashboard={true} />,
+        },
+        "Graph View": {
+            "icon": <GraphIcon size={size} />,
+            "component": <GraphView width={width} height={height} isDashboard={true} />,
+        },
+    }
+);
+
 export default function Tools() {
     const navigate = useNavigate();
 
@@ -27,7 +43,8 @@ export default function Tools() {
                     </button>
                 </div>
             </div>
-            <div className="vertical-line"></div>
+            {/* <div className="vertical-line"></div> */}
+            <hr />
             {/* Scan tools */}
             <div className="scan-tools">
                 <div className="tools-header">Scan Tools</div>
@@ -42,6 +59,7 @@ export default function Tools() {
                     </button> */}
                 </div>
             </div>
+            <hr />
         </div>
     );
 }

@@ -28,11 +28,12 @@
 }
 
 .center-flex-column {
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 2rem;
+    margin: 2rem 0;
     gap: 1rem;
 }
 
@@ -109,4 +110,10 @@ select:focus {
 option {
     background: var(--main-color);
     color: var(--text-color);
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, var(--hr-color-1), var(--hr-color-2), var(--hr-color-1));
 }

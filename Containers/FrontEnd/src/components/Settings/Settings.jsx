@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import SetNetworkScanSettings from './SetNetworkScanSettings/SetNetworkScanSettings';
-import DasboardSettings from './DasboardSettings/DasboardSettings';
+import DasboardSettings from './DasboardSettings/DashboardSettings';
 import RecurringScanSettings from './RecurringScanSettings/RecurringScanSettings';
 import './Settings.css'
 

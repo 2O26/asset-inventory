@@ -121,13 +121,8 @@
 
 
 .asset-info-container hr {
-    border: 0;
-    height: 1px;
-    background-image: linear-gradient(to right, var(--hr-color-1), var(--hr-color-2), var(--hr-color-1));
     margin-top: 20px;
-    /* Adjust the margin as needed */
     margin-bottom: 20px;
-    /* Adjust the margin as needed */
 }
 
 .key-value {

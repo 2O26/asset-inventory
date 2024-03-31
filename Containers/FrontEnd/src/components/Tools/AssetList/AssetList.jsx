@@ -8,11 +8,19 @@ import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import { SearchIcon } from '../../common/Icons/Icons';
 
-const getColumnHeaders = (data) => {
-    const columnHeaders = new Set(['Select']);
-    Object.values(data.state.assets).forEach(asset => {
-        Object.keys(asset.properties).forEach(key => columnHeaders.add(key));
-    });
+const NarrowList = ['Name', 'Owner', 'Type', 'Criticality']
+
+const getColumnHeaders = (data, isNarrowView, isDashboard) => {
+    const columnHeaders = new Set();
+    if (!isNarrowView) {
+        !isDashboard && columnHeaders.add('Select'); // Assuming 'Select' is a special column for checkboxes
+        Object.values(data.state.assets).forEach(asset => {
+            Object.keys(asset.properties).forEach(key => columnHeaders.add(key));
+        });
+    } else {
+        // Add only the important columns for narrow view
+        NarrowList.forEach(key => columnHeaders.add(key));
+    }
 
     return Array.from(columnHeaders);
 };
@@ -43,57 +51,54 @@ export function SearchBar({ onSearch }) {
     );
 }
 
-export default function AssetList() {
+export default function AssetList({ width = "95vw", height = "100%", isDashboard = false }) {
     const navigate = useNavigate();
     const { data, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['getState'],
         queryFn: GetState,
-        enabled: true
+        enabled: true,
     });
     const [filteredAssets, setFilteredAssets] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [checkedItems, setCheckedItems] = useState({});
     const [isRemoveVisible, setIsRemoveVisible] = useState(false);
 
+    // Dynamically adjust based on viewport width
+    const matches = width.match(/\d+/);
+    const numberPart = parseInt(matches[0], 10)
+    const isNarrowView = numberPart < 60; // Example breakpoint
+
     useEffect(() => {
         if (data) {
-            const columnHeaders = getColumnHeaders(data);
-            if (searchTerm === '') {
-                setFilteredAssets(Object.entries(data.state.assets));
-            } else {
-                const filteredAssets = Object.entries(data.state.assets).filter(([key, value]) => {
-                    return value.properties[columnHeaders[1]].toLowerCase().includes(searchTerm.toLowerCase());
-                });
-                setFilteredAssets(filteredAssets);
-            }
-
             const initialCheckState = Object.keys(data.state.assets).reduce((acc, key) => {
                 acc[key] = false;
                 return acc;
             }, {});
             setCheckedItems(initialCheckState);
+
+            const newFilteredAssets = searchTerm === '' ? Object.entries(data.state.assets) :
+                Object.entries(data.state.assets).filter(([key, value]) => {
+                    return value.properties.Name.toLowerCase().includes(searchTerm.toLowerCase()); // Assuming 'Name' is a searchable field
+                });
+
+            setFilteredAssets(newFilteredAssets);
         }
     }, [data, searchTerm]);
 
     const handleClick = (assetID) => {
         navigate(`/asset-view/${assetID}`);
-    }
+    };
 
     const handleCheckboxChange = (id) => {
         setCheckedItems(prevState => {
-            const newState = {
-                ...prevState,
-                [id]: !prevState[id]
-            };
-
-            const anyChecked = Object.values(newState).some(checked => checked);
-            setIsRemoveVisible(anyChecked);
-
+            const newState = { ...prevState, [id]: !prevState[id] };
+            setIsRemoveVisible(Object.values(newState).some(checked => checked));
             return newState;
         });
     };
 
     const handleAssetRemoval = () => {
+        // Implementation for removing checked assets
         setIsRemoveVisible(false);
         setCheckedItems({});
         refetch();
@@ -104,49 +109,50 @@ export default function AssetList() {
 
     return (
         <div className='page-container'>
-            <div><SearchBar onSearch={setSearchTerm} /></div>
-            <div className='asset-list-container'>
+            {!isDashboard && <div><SearchBar onSearch={setSearchTerm} /></div>}
+            <div className='asset-list-container' style={{ width: width, height: height }}>
                 <div className='headerRow'>
-                    {data && getColumnHeaders(data).map(header => (
+                    {data && getColumnHeaders(data, isNarrowView, isDashboard).map(header => (
                         <div key={header} className={`headerCell ${header === 'Select' ? 'checkbox-header' : ''}`}>
                             {header}
                         </div>
                     ))}
                 </div>
-
-                <hr style={{ margin: "0.5rem 2rem ", border: "1px solid var(--text-color)" }}></hr>
+                <hr />
                 {filteredAssets.map(([key, value]) => (
                     <div key={key} className='assetRow'>
-                        <div className='assetCell'>
-                            <input
-                                type="checkbox"
-                                checked={checkedItems[key] || false}
-                                onChange={() => handleCheckboxChange(key)}
-                            />
-                        </div>
-                        {Object.keys(value.properties).map((header, headerIndex) => {
-                            return (
-                                <div
-                                    key={headerIndex}
-                                    className='assetCell'
-                                    onClick={() => handleClick(key)}
-                                >
-                                    {value.properties[header]}
-                                </div>
-                            );
-                        })}
+                        {(!isNarrowView && !isDashboard) && (
+                            <div className='assetCell'>
+                                <input
+                                    type="checkbox"
+                                    checked={checkedItems[key] || false}
+                                    onChange={() => handleCheckboxChange(key)}
+                                />
+                            </div>
+                        )}
+                        {Object.keys(value.properties).filter(header => !isNarrowView || NarrowList.includes(header)).map((header, headerIndex) => (
+                            <div
+                                key={headerIndex}
+                                className='assetCell'
+                                onClick={() => handleClick(key)}
+                            >
+                                {header === "Type" ? value.properties[header][0] : value.properties[header]}
+                            </div>
+                        ))}
                     </div>
                 ))}
             </div>
-            <div className='actions-container'>
-                <AddAsset />
-                {isRemoveVisible && (
-                    <RemoveAsset
-                        checkedItems={checkedItems}
-                        onAssetRemoved={handleAssetRemoval}
-                    />
-                )}
-            </div>
+            {!isDashboard &&
+                <div className='actions-container'>
+                    <AddAsset />
+                    {isRemoveVisible && (
+                        <RemoveAsset
+                            checkedItems={checkedItems}
+                            onAssetRemoved={handleAssetRemoval}
+                        />
+                    )}
+                </div>
+            }
         </div>
     );
 }
