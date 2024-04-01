@@ -63,6 +63,7 @@
     /* Center the elements horizontally */
     max-width: 50%;
     /* Make it occupy full width */
+    margin-left: 30px;
 }
 
 /* Modifications for the button container */

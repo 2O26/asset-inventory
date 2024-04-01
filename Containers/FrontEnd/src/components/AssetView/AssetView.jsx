@@ -7,11 +7,14 @@ import './AssetView.css';
 import { AssetInfo } from './AssetInfo';
 import GraphView from '../Tools/GraphView/GraphView';
 import EditAsset from './EditAsset';
+import {LeftArrow, RightArrow} from '../common/Icons/Icons';
+
 
 export default function AssetView() {
     let { assetID } = useParams();
     const [selectedView, setSelectedView] = useState('Information');
     const [filteredRelations, setFilteredRelations] = useState([]);
+    const [isExpanded, setIsExpanded] = useState(true); // Is asset view expanded or not?
     const { data, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['getState'],
         queryFn: GetState,
@@ -50,11 +53,18 @@ export default function AssetView() {
 
     return (
         <div className='asset-view-container'>
-            {/* Button Section */}
+            {/* This button opens and closes the asset info */}
             <GraphView selectedAsset={assetID} />
-            {data.state.assets[assetID] &&
+            <button
+                className="toggle-button"
+                onClick={() => setIsExpanded(!isExpanded)} // Toggle visibility
+            >
+                {isExpanded ? <RightArrow /> : <LeftArrow />}
+            </button>
 
+            {isExpanded && data.state.assets[assetID] && (
                 <div className='button-plus-info'>
+
                     <div className="button-container">
                         <button
                             className={`tab-button ${selectedView === 'Information' ? 'active-button' : ''}`}
@@ -84,8 +94,10 @@ export default function AssetView() {
                         <AssetInfo data={data} assetID={assetID} title={"History Page"} showPluginInfo={false}></AssetInfo>)}
                     {selectedView === 'Edit' && (
                         <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch}></EditAsset>)}
+
                 </div>
-            }
+            )}
+            
         </div>
     );
 }

@@ -13,10 +13,23 @@ import { CgArrowsH } from "react-icons/cg";
 import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
 import { MdAddLink } from "react-icons/md";
 import { CiSearch } from "react-icons/ci";
-
+import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack } from "react-icons/io";
 
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
+
+export const LeftArrow = ({ size = 30 }) => {
+    return (
+        <IoIosArrowBack size={size} />
+    )
+}
+
+export const RightArrow = ({ size = 30 }) => {
+    return (
+        <IoIosArrowForward size={size} />
+    )
+}
 
 export const ThemeIcon = ({ size = 30 }) => {
     return (
