@@ -1,11 +1,10 @@
 # Build step #1: build the React front end
 FROM node:latest as build-step
-
-RUN npm install -g nodemon
 # EXPOSE 3000
 WORKDIR /app
-COPY . .
+COPY package*.json ./
 RUN npm install
+COPY . .
 ENV DEBUG='frontend:*'
 
 # ENTRYPOINT [ "npm", "start" ]

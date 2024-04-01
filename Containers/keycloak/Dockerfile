@@ -34,7 +34,6 @@ ENV KEYCLOAK_ADMIN_PASSWORD=admin
 
 # Use the entry point provided by the base image
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
-
 # # Expose the ports Keycloak runs on
 # EXPOSE 8085 8443
 
