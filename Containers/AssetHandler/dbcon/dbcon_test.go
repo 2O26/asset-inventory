@@ -3,6 +3,7 @@ package dbcon
 import (
 	"assetinventory/assethandler/jsonhandler"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -121,6 +122,59 @@ var ( // Mock data
 	}
 )
 
+func TestSetupDatabase(t *testing.T) {
+	mockDB := new(MockDB)
+	ctx := context.TODO()
+	uri := "mongodb://localhost:27017/"
+	dbName := "test_db"
+
+	// Set up expectations for the mock
+	mockDB.On("Connect", ctx, mock.Anything).Return(&mongo.Client{}, nil)
+
+	// Call the SetupDatabase function with the mock
+	_, err := mockDB.Connect(ctx, nil)
+	assert.NoError(t, err)
+	err = SetupDatabase(uri, dbName)
+	if err != nil {
+		t.Errorf("SetupDatabase failed: %v", err)
+	}
+
+	// Assert that the expectations were met and no error occurred
+	assert.NoError(t, err)
+	mockDB.AssertExpectations(t)
+}
+
+func TestGetCollection(t *testing.T) {
+	mockDB := new(MockDB)
+	defer mockDB.AssertExpectations(t)
+
+	ctx := context.TODO()
+	uri := "mongodb://localhost:27017/"
+	dbName := "test_db"
+	collectionName := "test_collection"
+
+	// Set up expectations for the mock
+	mockDB.On("Connect", ctx, mock.Anything).Return(&mongo.Client{}, nil)
+
+	// Call the SetupDatabase function with the mock
+	_, err := mockDB.Connect(ctx, nil)
+	assert.NoError(t, err)
+	err = SetupDatabase(uri, dbName)
+	assert.NoError(t, err)
+
+	// Set up expectations for the Database and Collection methods
+	mockDatabase := &MockDB{}
+	mockCollection := &mongo.Collection{}
+	mockDB.On("Database", dbName).Return(mockDatabase)
+	mockDatabase.On("Collection", collectionName, mock.Anything).Return(mockCollection)
+
+	// Call GetCollection
+	collection := GetCollection(collectionName)
+
+	// Assert that the returned collection is the expected one
+	assert.Equal(t, mockCollection, collection)
+	mockDB.AssertExpectations(t)
+}
 func TestAddScan(t *testing.T) {
 	mockDB := new(MockDB)
 	// mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("jsonhandler.BackState")).Return(&mongo.InsertOneResult{}, nil)
@@ -366,11 +420,22 @@ func TestManageAssetsAndRelations(t *testing.T) {
 	addAssetRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
 			{
-				Name:        "New Asset",
-				Owner:       "UID_1234",
+				Name:        "NewAsset",
+				Owner:       "UID",
 				Type:        []string{"IoT", "Sensor"},
 				Criticality: 3,
-				Hostname:    "NewAsset-1",
+				Hostname:    "NewAsset1",
+			},
+		},
+	}
+	illegalCharachtersAddAssetRequest := AssetRequest{
+		AddAsset: []jsonhandler.Asset{
+			{
+				Name:        "New--_Asset",
+				Owner:       "UID  1122",
+				Type:        []string{"IoT ", "Sensor"},
+				Criticality: 3,
+				Hostname:    "NewAsset-_1",
 			},
 		},
 	}
@@ -464,6 +529,11 @@ func TestManageAssetsAndRelations(t *testing.T) {
 			messages: []string{"Asset added successfully to the latest scan"},
 		},
 		{
+			name:    "Illegal Charachters",
+			request: illegalCharachtersAddAssetRequest,
+			errors:  []string{"Failed to add new assets: User input contains illegal charachters!"},
+		},
+		{
 			name:     "Remove Asset",
 			request:  removeAssetRequest,
 			messages: []string{"Asset and related relations removed successfully from the latest scan", "Cannot remove asset, Asset not found", "Asset ID is empty"},
@@ -535,7 +605,6 @@ func TestManageAssetsAndRelations(t *testing.T) {
 func TestManageAssetsAndRelations_getLatestScan(t *testing.T) {
 	mockDB := new(MockDB)
 	mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, nil, nil))
-	// mockDB.On("UpdateOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.UpdateResult{ModifiedCount: 1}, nil)
 	// Mock requests
 	invalidRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
@@ -603,8 +672,8 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 
 	invalidRequest := `{
         "AddAsset": [{
-            "Name": "New Asset",
-            "Owner": "UID_1234",
+            "Name": "NewAsset",
+            "Owner": "UID",
             "Type": ["IoT", "Sensor"],
             "Criticality": "this should be an integer", // Intentionally incorrect type
             "Hostname": "NewAsset-1"
@@ -613,11 +682,11 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 	addAssetRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
 			{
-				Name:        "New Asset",
-				Owner:       "UID_1234",
-				Type:        []string{"IoT", "Sensor"},
+				Name:        "NewAsset",
+				Owner:       "UID",
+				Type:        []string{"IoT"},
 				Criticality: 3,
-				Hostname:    "NewAsset-1",
+				Hostname:    "NewAsset1",
 			},
 		},
 	}
@@ -645,7 +714,7 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 				From:        existingAssetID_1,
 				To:          existingAssetID_5,
 				Direction:   "uni",
-				Owner:       "UID_2332",
+				Owner:       "UID",
 				DateCreated: "2024-03-25 11:00:00",
 			}},
 	}
