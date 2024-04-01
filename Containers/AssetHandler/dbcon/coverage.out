@@ -33,14 +33,14 @@ assetinventory/assethandler/dbcon/dbcon.go:123.2,123.29 1 0
 assetinventory/assethandler/dbcon/dbcon.go:134.66,139.47 4 1
 assetinventory/assethandler/dbcon/dbcon.go:139.47,143.3 3 1
 assetinventory/assethandler/dbcon/dbcon.go:145.2,146.16 2 1
-assetinventory/assethandler/dbcon/dbcon.go:146.16,150.3 3 0
+assetinventory/assethandler/dbcon/dbcon.go:146.16,150.3 3 1
 assetinventory/assethandler/dbcon/dbcon.go:157.2,157.150 1 1
 assetinventory/assethandler/dbcon/dbcon.go:157.150,161.3 3 1
 assetinventory/assethandler/dbcon/dbcon.go:164.2,171.23 6 1
 assetinventory/assethandler/dbcon/dbcon.go:171.23,174.3 2 1
 assetinventory/assethandler/dbcon/dbcon.go:174.8,177.3 2 1
 assetinventory/assethandler/dbcon/dbcon.go:182.70,184.154 2 1
-assetinventory/assethandler/dbcon/dbcon.go:184.154,187.3 2 0
+assetinventory/assethandler/dbcon/dbcon.go:184.154,187.3 2 1
 assetinventory/assethandler/dbcon/dbcon.go:188.2,188.24 1 1
 assetinventory/assethandler/dbcon/dbcon.go:192.135,193.27 1 1
 assetinventory/assethandler/dbcon/dbcon.go:193.27,195.41 1 1
@@ -133,3 +133,4 @@ assetinventory/assethandler/dbcon/dbhandler.go:83.118,86.2 2 1
 assetinventory/assethandler/dbcon/dbhandler.go:88.98,91.2 2 0
 assetinventory/assethandler/dbcon/dbhandler.go:93.120,96.2 2 1
 assetinventory/assethandler/dbcon/dbhandler.go:97.102,100.2 2 1
+assetinventory/assethandler/dbcon/dbhandler.go:101.96,104.2 2 0
