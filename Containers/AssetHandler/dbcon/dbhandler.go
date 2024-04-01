@@ -94,3 +94,11 @@ func (m *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*optio
 	args := m.Called(ctx, filter, opts)
 	return args.Get(0).(*mongo.SingleResult)
 }
+func (m *MockDB) Connect(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
+	args := m.Called(ctx, opts)
+	return args.Get(0).(*mongo.Client), args.Error(1)
+}
+func (m *MockDB) Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection {
+	args := m.Called(name, opts)
+	return args.Get(0).(*mongo.Collection)
+}
