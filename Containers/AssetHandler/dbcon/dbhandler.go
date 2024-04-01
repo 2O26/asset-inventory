@@ -64,7 +64,7 @@ func (m *MongoDBHelper) Find(ctx context.Context, filter interface{}) ([]bson.M,
 
 type MockDB struct {
 	mock.Mock
-	DecodeHook func(v interface{}) error
+	// DecodeHook func(v interface{}) error
 }
 
 func (m *MockDB) Find(ctx context.Context, filter interface{}) ([]bson.M, error) {

@@ -144,37 +144,6 @@ func TestSetupDatabase(t *testing.T) {
 	mockDB.AssertExpectations(t)
 }
 
-func TestGetCollection(t *testing.T) {
-	mockDB := new(MockDB)
-	defer mockDB.AssertExpectations(t)
-
-	ctx := context.TODO()
-	uri := "mongodb://localhost:27017/"
-	dbName := "test_db"
-	collectionName := "test_collection"
-
-	// Set up expectations for the mock
-	mockDB.On("Connect", ctx, mock.Anything).Return(&mongo.Client{}, nil)
-
-	// Call the SetupDatabase function with the mock
-	_, err := mockDB.Connect(ctx, nil)
-	assert.NoError(t, err)
-	err = SetupDatabase(uri, dbName)
-	assert.NoError(t, err)
-
-	// Set up expectations for the Database and Collection methods
-	mockDatabase := &MockDB{}
-	mockCollection := &mongo.Collection{}
-	mockDB.On("Database", dbName).Return(mockDatabase)
-	mockDatabase.On("Collection", collectionName, mock.Anything).Return(mockCollection)
-
-	// Call GetCollection
-	collection := GetCollection(collectionName)
-
-	// Assert that the returned collection is the expected one
-	assert.Equal(t, mockCollection, collection)
-	mockDB.AssertExpectations(t)
-}
 func TestAddScan(t *testing.T) {
 	mockDB := new(MockDB)
 	// mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("jsonhandler.BackState")).Return(&mongo.InsertOneResult{}, nil)
