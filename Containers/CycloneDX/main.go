@@ -33,7 +33,7 @@ func uploadCycloneDX(c *gin.Context) {
 	}
 
 	var sbomData []byte
-	if file.Header.Get("Content-Type") == "application/xml" {
+	if file.Header.Get("Content-Type") == "text/xml" {
 		// Convert XML to JSON
 		stdin, err := file.Open()
 		if err != nil {
@@ -43,9 +43,7 @@ func uploadCycloneDX(c *gin.Context) {
 			return
 		}
 		defer stdin.Close()
-
-		cmd := exec.Command("cyclonedx", "--input-type", "xml", "--output-type", "json", "--output", "-")
-		cmd.Stdin = stdin
+		cmd := exec.Command("cyclonedx", "convert", "--input-type", "xml", "--output-type", "json")
 		out, err := cmd.Output()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
