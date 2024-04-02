@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"regexp"
 	"time"
+	"time"
 	"unicode"
 
 	"github.com/gin-gonic/gin"
@@ -47,10 +48,12 @@ func GetCollection(collectionName string) *mongo.Collection {
 func isValidName(hostName string) bool {
 	valid := regexp.MustCompile(`^\b[A-Za-z0-9 -._]*[A-Za-z0-9]$`)
 
+
 	return valid.MatchString(hostName)
 }
 
 func isValidOwner(ownerName string) bool {
+	for _, char := range ownerName {
 	for _, char := range ownerName {
 		if !unicode.IsLetter(char) && char != ' ' && char != '-' {
 			return false
@@ -63,6 +66,7 @@ func isValidOwner(ownerName string) bool {
 func isValidType(assetTypes []string) bool {
 	for _, t := range assetTypes {
 		for _, char := range t {
+			if !unicode.IsLetter(char) && char != '-' && char != ' ' {
 			if !unicode.IsLetter(char) && char != '-' && char != ' ' {
 				return false
 			}
@@ -203,6 +207,7 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 			newAsset.DateUpdated = newAsset.DateCreated
 			latestScan.Assets[newAssetID] = newAsset
 		}
+
 
 		// Update the latest scan with the new assets
 		update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
