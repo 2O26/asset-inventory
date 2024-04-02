@@ -47,7 +47,7 @@ test:
 	docker compose -f test-docker-compose.yaml up
 
 run:
-	docker compose -f docker-compose.yaml up
+	docker compose -f docker-compose.yaml up --compatibility -d
 	open http://localhost:80/
 
 down:
