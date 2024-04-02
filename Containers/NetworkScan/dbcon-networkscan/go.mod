@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver v1.14.0
+	github.com/google/uuid v1.6.0
 )
 
 require (
