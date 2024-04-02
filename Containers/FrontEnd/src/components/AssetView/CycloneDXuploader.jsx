@@ -37,7 +37,7 @@ export const CycloneDXuploader = ({ assetID }) => {
                 <FileUploader
                     handleChange={handleFileChange}
                     name="file"
-                    types={['JSON']}
+                    types={['JSON', 'XML']}
                     className="custom-file-uploader" />
             </div>
             <p>Drag and drop your file here or click to select a file.</p>
