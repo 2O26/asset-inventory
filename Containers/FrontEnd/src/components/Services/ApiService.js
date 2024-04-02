@@ -168,7 +168,9 @@ export const UploadCycloneDX = async (data) => {
             // Handle success scenario (e.g., showing the uploaded file's details)
         } else {
             // Handle server errors or invalid responses
+            const data = await response.json();
             alert('Failed to upload file');
+            return data;
         }
     } catch (error) {
         // Handle network errors
