@@ -56,7 +56,7 @@ func uploadCycloneDX(c *gin.Context) {
 		}
 		defer os.Remove(dst) // Remove the temporary file after conversion
 
-		cmd := exec.Command("cyclonedx", "convert", "--input-file", dst, "--output-type", "json")
+		cmd := exec.Command("cyclonedx", "convert", "--input-format", "xml", "--input-file", dst, "--output-format", "json")
 		fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
 		out, err := cmd.Output()
 		if err != nil {

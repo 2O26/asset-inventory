@@ -71,7 +71,8 @@ RUN go mod download
 COPY *.go ./
 
 COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/linux-x64 /bin
-
+COPY ./bom.xml ./bom.xml
+RUN apk add --no-cache icu
 # Compile the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
 # Expose port 8082 (the port that the API is listening to)
@@ -86,6 +87,6 @@ ENTRYPOINT ["/cyclonedx"]
 # COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/linux-x64 /bin
 # # COPY ./bom.json ./bom.json
 # # COPY ./bom.xml ./bom.xml
-# RUN apk add --no-cache python3 icu
+
 
 # ENTRYPOINT ["python3", "-m", "http.server", "8082"]
