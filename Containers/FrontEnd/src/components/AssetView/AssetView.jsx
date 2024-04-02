@@ -8,6 +8,7 @@ import { AssetInfo } from './AssetInfo';
 import GraphView from '../Tools/GraphView/GraphView';
 import EditAsset from './EditAsset';
 import {LeftArrow, RightArrow} from '../common/Icons/Icons';
+import { CSSTransition } from 'react-transition-group';
 
 
 export default function AssetView() {
@@ -51,54 +52,57 @@ export default function AssetView() {
     // if (!data.state.assets[assetID]) return <div>No asset data!</div>;
 
 
+    
     return (
-        <div className='asset-view-container'>
-            {/* This button opens and closes the asset info */}
-            <GraphView selectedAsset={assetID} />
-            <button
-                className="toggle-button"
-                onClick={() => setIsExpanded(!isExpanded)} // Toggle visibility
-            >
-                {isExpanded ? <RightArrow /> : <LeftArrow />}
-            </button>
-            
-
-            {isExpanded && data.state.assets[assetID] && (
-                <div className={`button-plus-info ${!isExpanded ? 'hidden' : ''}`}>
-
-                    <div className="button-container">
-                        <button
-                            className={`tab-button ${selectedView === 'Information' ? 'active-button' : ''}`}
-                            onClick={() => handleButtonClick('Information')}
-                        >
-                            Information
-                        </button>
-                        <button
-                            className={`tab-button ${selectedView === 'History' ? 'active-button' : ''}`}
-                            onClick={() => handleButtonClick('History')}
-                        >
-                            History
-                        </button>
-                        <button
-                            className={`tab-button ${selectedView === 'Edit' ? 'active-button' : ''}`}
-                            onClick={() => handleButtonClick('Edit')}
-                        >
-                            Edit
-                        </button>
-                    </div>
-                    {/* Conditionally render content based on selectedView */}
-                    {selectedView === 'Information' && (
-                        <div>
-                            <AssetInfo data={data} assetID={assetID} showPluginInfo={true} ></AssetInfo>
-                        </div>)}
-                    {selectedView === 'History' && (
-                        <AssetInfo data={data} assetID={assetID} title={"History Page"} showPluginInfo={false}></AssetInfo>)}
-                    {selectedView === 'Edit' && (
-                        <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch}></EditAsset>)}
-
-                </div>
-            )}
-            
-        </div>
-    );
-}
+         <div className='asset-view-container'>
+             <GraphView selectedAsset={assetID} />
+     
+             <button
+                 className="toggle-button"
+                 onClick={() => setIsExpanded(!isExpanded)}
+             >
+                 {isExpanded ? <RightArrow /> : <LeftArrow />}
+             </button>
+             <CSSTransition
+                 in={isExpanded && !!data.state.assets[assetID]}
+                 timeout={500}
+                 classNames="slide"
+                 unmountOnExit
+             >
+                 <div className="button-plus-info">
+                     <div className="button-container">
+                         <button
+                             className={`tab-button ${selectedView === 'Information' ? 'active-button' : ''}`}
+                             onClick={() => handleButtonClick('Information')}
+                         >
+                             Information
+                         </button>
+                         <button
+                             className={`tab-button ${selectedView === 'History' ? 'active-button' : ''}`}
+                             onClick={() => handleButtonClick('History')}
+                         >
+                             History
+                         </button>
+                         <button
+                             className={`tab-button ${selectedView === 'Edit' ? 'active-button' : ''}`}
+                             onClick={() => handleButtonClick('Edit')}
+                         >
+                             Edit
+                         </button>
+                     </div>
+                     {/* Conditionally render content based on selectedView */}
+                     {selectedView === 'Information' && (
+                         <div>
+                             <AssetInfo data={data} assetID={assetID} showPluginInfo={true} ></AssetInfo>
+                         </div>)}
+                     {selectedView === 'History' && (
+                         <AssetInfo data={data} assetID={assetID} title={"History Page"} showPluginInfo={false}></AssetInfo>)}
+                     {selectedView === 'Edit' && (
+                         <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch}></EditAsset>)}
+ 
+ 
+                     {/* Your existing div content */}
+                 </div>
+             </CSSTransition>
+         </div>
+     );}
