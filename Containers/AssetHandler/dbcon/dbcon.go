@@ -194,8 +194,8 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 		// Loop through the new assets and add them to the latest scan
 		for _, newAsset := range req.AddAsset {
 			if !(isValidName(newAsset.Name) && isValidOwner(newAsset.Owner) && isValidType(newAsset.Type)) {
-				log.Printf("Error user input contains illegal charachters!")
-				errors = append(errors, "Failed to add new assets: User input contains illegal charachters!")
+				log.Printf("Error user input contains illegal characters!")
+				errors = append(errors, "Failed to add new assets: User input contains illegal characters!")
 				return messages, errors
 			}
 			newAssetID := primitive.NewObjectID().Hex()

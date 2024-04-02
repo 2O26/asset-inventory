@@ -2,13 +2,11 @@ package main
 
 import (
 	dbcon "assetinventory/cyclonedx/dbcon-cyclonedx"
-	"bytes"
 	"fmt"
-	"io"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"os/exec"
 )
 
 func uploadCycloneDX(c *gin.Context) {
@@ -24,12 +22,30 @@ func uploadCycloneDX(c *gin.Context) {
 		return
 	}
 
-	if file.Header.Get("Content-Type") != "application/json" {
+	if file.Header.Get("Content-Type") != "application/json" || file.Header.Get("Content-Type") != "application/xml" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Only JSON files are allowed",
+			"error": "Only JSON or xml files are allowed",
 		})
 		return
 	}
+	dst := "./" + file.Filename
+	if err := c.SaveUploadedFile(file, dst); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to save the file",
+		})
+		return
+	}
+	cmd := exec.Command("cyclonedx", "convert", "--input-file", dst, "--input-type", "autodetect", "--output-type", "json")
+	out, err := cmd.Output()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to parse input data",
+		})
+		return
+	}
+
+	sbomData := out
+
 	// Fetch the assetID from the POST request
 	assetID := c.PostForm("assetID")
 
@@ -40,24 +56,24 @@ func uploadCycloneDX(c *gin.Context) {
 	fmt.Printf("Asset ID: %s\n", assetID) // Print the assetID
 
 	// Read the file content into a byte slice
-	fileContent, err := file.Open()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to open the file",
-		})
-		return
-	}
-	defer fileContent.Close()
+	//fileContent, err := file.Open()
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{
+	//		"error": "Failed to open the file",
+	//	})
+	//	return
+	//}
+	//defer fileContent.Close()
 
-	buf := bytes.NewBuffer(nil)
-	if _, err := io.Copy(buf, fileContent); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to read the file",
-		})
-		return
-	}
+	//buf := bytes.NewBuffer(nil)
+	//if _, err := io.Copy(buf, fileContent); err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{
+	//		"error": "Failed to read the file",
+	//	})
+	//	return
+	//}
 	// Save the SBOM data to the database
-	sbomData := buf.Bytes()
+	//sbomData := buf.Bytes()
 	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
 	err = dbcon.SaveCycloneDX(db, sbomData, assetID)
 	if err != nil {
@@ -71,7 +87,6 @@ func uploadCycloneDX(c *gin.Context) {
 		"message": fmt.Sprintf("File uploaded successfully: %s", file.Filename),
 	})
 }
-
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
