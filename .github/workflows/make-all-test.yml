@@ -7,8 +7,7 @@ on:
       - ci/cd
       
 jobs:
-  build-and-sq:
-    name: Sonarqube-analysis
+  sonarqube-analysis:
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
