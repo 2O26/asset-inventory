@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,8 +14,9 @@ import (
 )
 
 type CycloneDXDocument struct {
-	ID       string `bson:"_id,omitempty"`
-	SBOMData []byte `bson:"sbom_data"`
+	ID               string    `bson:"_id,omitempty"`
+	SBOMData         []byte    `bson:"sbom_data"`
+	MostRecentUpdate time.Time `json:"mostRecentUpdate"`
 }
 
 var client *mongo.Client
@@ -44,16 +46,34 @@ func GetCollection(collectionName string) *mongo.Collection {
 	return client.Database(dbName).Collection(collectionName)
 }
 
-// SaveCycloneDX saves the CycloneDX file data to the database.
 func SaveCycloneDX(db DatabaseHelper, sbomData []byte, assetID string) error {
 	doc := CycloneDXDocument{
-		ID:       assetID,
-		SBOMData: sbomData,
+		ID:               assetID,
+		SBOMData:         sbomData,
+		MostRecentUpdate: time.Now(),
 	}
 
-	_, err := db.InsertOne(context.Background(), doc)
+	filter := bson.M{"_id": assetID}
+
+	// Check if the document exists
+	existingDoc := CycloneDXDocument{}
+	err := db.FindOne(context.Background(), filter).Decode(&existingDoc)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		if err == mongo.ErrNoDocuments {
+			// If the document doesn't exist, insert a new one
+			_, err = db.InsertOne(context.Background(), doc)
+			if err != nil {
+				return fmt.Errorf("%w", err)
+			}
+		} else {
+			return fmt.Errorf("%w", err)
+		}
+	} else {
+		// If the document exists, replace it with the new document
+		_, err = db.ReplaceOne(context.Background(), filter, doc)
+		if err != nil {
+			return fmt.Errorf("%w", err)
+		}
 	}
 
 	return nil

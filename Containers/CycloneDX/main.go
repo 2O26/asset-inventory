@@ -44,7 +44,8 @@ func uploadCycloneDX(c *gin.Context) {
 		}
 		defer stdin.Close()
 
-		cmd := exec.Command("cyclonedx", "--input-type", "xml", "--output-type", "json")
+		cmd := exec.Command("cyclonedx", "--input-type", "xml", "--output-type", "json", "--output", "-")
+		cmd.Stdin = stdin
 		out, err := cmd.Output()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{

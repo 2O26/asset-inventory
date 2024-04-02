@@ -21,6 +21,7 @@ type DatabaseHelper interface {
 	DeleteMany(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error)
 	UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error)
 	DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error)
+	ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*mongo.UpdateResult, error)
 }
 
 func (m *MongoDBHelper) InsertOne(ctx context.Context, document interface{}) (*mongo.InsertOneResult, error) {
@@ -41,6 +42,9 @@ func (m *MongoDBHelper) UpdateOne(ctx context.Context, filter interface{}, updat
 // DeleteOne Implementing the DeleteOne method for MongoDBHelper
 func (m *MongoDBHelper) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
 	return m.Collection.DeleteOne(ctx, filter)
+}
+func (m *MongoDBHelper) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*mongo.UpdateResult, error) {
+	return m.Collection.ReplaceOne(ctx, filter, replacement)
 }
 func (m *MongoDBHelper) Find(ctx context.Context, filter interface{}) ([]bson.M, error) {
 	var results []bson.M
@@ -92,4 +96,9 @@ func (m *MockDB) DeleteOne(ctx context.Context, filter interface{}) (*mongo.Dele
 func (m *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
 	args := m.Called(ctx, filter, opts)
 	return args.Get(0).(*mongo.SingleResult)
+}
+
+func (m *MockDB) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*mongo.UpdateResult, error) {
+	args := m.Called(ctx, filter, replacement)
+	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
 }
