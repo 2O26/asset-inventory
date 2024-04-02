@@ -61,9 +61,10 @@ export default function AssetView() {
             >
                 {isExpanded ? <RightArrow /> : <LeftArrow />}
             </button>
+            
 
             {isExpanded && data.state.assets[assetID] && (
-                <div className='button-plus-info'>
+                <div className={`button-plus-info ${!isExpanded ? 'hidden' : ''}`}>
 
                     <div className="button-container">
                         <button

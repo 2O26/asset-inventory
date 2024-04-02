@@ -5,6 +5,25 @@
     /* Ensures everything is aligned to the left */
 }
 
+.toggle-button {
+    color: var(--text-color); /* Keeps the color for the icon */
+    background: none; /* Removes the background */
+    border: none; /* Removes the border */
+    padding: 0; /* Removes padding, adjust as necessary */
+    cursor: pointer; /* Optional: Changes cursor on hover to indicate it's clickable */
+}
+
+/* If your button still has some default browser styling, you might also need */
+.toggle-button:focus {
+    outline: none; /* Removes outline on focus for browsers that apply this */
+}
+
+/* Ensure your icons (arrows) are properly sized */
+.toggle-button svg {
+    width: 24px; /* Example size, adjust as needed */
+    height: auto; /* Maintain aspect ratio */
+}
+
 .tab-button {
     z-index: 0;
     border: 1px solid var(--main-color);
@@ -63,7 +82,6 @@
     /* Center the elements horizontally */
     max-width: 50%;
     /* Make it occupy full width */
-    margin-left: 30px;
 }
 
 /* Modifications for the button container */
