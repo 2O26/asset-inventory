@@ -1,16 +1,19 @@
-.PHONY: all assInvFront assetHandler networkScan fluentd elasticsearch kibana frontendDev cypresslocal dev run down clean cypress-test environment-test frontend-dev configHandler keycloakLocal
+.PHONY: all assInvFront assetHandler networkScan fluentd elasticsearch kibana frontendDev cypresslocal dev run down clean cypress-test environment-test frontend-dev configHandler keycloakLocal cyclonedx
 
-all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypresslocal configHandler keycloakLocal
+all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypresslocal configHandler keycloakLocal cyclonedx
 
-all-dev: assetHandler networkScan frontendDev configHandler keycloakLocal
+all-dev: assetHandler networkScan frontendDev configHandler keycloakLocal cyclonedx
 
-all-test: assetHandler networkScan frontendDev configHandler cypresslocal keycloakLocal
+all-test: assetHandler networkScan frontendDev configHandler cypresslocal keycloakLocal cyclonedx
 
 assInvFront:
 	docker build -t assinvfront ./Containers/FrontEnd
 
 frontendDev:
 	cd ./Containers/FrontEnd/ && docker build --file DockerfileDev -t frontenddev .
+
+cyclonedx:
+	docker build -t cyclonedx ./Containers/CycloneDX
 
 assetHandler:
 	docker build -t assethandler ./Containers/AssetHandler

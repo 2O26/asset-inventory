@@ -1,4 +1,4 @@
-package dbcon
+package dbcon_cyclonedx
 
 import (
 	"context"
@@ -13,7 +13,7 @@ type MongoDBHelper struct {
 	Collection *mongo.Collection
 }
 
-// AddScan handles POST requests to add a new scan
+// DatabaseHelper AddScan handles POST requests to add a new scan
 type DatabaseHelper interface {
 	InsertOne(ctx context.Context, document interface{}) (*mongo.InsertOneResult, error)
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
@@ -21,6 +21,7 @@ type DatabaseHelper interface {
 	DeleteMany(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error)
 	UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error)
 	DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error)
+	ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*mongo.UpdateResult, error)
 }
 
 func (m *MongoDBHelper) InsertOne(ctx context.Context, document interface{}) (*mongo.InsertOneResult, error) {
@@ -33,14 +34,17 @@ func (m *MongoDBHelper) DeleteMany(ctx context.Context, filter interface{}) (*mo
 	return m.Collection.DeleteMany(ctx, filter)
 }
 
-// Implementing the UpdateOne method for MongoDBHelper
+// UpdateOne Implementing the UpdateOne method for MongoDBHelper
 func (m *MongoDBHelper) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error) {
 	return m.Collection.UpdateOne(ctx, filter, update)
 }
 
-// Implementing the DeleteOne method for MongoDBHelper
+// DeleteOne Implementing the DeleteOne method for MongoDBHelper
 func (m *MongoDBHelper) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
 	return m.Collection.DeleteOne(ctx, filter)
+}
+func (m *MongoDBHelper) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*mongo.UpdateResult, error) {
+	return m.Collection.ReplaceOne(ctx, filter, replacement)
 }
 func (m *MongoDBHelper) Find(ctx context.Context, filter interface{}) ([]bson.M, error) {
 	var results []bson.M
@@ -64,7 +68,6 @@ func (m *MongoDBHelper) Find(ctx context.Context, filter interface{}) ([]bson.M,
 
 type MockDB struct {
 	mock.Mock
-	// DecodeHook func(v interface{}) error
 }
 
 func (m *MockDB) Find(ctx context.Context, filter interface{}) ([]bson.M, error) {
@@ -85,20 +88,17 @@ func (m *MockDB) UpdateOne(ctx context.Context, filter interface{}, update inter
 	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
 }
 
+// DeleteOne Add mock implementation for DeleteOne
 func (m *MockDB) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
 	args := m.Called(ctx, filter)
 	return args.Get(0).(*mongo.DeleteResult), args.Error(1)
 }
-
 func (m *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
 	args := m.Called(ctx, filter, opts)
 	return args.Get(0).(*mongo.SingleResult)
 }
-func (m *MockDB) Connect(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
-	args := m.Called(ctx, opts)
-	return args.Get(0).(*mongo.Client), args.Error(1)
-}
-func (m *MockDB) Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection {
-	args := m.Called(name, opts)
-	return args.Get(0).(*mongo.Collection)
+
+func (m *MockDB) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*mongo.UpdateResult, error) {
+	args := m.Called(ctx, filter, replacement)
+	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
 }

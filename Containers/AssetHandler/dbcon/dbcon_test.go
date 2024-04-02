@@ -3,6 +3,7 @@ package dbcon
 import (
 	"assetinventory/assethandler/jsonhandler"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -120,6 +121,28 @@ var ( // Mock data
 		},
 	}
 )
+
+func TestSetupDatabase(t *testing.T) {
+	mockDB := new(MockDB)
+	ctx := context.TODO()
+	uri := "mongodb://localhost:27017/"
+	dbName := "test_db"
+
+	// Set up expectations for the mock
+	mockDB.On("Connect", ctx, mock.Anything).Return(&mongo.Client{}, nil)
+
+	// Call the SetupDatabase function with the mock
+	_, err := mockDB.Connect(ctx, nil)
+	assert.NoError(t, err)
+	err = SetupDatabase(uri, dbName)
+	if err != nil {
+		t.Errorf("SetupDatabase failed: %v", err)
+	}
+
+	// Assert that the expectations were met and no error occurred
+	assert.NoError(t, err)
+	mockDB.AssertExpectations(t)
+}
 
 func TestAddScan(t *testing.T) {
 	mockDB := new(MockDB)
@@ -290,12 +313,11 @@ func TestGetLatestScan(t *testing.T) {
 
 }
 
-
 func TestIsValidName(t *testing.T) {
-    tests := []struct {
+	tests := []struct {
 		target string
 		result bool
-	 }{
+	}{
 		{"PC-A", true},
 		{"domain.com", true},
 		{"Johans Laptop", true},
@@ -304,22 +326,22 @@ func TestIsValidName(t *testing.T) {
 		{`PC-A"; DROPT TABLE USERS; --`, false},
 	}
 
-		for _, test := range tests {
-		  valid := isValidName(test.target)
-		  if valid != test.result{
-		    	t.Errorf("Host Namet: %s is %t it should be %t", test.target, valid, test.result)
-		  }
-		 }
+	for _, test := range tests {
+		valid := isValidName(test.target)
+		if valid != test.result {
+			t.Errorf("Host Namet: %s is %t it should be %t", test.target, valid, test.result)
+		}
+	}
 
 }
 
 func TestIsValidOwner(t *testing.T) {
-    tests := []struct {
+	tests := []struct {
 		target string
-		 result bool
-	 }{
+		result bool
+	}{
 		{"Victor Vidin", true},
-		{"Henrik Goransson",true},
+		{"Henrik Goransson", true},
 		{"Karl-Fredrik af Chapman", true},
 		{"IT Departementet", true},
 		{"Knowit", true},
@@ -328,34 +350,34 @@ func TestIsValidOwner(t *testing.T) {
 		{"hej, jag har stulit dina uppgifter!", false},
 		{"F#ck U!", false},
 	}
-		
-		for _, test := range tests {
-		  valid := isValidOwner(test.target)
-		  if valid != test.result{
-				t.Errorf("Owner Name: %s is %t it should be %t", test.target, valid, test.result)
-		  }
+
+	for _, test := range tests {
+		valid := isValidOwner(test.target)
+		if valid != test.result {
+			t.Errorf("Owner Name: %s is %t it should be %t", test.target, valid, test.result)
 		}
+	}
 }
 
 func TestIsValidType(t *testing.T) {
-    tests := []struct {
+	tests := []struct {
 		target []string
 		result bool
-	 }{
-		{[]string{"hardware","Server","Rack mounted"},true},
-		{[]string{"Windows"," Laptop"}, true},
-		{[]string{"Linux","Virtual Machine","Computer"}, true},
+	}{
+		{[]string{"hardware", "Server", "Rack mounted"}, true},
+		{[]string{"Windows", " Laptop"}, true},
+		{[]string{"Linux", "Virtual Machine", "Computer"}, true},
 		{[]string{"me -.9, lol"}, false},
-		{[]string{"12","34","1234"}, false},
+		{[]string{"12", "34", "1234"}, false},
 		{[]string{`Laptop, Windows"; DROP TABLE users; --'`}, false},
 	}
 
-		for _, test := range tests {
-		  valid := isValidType(test.target)
-		  if valid != test.result{
-				t.Errorf("The Type: %s is %t it should be %t", test.target, valid, test.result)
-		  }
+	for _, test := range tests {
+		valid := isValidType(test.target)
+		if valid != test.result {
+			t.Errorf("The Type: %s is %t it should be %t", test.target, valid, test.result)
 		}
+	}
 }
 
 func TestManageAssetsAndRelations(t *testing.T) {
@@ -367,11 +389,22 @@ func TestManageAssetsAndRelations(t *testing.T) {
 	addAssetRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
 			{
-				Name:        "New Asset",
-				Owner:       "UID_1234",
+				Name:        "NewAsset",
+				Owner:       "UID",
 				Type:        []string{"IoT", "Sensor"},
 				Criticality: 3,
-				Hostname:    "NewAsset-1",
+				Hostname:    "NewAsset1",
+			},
+		},
+	}
+	illegalCharachtersAddAssetRequest := AssetRequest{
+		AddAsset: []jsonhandler.Asset{
+			{
+				Name:        "New--_Asset",
+				Owner:       "UID  1122",
+				Type:        []string{"IoT ", "Sensor"},
+				Criticality: 3,
+				Hostname:    "NewAsset-_1",
 			},
 		},
 	}
@@ -465,6 +498,11 @@ func TestManageAssetsAndRelations(t *testing.T) {
 			messages: []string{"Asset added successfully to the latest scan"},
 		},
 		{
+			name:    "Illegal Charachters",
+			request: illegalCharachtersAddAssetRequest,
+			errors:  []string{"Failed to add new assets: User input contains illegal charachters!"},
+		},
+		{
 			name:     "Remove Asset",
 			request:  removeAssetRequest,
 			messages: []string{"Asset and related relations removed successfully from the latest scan", "Cannot remove asset, Asset not found", "Asset ID is empty"},
@@ -536,7 +574,6 @@ func TestManageAssetsAndRelations(t *testing.T) {
 func TestManageAssetsAndRelations_getLatestScan(t *testing.T) {
 	mockDB := new(MockDB)
 	mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, nil, nil))
-	// mockDB.On("UpdateOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.UpdateResult{ModifiedCount: 1}, nil)
 	// Mock requests
 	invalidRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
@@ -604,8 +641,8 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 
 	invalidRequest := `{
         "AddAsset": [{
-            "Name": "New Asset",
-            "Owner": "UID_1234",
+            "Name": "NewAsset",
+            "Owner": "UID",
             "Type": ["IoT", "Sensor"],
             "Criticality": "this should be an integer", // Intentionally incorrect type
             "Hostname": "NewAsset-1"
@@ -614,11 +651,11 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 	addAssetRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
 			{
-				Name:        "New Asset",
-				Owner:       "UID_1234",
-				Type:        []string{"IoT", "Sensor"},
+				Name:        "NewAsset",
+				Owner:       "UID",
+				Type:        []string{"IoT"},
 				Criticality: 3,
-				Hostname:    "NewAsset-1",
+				Hostname:    "NewAsset1",
 			},
 		},
 	}
@@ -646,7 +683,7 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 				From:        existingAssetID_1,
 				To:          existingAssetID_5,
 				Direction:   "uni",
-				Owner:       "UID_2332",
+				Owner:       "UID",
 				DateCreated: "2024-03-25 11:00:00",
 			}},
 	}

@@ -153,7 +153,7 @@ export const UpdateAsset = async (data) => {
 }
 
 export const UploadCycloneDX = async (data) => {
-    const uploadURL = 'http://localhost:8080/uploadCycloneDX';
+    const uploadURL = 'http://localhost:8082/uploadCycloneDX';
 
     try {
         const response = await fetch(uploadURL, {
@@ -168,7 +168,9 @@ export const UploadCycloneDX = async (data) => {
             // Handle success scenario (e.g., showing the uploaded file's details)
         } else {
             // Handle server errors or invalid responses
+            const data = await response.json();
             alert('Failed to upload file');
+            return data;
         }
     } catch (error) {
         // Handle network errors
