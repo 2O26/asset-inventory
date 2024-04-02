@@ -12,6 +12,7 @@ import (
     "golang.org/x/net/icmp"
     "golang.org/x/net/ipv4"
     "os"
+    "github.com/google/uuid"
 )
 
 // Global variable to store the scan result
@@ -178,7 +179,7 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 
 
        // Iterate over all IPs in the subnet
-    for ; subnet.Contains(ip) && !ip.Equal(broadcastAddress); inc(ip) {
+       for ip := networkAddress; ; inc(ip) {
 
         // Check if the IP address is up
         isUp, err := ping(ip.String())
@@ -193,14 +194,11 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
             status = "up"
         }
         asset := dbcon.Asset{
-            Status:        status, // up means that the ip responded to the ping
-            IPv4Addr:      ip.String(),
-            IPv6Addr:      "", // IPv6 address is empty for now
-            Subnet:        target, 
-            Hostname:      "",     
-            KernelVersion: "",     // OS information is empty for now
-            MACAddr:       "",     // MAC address is empty for now
-            OpenPorts:     []int{}, 
+            UID:          uuid.New().String(),
+            Status:       status,
+            IPv4Addr:     ip.String(),
+            Subnet:       target,
+            OpenPorts:    []int{},
         }
         scan.State[ip.String()] = asset
 
@@ -227,6 +225,9 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
                 // Put the modified asset back into the map
                 scan.State[ip.String()] = asset
             }
+        }
+        if ip.Equal(broadcastAddress) {
+            break
         }
     }
 
