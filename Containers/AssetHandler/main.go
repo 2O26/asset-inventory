@@ -4,6 +4,7 @@ import (
 	"assetinventory/assethandler/dbcon"
 	"assetinventory/assethandler/jsonhandler"
 	"context"
+	"fmt"
 	"time"
 
 	"encoding/json"
@@ -18,13 +19,27 @@ type StateResponse struct {
 	Message string                 `json:"message"`
 	State   jsonhandler.FrontState `json:"state"`
 }
-
-type PluginState struct {
-	StateID     string         `json:"stateID"`
-	DateCreated string         `json:"dateCreated"`
-	DateUpdated string         `json:"dateUpdated"`
-	State       map[string]any `json:"state"`
+type networkResponse struct {
+	StateID     string
+	DateCreated string
+	DateUpdated string
+	State       map[string]networkAsset
 }
+
+type networkAsset struct {
+	UID       string `bson:"uid" json:"uid"`
+	Status    string `bson:"status" json:"status"`
+	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
+	Subnet    string `bson:"subnet" json:"subnet"`
+	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
+}
+
+// type PluginState struct {
+// 	StateID     string         `json:"stateID"`
+// 	DateCreated string         `json:"dateCreated"`
+// 	DateUpdated string         `json:"dateUpdated"`
+// 	State       map[string]any `json:"state"`
+// }
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -53,7 +68,7 @@ func getNetScanStatus() json.RawMessage {
 
 	defer response.Body.Close() // Ensure the body is closed after reading
 
-	var netassets PluginState
+	var netassets jsonhandler.PluginState
 	// Read the response body
 	json.NewDecoder(response.Body).Decode(&netassets) //puts the response into netassets
 	if err != nil {
@@ -128,6 +143,37 @@ func getLatestState(c *gin.Context) {
 		c.IndentedJSON(http.StatusOK, response)
 	}
 }
+
+func getNetworkScan() json.RawMessage {
+	url := "http://networkscan:8081/getLatestScan"
+
+	// GET request from netscan
+	response, err := http.Get(url)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer response.Body.Close() // Ensure the body is closed after reading
+
+	var netassets networkResponse
+	// Read the response body
+	json.NewDecoder(response.Body).Decode(&netassets) //puts the response into netassets
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Iterate over the State map and print UID values'
+	for _, stateEntry := range netassets.State {
+		// url := "http://networkscan:808/assetHandler"
+
+		// // GET request from netscan
+		// response, err := http.Post(url, "application/json", bytes.NewBuffer(stateEntry))
+		fmt.Println("IPv4:", stateEntry.IPv4Addr)
+	}
+	return nil
+}
+
 func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 	// Add initial scan
 	initialScan := jsonhandler.BackState{
@@ -243,6 +289,7 @@ func main() {
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
 	addInitialScan(scansHelper)
+	getNetworkScan()
 	router.POST("/AddScan", func(c *gin.Context) {
 		dbcon.AddScan(scansHelper, c)
 	})
