@@ -23,3 +23,17 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('login', () => {
+
+    cy.origin(Cypress.env('kc-url'), () => {
+        cy.visit(Cypress.env('base-url'))
+        cy.get('#username').type('admin')
+        cy.get('#password').type('admin')
+        cy.get('#kc-login').click()
+    })
+});
+
+Cypress.Commands.add('logout', () => {
+    cy.contains('Log Out').click()
+})

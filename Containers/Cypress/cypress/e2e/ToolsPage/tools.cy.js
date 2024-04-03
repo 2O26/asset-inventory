@@ -1,7 +1,11 @@
 describe('Tools page tests', () => {
     beforeEach('visiting tools page', () => {
-        cy.visit(Cypress.env('baseUrl'))
+        cy.login();
         cy.contains('Tools').click()
+    })
+
+    afterEach('logout', () => {
+        cy.logout();
     })
 
     it('can verify asset list button', () => {

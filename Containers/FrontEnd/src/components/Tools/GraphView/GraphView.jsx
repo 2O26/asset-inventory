@@ -175,7 +175,7 @@ function LayoutFlow({ initialNodes, initialEdges, selectedAsset, isDashboard }) 
     );
 }
 
-export default function GraphView({ width = '100vw', height = '90vh', selectedAsset = null, isDashboard = true }) {
+export default function GraphView({ width = '100vw', height = '90vh', selectedAsset = null, isDashboard = false }) {
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ['getState'],
         queryFn: GetState,
