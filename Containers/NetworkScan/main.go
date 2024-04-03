@@ -3,10 +3,6 @@ package main
 import (
 	dbcon "assetinventory/networkscan/dbcon-networkscan"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/sony/sonyflake"
-	"golang.org/x/net/icmp"
-	"golang.org/x/net/ipv4"
 	"log"
 	"net"
 	"net/http"
@@ -14,6 +10,11 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sony/sonyflake"
+	"golang.org/x/net/icmp"
+	"golang.org/x/net/ipv4"
 )
 
 // Global variable to store the scan result
@@ -127,6 +128,13 @@ func main() {
 	})
 	router.GET("/getLatestScan", func(c *gin.Context) {
 		dbcon.GetLatestScan(scansHelper, c)
+	})
+	router.GET("/PrintAllDocuments", func(c *gin.Context) {
+		dbcon.PrintAllDocuments(scansHelper, c)
+	})
+
+	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
+		dbcon.DeleteAllDocuments(scansHelper, c)
 	})
 	log.Println("Server starting on port 8081...")
 	if err := router.Run(":8081"); err != nil {
