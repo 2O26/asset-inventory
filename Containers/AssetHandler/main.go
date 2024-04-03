@@ -84,7 +84,6 @@ func getNetScanStatus() json.RawMessage {
 func getLatestState(c *gin.Context) {
 	// Simulate authentication
 	var authSuccess = true
-
 	if authSuccess {
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)
@@ -144,9 +143,8 @@ func getLatestState(c *gin.Context) {
 	}
 }
 
-func getNetworkScan() json.RawMessage {
+func getNetworkScan() {
 	url := "http://networkscan:8081/getLatestScan"
-
 	// GET request from netscan
 	response, err := http.Get(url)
 
@@ -162,16 +160,19 @@ func getNetworkScan() json.RawMessage {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	addAsset := []jsonhandler.Asset{}
 	// Iterate over the State map and print UID values'
 	for _, stateEntry := range netassets.State {
-		// url := "http://networkscan:808/assetHandler"
-
-		// // GET request from netscan
-		// response, err := http.Post(url, "application/json", bytes.NewBuffer(stateEntry))
-		fmt.Println("IPv4:", stateEntry.IPv4Addr)
+		asset := jsonhandler.Asset{
+			Hostname: stateEntry.IPv4Addr,
+		}
+		addAsset = append(addAsset, asset)
+		request := dbcon.AssetRequest{
+			AddAsset: addAsset,
+		}
+		dbcon.AddAssets(request)
+		fmt.Println("Added asset: ", stateEntry.IPv4Addr)
 	}
-	return nil
 }
 
 func addInitialScan(scansHelper dbcon.DatabaseHelper) {

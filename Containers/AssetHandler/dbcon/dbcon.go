@@ -57,7 +57,6 @@ func isValidOwner(ownerName string) bool {
 		}
 	}
 	return true
-
 }
 
 func isValidType(assetTypes []string) bool {
@@ -216,6 +215,42 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 		}
 	}
 	return messages, errors
+}
+
+// addAssets adds form network scan
+func AddAssets(req AssetRequest) string {
+	// Find the latest scan to update
+	db := &MongoDBHelper{Collection: GetCollection("scans")}
+	latestScan, err := getLatestScan(db)
+	if err != nil {
+		log.Printf("Error retrieving the latest scan: %v\n", err)
+		return err.Error()
+	}
+	if len(req.AddAsset) > 0 {
+		// Loop through the new assets and add them to the latest scan
+		for _, newAsset := range req.AddAsset {
+			// if newAsset.Hostname == latestScan.Assets[newAsset.Hostname].Hostname {
+			// 	log.Printf("Asset already exists in the latest scan.\n")
+			// 	return "Asset already exists in the latest scan"
+			// }
+			newAssetID := primitive.NewObjectID().Hex()
+			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+			newAsset.DateUpdated = newAsset.DateCreated
+			latestScan.Assets[newAssetID] = newAsset
+		}
+
+		// Update the latest scan with the new assets
+		update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
+		_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+		if err != nil {
+			log.Printf("Failed to add new assets: %v\n", err)
+			return "Failed to add new assets: " + err.Error()
+		} else {
+			log.Printf("Asset added successfully to the latest scan.\n")
+			return "Asset added successfully to the latest scan"
+		}
+	}
+	return "No new assets to add"
 }
 
 // updateAssets updates existing assets in the latest scan
