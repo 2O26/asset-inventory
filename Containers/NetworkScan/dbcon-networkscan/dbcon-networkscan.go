@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -129,6 +133,50 @@ func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
 	return updatedScan
 }
 
+func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
+	if previousScan == nil {
+		return currentScan
+	}
+
+	updatedScan := Scan{
+		StateID:     currentScan.StateID,
+		DateCreated: currentScan.DateCreated,
+		DateUpdated: currentScan.DateUpdated,
+		State:       make(map[string]Asset),
+	}
+	for ip, asset := range currentScan.State {
+		updatedScan.State[ip] = asset
+	}
+	// Loop through all assets in the current scan
+	for ip, asset := range currentScan.State {
+		// Check if the IP address exists in the previous scan
+		if prevAsset, ok := previousScan.State[ip]; ok {
+			// IP address exists in the previous scan
+			if asset.Status != prevAsset.Status {
+				// Status has changed, update the asset
+				updatedScan.State[ip] = asset
+			} else {
+				// Status has not changed, keep the previous asset
+				updatedScan.State[ip] = prevAsset
+			}
+		} else {
+			// New IP address, add the asset
+			updatedScan.State[ip] = asset
+		}
+	}
+
+	// Loop through all assets in the previous scan
+	for ip, prevAsset := range previousScan.State {
+		if _, ok := currentScan.State[ip]; !ok {
+			// IP address does not exist in the current scan, set status to down
+			prevAsset.Status = "down"
+			updatedScan.State[ip] = prevAsset
+		}
+	}
+
+	return updatedScan
+}
+
 func AddScan(db DatabaseHelper, scan Scan) {
 	var previousScan *Scan
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
@@ -151,6 +199,26 @@ func AddScan(db DatabaseHelper, scan Scan) {
 	updatedScan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
 	result, err := db.InsertOne(context.TODO(), updatedScan)
 
+	var previousScan *Scan
+	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// Detta är den första skannen, infoga den direkt
+			scan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+			result, err := db.InsertOne(context.TODO(), scan)
+			if err != nil {
+				log.Fatalf("Could not insert scan: %s", err)
+			}
+			log.Printf("OK!, %v", result)
+			return
+		}
+		log.Printf("Failed to retrieve the latest scan: %v", err)
+		return
+	}
+
+	updatedScan := compareScanStates(scan, previousScan)
+	updatedScan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+	result, err := db.InsertOne(context.TODO(), updatedScan)
 	if err != nil {
 		log.Fatalf("Could not insert scan: %s", err)
 	}
@@ -321,4 +389,132 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
 	// test()
+}
+
+// func test() {
+// 	scan1 := Scan{
+// 		StateID:     "",
+// 		DateCreated: "2024-04-03 17:28:24",
+// 		DateUpdated: "2024-04-03 17:36:34",
+// 		State: map[string]Asset{
+// 			"3403275042825": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.1",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3816296546313": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.125",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3823024209929": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.128",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3840002752521": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.134",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3864480710665": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.142",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3873372635145": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.145",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3947225939977": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.168",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3950581383177": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.170",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3950698823689": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.171",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"4011650449417": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.190",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"4011784667145": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.191",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 		},
+// 	}
+
+// 	scan2 := Scan{
+// 		StateID:     "",
+// 		DateCreated: "2024-04-03 17:28:24",
+// 		DateUpdated: "2024-04-03 19:36:34",
+// 		State: map[string]Asset{
+// 			"3403275042889": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.10",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3816296546313": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.125",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3823024209929": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.128",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 		},
+// 	}
+// 	db := &MongoDBHelper{Collection: GetCollection("scans")}
+// 	AddScan(db, scan1)
+// 	AddScan(db, scan2)
+
+// }
+
+func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {
+	results, err := db.Find(context.TODO(), bson.D{})
+	if err != nil {
+		log.Printf("Failed to find documents:%v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching documents"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, results)
+}
+
+func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
+	deleteResult, err := db.DeleteMany(context.TODO(), bson.D{})
+	if err != nil {
+		log.Printf("Failed to delete documents:%v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting documents"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
 }
