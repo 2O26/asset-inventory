@@ -76,9 +76,10 @@ RUN apk add --no-cache icu \
     python3 \
     py3-pip \
     && python3 -m venv /opt/cve-bin-tool-venv \
-    && source /opt/cve-bin-tool-venv/bin/activate \
-    && pip install --upgrade pip \
-    && pip install cve-bin-tool
+    && /opt/cve-bin-tool-venv/bin/pip install --upgrade pip \
+    && /opt/cve-bin-tool-venv/bin/pip install cve-bin-tool \
+    && /opt/cve-bin-tool-venv/bin/pip install gsutil 
+
 # Compile the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
 
