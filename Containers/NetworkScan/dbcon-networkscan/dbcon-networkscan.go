@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,6 +24,10 @@ type Scan struct {
 }
 
 type Asset struct {
+	Status    string `bson:"status" json:"status"`
+	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
+	Subnet    string `bson:"subnet" json:"subnet"`
+	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
 	Status    string `bson:"status" json:"status"`
 	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
 	Subnet    string `bson:"subnet" json:"subnet"`
@@ -130,7 +138,71 @@ func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
 	return updatedScan
 }
 
+func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
+	if previousScan == nil {
+		return currentScan
+	}
+
+	updatedScan := Scan{
+		StateID:     currentScan.StateID,
+		DateCreated: currentScan.DateCreated,
+		DateUpdated: currentScan.DateUpdated,
+		State:       make(map[string]Asset),
+	}
+	for ip, asset := range currentScan.State {
+		updatedScan.State[ip] = asset
+	}
+	// Loop through all assets in the current scan
+	for ip, asset := range currentScan.State {
+		// Check if the IP address exists in the previous scan
+		if prevAsset, ok := previousScan.State[ip]; ok {
+			// IP address exists in the previous scan
+			if asset.Status != prevAsset.Status {
+				// Status has changed, update the asset
+				updatedScan.State[ip] = asset
+			} else {
+				// Status has not changed, keep the previous asset
+				updatedScan.State[ip] = prevAsset
+			}
+		} else {
+			// New IP address, add the asset
+			updatedScan.State[ip] = asset
+		}
+	}
+
+	// Loop through all assets in the previous scan
+	for ip, prevAsset := range previousScan.State {
+		if _, ok := currentScan.State[ip]; !ok {
+			// IP address does not exist in the current scan, set status to down
+			prevAsset.Status = "down"
+			updatedScan.State[ip] = prevAsset
+		}
+	}
+
+	return updatedScan
+}
+
 func AddScan(db DatabaseHelper, scan Scan) {
+	var previousScan *Scan
+	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// Detta är den första skannen, infoga den direkt
+			scan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+			result, err := db.InsertOne(context.TODO(), scan)
+			if err != nil {
+				log.Fatalf("Could not insert scan: %s", err)
+			}
+			log.Printf("OK!, %v", result)
+			return
+		}
+		log.Printf("Failed to retrieve the latest scan: %v", err)
+		return
+	}
+
+	updatedScan := compareScanStates(scan, previousScan)
+	updatedScan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+	result, err := db.InsertOne(context.TODO(), updatedScan)
 	var previousScan *Scan
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
 	if err != nil {
