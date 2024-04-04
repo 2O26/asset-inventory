@@ -63,9 +63,9 @@ export default function AssetView() {
              >
                  {isExpanded ? <RightArrow /> : <LeftArrow />}
              </button>
-             <CSSTransition
-                 in={isExpanded && !!data.state.assets[assetID]}
-                 timeout={500}
+             <CSSTransition //This code is here to support the asset view container sliding smoothly away to the right, but it's
+                 in={isExpanded && !!data.state.assets[assetID]} //disabled for now because I couldn't get it to work -Karlsson.
+                 timeout={0} //Delay in milliseconds.
                  classNames="slide"
                  unmountOnExit
              >
@@ -101,7 +101,6 @@ export default function AssetView() {
                          <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch}></EditAsset>)}
  
  
-                     {/* Your existing div content */}
                  </div>
              </CSSTransition>
          </div>
