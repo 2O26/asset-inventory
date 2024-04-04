@@ -2,9 +2,9 @@
 
 all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypresslocal configHandler keycloakLocal cyclonedx
 
-all-dev: assetHandler networkScan frontendDev configHandler keycloakLocal cyclonedx keycloakInit
+all-dev: assetHandler networkScan frontendDev configHandler keycloakLocal cyclonedx
 
-all-test: assetHandler networkScan frontendDev configHandler cypresslocal keycloakLocal cyclonedx keycloakInit
+all-test: assetHandler networkScan frontendDev configHandler cypresslocal keycloakLocal cyclonedx
 
 assInvFront:
 	docker build -t assinvfront ./Containers/FrontEnd
@@ -26,9 +26,6 @@ configHandler:
 
 keycloakLocal:
 	docker build -t keycloak_local ./Containers/keycloak
-
-keycloakInit:
-	docker build -t clientinit ./Containers/ClientInit
 
 fluentd:
 	docker build -t fluentd ./Containers/fluentd
@@ -59,4 +56,4 @@ down:
 	docker compose -f test-docker-compose.yaml down
 
 clean:
-	docker rmi --force assinvfront assethandler networkscan fluentd elasticsearch kibana confighandler frontenddev keycloakLocal keycloakInit
+	docker rmi --force assinvfront assethandler networkscan fluentd elasticsearch kibana confighandler frontenddev keycloakLocal cyclonedx

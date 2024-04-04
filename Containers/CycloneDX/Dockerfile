@@ -72,14 +72,22 @@ COPY *.go ./
 
 COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/linux-x64 /bin
 COPY ./bom.xml ./bom.xml
-RUN apk add --no-cache icu
+RUN apk add --no-cache icu \
+    python3 \
+    py3-pip \
+    && python3 -m venv /opt/cve-bin-tool-venv \
+    && source /opt/cve-bin-tool-venv/bin/activate \
+    && pip install --upgrade pip \
+    && pip install cve-bin-tool
 # Compile the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
+
+#RUN pip3 install --no-cache-dir --upgrade pip
+#RUN pip3 install --no-cache-dir cve-bin-tool
 # Expose port 8082 (the port that the API is listening to)
 EXPOSE 8082
 
 ENTRYPOINT ["/cyclonedx"]
-
 
 # FROM golang:1.22.0-alpine
 
