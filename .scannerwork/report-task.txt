@@ -1,0 +1,6 @@
+projectKey=assetinventory-org_asset-inventory_d7ef6ccb-a008-4af0-9ba4-05e3f2e7614a
+serverUrl=https://sq.emarcusson.se
+serverVersion=10.4.1.88267
+dashboardUrl=https://sq.emarcusson.se/dashboard?id=assetinventory-org_asset-inventory_d7ef6ccb-a008-4af0-9ba4-05e3f2e7614a
+ceTaskId=57a16d4e-f48a-4277-8ad4-d5a577545b9c
+ceTaskUrl=https://sq.emarcusson.se/api/ce/task?id=57a16d4e-f48a-4277-8ad4-d5a577545b9c

@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -34,6 +33,8 @@ func uploadCycloneDX(c *gin.Context) {
 		return
 	}
 
+	var dst string
+
 	var sbomData []byte
 	if file.Header.Get("Content-Type") == "text/xml" {
 		// Convert XML to JSON
@@ -54,7 +55,8 @@ func uploadCycloneDX(c *gin.Context) {
 			})
 			return
 		}
-		defer os.Remove(dst) // Remove the temporary file after conversion
+		
+		//defer os.Remove(dst) // Remove the temporary file after conversion
 
 		cmd := exec.Command("cyclonedx", "convert", "--input-format", "xml", "--input-file", dst, "--output-format", "json")
 		fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
@@ -106,6 +108,8 @@ func uploadCycloneDX(c *gin.Context) {
 		})
 		return
 	}
+	
+	dbcon.ScanAndSaveCVEs(assetID, dst)
 
 	// Respond to the client
 	c.JSON(http.StatusOK, gin.H{

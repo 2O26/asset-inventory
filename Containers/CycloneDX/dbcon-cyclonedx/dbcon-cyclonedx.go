@@ -6,7 +6,11 @@ import (
 	"log"
 	"net/http"
 	"time"
-
+	"encoding/json"
+	"os"
+	"os/exec"
+	"syscall"
+	"strings"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,6 +21,16 @@ type CycloneDXDocument struct {
 	ID               string    `bson:"_id,omitempty"`
 	SBOMData         []byte    `bson:"sbom_data"`
 	MostRecentUpdate time.Time `json:"mostRecentUpdate"`
+}
+
+type CVEEntry struct {
+	ID          string    `bson:"_id,omitempty"`
+	Vendor		string	  `bson:"vendor"`
+	Product 	string    `bson:"product"`
+	Version     string    `bson:"version"`
+	Score		string    `bson:"score"`		
+	CVEs        []string  `bson:"cves"`
+	ReportDate  time.Time `bson:"reportDate"`
 }
 
 var client *mongo.Client
@@ -45,6 +59,77 @@ func SetupDatabase(uri string, databaseName string) error {
 func GetCollection(collectionName string) *mongo.Collection {
 	return client.Database(dbName).Collection(collectionName)
 }
+
+func ScanAndSaveCVEs(assetID string, sbomFilePath string) {
+	// Define the output file path for the CVE scan results
+	outputFilePath := fmt.Sprintf("cve-results-%s.json", assetID)
+
+	// Execute the CVE Binary Tool
+    cmd := exec.Command("cve-bin-tool", "--sbom", "cyclonedx", "--sbom-file", "sbom.json", "-f", "json", "-o", "cve")
+	startTime := time.Now()
+	fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
+
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+
+    err := cmd.Run()
+
+	elapsedTime := time.Since(startTime)
+	
+	if err != nil {
+		// Check if the error is an ExitError
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			if waitStatus, ok := exitErr.Sys().(syscall.WaitStatus); ok {
+				// cve-binary-tool despite its succesfull execution, exits with status code 1
+				// Considered sucessful for the time being
+				if waitStatus.ExitStatus() == 1 {
+					fmt.Println("Command exited with status 1, considered successful in this context.")
+				} else {
+					fmt.Printf("Command failed with specific exit code: %d\n", waitStatus.ExitStatus())
+					os.Exit(waitStatus.ExitStatus())
+				}
+			}
+		} else {
+			// For non-exit errors
+			fmt.Printf("Command failed to run: %s\n", err)
+			os.Exit(1)
+		}
+	}
+
+    //mt.Println(string(output))
+    fmt.Printf("Command executed in %s\n", elapsedTime)
+
+	// Read the scan results
+	fileBytes, err := os.ReadFile(outputFilePath)
+	if err != nil {
+		log.Printf("Failed to read CVE scan results: %v", err)
+		return
+	}
+
+	// Parse the JSON results
+	var cveResults []string // Adjust this according to the actual format of your CVE tool's output
+	if err := json.Unmarshal(fileBytes, &cveResults); err != nil {
+		log.Printf("Failed to parse CVE scan results: %v", err)
+		return
+	}
+
+	cveEntry := CVEEntry{
+		// Assuming `vendor`, `product`, and `version` are determined from the SBOM or CVE scan output
+		Vendor:     "exampleVendor",
+		Product:    "exampleProduct",
+		Version:    "1.0.0",
+		Score:      "5.5", // Example score, adjust based on actual data
+		CVEs:       cveResults,
+		ReportDate: time.Now(),
+	}
+
+	cveCollection := GetCollection("CVEs") // Ensure you have a function to get the CVE collection
+	_, err = cveCollection.InsertOne(context.Background(), cveEntry)
+	if err != nil {
+		log.Printf("Failed to save CVE data: %v", err)
+	}
+}
+
 
 func SaveCycloneDX(db DatabaseHelper, sbomData []byte, assetID string) error {
 	doc := CycloneDXDocument{
