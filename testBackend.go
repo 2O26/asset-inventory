@@ -35,7 +35,6 @@ func main() {
         coverage := extractCoverage(string(out))
         fmt.Print("percent code covered by test:", coverage)
     }
-    fmt.Print("\nPlease note the percentage of code considered covered by tests is still counted even if the test fails.")
 }
 
 func findModules() ([]string, error) {
@@ -48,6 +47,8 @@ func findModules() ([]string, error) {
             modules = append(modules, path)
         }else if info.IsDir() && strings.Contains(path, "NetworkScan") && !strings.Contains(path, "FrontEnd"){
             modules = append(modules, path)
+        }else if info.IsDir() && strings.Contains(path, "CycloneDX") && !strings.Contains(path, "FrontEnd"){
+              modules = append(modules, path)
         }
         
         return nil
@@ -57,16 +58,17 @@ func findModules() ([]string, error) {
 
 func extractCoverage(output string) string {
     lines := strings.Split(output, "\n")
+    final := "0%"
     for _, line := range lines {
         if strings.Contains(line, "coverage:") && strings.Contains(line, "%") {
             //If the line contains both "coverage:" and "%", extract the coverage percentage
             fields := strings.Fields(line)
             for _, field := range fields {
                 if strings.Contains(field, "%") {
-                    return field
+                    final = field
                 }
             }
         }
     }
-    return ""//return empty string after the percentage
+    return final
 }
