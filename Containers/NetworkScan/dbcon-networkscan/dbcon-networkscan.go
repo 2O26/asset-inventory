@@ -175,111 +175,112 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 	c.JSON(http.StatusOK, scan)
 }
 
-// func test() {
-// 	scan1 := Scan{
-// 		StateID:     "",
-// 		DateCreated: "2024-04-03 17:28:24",
-// 		DateUpdated: "2024-04-03 17:36:34",
-// 		State: map[string]Asset{
-// 			"3403275042825": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.1",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3816296546313": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.125",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3823024209929": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.128",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3840002752521": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.134",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3864480710665": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.142",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3873372635145": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.145",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3947225939977": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.168",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3950581383177": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.170",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3950698823689": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.171",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"4011650449417": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.190",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"4011784667145": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.191",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 		},
-// 	}
+func test() {
+	scan1 := Scan{
+		StateID:     "",
+		DateCreated: "2024-04-03 17:28:24",
+		DateUpdated: "2024-04-03 17:36:34",
+		State: map[string]Asset{
+			"3403275042825": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.1",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3816296546313": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.125",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3823024209929": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.128",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3840002752521": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.134",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3864480710665": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.142",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3873372635145": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.145",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3947225939977": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.168",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3950581383177": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.170",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3950698823689": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.171",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"4011650449417": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.190",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"4011784667145": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.191",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+		},
+	}
 
-// 	scan2 := Scan{
-// 		StateID:     "",
-// 		DateCreated: "2024-04-03 17:28:24",
-// 		DateUpdated: "2024-04-03 19:36:34",
-// 		State: map[string]Asset{
-// 			"3403275042889": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.10",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3816296546313": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.125",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3823024209929": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.128",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 		},
-// 	}
-// 	db := &MongoDBHelper{Collection: GetCollection("scans")}
-// 	AddScan(db, scan1)
-// 	AddScan(db, scan2)
+	scan2 := Scan{
+		StateID:     "",
+		DateCreated: "2024-04-03 17:28:24",
+		DateUpdated: "2024-04-03 19:36:34",
+		State: map[string]Asset{
+			"3403275042889": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.10",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3816296546313": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.125",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+			"3823024209929": {
+				Status:    "up",
+				IPv4Addr:  "192.168.39.128",
+				Subnet:    "192.168.39.0/24",
+				OpenPorts: []int{},
+			},
+		},
+	}
+	db := &MongoDBHelper{Collection: GetCollection("scans")}
+	AddScan(db, scan1)
+	time.Sleep(2 * time.Second)
+	AddScan(db, scan2)
 
-// }
+}
 
 func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {
 	results, err := db.Find(context.TODO(), bson.D{})
@@ -301,4 +302,5 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
+	test()
 }
