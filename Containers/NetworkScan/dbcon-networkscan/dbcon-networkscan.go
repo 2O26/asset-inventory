@@ -6,10 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"log"
-	"net/http"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -150,27 +146,28 @@ func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
 	// Loop through all assets in the current scan
 	for ip, asset := range currentScan.State {
 		// Check if the IP address exists in the previous scan
-		if prevAsset, ok := previousScan.State[ip]; ok {
+		if prevAsset, ok := previousScan.State[asset.IPv4Addr]; ok {
 			// IP address exists in the previous scan
-			if asset.Status != prevAsset.Status {
+			if prevAsset.Status != asset.Status {
 				// Status has changed, update the asset
-				updatedScan.State[ip] = asset
+				asset.Status = "up"
+				updatedScan.State[asset.IPv4Addr] = asset
 			} else {
 				// Status has not changed, keep the previous asset
-				updatedScan.State[ip] = prevAsset
+				updatedScan.State[asset.IPv4Addr] = asset
 			}
 		} else {
 			// New IP address, add the asset
-			updatedScan.State[ip] = asset
+			updatedScan.State[asset.IPv4Addr] = asset
 		}
 	}
 
-	// Loop through all assets in the previous scan
-	for ip, prevAsset := range previousScan.State {
-		if _, ok := currentScan.State[ip]; !ok {
-			// IP address does not exist in the current scan, set status to down
+	// Loop through assets in the previous scan
+	for _, prevAsset := range previousScan.State {
+		if _, ok := updatedScan.State[prevAsset.IPv4Addr]; !ok {
+			// IP address does not exist in the current scan, add the previous asset with status "down"
 			prevAsset.Status = "down"
-			updatedScan.State[ip] = prevAsset
+			updatedScan.State[prevAsset.IPv4Addr] = prevAsset
 		}
 	}
 
@@ -366,7 +363,7 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 // 	time.Sleep(2 * time.Second)
 // 	AddScan(db, scan2)
 
-}
+// }
 
 func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {
 	results, err := db.Find(context.TODO(), bson.D{})
