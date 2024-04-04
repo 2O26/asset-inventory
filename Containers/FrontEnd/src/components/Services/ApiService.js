@@ -179,18 +179,36 @@ export const UploadCycloneDX = async (data) => {
 }
 
 
-export const SaveDashboardConfig = async (data) => {
-    const response = await fetch('http://localhost:8080/storeDashboardConfig', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
-            'Authorization': `Bearer ${UserService.getToken()}`,
-        },
-        body: JSON.stringify(data)
-    });
+export const SaveUserSetting = async (data) => {
+    try {
+        const response = await fetch('http://localhost:3001/UpdateUserConfig', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
+                'Authorization': `Bearer ${UserService.getToken()}`,
+            },
+            body: JSON.stringify(data)
+        });
 
-    if (!response.ok) {
-        throw new Error('Network response was not ok, could not fetch state');
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not add user configuration');
     }
-    return response.json();
 };
+
+export const GetUserSettings = async () => {
+    try {
+        const response = await fetch('http://localhost:3001/getUserConfigurations', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${UserService.getToken()}`
+            }
+        });
+        return response.json();
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch user settings');
+    }
+}

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 mongoose.set('strictQuery', false);
 var dbServer = 'configstorage:27018';
-const dbName = 'netscanConfig';
+const dbName = 'configurations';
 
 var IPRangeSchema = require('../Schemas/IPRangeSchema');
 var RecurringScanSchema = require('../Schemas/RecurringScanSchema');
@@ -54,7 +54,7 @@ class ConfigHandler {
         try {
             await newRange_instance.save();
         } catch (err) {
-            console.log('Error while inserting test text:', err.message);
+            console.log('Error while inserting recurring scan data', err.message);
         }
     }
 

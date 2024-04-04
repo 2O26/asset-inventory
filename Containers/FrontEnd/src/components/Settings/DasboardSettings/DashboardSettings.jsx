@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { dashboardTools } from '../../Tools/Tools';
-import { SaveDashboardConfig } from '../../Services/ApiService';
+import { SaveUserSetting, GetUserSettings } from '../../Services/ApiService';
 import './DashboardSettings.css'
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 
 function sortDictByValues(dict) {
@@ -21,15 +21,33 @@ export default function DashboardSettings() {
     const [rightLst, setRightLst] = useState(Object.keys(toolsObject).reduce((acc, key) => ({ ...acc, [key]: 0 }), {}));
 
     const { mutate, isPending, isError, error } = useMutation({
-        mutationFn: SaveDashboardConfig,
+        mutationFn: SaveUserSetting,
         onSuccess: (data) => {
-            console.log(data);
-            window.alert("Settings Saved")
+            // window.alert("Settings Saved")
+            refetchUserSettings();
         },
         onError: (error) => {
             console.error("Save Dashboard Config: ", error);
         }
     });
+
+    const { data: userSettingData, isLoading: isLoadingUserSettings, isError: isUserSettings, error: errorUserSettings, refetch: refetchUserSettings } = useQuery({
+        queryKey: ['User Settings'],
+        queryFn: GetUserSettings,
+        enabled: true
+    });
+
+    function countToolObjectOccurances(array, toolsObject) {
+        let counts = {}
+        toolsObject.forEach(item => {
+            counts[item] = 0
+        })
+        array.forEach(item => {
+            counts[item] += 1;
+        })
+
+        return counts;
+    }
 
     // Handler for changing values in leftLst
     const handleLeftInputChange = (key, value) => {
@@ -44,10 +62,20 @@ export default function DashboardSettings() {
     };
 
     const handleSave = () => {
-        console.log("left list: ", sortDictByValues(leftLst))
-        console.log("right list: ", sortDictByValues(rightLst))
-        mutate({ "leftList": sortDictByValues(leftLst), "rightList": sortDictByValues(rightLst) })
+        mutate({ update: { "leftDash": sortDictByValues(leftLst), "rightDash": sortDictByValues(rightLst) } });
     }
+
+    const resetInput = () => {
+        setRightLst(countToolObjectOccurances(userSettingData.userSettings[0].rightDash, Object.keys(toolsObject)));
+        setLeftLst(countToolObjectOccurances(userSettingData.userSettings[0].leftDash, Object.keys(toolsObject)));
+    }
+
+    useEffect(() => {
+        if (userSettingData) {
+            setRightLst(countToolObjectOccurances(userSettingData.userSettings[0].rightDash, Object.keys(toolsObject)));
+            setLeftLst(countToolObjectOccurances(userSettingData.userSettings[0].leftDash, Object.keys(toolsObject)));
+        }
+    }, [userSettingData])
 
     return (
         <div className='center-flex-column '>
@@ -88,7 +116,7 @@ export default function DashboardSettings() {
             {isError && <div className='errorMessage'>{error.message}</div>}
             <div className='standard-button-container'>
                 <button className="standard-button" disabled={isPending} onClick={() => handleSave()}>Save</button>
-                <button className="standard-button" disabled={isPending} >Cancel</button>
+                <button className="standard-button" disabled={isPending} onClick={() => resetInput()} >Reset</button>
 
             </div>
         </div>
