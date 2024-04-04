@@ -426,36 +426,52 @@ func AddAssets(req AssetRequest) string {
 	db := &MongoDBHelper{Collection: GetCollection("scans")}
 	latestScan, err := getLatestScan(db)
 	if err != nil {
-		log.Printf("Error retrieving the latest scan: %v\n", err)
-		return err.Error()
+		// Log and return error if it's not ErrNoDocuments
+		log.Printf("Failed to retrieve the latest scan: %v\n", err)
+		return "Failed to retrieve the latest scan: " + err.Error()
 	}
+	// Check if there are new assets to add
 	if len(req.AddAsset) > 0 {
-		// Loop through the new assets and add them to the latest scan
+		fmt.Println("AddAsset: ", req.AddAsset)
+		var newAssets []jsonhandler.Asset
 		for _, newAsset := range req.AddAsset {
-			for _, t := range latestScan.Assets {
-				fmt.Println("newAsset: ", newAsset.Hostname, "latestScan: ", latestScan.Assets[t.Hostname])
-				if newAsset.Hostname == latestScan.Assets[newAsset.Hostname].Hostname {
-					log.Printf("Asset already exists in the latest scan.\n")
-					return "Asset already exists in the latest scan"
+			// Check if an asset with the same hostname already exists
+			exists := false
+			for _, existingAsset := range latestScan.Assets {
+				if existingAsset.Hostname == newAsset.Hostname {
+					exists = true
+					log.Printf("Asset with hostname %s already exists in the latest scan.\n", newAsset.Hostname)
+					break
 				}
 			}
-			newAssetID := primitive.NewObjectID().Hex()
-			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
-			newAsset.DateUpdated = newAsset.DateCreated
-			latestScan.Assets[newAssetID] = newAsset
+			if !exists {
+				newAssets = append(newAssets, newAsset)
+			}
 		}
+		if len(newAssets) > 0 {
+			for _, newAsset := range newAssets {
+				newAssetID := primitive.NewObjectID().Hex()
+				newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+				newAsset.DateUpdated = newAsset.DateCreated
+				latestScan.Assets[newAssetID] = newAsset
+			}
 
-		// Update the latest scan with the new assets
-		update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
-		_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
-		if err != nil {
-			log.Printf("Failed to add new assets: %v\n", err)
-			return "Failed to add new assets: " + err.Error()
+			// Update the latest scan with the new assets
+			update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
+			_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+			if err != nil {
+				log.Printf("Failed to add new assets: %v\n", err)
+				return "Failed to add new assets: " + err.Error()
+			} else {
+				log.Printf("New assets added successfully to the latest scan.\n")
+				return "New assets added successfully to the latest scan"
+			}
 		} else {
-			log.Printf("Asset added successfully to the latest scan.\n")
-			return "Asset added successfully to the latest scan"
+			log.Printf("No new assets to add, all assets already exist.\n")
+			return "No new assets to add, all assets already exist"
 		}
 	}
+
 	return "No new assets to add"
 }
 
