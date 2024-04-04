@@ -298,7 +298,7 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 // 	time.Sleep(2 * time.Second)
 // 	AddScan(db, scan2)
 
-// }
+}
 
 func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {
 	results, err := db.Find(context.TODO(), bson.D{})
