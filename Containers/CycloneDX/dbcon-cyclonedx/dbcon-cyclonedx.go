@@ -65,7 +65,7 @@ func ScanAndSaveCVEs(assetID string, sbomFilePath string) {
 	outputFilePath := fmt.Sprintf("cve-results-%s.json", assetID)
 
 	// Execute the CVE Binary Tool
-    cmd := exec.Command("cve-bin-tool", "--sbom", "cyclonedx", "--sbom-file", "sbom.json", "-f", "json", "-o", "cve")
+    cmd := exec.Command("/opt/cve-bin-tool-venv/bin/cve-bin-tool", "--sbom", "cyclonedx", "--sbom-file", "sbom.json", "-f", "json", "-o", "cve")
 	startTime := time.Now()
 	fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
 
