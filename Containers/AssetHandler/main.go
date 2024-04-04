@@ -145,6 +145,7 @@ func getLatestState(c *gin.Context) {
 }
 
 func getNetworkScan() {
+	fmt.Println("########Getting network scan##########")
 	url := "http://networkscan:8081/getLatestScan"
 	// GET request from netscan
 	response, err := http.Get(url)
@@ -165,19 +166,19 @@ func getNetworkScan() {
 	// Iterate over the State map and print UID values'
 	for _, stateEntry := range netassets.State {
 		asset := jsonhandler.Asset{
-			Name:        "PC-A",
-			Owner:       "UID_2332",
-			Type:        []string{"Network", "Device"},
-			Criticality: 1,
+			Name:        "",
+			Owner:       "",
+			Type:        []string{},
+			Criticality: 0,
 			Hostname:    stateEntry.IPv4Addr,
 		}
 		addAsset = append(addAsset, asset)
-		request := dbcon.AssetRequest{
-			AddAsset: addAsset,
-		}
-		dbcon.AddAssets(request)
-		fmt.Println("Added asset: ", stateEntry.IPv4Addr)
 	}
+	request := dbcon.AssetRequest{
+		AddAsset: addAsset,
+	}
+	dbcon.AddAssets(request)
+	fmt.Println("Added asset: ", request)
 }
 
 func addInitialScan(scansHelper dbcon.DatabaseHelper) {
@@ -295,7 +296,6 @@ func main() {
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
 	addInitialScan(scansHelper)
-	getNetworkScan()
 	router.POST("/AddScan", func(c *gin.Context) {
 		dbcon.AddScan(scansHelper, c)
 	})
