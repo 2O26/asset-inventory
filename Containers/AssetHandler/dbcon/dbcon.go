@@ -229,10 +229,13 @@ func AddAssets(req AssetRequest) string {
 	if len(req.AddAsset) > 0 {
 		// Loop through the new assets and add them to the latest scan
 		for _, newAsset := range req.AddAsset {
-			// if newAsset.Hostname == latestScan.Assets[newAsset.Hostname].Hostname {
-			// 	log.Printf("Asset already exists in the latest scan.\n")
-			// 	return "Asset already exists in the latest scan"
-			// }
+			for _, t := range latestScan.Assets {
+				fmt.Println("newAsset: ", newAsset.Hostname, "latestScan: ", latestScan.Assets[t.Hostname])
+				if newAsset.Hostname == latestScan.Assets[newAsset.Hostname].Hostname {
+					log.Printf("Asset already exists in the latest scan.\n")
+					return "Asset already exists in the latest scan"
+				}
+			}
 			newAssetID := primitive.NewObjectID().Hex()
 			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 			newAsset.DateUpdated = newAsset.DateCreated

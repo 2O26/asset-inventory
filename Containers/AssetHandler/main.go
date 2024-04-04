@@ -82,6 +82,8 @@ func getNetScanStatus() json.RawMessage {
 }
 
 func getLatestState(c *gin.Context) {
+	// Add assets from network scan
+	getNetworkScan()
 	// Simulate authentication
 	var authSuccess = true
 	if authSuccess {
@@ -109,7 +111,6 @@ func getLatestState(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare scan data"})
 			return
 		}
-
 		pluginStates := make(map[string]json.RawMessage)
 		netassets := getNetScanStatus()
 		pluginStates["netscan"] = netassets
@@ -164,7 +165,11 @@ func getNetworkScan() {
 	// Iterate over the State map and print UID values'
 	for _, stateEntry := range netassets.State {
 		asset := jsonhandler.Asset{
-			Hostname: stateEntry.IPv4Addr,
+			Name:        "PC-A",
+			Owner:       "UID_2332",
+			Type:        []string{"Network", "Device"},
+			Criticality: 1,
+			Hostname:    stateEntry.IPv4Addr,
 		}
 		addAsset = append(addAsset, asset)
 		request := dbcon.AssetRequest{
