@@ -1,8 +1,12 @@
 describe('View asset page tests', () => {
     beforeEach('visiting Asset List page', () => {
-        cy.visit(Cypress.env('baseUrl'))
+        cy.login();
         cy.contains('Tools').click()
         cy.contains('Asset List').click()
+    })
+
+    afterEach('logout', () => {
+        cy.logout();
     })
 
     for (let i = 0; i < 3; i++) {
@@ -16,12 +20,12 @@ describe('View asset page tests', () => {
             beforeEach('clicking asset in list and saving info', () => {
                 cy.get('.assetRow').eq(i)
                     .then((row) => {
-                        tmpName = row.find('.assetCell').eq(0).text();
-                        tmpType = row.find('.assetCell').eq(1).text();
+                        tmpName = row.find('.assetCell').eq(1).text();
                         tmpOwner = row.find('.assetCell').eq(2).text();
-                        tmpCreated = row.find('.assetCell').eq(3).text();
-                        tmpEdited = row.find('.assetCell').eq(4).text();
-                        tmpCrit = row.find('.assetCell').eq(5).text();
+                        tmpType = row.find('.assetCell').eq(3).text();
+                        tmpCreated = row.find('.assetCell').eq(4).text();
+                        tmpEdited = row.find('.assetCell').eq(5).text();
+                        tmpCrit = row.find('.assetCell').eq(6).text();
                     }).click();
             })
 
@@ -38,11 +42,11 @@ describe('View asset page tests', () => {
             })
 
             it('can verify asset Creation Date', () => {
-                cy.get('.assetItem').contains('Creation Date').should('contain', tmpCreated);
+                cy.get('.assetItem').contains('Created at').should('contain', tmpCreated);
             })
 
             it('can verify asset Updated Date', () => {
-                cy.get('.assetItem').contains('Updated Date').should('contain', tmpEdited);
+                cy.get('.assetItem').contains('Updated at').should('contain', tmpEdited);
             })
 
             it('can verify asset criticality', () => {

@@ -1,8 +1,12 @@
 describe('Graph View page tests', () => {
     beforeEach('visiting Asset List page', () => {
-        cy.visit(Cypress.env('baseUrl'))
+        cy.login();
         cy.contains('Tools').click()
         cy.contains('Graph View').click()
+    })
+
+    afterEach('logout', () => {
+        cy.logout();
     })
 
     it('Can verify URL', () => {
