@@ -98,8 +98,14 @@ services:
       KC_DB_PASSWORD: keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin # makeTheDevelopersLifesH4RDbySettingAwaytoLongPassword!
+      KC_HEALTH_ENABLED: true
     depends_on:
       - keycloakstorage
+
+  clientinit:
+    image: clientinit
+    depends_on:
+      - keycloak
 
 volumes:
   configstorage:

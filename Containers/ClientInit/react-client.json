@@ -10,10 +10,12 @@
   "alwaysDisplayInConsole": false,
   "clientAuthenticatorType": "client-secret",
   "redirectUris": [
-    "http://localhost:3000/*"
+    "http://localhost:3000/*",
+    "http://frontenddev:3000/*"
   ],
   "webOrigins": [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://frontenddev:3000"
   ],
   "notBefore": 0,
   "bearerOnly": false,
@@ -27,7 +29,7 @@
   "protocol": "openid-connect",
   "attributes": {
     "login_theme": "keycloak",
-    "post.logout.redirect.uris": "http://localhost:3000/*",
+    "post.logout.redirect.uris": "http://localhost:3000/*##http://frontenddev:3000/*",
     "oauth2.device.authorization.grant.enabled": "false",
     "backchannel.logout.revoke.offline.tokens": "false",
     "use.refresh.tokens": "true",
@@ -40,7 +42,9 @@
     "tls.client.certificate.bound.access.tokens": "false",
     "display.on.consent.screen": "false",
     "pkce.code.challenge.method": "S256",
-    "token.response.type.bearer.lower-case": "false"
+    "token.response.type.bearer.lower-case": "false",
+    "frontchannel.logout.url": "",
+    "backchannel.logout.url": ""
   },
   "authenticationFlowBindingOverrides": {},
   "fullScopeAllowed": true,
@@ -62,5 +66,6 @@
     "view": true,
     "configure": true,
     "manage": true
-  }
+  },
+  "authorizationServicesEnabled": false
 }
