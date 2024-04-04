@@ -66,8 +66,10 @@ export default function DashboardSettings() {
     }
 
     const resetInput = () => {
-        setRightLst(countToolObjectOccurances(userSettingData.userSettings[0].rightDash, Object.keys(toolsObject)));
-        setLeftLst(countToolObjectOccurances(userSettingData.userSettings[0].leftDash, Object.keys(toolsObject)));
+        if (userSettingData) {
+            setRightLst(countToolObjectOccurances(userSettingData.userSettings[0].rightDash, Object.keys(toolsObject)));
+            setLeftLst(countToolObjectOccurances(userSettingData.userSettings[0].leftDash, Object.keys(toolsObject)));
+        }
     }
 
     useEffect(() => {

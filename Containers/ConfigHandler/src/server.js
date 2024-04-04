@@ -130,7 +130,13 @@ app.get("/getUserConfigurations", async (req, res) => {
         userConfigHandler.connect()
             .then(() => userConfigHandler.getUserSettings(decoded.sub))
             .then(result => {
-                res.json({ userSettings: result })
+                if (result.length === 0) {
+                    const defaultSetting = [{ userID: decoded.sub, leftDash: ["Graph view"], rightDash: ["Asset List"], darkmode: true }];
+                    res.json({ userSettings: defaultSetting })
+                } else {
+                    res.json({ userSettings: result })
+                }
+
             }).catch((err) => {
                 console.log('Could not fetch user settings from database. Error', err);
             });
