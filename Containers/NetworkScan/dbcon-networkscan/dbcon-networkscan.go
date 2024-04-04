@@ -97,33 +97,32 @@ func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
 		DateUpdated: currentScan.DateUpdated,
 		State:       make(map[string]Asset),
 	}
-	for ip, asset := range currentScan.State {
-		updatedScan.State[ip] = asset
-	}
-	// Loop through all assets in the current scan
-	for ip, asset := range currentScan.State {
+
+	// Loop through assets in the current scan
+	for _, asset := range currentScan.State {
 		// Check if the IP address exists in the previous scan
-		if prevAsset, ok := previousScan.State[ip]; ok {
+		if prevAsset, ok := previousScan.State[asset.IPv4Addr]; ok {
 			// IP address exists in the previous scan
-			if asset.Status != prevAsset.Status {
+			if prevAsset.Status != asset.Status {
 				// Status has changed, update the asset
-				updatedScan.State[ip] = asset
+				asset.Status = "up"
+				updatedScan.State[asset.IPv4Addr] = asset
 			} else {
 				// Status has not changed, keep the previous asset
-				updatedScan.State[ip] = prevAsset
+				updatedScan.State[asset.IPv4Addr] = asset
 			}
 		} else {
 			// New IP address, add the asset
-			updatedScan.State[ip] = asset
+			updatedScan.State[asset.IPv4Addr] = asset
 		}
 	}
 
-	// Loop through all assets in the previous scan
-	for ip, prevAsset := range previousScan.State {
-		if _, ok := currentScan.State[ip]; !ok {
-			// IP address does not exist in the current scan, set status to down
+	// Loop through assets in the previous scan
+	for _, prevAsset := range previousScan.State {
+		if _, ok := updatedScan.State[prevAsset.IPv4Addr]; !ok {
+			// IP address does not exist in the current scan, add the previous asset with status "down"
 			prevAsset.Status = "down"
-			updatedScan.State[ip] = prevAsset
+			updatedScan.State[prevAsset.IPv4Addr] = prevAsset
 		}
 	}
 
@@ -151,6 +150,7 @@ func AddScan(db DatabaseHelper, scan Scan) {
 	updatedScan := compareScanStates(scan, previousScan)
 	updatedScan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
 	result, err := db.InsertOne(context.TODO(), updatedScan)
+
 	if err != nil {
 		log.Fatalf("Could not insert scan: %s", err)
 	}
@@ -182,19 +182,19 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 // 		DateUpdated: "2024-04-03 17:36:34",
 // 		State: map[string]Asset{
 // 			"3403275042825": {
-// 				Status:    "up",
+// 				Status:    "down",
 // 				IPv4Addr:  "192.168.39.1",
 // 				Subnet:    "192.168.39.0/24",
 // 				OpenPorts: []int{},
 // 			},
 // 			"3816296546313": {
-// 				Status:    "up",
+// 				Status:    "down",
 // 				IPv4Addr:  "192.168.39.125",
 // 				Subnet:    "192.168.39.0/24",
 // 				OpenPorts: []int{},
 // 			},
 // 			"3823024209929": {
-// 				Status:    "up",
+// 				Status:    "down",
 // 				IPv4Addr:  "192.168.39.128",
 // 				Subnet:    "192.168.39.0/24",
 // 				OpenPorts: []int{},
@@ -255,21 +255,39 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 // 		DateCreated: "2024-04-03 17:28:24",
 // 		DateUpdated: "2024-04-03 19:36:34",
 // 		State: map[string]Asset{
-// 			"3403275042889": {
+// 			"3403275042825": {
 // 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.10",
+// 				IPv4Addr:  "192.168.39.1",
 // 				Subnet:    "192.168.39.0/24",
 // 				OpenPorts: []int{},
 // 			},
 // 			"3816296546313": {
 // 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.125",
+// 				IPv4Addr:  "192.168.39.102",
 // 				Subnet:    "192.168.39.0/24",
 // 				OpenPorts: []int{},
 // 			},
 // 			"3823024209929": {
 // 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.128",
+// 				IPv4Addr:  "192.168.39.118",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3816296526313": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.100",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3823024209924": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.216",
+// 				Subnet:    "192.168.39.0/24",
+// 				OpenPorts: []int{},
+// 			},
+// 			"3823024201924": {
+// 				Status:    "up",
+// 				IPv4Addr:  "192.168.39.125",
 // 				Subnet:    "192.168.39.0/24",
 // 				OpenPorts: []int{},
 // 			},
@@ -277,6 +295,7 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 // 	}
 // 	db := &MongoDBHelper{Collection: GetCollection("scans")}
 // 	AddScan(db, scan1)
+// 	time.Sleep(2 * time.Second)
 // 	AddScan(db, scan2)
 
 // }
@@ -301,4 +320,5 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
+	// test()
 }
