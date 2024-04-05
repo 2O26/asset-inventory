@@ -5,7 +5,6 @@ import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 import { useMutation } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { GetState } from '../Services/ApiService'
-import { CycloneDXuploader } from './CycloneDXuploader';
 
 
 export default function EditAsset({ assetData, assetID, relationData, refetch }) {
@@ -22,7 +21,7 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
 
     const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "uni" };
     const [newRelationData, setNewRelationData] = useState(emptyRelation)
-    const { data, isLoading} = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ['getState'],
         queryFn: GetState,
         enabled: true
@@ -215,9 +214,6 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                 }
 
                 <hr />
-                <div>
-                    <CycloneDXuploader data={data} assetID={assetID} showPluginInfo={true} />
-                </div>
 
                 {isPending && <LoadingSpinner />}
                 {isError && <div className='errorMessage'>{error.message}</div>}

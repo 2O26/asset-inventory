@@ -15,10 +15,17 @@ import { MdAddLink } from "react-icons/md";
 import { CiSearch } from "react-icons/ci";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
+import { MdCyclone } from "react-icons/md";
 
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
 
+
+export const CycloneDXIcon = ({ size = 30 }) => {
+    return (
+        <MdCyclone size={size} />
+    )
+}
 export const LeftArrow = ({ size = 30 }) => {
     return (
         <IoIosArrowBack size={size} />

@@ -1,0 +1,42 @@
+.cxdFileList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.cdxFile {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.2rem;
+    border-radius: 0.25rem;
+    background-color: var(--secondary-color);
+    /* width: fit-content; */
+    padding: 2rem;
+    width: 12rem;
+    height: auto;
+    max-width: 12rem;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: var(--box-shadow);
+}
+
+.cdxFile:hover {
+    filter: brightness(105%);
+}
+
+.cdxFileTest {
+    max-width: 6rem;
+    text-wrap: wrap;
+    overflow-wrap: break-word;
+}
+
+.CDXModal {
+    width: 60vw;
+    height: 80vh;
+    background-color: var(--main-color);
+    border-radius: 0.5rem;
+    overflow: scroll;
+}
