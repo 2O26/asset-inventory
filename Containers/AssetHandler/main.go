@@ -178,7 +178,21 @@ func getNetworkScan() {
 		AddAsset: addAsset,
 	}
 	dbcon.AddAssets(request)
-	fmt.Println("Added asset: ", request)
+	pluginState := jsonhandler.PluginState{
+		StateID:     "netassets.StateID",
+		DateCreated: netassets.DateCreated,
+		DateUpdated: netassets.DateUpdated,
+		State:       make(map[string]interface{}),
+	}
+
+	for k, v := range netassets.State {
+		pluginState.State[k] = v
+	}
+	plugin := jsonhandler.Plugin{
+		PluginStateID: netassets.StateID,
+	}
+	fmt.Println("PluginState: ", pluginState)
+	dbcon.AddPluginData(pluginState, plugin)
 }
 
 func addInitialScan(scansHelper dbcon.DatabaseHelper) {
@@ -271,7 +285,21 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				DateCreated: "2024-03-05 14:20:00",
 			},
 		},
-	}
+		PluginStates: map[string]jsonhandler.PluginState{
+			"20240214-1300A": {
+				StateID:     "20240214-1300A",
+				DateCreated: "2024-02-14 13:00:00",
+				DateUpdated: "2024-02-14 13:30:00",
+				State: map[string]interface{}{
+					"65f8671cfe55e5c76465d840": map[string]interface{}{
+						"status":    "down",
+						"ipv4Addr":  "192.168.1.1",
+						"subnet":    "192.168.1.0/24",
+						"openPorts": []int{},
+					},
+				},
+			},
+		}}
 	_, err := scansHelper.InsertOne(context.Background(), initialScan)
 	if err != nil {
 		log.Fatalf("Failed to add initial scan: %v", err)
