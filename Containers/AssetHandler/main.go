@@ -179,7 +179,7 @@ func getNetworkScan() {
 	}
 	dbcon.AddAssets(request)
 	pluginState := jsonhandler.PluginState{
-		StateID:     "netassets.StateID",
+		StateID:     "IPscan",
 		DateCreated: netassets.DateCreated,
 		DateUpdated: netassets.DateUpdated,
 		State:       make(map[string]interface{}),
@@ -189,7 +189,7 @@ func getNetworkScan() {
 		pluginState.State[k] = v
 	}
 	plugin := jsonhandler.Plugin{
-		PluginStateID: netassets.StateID,
+		PluginStateID: "IPscan",
 	}
 	fmt.Println("PluginState: ", pluginState)
 	dbcon.AddPluginData(pluginState, plugin)
