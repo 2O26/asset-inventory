@@ -131,7 +131,7 @@ app.get("/getUserConfigurations", async (req, res) => {
             .then(() => userConfigHandler.getUserSettings(decoded.sub))
             .then(result => {
                 if (result.length === 0) {
-                    const defaultSetting = [{ userID: decoded.sub, leftDash: ["Graph view"], rightDash: ["Asset List"], darkmode: true }];
+                    const defaultSetting = [{ userID: decoded.sub, leftDash: ["Graph View"], rightDash: ["Asset List"], darkmode: true }];
                     res.json({ userSettings: defaultSetting })
                 } else {
                     res.json({ userSettings: result })
