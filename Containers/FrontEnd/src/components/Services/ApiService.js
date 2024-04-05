@@ -212,3 +212,16 @@ export const GetUserSettings = async () => {
         throw new Error('Could not fetch user settings');
     }
 }
+
+export const GetCDXfiles = async (assetID) => {
+    try {
+        const response = await fetch('http://localhost:8082/getCycloneDXFile?assetID=' + assetID);
+        const return_data = await response.json();
+        // console.log('http://localhost:8082/getCycloneDXFile?assetID=' + assetID)
+        // console.log(return_data);
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch CycloneDX info');
+    }
+}
