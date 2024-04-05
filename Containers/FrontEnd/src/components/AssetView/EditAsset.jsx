@@ -148,7 +148,6 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                 <hr />
 
                 <div >
-                    <hr />
                     <h3>Relations </h3>
                     <div className='relation-content_button'>
                         <div className="relations-container" >
