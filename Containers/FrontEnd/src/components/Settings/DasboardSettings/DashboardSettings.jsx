@@ -43,7 +43,7 @@ export default function DashboardSettings() {
             counts[item] = 0
         })
         array.forEach((item, index) => {
-            counts[item] = index;
+            counts[item] = index + 1;
         });
 
         return counts;
