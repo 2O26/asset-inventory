@@ -81,4 +81,14 @@ describe('Asset List page tests', () => {
             cy.get('.asset-list-container').should('contain', tmpAssetData.owner)
         })
     })
+    describe('when searching with a long random string', () => {
+        beforeEach('asset search with long random string', () => {
+            cy.get('.SearchBar input').type('8c0dd0655ca3418578b51582deb38ab47a0137e2a592541bc1ef34ad2d80af32');
+        });
+        it('should not display any assets in the list', () => {
+            cy.get('.asset-list-container').should('not.contain', 'Test PC');
+            cy.get('.asset-list-container').should('not.contain', 'Another Asset');
+        });
+    });
+    
 })
