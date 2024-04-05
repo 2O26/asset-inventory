@@ -63,7 +63,7 @@ func GetCollection(collectionName string) *mongo.Collection {
 func ScanAndSaveCVEs(assetID string, sbomFilePath string) {
 	outputFilePath := fmt.Sprintf("cve-results-%s.json", assetID)
 
-    cmd := exec.Command("cve-bin-tool", "--sbom", "cyclonedx", "--sbom-file", "sbom.json", "-f", "json", "-o", "cve")
+    cmd := exec.Command("cve-bin-tool", "--sbom", "cyclonedx", "--sbom-file", "sbom.json", "-f", "json", "-o", outputFilePath)
 	startTime := time.Now()
 	fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
 

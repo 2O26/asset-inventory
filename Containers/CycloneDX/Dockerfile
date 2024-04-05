@@ -94,7 +94,7 @@ COPY --from=go-builder /cyclonedx /cyclonedx
 
 RUN python -m pip install cve-bin-tool
 
-RUN python -m cve_bin_tool.cli -u now -e / / --disable-data-source OSV, REDHAT
+RUN python -m cve_bin_tool.cli -u now -e / / --disable-data-source OSV
 
 
 #CMD ["/bin/bash"]
