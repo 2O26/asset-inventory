@@ -57,9 +57,7 @@ RUN git clone https://github.com/CycloneDX/cyclonedx-cli.git
 WORKDIR ./cyclonedx-cli
 RUN dotnet publish src/cyclonedx/cyclonedx.csproj --configuration Release --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output bin/linux-x64
 
-
-
-FROM golang:1.22.0-alpine
+FROM golang:1.22.0-alpine as go-builder
 WORKDIR /app
 # go.mod : describes modules properties, including dependencies on other modules and on versions on Go
 # go.sum : file contains cryptographic hashes for each module version that your project depends on. (maintains integrity and reproducibility)
@@ -72,16 +70,35 @@ COPY *.go ./
 
 COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/linux-x64 /bin
 COPY ./bom.xml ./bom.xml
-RUN apk add --no-cache icu \
-    python3 \
-    py3-pip \
-    && python3 -m venv /opt/cve-bin-tool-venv \
-    && /opt/cve-bin-tool-venv/bin/pip install --upgrade pip \
-    && /opt/cve-bin-tool-venv/bin/pip install cve-bin-tool \
-    && /opt/cve-bin-tool-venv/bin/pip install gsutil 
+RUN apk add --no-cache icu 
+# python3 \
+# py3-pip \
+# && python3 -m venv /opt/cve-bin-tool-venv \
+# && /opt/cve-bin-tool-venv/bin/pip install --upgrade pip \
+# && /opt/cve-bin-tool-venv/bin/pip install cve-bin-tool \
+# && /opt/cve-bin-tool-venv/bin/pip install gsutil 
 
 # Compile the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
+
+
+FROM python:3.8-slim-buster 
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1 
+
+WORKDIR /app
+
+COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/linux-x64 /bin
+COPY --from=go-builder /cyclonedx /cyclonedx
+
+RUN python -m pip install cve-bin-tool
+
+RUN python -m cve_bin_tool.cli -u now -e / / --disable-data-source OSV, REDHAT
+
+
+#CMD ["/bin/bash"]
+
 
 #RUN pip3 install --no-cache-dir --upgrade pip
 #RUN pip3 install --no-cache-dir cve-bin-tool
