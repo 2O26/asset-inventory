@@ -37,11 +37,12 @@ type Relation struct {
 }
 
 type BackState struct {
-	ID               primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
-	MostRecentUpdate time.Time           `json:"mostRecentUpdate"`
-	Assets           map[string]Asset    `json:"assets"`
-	Plugins          map[string]Plugin   `json:"plugins"`
-	Relations        map[string]Relation `json:"relations"`
+	ID               primitive.ObjectID     `bson:"_id,omitempty" json:"id,omitempty"`
+	MostRecentUpdate time.Time              `json:"mostRecentUpdate"`
+	Assets           map[string]Asset       `json:"assets"`
+	Plugins          map[string]Plugin      `json:"plugins"`
+	Relations        map[string]Relation    `json:"relations"`
+	PluginStates     map[string]PluginState `json:"pluginStates"`
 }
 
 type FrontState struct {
@@ -52,10 +53,10 @@ type FrontState struct {
 }
 
 type PluginState struct {
-	StateID     string         `json:"stateID"`
-	DateCreated string         `json:"dateCreated"`
-	DateUpdated string         `json:"dateUpdated"`
-	State       map[string]any `json:"state"`
+	StateID     string                 `json:"stateID"`
+	DateCreated string                 `json:"dateCreated"`
+	DateUpdated string                 `json:"dateUpdated"`
+	State       map[string]interface{} `json:"state"`
 }
 
 // BackToFront Takes a state, an arbitrary amount of plugin names and plugin data and formats the output to the style used in frontend.
