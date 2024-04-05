@@ -2,15 +2,16 @@ package dbcon_cyclonedx
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
-	"encoding/json"
 	"os"
 	"os/exec"
-	"syscall"
 	"strings"
+	"syscall"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,13 +25,13 @@ type CycloneDXDocument struct {
 }
 
 type CVEEntry struct {
-	ID          string    `bson:"_id,omitempty"`
-	Vendor		string	  `bson:"vendor"`
-	Product 	string    `bson:"product"`
-	Version     string    `bson:"version"`
-	Score		string    `bson:"score"`		
-	CVEs        []string  `bson:"cves"`
-	ReportDate  time.Time `bson:"reportDate"`
+	ID         string    `bson:"_id,omitempty"`
+	Vendor     string    `bson:"vendor"`
+	Product    string    `bson:"product"`
+	Version    string    `bson:"version"`
+	Score      string    `bson:"score"`
+	CVEs       []string  `bson:"cves"`
+	ReportDate time.Time `bson:"reportDate"`
 }
 
 var client *mongo.Client
@@ -63,17 +64,18 @@ func GetCollection(collectionName string) *mongo.Collection {
 func ScanAndSaveCVEs(assetID string, sbomFilePath string) {
 	outputFilePath := fmt.Sprintf("cve-results-%s.json", assetID)
 
-    cmd := exec.Command("python", "-m", "cve_bin_tool.cli", "--sbom", "cyclonedx", "--sbom-file", "sbom.json", "-f", "json", "-o", outputFilePath)
+	// /app
+	cmd := exec.Command("python", "-m", "cve_bin_tool.cli", "--sbom", "cyclonedx", "--sbom-file", sbomFilePath, "-f", "json", "-o", outputFilePath)
 	startTime := time.Now()
 	fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
 
-    cmd.Stdout = os.Stdout
-    cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-    err := cmd.Run()
+	err := cmd.Run()
 
 	elapsedTime := time.Since(startTime)
-	
+
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			if waitStatus, ok := exitErr.Sys().(syscall.WaitStatus); ok {
@@ -92,8 +94,8 @@ func ScanAndSaveCVEs(assetID string, sbomFilePath string) {
 		}
 	}
 
-    //mt.Println(string(output))
-    fmt.Printf("Command executed in %s\n", elapsedTime)
+	//mt.Println(string(output))
+	fmt.Printf("Command executed in %s\n", elapsedTime)
 
 	// Read the scan results
 	fileBytes, err := os.ReadFile(outputFilePath)
@@ -124,7 +126,6 @@ func ScanAndSaveCVEs(assetID string, sbomFilePath string) {
 		log.Printf("Failed to save CVE data: %v", err)
 	}
 }
-
 
 func SaveCycloneDX(db DatabaseHelper, sbomData []byte, assetID string) error {
 	doc := CycloneDXDocument{

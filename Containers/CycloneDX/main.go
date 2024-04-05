@@ -33,7 +33,13 @@ func uploadCycloneDX(c *gin.Context) {
 		return
 	}
 
-	var dst string
+	var dst string = "./" + file.Filename
+	if err := c.SaveUploadedFile(file, dst); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to save the file",
+		})
+		return
+	}
 
 	var sbomData []byte
 	if file.Header.Get("Content-Type") == "text/xml" {
@@ -55,7 +61,7 @@ func uploadCycloneDX(c *gin.Context) {
 			})
 			return
 		}
-		
+
 		//defer os.Remove(dst) // Remove the temporary file after conversion
 
 		cmd := exec.Command("cyclonedx", "convert", "--input-format", "xml", "--input-file", dst, "--output-format", "json")
@@ -108,7 +114,7 @@ func uploadCycloneDX(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	dbcon.ScanAndSaveCVEs(assetID, dst)
 
 	// Respond to the client
