@@ -42,9 +42,9 @@ export default function DashboardSettings() {
         toolsObject.forEach(item => {
             counts[item] = 0
         })
-        array.forEach(item => {
-            counts[item] += 1;
-        })
+        array.forEach((item, index) => {
+            counts[item] = index;
+        });
 
         return counts;
     }
