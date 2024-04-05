@@ -218,7 +218,7 @@ export const GetCDXfiles = async (assetID) => {
         const response = await fetch('http://localhost:8082/getCycloneDXFile?assetID=' + assetID);
         const return_data = await response.json();
         // console.log('http://localhost:8082/getCycloneDXFile?assetID=' + assetID)
-        // console.log(return_data);
+        // console.log("Return data:", return_data);
         return return_data;
     } catch (err) {
         console.error(err);

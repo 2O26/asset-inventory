@@ -5,11 +5,10 @@ import './CycloneDX.css'
 import { CycloneDXIcon } from '../common/Icons/Icons';
 import Modal from 'react-modal';
 import { GetCDXfiles } from '../Services/ApiService';
+import { JSONTree } from 'react-json-tree';
 
 export default function CycloneDX({ assetID }) {
-    // const data = { "File1": { "data": "wassa" }, "File2": { "data": "yolo" } }
-
-    //OBS!! ändra så att data är det som hämtas från useQuery ist!!!!!
+    const [selectedView, setSelectedView] = useState('FullFile');
 
     const { data: cycloneData, isLoading: loadingCyclone, isError: isErrorCyclone, error: cycloneError, refetch: refetchCyclone } = useQuery({
         queryKey: ['getCDXfiles', assetID],
@@ -20,11 +19,17 @@ export default function CycloneDX({ assetID }) {
     const [fileFocus, setFileFocus] = useState('');
     const [open, setOpen] = useState(false);
 
-    const handleClick = (key) => {
-        setFileFocus(key)
-        console.log("fliel:", fileFocus, " : ", cycloneData[key])
+    const handleClick = (cycloneData) => {
+        setFileFocus(cycloneData)
+        console.log("file:", fileFocus)
+        console.log(cycloneData);
         setOpen(true)
     }
+
+    const handleButtonClick = (view) => {
+        setSelectedView(view);
+    }
+
     return (
         <div className='asset-info-container' >
             <CycloneDXuploader assetID={assetID} />
@@ -33,14 +38,10 @@ export default function CycloneDX({ assetID }) {
                 <div >
                     <h3>Files</h3>
                     <div className='cxdFileList'>
-                        {Object.entries(cycloneData).map(([key, value], index) => (
-                            // <div className='cdxFile' key={index} onClick={() => { setOpen(true), setFileFocus(key) }}>
-                            <div className='cdxFile' key={index} onClick={() => handleClick(key)}>
-                                <CycloneDXIcon />
-                                <div className='cdxFileTest'>{key}</div>
-                                {/* <div>{key}</div> */}
-                            </div>
-                        ))}
+                        <div className='cdxFile' onClick={() => handleClick(cycloneData)}>
+                            <CycloneDXIcon />
+                            <div className='cdxFileTest'>Uploaded SBOM file</div>
+                        </div>
                     </div>
                 </div>
             }
@@ -55,13 +56,62 @@ export default function CycloneDX({ assetID }) {
             >
                 {fileFocus.length != 0 &&
                     <div className='CDXModal'>
-                        {fileFocus}
-                        {Object.entries(cycloneData[fileFocus]).map(([key, value], index) => (
-                            <div key={index}>
-                                {key}: {value}
-                            </div>
-                        ))}
+                        <div className="button-container">
+                            <button
+                                className={`tab-button ${selectedView === 'FullFile' ? 'active-button' : ''}`}
+                                onClick={() => handleButtonClick('FullFile')}
+                            >
+                                Full CycloneDX File
+                            </button>
+                            <button
+                                className={`tab-button ${selectedView === 'Metadata' ? 'active-button' : ''}`}
+                                onClick={() => handleButtonClick('Metadata')}
+                            >
+                                Metadata
+                            </button>
+                            <button
+                                className={`tab-button ${selectedView === 'Libraries' ? 'active-button' : ''}`}
+                                onClick={() => handleButtonClick('Libraries')}
+                            >
+                                Libraries
+                            </button>
+                            <button
+                                className={`tab-button ${selectedView === 'Frameworks' ? 'active-button' : ''}`}
+                                onClick={() => handleButtonClick('Frameworks')}
+                            >
+                                Frameworks
+                            </button>
+                            <button
+                                className={`tab-button ${selectedView === 'CycloneDx' ? 'active-button' : ''}`}
+                                onClick={() => handleButtonClick('CycloneDx')}
+                            >
+                                C-DX
+                            </button>
+                        </div>
+                        <div>
+                            {selectedView === 'FullFile' && (
+                                <div>
+                                    <JSONTree data={fileFocus} theme="greenscreen" invertTheme />
+                                </div>
+                            )
+                            }
+                            {selectedView === 'Metadata' && (
+                                <div>
+                                    <JSONTree data={fileFocus["metadata"]} theme="greenscreen" invertTheme />
+                                </div>
+                            )
+                            }
+                            {selectedView === 'Libraries' && (
+                                <div>
 
+                                </div>
+                            )
+                            }
+                            {selectedView === 'Frameworks' && (<p> third</p>)
+                            }
+                            {selectedView === 'CycloneDx' && (<p>class</p>)
+                            }
+                        </div>
                     </div>
                 }
             </Modal>
