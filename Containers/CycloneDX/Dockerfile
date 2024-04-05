@@ -93,7 +93,6 @@ COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin/linux-x64 /bin
 COPY --from=go-builder /cyclonedx /cyclonedx
 
 RUN python -m pip install cve-bin-tool
-
 RUN python -m cve_bin_tool.cli -u now -e / / --disable-data-source OSV
 
 
