@@ -1,8 +1,26 @@
 #!/bin/bash
 
 # Keycloak server URL
-# KEYCLOAK_URL="http://keycloak:8085"
-KEYCLOAK_URL="http://localhost:8085"
+KEYCLOAK_URL="http://keycloak:8085"
+
+# Initial message indicating what the script is waiting for
+echo "Waiting for the service to be ready..."
+
+# Loop indefinitely until the curl command returns a 200 status code
+while true; do
+  # Use curl to get the HTTP status code
+  STATUS_CODE=$(curl --head --silent --output /dev/null --write-out "%{http_code}" http://keycloak:8085/health)
+
+  # Check if the status code is 200
+  if [ "$STATUS_CODE" -eq 200 ]; then
+    echo "Service is up and ready."
+    break # Exit the loop if the service is ready
+  else
+    echo "Service is not ready yet, status code: $STATUS_CODE. Retrying in 5 seconds..."
+    sleep 5 # Wait for 5 seconds before retrying
+  fi
+done
+
 
 # Admin credentials
 ADMIN_USER="admin"
@@ -39,6 +57,8 @@ CREATE_CLIENT_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$KEYCLO
 # # Check if the client was created successfully
 if [ "$CREATE_CLIENT_RESPONSE" = "201" ]; then
   echo "Client successfully created."
+elif [ "$CREATE_CLIENT_RESPONSE" = "409" ]; then
+  echo "Client already created."
 else
   echo "Failed to create client, server responded with HTTP status $CREATE_CLIENT_RESPONSE."
 fi
@@ -55,6 +75,8 @@ CREATE_USER_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$KEYCLOAK
 # # Check if the user was created successfully
 if [ "$CREATE_USER_RESPONSE" = "201" ]; then
   echo "User successfully created."
+elif [ "$CREATE_USER_RESPONSE" = "409" ]; then
+  echo "User already created."
 else
   echo "Failed to create user, server responded with HTTP status $CREATE_USER_RESPONSE."
 fi
