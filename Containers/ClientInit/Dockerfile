@@ -7,8 +7,7 @@ RUN apk add --no-cache bash jq curl
 COPY init.sh .
 COPY react-client.json .
 
-# Make the script executable
-RUN chmod +x /init.sh
+RUN dos2unix init.sh
 
 # Set the correct CMD path
 CMD ["/bin/bash", "init.sh"]
