@@ -216,6 +216,43 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 	}
 	return messages, errors
 }
+func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugin) {
+	fmt.Println("##############Adding plugin data##############")
+	// Find the latest scan to update
+	db := &MongoDBHelper{Collection: GetCollection("scans")}
+	latestScan, err := getLatestScan(db)
+	if err != nil {
+		// Log and return error if it's not ErrNoDocuments
+		log.Printf("Failed to retrieve the latest scan: %v\n", err)
+		return
+	}
+
+	// Check if the plugin state already exists in the latest scan
+	existingPluginState, exists := latestScan.PluginStates[pluginState.StateID]
+	if exists {
+		// Update the existing plugin state
+		existingPluginState.State = pluginState.State
+		existingPluginState.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+		latestScan.PluginStates[pluginState.StateID] = existingPluginState
+	} else {
+		// Add the new plugin state
+		pluginState.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+		pluginState.DateUpdated = pluginState.DateCreated
+		latestScan.PluginStates[pluginState.StateID] = pluginState
+	}
+
+	// Add the new plugin
+	latestScan.Plugins[pluginState.StateID] = plugin
+
+	// Update the latest scan with the new/updated plugin data
+	update := bson.M{"$set": bson.M{"pluginStates": latestScan.PluginStates, "plugins": latestScan.Plugins}}
+	_, err = db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+	if err != nil {
+		log.Printf("Failed to add/update plugin data: %v\n", err)
+	} else {
+		log.Printf("Plugin data added/updated successfully to the latest scan.\n")
+	}
+}
 
 // func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugin) {
 // 	fmt.Println("##############Adding plugin data##############")
