@@ -28,6 +28,7 @@ ENV KEYCLOAK_ADMIN_PASSWORD=admin
 # Copy custom themes or extensions if you have any
 # For example, to add a custom theme:
 # COPY ./themes/mytheme /opt/jboss/keycloak/themes/mytheme
+COPY ./themes/custom /opt/keycloak/themes/custom
 
 # If you have custom providers or CLI scripts, you can copy them as well
 # COPY ./providers/* /opt/jboss/keycloak/standalone/deployments/
