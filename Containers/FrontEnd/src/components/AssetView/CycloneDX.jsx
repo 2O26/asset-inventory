@@ -9,6 +9,8 @@ import { JSONTree } from 'react-json-tree';
 import { CDXMetadata } from './CDXtabs/CDXMetadata';
 import { CDXLibraries } from './CDXtabs/CDXLibraries';
 import { CDXFramework } from './CDXtabs/CDXFramework';
+import { CDXCVE } from './CDXtabs/CDXCVE';
+
 
 const theme = {
     base00: 'var(--base-00)',
@@ -131,7 +133,8 @@ export default function CycloneDX({ assetID }) {
                             </div>
                             )}
                             {selectedView === 'VulnerbleComponents' && (
-                                <p>Here we will list vulnerble components, e.g, libraries and framworks. Sort by criticality.</p>
+
+                                <CDXCVE id={assetID} />
                             )}
                         </div>
                     </div>

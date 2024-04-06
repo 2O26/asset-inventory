@@ -206,7 +206,8 @@ export const GetUserSettings = async () => {
                 'Authorization': `Bearer ${UserService.getToken()}`
             }
         });
-        return response.json();
+        const result = await response.json()
+        return result;
     } catch (err) {
         console.error(err);
         throw new Error('Could not fetch user settings');
@@ -223,5 +224,28 @@ export const GetCDXfiles = async (assetID) => {
     } catch (err) {
         console.error(err);
         throw new Error('Could not fetch CycloneDX info');
+    }
+}
+
+export const GetVulnerbleComponents = async (assetID) => {
+    const return_data = {}
+    try {
+        const response = await fetch('http://localhost:3002/getVulnerble', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
+                'Authorization': `Bearer ${UserService.getToken()}`,
+            },
+            body: JSON.stringify({ assetID: assetID })
+        });
+        const return_data = await response.json();
+
+
+        // console.log('http://localhost:8082/getCycloneDXFile?assetID=' + assetID)
+        // console.log("Return data:", return_data);
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch CVE info');
     }
 }

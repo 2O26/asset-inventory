@@ -1,8 +1,8 @@
-.PHONY: all assInvFront assetHandler networkScan fluentd elasticsearch kibana frontendDev cypresslocal dev run down clean cypress-test environment-test frontend-dev configHandler keycloakLocal cyclonedx
+.PHONY: all assInvFront assetHandler networkScan fluentd elasticsearch kibana frontendDev cypresslocal dev run down clean cypress-test environment-test frontend-dev configHandler keycloakLocal cyclonedx, cveScanner
 
 all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypresslocal configHandler keycloakLocal cyclonedx
 
-all-dev: assetHandler networkScan frontendDev configHandler keycloakLocal cyclonedx keycloakInit
+all-dev: assetHandler networkScan frontendDev configHandler keycloakLocal cyclonedx keycloakInit cveScanner
 
 all-test: assetHandler networkScan frontendDev configHandler cypresslocal keycloakLocal cyclonedx keycloakInit
 
@@ -23,6 +23,9 @@ networkScan:
 
 configHandler:
 	docker build -t confighandler ./Containers/ConfigHandler
+
+cveScanner:
+	docker build -t cvescanner ./Containers/CVEScanner
 
 keycloakLocal:
 	docker build -t keycloak_local ./Containers/keycloak
@@ -59,4 +62,5 @@ down:
 	docker compose -f test-docker-compose.yaml down
 
 clean:
-	docker rmi --force assinvfront assethandler networkscan fluentd elasticsearch kibana confighandler frontenddev keycloakLocal keycloakInit
+	docker rmi --force assinvfront assethandler networkscan fluentd elasticsearch kibana confighandler frontenddev keycloakLocal keycloakInit cveScanner
+

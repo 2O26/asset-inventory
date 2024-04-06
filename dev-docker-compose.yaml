@@ -19,15 +19,25 @@ services:
 
   confighandler:
     image: confighandler
+    restart: always
     ports:
       - "3001:3001"
     volumes:
       - ./Containers/ConfigHandler/src:/app/src
+    depends_on:
+      - keycloak
 
   cyclonedx:
     image: cyclonedx
     ports:
       - "8082:8082"
+
+  cvescanner:
+    image: cvescanner
+    volumes:
+      - ./Containers/CVEScanner/src:/app/src
+    ports:
+      - "3002:3002"
 
   netscanstorage:
     image: mongo

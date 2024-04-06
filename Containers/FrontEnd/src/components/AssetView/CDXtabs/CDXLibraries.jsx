@@ -96,7 +96,7 @@ export const CDXLibraries = (components) => {
                 <hr />
 
                 <hr />
-                <div lassName='center-flex-column'>
+                <div className='center-flex-column'>
                     <SearchBar onSearch={setSearchTerm} />
                     {filteredAssets.map((component, index) => (
                         <div key={index}>

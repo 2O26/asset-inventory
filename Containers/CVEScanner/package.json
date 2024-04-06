@@ -1,0 +1,21 @@
+{
+    "name": "svescanner",
+    "version": "1.0.0",
+    "description": "Cve scanner. Checks if libraries have any CVE:s with score above 7.",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "nodemon src/server.js",
+        "start": "nodemon src/server.js"
+    },
+    "author": "Stressed student trying to finish project before demo",
+    "license": "NONE",
+    "dependencies": {
+        "express": "^4.18.1",
+        "socket.io": "^4.5.0",
+        "mongoose": "^6.3.3",
+        "node-cron": "^3.0.3",
+        "jsonwebtoken": "^9.0.2",
+        "jwks-rsa": "^3.1.0",
+        "node-fetch": "^3.3.2"
+    }
+}
