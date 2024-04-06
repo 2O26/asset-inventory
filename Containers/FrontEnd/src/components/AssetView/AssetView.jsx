@@ -56,6 +56,7 @@ export default function AssetView() {
 
     return (
         <div className='asset-view-container'>
+
             <GraphView selectedAsset={assetID} />
 
             <button
@@ -64,9 +65,9 @@ export default function AssetView() {
             >
                 {isExpanded ? <RightArrow /> : <LeftArrow />}
             </button>
-            <CSSTransition //This code is here to support the asset view container sliding smoothly away to the right, but it's
-                in={isExpanded && !!data.state.assets[assetID]} //disabled for now because I couldn't get it to work -Karlsson.
-                timeout={0} //Delay in milliseconds.
+            <CSSTransition
+                in={isExpanded}
+                timeout={500} // Match the duration of your CSS transition
                 classNames="slide"
                 unmountOnExit
             >

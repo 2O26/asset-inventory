@@ -24,8 +24,9 @@
 :root {
     --error-color: rgb(255, 120, 120);
     --success-color: #2FDD92;
-    /* --box-shadow: 0px -8px 15px rgba(0, 0, 0, 0.15); */
     --box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+
+
 }
 
 :root .dark {
@@ -47,13 +48,30 @@
     --button-active: #5c5c5c;
     --button-shadow: #0000007e;
 
-    /* --hr-color-1: rgba(228, 228, 228, 0);
-    --hr-color-2: rgba(228, 228, 228, 0.75); */
     --hr-color-1: rgba(228, 228, 228, 0);
     --hr-color-2: rgba(42, 138, 246, 0.75);
 
+    /* Graph View Colors */
     --graph-bg: rgb(21, 21, 21);
     --selected-node: #000000;
+
+    /* CycloneDX json colors */
+    --base-00: var(--main-color);
+    --base-01: #383830;
+    --base-02: #49483e;
+    --base-03: #f96edd;
+    --base-04: #a59f85;
+    --base-05: #f8f8f2;
+    --base-06: #f5f4f1;
+    --base-07: #f9f8f5;
+    --base-08: #f92672;
+    --base-09: #fd971f;
+    --base-0A: #f4bf75;
+    --base-0B: var(--text-color);
+    --base-0C: #a1efe4;
+    --base-0D: #4f86fc;
+    --base-0E: #ae81ff;
+    --base-0F: #cc6633;
 }
 
 /* Blue Light Theme */
@@ -79,6 +97,25 @@
     --hr-color-1: rgba(0, 0, 0, 0);
     --hr-color-2: rgba(64, 83, 251, 0.75);
 
+    /* Graph View Colors */
     --graph-bg: rgb(222, 222, 222);
     --selected-node: #b3c9fd;
+
+    /* CycloneDX json colors */
+    --base-00: var(--main-color);
+    --base-01: #383830;
+    --base-02: #49483e;
+    --base-03: #f96edd;
+    --base-04: #a59f85;
+    --base-05: #f8f8f2;
+    --base-06: #f5f4f1;
+    --base-07: #f9f8f5;
+    --base-08: #f92672;
+    --base-09: #fd971f;
+    --base-0A: #f4bf75;
+    --base-0B: var(--text-color);
+    --base-0C: #a1efe4;
+    --base-0D: #4f86fc;
+    --base-0E: #ae81ff;
+    --base-0F: #cc6633;
 }
