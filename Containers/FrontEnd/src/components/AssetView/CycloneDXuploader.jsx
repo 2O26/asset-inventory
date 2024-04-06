@@ -1,15 +1,19 @@
 import React from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { UploadCycloneDX } from '../Services/ApiService';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 import { FileUploader } from 'react-drag-drop-files';
 import './CycloneDXuploader.css';
 
 export const CycloneDXuploader = ({ assetID }) => {
+
+    const queryClient = useQueryClient();
+
     const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
         mutationFn: UploadCycloneDX,
         onSuccess: (data) => {
             console.log(data);
+            queryClient.invalidateQueries(['getCDXfiles']);
         },
         onError: (error) => {
             console.error("Upload CycloneDX error: ", error);
