@@ -1,0 +1,106 @@
+/* .login-pf {
+} */
+
+.login-pf body {
+    background: url(../img/backround.webp);
+
+    --button-color: #4a7dff;
+    --button-text: #ffffff;
+    --button-text-hover: #000000;
+    --button-hover: #6993fe;
+    --button-active: #5c5c5c;
+    --button-shadow: #5c5c5c6a;
+}
+
+#kc-header-wrapper {
+    text-wrap: nowrap;
+    text-transform: none !important;
+}
+
+.kc-logo-text {
+    background-image: none !important;
+}
+
+.kc-logo-text:before {
+    content: "Asset Inventory | Knowit";
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000000;
+    text-shadow: 0px 0px 10px #ffffff;
+    background-color: white;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.login-pf-page .card-pf {
+    border-radius: 0.25rem;
+    background-color: #ffffff;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card-pf {
+    border-top: none;
+}
+
+#kc-form-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem
+}
+
+.btn-group-lg .btn,
+.btn-lg {
+    border-radius: 0.5rem;
+}
+
+.btn-group-lg .btn,
+.btn-lg {
+    width: fit-content !important;
+    padding: 0 2rem;
+    height: 45px;
+    font-family: inherit;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    font-weight: 600;
+    color: var(--button-text) !important;
+    background-color: var(--button-color) !important;
+    border: none;
+    border-radius: 2rem;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    cursor: pointer;
+    outline: none;
+    width: fit-content;
+}
+
+.btn-group-lg .btn:hover:enabled,
+.btn-lg:hover:enabled {
+    background-color: var(--button-hover) !important;
+    box-shadow: 0px 15px 20px var(--button-shadow);
+    color: var(--button-text-hover) !important;
+    transform: translateY(-7px);
+}
+
+.btn-group-lg .btn:focus:enabled,
+.btn-lg:focus:enabled {
+    background-color: var(--button-hover);
+    box-shadow: 0px 15px 20px var(--button-shadow);
+    color: var(--button-text-hover) !important;
+    transform: translateY(-7px);
+}
+
+.btn-group-lg .btn:active:enabled,
+.btn-lg:active:enabled {
+    background-color: var(--button-active);
+}
+
+.btn-group-lg .btn:disabled,
+.btn-lg:disabled {
+    background-color: #cecece;
+    cursor: unset;
+}
