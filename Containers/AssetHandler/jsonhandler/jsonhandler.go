@@ -78,8 +78,19 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 
 	out.Relations = in.Relations
 	copyAssets(in.Assets, outAssets) //written by Gemini
+	// Check if the pluginList is already populated
 	for pluginName, _ := range in.Plugins {
-		out.PluginList = append(out.PluginList, pluginName)
+		found := false
+		for _, existingPlugin := range out.PluginList {
+			if pluginName == existingPlugin {
+				found = true
+				break
+			}
+		}
+		// If not found, add the plugin to the list
+		if !found {
+			out.PluginList = append(out.PluginList, pluginName)
+		}
 	}
 	if plugins != nil {
 		//need to unmarshal all pluginStates
@@ -96,24 +107,24 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 
 			pluginStates[key] = temp
 		}
-		// for pluginStateID, pluginState := range in.PluginStates {
-		// 	for ipv4Addr, pluginAssetData := range pluginState.State {
-		// 		for assetID, frontAsset := range outAssets {
-		// 			if frontAsset.Hostname == ipv4Addr {
-		// 				if frontAsset.Plugins == nil {
-		// 					frontAsset.Plugins = make(map[string]any)
-		// 				}
-		// 				frontAsset.Plugins[pluginStateID] = pluginAssetData
-		// 				outAssets[assetID] = frontAsset
-		// 				break
-		// 			}
-		// 		}
-		// 	}
-		// }
 		//All pluginStates have been unmarshalled, can now copy
 		insertPluginData(outAssets, pluginStates)
 	}
-
+	// Copy pluginStates to output
+	for pluginStateID, pluginState := range in.PluginStates {
+		for asset, pluginAssetData := range pluginState.State {
+			for assetID, frontAsset := range outAssets {
+				// If the asset matches the plugin asset, add the plugin data
+				if assetID == asset {
+					if frontAsset.Plugins == nil {
+						frontAsset.Plugins = make(map[string]any)
+					}
+					frontAsset.Plugins[pluginStateID] = pluginAssetData
+					outAssets[assetID] = frontAsset
+				}
+			}
+		}
+	}
 	out.Assets = outAssets //need to put output in out.assets as indices can't be modified
 
 	toPrint, err := json.Marshal(out)

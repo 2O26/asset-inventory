@@ -255,7 +255,7 @@ func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugi
 }
 
 // addAssets adds form network scan
-func AddAssets(req AssetRequest) string {
+func AddAssets(req AssetRequest, assetIDS []string) string {
 	// Find the latest scan to update
 	db := &MongoDBHelper{Collection: GetCollection("scans")}
 	latestScan, err := getLatestScan(db)
@@ -264,11 +264,11 @@ func AddAssets(req AssetRequest) string {
 		log.Printf("Failed to retrieve the latest scan: %v\n", err)
 		return "Failed to retrieve the latest scan: " + err.Error()
 	}
+	newAssetIDS := []string{}
 	// Check if there are new assets to add
 	if len(req.AddAsset) > 0 {
-		fmt.Println("AddAsset: ", req.AddAsset)
 		var newAssets []jsonhandler.Asset
-		for _, newAsset := range req.AddAsset {
+		for i, newAsset := range req.AddAsset {
 			// Check if an asset with the same hostname already exists
 			exists := false
 			for _, existingAsset := range latestScan.Assets {
@@ -280,14 +280,15 @@ func AddAssets(req AssetRequest) string {
 			}
 			if !exists {
 				newAssets = append(newAssets, newAsset)
+				newAssetIDS = append(newAssetIDS, assetIDS[i])
 			}
 		}
 		if len(newAssets) > 0 {
-			for _, newAsset := range newAssets {
-				newAssetID := primitive.NewObjectID().Hex()
+			for i, newAsset := range newAssets {
+				// newAssetID := primitive.NewObjectID().Hex()
 				newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 				newAsset.DateUpdated = newAsset.DateCreated
-				latestScan.Assets[newAssetID] = newAsset
+				latestScan.Assets[newAssetIDS[i]] = newAsset
 			}
 
 			// Update the latest scan with the new assets
