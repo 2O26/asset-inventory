@@ -27,7 +27,6 @@ type networkResponse struct {
 }
 
 type networkAsset struct {
-	UID       string `bson:"uid" json:"uid"`
 	Status    string `bson:"status" json:"status"`
 	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
 	Subnet    string `bson:"subnet" json:"subnet"`
@@ -157,6 +156,10 @@ func getNetworkScan() {
 		log.Fatal(err)
 	}
 	addAsset := []jsonhandler.Asset{}
+	var assetIDs []string
+	for k := range netassets.State {
+		assetIDs = append(assetIDs, k)
+	}
 	// Iterate over the State map and print UID values'
 	for _, stateEntry := range netassets.State {
 		asset := jsonhandler.Asset{
@@ -173,7 +176,7 @@ func getNetworkScan() {
 		AddAsset: addAsset,
 	}
 	fmt.Println("Request: ", request)
-	dbcon.AddAssets(request)
+	dbcon.AddAssets(request, assetIDs)
 	pluginState := jsonhandler.PluginState{
 		StateID:     "netassets.StateID",
 		DateCreated: netassets.DateCreated,
