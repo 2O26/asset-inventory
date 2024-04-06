@@ -17,7 +17,8 @@
     "react-transition-group": "^4.4.5",
     "reactflow": "^11.10.4",
     "web-vitals": "^3.5.2",
-    "react-json-tree": "^0.18.0"
+    "react-json-tree": "^0.18.0",
+    "prop-types": "^15.8.1"
   },
   "scripts": {
     "start": "react-scripts -r @cypress/instrument-cra start",

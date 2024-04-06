@@ -63,6 +63,7 @@ export default function DashboardSettings() {
 
     const handleSave = () => {
         mutate({ update: { "leftDash": sortDictByValues(leftLst), "rightDash": sortDictByValues(rightLst) } });
+        setShowButtons(false)
     }
 
     const resetInput = () => {
@@ -70,6 +71,7 @@ export default function DashboardSettings() {
             setRightLst(countToolObjectOccurances(userSettingData.userSettings[0].rightDash, Object.keys(toolsObject)));
             setLeftLst(countToolObjectOccurances(userSettingData.userSettings[0].leftDash, Object.keys(toolsObject)));
         }
+        setShowButtons(false)
     }
 
     useEffect(() => {
@@ -80,7 +82,7 @@ export default function DashboardSettings() {
     }, [userSettingData])
 
     return (
-        <div className='center-flex-column '>
+        <div className='center-flex-column'>
             <div className='dashboard-settings-container'>
                 <div className='pligin-dasb-lst'>
                     <h3> Left Side 4:1</h3>
@@ -114,13 +116,20 @@ export default function DashboardSettings() {
                     ))}
                 </div>
             </div>
-            {isPending && <LoadingSpinner />}
-            {isError && <div className='errorMessage'>{error.message}</div>}
-            <div className='standard-button-container'>
-                <button className="standard-button" disabled={isPending} onClick={() => handleSave()}>Save</button>
-                <button className="standard-button" disabled={isPending} onClick={() => resetInput()} >Reset</button>
+            <div className='conifg-description'>
+                <p>0: will not show</p>
+                <p>1+: will display in decending order</p>
 
             </div>
+            {isPending && <LoadingSpinner />}
+            {isError && <div className='errorMessage'>{error.message}</div>}
+            {showButtons &&
+                <div className='standard-button-container'>
+                    <button className="standard-button" disabled={isPending} onClick={() => handleSave()}>Save</button>
+                    <button className="standard-button" disabled={isPending} onClick={() => resetInput()} >Reset</button>
+
+                </div>
+            }
         </div>
     );
 }

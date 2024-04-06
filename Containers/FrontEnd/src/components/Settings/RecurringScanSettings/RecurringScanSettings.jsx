@@ -143,9 +143,9 @@ export default function RecurringScanSettings() {
 
     return (
         <div className='reoccurringkScan-container'>
-            <h2>
+            {/* <h2>
                 Cron Settings
-            </h2>
+            </h2> */}
             <div>
                 <p className="settingsText"> Current recurring scans:</p>
                 {(isLoadingRecurring || isPendingMutAdd || isPendingMutRm) && <LoadingSpinner />}
