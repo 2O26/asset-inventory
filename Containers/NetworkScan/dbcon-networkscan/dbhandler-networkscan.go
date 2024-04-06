@@ -2,6 +2,7 @@ package dbcon_networkscan
 
 import (
 	"context"
+
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -41,6 +42,7 @@ func (m *MongoDBHelper) UpdateOne(ctx context.Context, filter interface{}, updat
 func (m *MongoDBHelper) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
 	return m.Collection.DeleteOne(ctx, filter)
 }
+
 func (m *MongoDBHelper) Find(ctx context.Context, filter interface{}) ([]bson.M, error) {
 	var results []bson.M
 	cur, err := m.Collection.Find(ctx, filter)

@@ -86,11 +86,7 @@ func GetCollection(collectionName string) *mongo.Collection {
 	return client.Database(dbName).Collection(collectionName)
 }
 
-func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
-	if previousScan == nil {
-		return currentScan
-	}
-
+func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 	updatedScan := Scan{
 		StateID:     currentScan.StateID,
 		DateCreated: currentScan.DateCreated,
@@ -99,30 +95,39 @@ func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
 	}
 
 	// Loop through assets in the current scan
-	for _, asset := range currentScan.State {
-		// Check if the IP address exists in the previous scan
-		if prevAsset, ok := previousScan.State[asset.IPv4Addr]; ok {
-			// IP address exists in the previous scan
-			if prevAsset.Status != asset.Status {
+	for assetID, asset := range currentScan.State {
+		found := false
+		for _, prevAsset := range previousScan.State {
+			// Check if the IP address exists in the previous scan
+			if prevAsset.IPv4Addr == asset.IPv4Addr {
+				found = true
 				// Status has changed, update the asset
-				asset.Status = "up"
-				updatedScan.State[asset.IPv4Addr] = asset
-			} else {
-				// Status has not changed, keep the previous asset
-				updatedScan.State[asset.IPv4Addr] = asset
+				if prevAsset.Status != asset.Status {
+					asset.Status = "up"
+				}
+				updatedScan.State[assetID] = asset
+				break
 			}
-		} else {
+		}
+		if !found {
 			// New IP address, add the asset
-			updatedScan.State[asset.IPv4Addr] = asset
+			updatedScan.State[assetID] = asset
 		}
 	}
 
 	// Loop through assets in the previous scan
-	for _, prevAsset := range previousScan.State {
-		if _, ok := updatedScan.State[prevAsset.IPv4Addr]; !ok {
+	for assetID, prevAsset := range previousScan.State {
+		found := false
+		for _, asset := range currentScan.State {
+			if prevAsset.IPv4Addr == asset.IPv4Addr {
+				found = true
+				break
+			}
+		}
+		if !found {
 			// IP address does not exist in the current scan, add the previous asset with status "down"
 			prevAsset.Status = "down"
-			updatedScan.State[prevAsset.IPv4Addr] = prevAsset
+			updatedScan.State[assetID] = prevAsset
 		}
 	}
 
@@ -130,7 +135,7 @@ func compareScanStates(currentScan Scan, previousScan *Scan) Scan {
 }
 
 func AddScan(db DatabaseHelper, scan Scan) {
-	var previousScan *Scan
+	var previousScan Scan
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -250,49 +255,49 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 // 		},
 // 	}
 
-// 	scan2 := Scan{
-// 		StateID:     "",
-// 		DateCreated: "2024-04-03 17:28:24",
-// 		DateUpdated: "2024-04-03 19:36:34",
-// 		State: map[string]Asset{
-// 			"3403275042825": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.1",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3816296546313": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.102",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3823024209929": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.118",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3816296526313": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.100",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3823024209924": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.216",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3823024201924": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.125",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
+// scan2 := Scan{
+// 	StateID:     "",
+// 	DateCreated: "2024-04-03 17:28:24",
+// 	DateUpdated: "2024-04-03 19:36:34",
+// 	State: map[string]Asset{
+// 		"3403275042825": {
+// 			Status:    "up",
+// 			IPv4Addr:  "192.168.39.1",
+// 			Subnet:    "192.168.39.0/24",
+// 			OpenPorts: []int{},
 // 		},
-// 	}
+// 		"3816296546313": {
+// 			Status:    "up",
+// 			IPv4Addr:  "192.168.39.102",
+// 			Subnet:    "192.168.39.0/24",
+// 			OpenPorts: []int{},
+// 		},
+// 		"3823024209929": {
+// 			Status:    "up",
+// 			IPv4Addr:  "192.168.39.118",
+// 			Subnet:    "192.168.39.0/24",
+// 			OpenPorts: []int{},
+// 		},
+// 		"3816296526313": {
+// 			Status:    "up",
+// 			IPv4Addr:  "192.168.39.100",
+// 			Subnet:    "192.168.39.0/24",
+// 			OpenPorts: []int{},
+// 		},
+// 		"3823024209924": {
+// 			Status:    "up",
+// 			IPv4Addr:  "192.168.39.216",
+// 			Subnet:    "192.168.39.0/24",
+// 			OpenPorts: []int{},
+// 		},
+// 		"3823024201924": {
+// 			Status:    "up",
+// 			IPv4Addr:  "192.168.39.125",
+// 			Subnet:    "192.168.39.0/24",
+// 			OpenPorts: []int{},
+// 		},
+// 	},
+// }
 // 	db := &MongoDBHelper{Collection: GetCollection("scans")}
 // 	AddScan(db, scan1)
 // 	time.Sleep(2 * time.Second)
