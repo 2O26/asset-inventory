@@ -42,3 +42,46 @@
     text-align: left;
     /* margin-left: 1rem; */
 }
+
+
+/* Searchbar */
+
+.SearchBar {
+    margin: 2rem 0;
+    width: 500px;
+    height: 60px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: var(--main-color);
+    border: 1px solid var(--text-color);
+    /* Changed border to a solid color */
+    border-radius: 30px;
+    display: flex;
+    /* Added */
+    align-items: center;
+    /* Added */
+}
+
+.searchIconWrapper {
+    margin-right: -5px;
+    /* Added margin for spacing between icon and text */
+    color: var(--text-color);
+}
+
+.inputWrapper {
+    flex: 1;
+    /* Added */
+}
+
+.inputWrapper input {
+    width: calc(100% - 40px);
+    /* Adjusted width to accommodate icon and margin */
+    outline: none;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+}
+
+.SearchBar:hover {
+    backdrop-filter: brightness(85%);
+}
