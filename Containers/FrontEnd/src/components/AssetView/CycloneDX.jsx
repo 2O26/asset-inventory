@@ -6,6 +6,9 @@ import { CycloneDXIcon } from '../common/Icons/Icons';
 import Modal from 'react-modal';
 import { GetCDXfiles } from '../Services/ApiService';
 import { JSONTree } from 'react-json-tree';
+import { CDXMetadata } from './CDXtabs/CDXMetadata';
+import { CDXLibraries } from './CDXtabs/CDXLibraries';
+import { CDXFramework } from './CDXtabs/CDXFramework';
 
 const theme = {
     base00: 'var(--base-00)',
@@ -86,25 +89,25 @@ export default function CycloneDX({ assetID }) {
                                 className={`tab-button ${selectedView === 'Metadata' ? 'active-button' : ''}`}
                                 onClick={() => handleButtonClick('Metadata')}
                             >
-                                Metadata
+                                Metadata about software
                             </button>
                             <button
                                 className={`tab-button ${selectedView === 'Libraries' ? 'active-button' : ''}`}
                                 onClick={() => handleButtonClick('Libraries')}
                             >
-                                Libraries
+                                External Libraries Used
                             </button>
                             <button
                                 className={`tab-button ${selectedView === 'Frameworks' ? 'active-button' : ''}`}
                                 onClick={() => handleButtonClick('Frameworks')}
                             >
-                                Frameworks
+                                External Frameworks Used
                             </button>
                             <button
-                                className={`tab-button ${selectedView === 'CycloneDx' ? 'active-button' : ''}`}
-                                onClick={() => handleButtonClick('CycloneDx')}
+                                className={`tab-button ${selectedView === 'VulnerbleComponents' ? 'active-button' : ''}`}
+                                onClick={() => handleButtonClick('VulnerbleComponents')}
                             >
-                                C-DX
+                                Vulnerble Components
                             </button>
                         </div>
                         <div className='json-container'>
@@ -112,24 +115,24 @@ export default function CycloneDX({ assetID }) {
                                 <div>
                                     <JSONTree data={fileFocus} theme={theme} hideRoot />
                                 </div>
-                            )
-                            }
+                            )}
                             {selectedView === 'Metadata' && (
                                 <div>
-                                    <JSONTree data={fileFocus["metadata"]} theme={theme} />
+                                    <CDXMetadata data={fileFocus["metadata"]} />
                                 </div>
-                            )
-                            }
+                            )}
                             {selectedView === 'Libraries' && (
                                 <div>
-
+                                    <CDXLibraries data={fileFocus.components} />
                                 </div>
-                            )
-                            }
-                            {selectedView === 'Frameworks' && (<p> third</p>)
-                            }
-                            {selectedView === 'CycloneDx' && (<p>class</p>)
-                            }
+                            )}
+                            {selectedView === 'Frameworks' && (<div>
+                                <CDXFramework data={fileFocus.components} />
+                            </div>
+                            )}
+                            {selectedView === 'VulnerbleComponents' && (
+                                <p>Here we will list vulnerble components, e.g, libraries and framworks. Sort by criticality.</p>
+                            )}
                         </div>
                     </div>
                 }

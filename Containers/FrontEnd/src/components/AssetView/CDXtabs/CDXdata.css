@@ -1,0 +1,44 @@
+.settings-header {
+    position: relative;
+    z-index: 1;
+    border-radius: 0.5rem;
+    box-shadow: var(--box-shadow);
+    color: var(--text-color);
+    background-color: var(--main-color);
+    width: 50vw;
+    padding: 1rem;
+}
+
+
+.settings-container {
+    z-index: 0;
+    border-radius: 0.5rem;
+    box-shadow: var(--box-shadow);
+    width: 50vw;
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    flex-direction: column;
+    text-align: left;
+    background-color: var(--secondary-color);
+    background-color: var(--main-color);
+    padding: 3rem 1rem 1rem 1rem;
+    margin-top: -2rem;
+
+}
+
+.settings-header.show-content {
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.settingsText {
+    display: flex;
+    flex-direction: row;
+    align-items: left;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--text-color);
+    margin: 0.5rem 0rem 0.5rem 0rem;
+    text-align: left;
+    /* margin-left: 1rem; */
+}
