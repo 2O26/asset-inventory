@@ -106,9 +106,9 @@ export default function SetNetworkScanSettings() {
 
     return (
         <div>
-            <div className='networkScanTitleConfig'>
+            {/* <div className='networkScanTitleConfig'>
                 <h2 > Network Scan Settings</h2>
-            </div>
+            </div> */}
             <div className=''>
                 <div>
                     <p className='settingsText'> Current IP ranges:</p>
