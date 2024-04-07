@@ -268,7 +268,6 @@ func AddAssets(req AssetRequest) string {
 			return "No new assets to add, all assets already exist"
 		}
 	}
-
 	return "No new assets to add"
 }
 
