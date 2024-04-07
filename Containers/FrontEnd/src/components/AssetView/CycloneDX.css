@@ -39,6 +39,7 @@
     /* background-color: var(--accent-color); */
     background-color: none;
     border-radius: 0.5rem;
+    color: var(--text-color);
     /* overflow: scroll; */
 }
 
@@ -65,7 +66,7 @@
     height: 100%;
     position: relative;
     z-index: 4;
-    border-radius: 0 0.5rem 0.5rem 0.5rem;
+    border-radius: 0 0rem 0.5rem 0.5rem;
     overflow: scroll;
     border: none;
 }
