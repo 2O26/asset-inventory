@@ -18,7 +18,8 @@
     "reactflow": "^11.10.4",
     "web-vitals": "^3.5.2",
     "react-json-tree": "^0.18.0",
-    "prop-types": "^15.8.1"
+    "prop-types": "^15.8.1",
+    "pdfmake": "^0.2.10"
   },
   "scripts": {
     "start": "react-scripts -r @cypress/instrument-cra start",
