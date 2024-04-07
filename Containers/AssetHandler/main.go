@@ -34,13 +34,6 @@ type networkAsset struct {
 	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
 }
 
-// type PluginState struct {
-// 	StateID     string         `json:"stateID"`
-// 	DateCreated string         `json:"dateCreated"`
-// 	DateUpdated string         `json:"dateUpdated"`
-// 	State       map[string]any `json:"state"`
-// }
-
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -129,6 +122,7 @@ func getLatestState(c *gin.Context) {
 		pluginStates["osscan"] = mockOSScan
 
 		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil)
+
 		if err != nil {
 			log.Println(err)
 		}
@@ -173,10 +167,12 @@ func getNetworkScan() {
 			Hostname:    stateEntry.IPv4Addr,
 		}
 		addAsset = append(addAsset, asset)
+		fmt.Println("Asset: ", asset)
 	}
 	request := dbcon.AssetRequest{
 		AddAsset: addAsset,
 	}
+	fmt.Println("Request: ", request)
 	dbcon.AddAssets(request)
 	pluginState := jsonhandler.PluginState{
 		StateID:     "netassets.StateID",
@@ -286,7 +282,7 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 			},
 		},
 		PluginStates: map[string]jsonhandler.PluginState{
-			"20240214-1300A": {
+			"IPscan": {
 				StateID:     "20240214-1300A",
 				DateCreated: "2024-02-14 13:00:00",
 				DateUpdated: "2024-02-14 13:30:00",
