@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './CDXdata.css';
+import { JSONTree } from 'react-json-tree';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { GetVulnerbleComponents } from '../../Services/ApiService';
-
+import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 const theme = {
     base00: 'var(--base-00)',
     base01: 'var(--base-01)',
@@ -23,6 +24,9 @@ const theme = {
 };
 
 export const CDXCVE = (assetID) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredLibraries, setFilteredfilteredLibraries] = useState([]);
+    const [visibilityStates, setVisibilityStates] = useState({});
 
     const { data: CVEData, isLoading: loadingCVE, isError: isErrorCVE, error: CVEError, refetch: refetchCVE } = useQuery({
         queryKey: ['CVEVulnerabilities', assetID],
@@ -30,17 +34,83 @@ export const CDXCVE = (assetID) => {
         enabled: true
     });
 
+    const toggleVisibility = (section) => {
+        setVisibilityStates(prevState => ({
+            ...prevState,
+            [section]: !prevState[section]
+        }));
+    };
+
+    useEffect(() => {
+        if (CVEData) {
+
+            // const newFilteredComponents = searchTerm === '' ? components.data :
+            //     components.data.filter(component => {
+            //         // Assuming 'name' and 'description' are searchable fields.
+            //         // You can add more fields to check as needed.
+            //         return component.type === "library" &&
+            //             (component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            //                 component.description.toLowerCase().includes(searchTerm.toLowerCase()));
+            //     });
+            if (CVEData.cycloneDXvulns) {
+                setFilteredfilteredLibraries(CVEData.cycloneDXvulns.npm);
+            }
+
+        }
+    }, [CVEData, searchTerm]);
+
     function handleClick() {
-        console.log(CVEData);
-        refetchCVE();
+        console.log(CVEData.cycloneDXvulns.npm.vulnerabilities)
     }
 
+    if (loadingCVE) {
+        return (
+            <div>
+                <div>
+                    Waiting for CVE scan of SBOM libraries... This might take up to 5 min.
+                </div>
+                <LoadingSpinner />
+            </div>
+        )
+    }
+    if (isErrorCVE) {
+        return (
+            <div>
+                Error loading data: {CVEError.message}. Is the SBOM file on the correct format and with valid libraries?
+            </div>)
+    }
     return (
         <div>
             <div>
-                <h1> Hello world</h1>
+                <h3> NPM vulnerbilities</h3>
+                {filteredLibraries.vulnerabilities && (
+                    <div>
+                        {Object.keys(filteredLibraries.vulnerabilities).map((key, index) => (
+                            <div key={index}>
+                                <div
+                                    className={visibilityStates[index] ? "settings-header show-content" : "settings-header"}
+                                    onClick={() => toggleVisibility(index)}
+                                    style={{ cursor: 'pointer' }}>
+                                    {/* Assuming the 'name' property exists within the vulnerability details object */}
+                                    <strong>{filteredLibraries.vulnerabilities[key].name}</strong>
+                                    <button className='arrow-container'>
+                                        {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
+                                    </button>
+                                </div>
+                                {visibilityStates[index] && (
+                                    <div className='settings-container'>
+                                        {/* Here 'key' is used directly, as it is the unique identifier of the vulnerability */}
+                                        <p> Name: {filteredLibraries.vulnerabilities[key].name} </p>
+                                        {/* Accessing the 'severity' property from the vulnerability details object */}
+                                        <p> Severity: {filteredLibraries.vulnerabilities[key].severity} </p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 <hr />
-                <button onClick={handleClick} className='standard-button'> test </button>
             </div>
         </div>
     );

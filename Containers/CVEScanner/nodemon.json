@@ -1,0 +1,6 @@
+{
+    "ignore": [
+        "/app/npmVulnCheck/*",
+        "package.json"
+    ]
+}

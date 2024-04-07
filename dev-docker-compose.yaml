@@ -38,6 +38,8 @@ services:
       - ./Containers/CVEScanner/src:/app/src
     ports:
       - "3002:3002"
+    # env_file:
+    #   - ./Containers/CVEScanner/.env
 
   netscanstorage:
     image: mongo

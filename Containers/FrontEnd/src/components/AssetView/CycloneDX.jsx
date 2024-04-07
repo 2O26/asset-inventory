@@ -45,8 +45,6 @@ export default function CycloneDX({ assetID }) {
 
     const handleClick = (cycloneData) => {
         setFileFocus(cycloneData)
-        console.log("file:", fileFocus)
-        console.log(cycloneData);
         setOpen(true)
     }
 

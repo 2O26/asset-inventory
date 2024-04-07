@@ -78,6 +78,8 @@ export const CDXLibraries = (components) => {
                 components.data.filter(component => {
                     // Assuming 'name' and 'description' are searchable fields.
                     // You can add more fields to check as needed.
+
+                    // Search both by name or by description
                     return component.type === "library" &&
                         (component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             component.description.toLowerCase().includes(searchTerm.toLowerCase()));
