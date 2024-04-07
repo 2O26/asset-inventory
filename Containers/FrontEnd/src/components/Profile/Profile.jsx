@@ -12,7 +12,6 @@ export default function Profile() {
                 <a>First Name: {UserService.getFirstname()}</a>
                 <a>Last Name: {UserService.getLastname()}</a>
                 <a>Email: {UserService.getEmail()}</a>
-                <a>Is admin??? : {UserService.hasRole(['admin']) ? "yes" : "no"}</a>
             </div>
         </div>
     );
