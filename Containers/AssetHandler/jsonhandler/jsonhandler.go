@@ -78,7 +78,9 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 
 	out.Relations = in.Relations
 	copyAssets(in.Assets, outAssets) //written by Gemini
-
+	for pluginName, _ := range in.Plugins {
+		out.PluginList = append(out.PluginList, pluginName)
+	}
 	if plugins != nil {
 		//need to unmarshal all pluginStates
 		pluginStates := make(map[string]PluginState)
@@ -94,7 +96,20 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 
 			pluginStates[key] = temp
 		}
-
+		// for pluginStateID, pluginState := range in.PluginStates {
+		// 	for ipv4Addr, pluginAssetData := range pluginState.State {
+		// 		for assetID, frontAsset := range outAssets {
+		// 			if frontAsset.Hostname == ipv4Addr {
+		// 				if frontAsset.Plugins == nil {
+		// 					frontAsset.Plugins = make(map[string]any)
+		// 				}
+		// 				frontAsset.Plugins[pluginStateID] = pluginAssetData
+		// 				outAssets[assetID] = frontAsset
+		// 				break
+		// 			}
+		// 		}
+		// 	}
+		// }
 		//All pluginStates have been unmarshalled, can now copy
 		insertPluginData(outAssets, pluginStates)
 	}
