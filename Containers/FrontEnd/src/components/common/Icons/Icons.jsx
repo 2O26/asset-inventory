@@ -16,10 +16,10 @@ import { CiSearch } from "react-icons/ci";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
 import { MdCyclone } from "react-icons/md";
+import { BsFiletypePdf } from "react-icons/bs";
 
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
-
 
 export const CycloneDXIcon = ({ size = 30 }) => {
     return (
@@ -113,6 +113,12 @@ export const LogsIcon = ({ size = 30 }) => {
 export const GraphIcon = ({ size = 30 }) => {
     return (
         <GrGraphQl size={size} />
+    )
+}
+
+export const PDFIcon = ({ size = 30 }) => {
+    return (
+        <BsFiletypePdf size={size} />
     )
 }
 

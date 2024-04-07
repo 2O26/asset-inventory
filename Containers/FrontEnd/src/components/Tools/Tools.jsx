@@ -1,11 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Tools.css';
-import { AssetListIcon, IpScannerIcon, LogsIcon, GraphIcon } from '../common/Icons/Icons';
+import { AssetListIcon, IpScannerIcon, LogsIcon, GraphIcon, PDFIcon } from '../common/Icons/Icons';
 import { RedirectToLogServer } from './ViewLogs/ViewLogs.jsx';
 
 import AssetList from './AssetList/AssetList.jsx';
 import GraphView from './GraphView/GraphView.jsx';
+import PDFDownload from './PDFDownload/PDFDownload.jsx';
+
+import { GetState } from "../Services/ApiService";
+import { useQuery } from "@tanstack/react-query"
 
 export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = {}) => (
     {
@@ -22,6 +26,12 @@ export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = 
 
 export default function Tools() {
     const navigate = useNavigate();
+
+    const { data, isLoading, isError, error } = useQuery({
+        queryKey: ['getState'],
+        queryFn: GetState,
+        enabled: true
+    });
 
     return (
         <div className='tools-container'>
@@ -40,6 +50,10 @@ export default function Tools() {
                     <button className='button-tool' onClick={() => navigate("/tools/graph-view")}>
                         <GraphIcon size={60} />
                         <div> Graph View</div>
+                    </button>
+                    <button className='button-tool' onClick={() => PDFDownload(data.state)}>
+                        <PDFIcon size={60} />
+                        <div> Download PDF</div>
                     </button>
                 </div>
             </div>
