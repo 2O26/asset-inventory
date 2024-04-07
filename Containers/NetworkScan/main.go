@@ -21,7 +21,7 @@ import (
 var scanResultGlobal dbcon.Scan
 
 var flake, _ = sonyflake.New(sonyflake.Settings{
-	StartTime: time.Now(),
+	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
 })
 
 func printActiveIPs(scan dbcon.Scan) { // This is a tmp function
