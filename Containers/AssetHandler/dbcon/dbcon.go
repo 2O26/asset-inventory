@@ -11,6 +11,7 @@ import (
 	"unicode"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sony/sonyflake"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -80,10 +81,29 @@ func AddScan(db DatabaseHelper, c *gin.Context) {
 
 	newScan.MostRecentUpdate = time.Now()
 
+	var st = sonyflake.Settings{
+		StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
+	}
+
+	flake, err := sonyflake.New(st)
+
+	if err != nil {
+		log.Fatalf("Failed to create sonyflake generator: %v", err)
+	}
+	if flake == nil {
+		log.Fatalf("sonyflake.New unexpectedly returned nil with settings: %+v", st)
+	}
+
 	updatedAssets := make(map[string]jsonhandler.Asset)
 	for _, asset := range newScan.Assets {
-		assetID := primitive.NewObjectID().Hex() // Generate a new ID
-		updatedAssets[assetID] = asset           // Use the new ID as the key
+
+		id, err := flake.NextID()
+		if err != nil {
+			log.Fatalf("Failed to generate Sonyflake ID: %v", err)
+		}
+
+		assetID := fmt.Sprintf("%x", id) // Generate a new ID
+		updatedAssets[assetID] = asset   // Use the new ID as the key
 	}
 	newScan.Assets = updatedAssets
 
