@@ -23,7 +23,7 @@ const theme = {
     base0F: 'var(--base-0F)',
 };
 
-export const CDXCVE = (assetID) => {
+export const CDXCVE = ({ assetID }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredLibraries, setFilteredfilteredLibraries] = useState([]);
     const [visibilityStates, setVisibilityStates] = useState({});

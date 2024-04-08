@@ -119,6 +119,13 @@ services:
     depends_on:
       - keycloak
 
+  authhandler:
+    image: authhandler
+    volumes:
+      - ./Containers/AuthHandler/src:/app/src
+    depends_on:
+      - keycloak
+
 volumes:
   configstorage:
   configdbconfig:

@@ -1,7 +1,5 @@
 const express = require("express");
-const cron = require('node-cron');
-const jwt = require('jsonwebtoken');
-const jwksClient = require('jwks-rsa');
+const axios = require('axios');
 
 const { CVEcheck } = require("./CVEcheck")
 
@@ -14,47 +12,41 @@ const route = 3002;
 
 app.use(cors())
 
-const client = jwksClient({
-    jwksUri: 'http://keycloak:8085/realms/master/protocol/openid-connect/certs'
-});
-
 app.listen(route, () => { console.log("Server listening on port: ", route) });
-
-function getKey(header, callback) {
-    client.getSigningKey(header.kid, function (err, key) {
-        var signingKey = key.publicKey || key.rsaPublicKey;
-        callback(null, signingKey);
-    });
-}
 
 app.get("/status", (req, res) => {
     console.log("\n !!! Check Status !!! \n");
     res.send("Check Status");
 });
 
-app.post("/getVulnerble", async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
-    jwt.verify(token, getKey, {}, async function (err, decoded) {
-        if (err) {
-            res.status(401).send('Invalid token');
-            return;
-        }
-        const assetID = req.body.assetID;
-        try {
-            const cycloneDXresponse = await fetch('http://cyclonedx:8082/getCycloneDXFile?assetID=' + assetID.id);
-            if (cycloneDXresponse.status == 200) {
-                const cycloneDXdata = await cycloneDXresponse.json();
-                const vulnerbilities = await CVEcheck(cycloneDXdata)
-
-                res.json({ success: "success", cycloneDXvulns: vulnerbilities });
-            } else {
-                res.json({ success: "failure to fetch cyclonedx data for the asset" });
+app.post("/getVulnerable", async (req, res) => {
+    try {
+        // Authenticate the user and get their UID
+        const authResponse = await axios.get('http://authhandler:3003/getUID', {
+            headers: {
+                'Authorization': req.headers.authorization
             }
-        } catch (err) {
-            console.log(err);
-            res.json({ success: "failure" });
+        });
+
+        if (!authResponse.data.authenticated) {
+            return res.status(401).send('Invalid token');
         }
 
-    });
+        // Fetch CycloneDX file for the given asset ID
+        const assetID = req.body.assetID;
+        const cycloneDXResponse = await fetch(`http://cyclonedx:8082/getCycloneDXFile?assetID=${assetID}`);
 
+        if (cycloneDXResponse.status !== 200) {
+            return res.json({ success: false, message: "Failure to fetch CycloneDX data for the asset." });
+        }
+
+        const cycloneDXData = await cycloneDXResponse.json();
+        const vulnerabilities = await CVEcheck(cycloneDXData);
+
+        // Respond with the vulnerabilities found
+        res.json({ success: true, cycloneDXvulns: vulnerabilities });
+    } catch (error) {
+        console.error('Error while processing request:', error);
+        res.status(500).send('An error occurred while processing your request.');
+    }
 });

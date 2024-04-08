@@ -83,6 +83,11 @@ services:
     depends_on:
       - keycloak
 
+  authhandler:
+    image: authhandler
+    depends_on:
+      - keycloak
+
   ######################################################
   ###     Test Environment (nginx, postgres, cypress)   ###
   ######################################################

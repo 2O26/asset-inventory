@@ -38,8 +38,10 @@ const getTokenParsed = () => _kc.tokenParsed;
 
 const isLoggedIn = () => !!_kc.token;
 
+const tokenExpired = () => _kc.isTokenExpired();
+
 const updateToken = (successCallback) =>
-    _kc.updateToken(5)
+    _kc.updateToken(30)
         .then(successCallback)
         .catch(doLogin);
 
@@ -59,6 +61,7 @@ const UserService = {
     getToken,
     getTokenParsed,
     updateToken,
+    tokenExpired,
     getUsername,
     getFirstname,
     getLastname,

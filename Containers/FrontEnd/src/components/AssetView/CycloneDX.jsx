@@ -132,7 +132,7 @@ export default function CycloneDX({ assetID }) {
                             )}
                             {selectedView === 'VulnerbleComponents' && (
 
-                                <CDXCVE id={assetID} />
+                                <CDXCVE assetID={assetID} />
                             )}
                         </div>
                     </div>

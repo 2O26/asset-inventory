@@ -47,10 +47,6 @@ export const StartNetScan = async (scanSettings) => {
         console.error(err);
         throw new Error('Network response was not ok, could not fetch state');
     }
-    // if (!response.ok) {
-    //     throw new Error('Network response was not ok, could not fetch state');
-    // }
-    // return response.json();
 }
 
 export const GetIPranges = async () => {
@@ -71,7 +67,6 @@ export const AddIPranges = async (IPRange) => {
             body: JSON.stringify({ iprange: IPRange })
         });
         const resData = await response.json();
-        // console.log(resData);
         return resData;
     } catch (err) {
         console.error(err);
@@ -87,7 +82,6 @@ export const RmIPrange = async (IPRange) => {
             body: JSON.stringify({ iprange: IPRange })
         });
         const resData = await response.json();
-        // console.log(resData);
         return resData;
     } catch (err) {
         console.error(err);
@@ -129,7 +123,6 @@ export const RmRecurring = async (recurring) => {
             body: JSON.stringify({ recurring: recurring })
         });
         const resData = await response.json();
-        // console.log(resData);
         return resData;
     } catch (err) {
         console.error(err);
@@ -181,11 +174,17 @@ export const UploadCycloneDX = async (data) => {
 
 export const SaveUserSetting = async (data) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken()
+
         const response = await fetch('http://localhost:3001/UpdateUserConfig', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
-                'Authorization': `Bearer ${UserService.getToken()}`,
+                'Authorization': `Bearer ${authToken}`,
             },
             body: JSON.stringify(data)
         });
@@ -200,10 +199,16 @@ export const SaveUserSetting = async (data) => {
 
 export const GetUserSettings = async () => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
         const response = await fetch('http://localhost:3001/getUserConfigurations', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${UserService.getToken()}`
+                'Authorization': `Bearer ${authToken}`
             }
         });
         const result = await response.json()
@@ -218,8 +223,6 @@ export const GetCDXfiles = async (assetID) => {
     try {
         const response = await fetch('http://localhost:8082/getCycloneDXFile?assetID=' + assetID);
         const return_data = await response.json();
-        // console.log('http://localhost:8082/getCycloneDXFile?assetID=' + assetID)
-        // console.log("Return data:", return_data);
         return return_data;
     } catch (err) {
         console.error(err);
@@ -230,19 +233,24 @@ export const GetCDXfiles = async (assetID) => {
 export const GetVulnerbleComponents = async (assetID) => {
     const return_data = {}
     try {
-        const response = await fetch('http://localhost:3002/getVulnerble', {
+
+        if (UserService.tokenExpired()) {
+            UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
+        const response = await fetch('http://localhost:3002/getVulnerable', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
-                'Authorization': `Bearer ${UserService.getToken()}`,
+                'Authorization': `Bearer ${authToken}`,
             },
-            body: JSON.stringify({ assetID: assetID })
+            body: JSON.stringify({ "assetID": assetID })
         });
+
+
         const return_data = await response.json();
 
-
-        // console.log('http://localhost:8082/getCycloneDXFile?assetID=' + assetID)
-        // console.log("Return data:", return_data);
         return return_data;
     } catch (err) {
         console.error(err);

@@ -1,7 +1,6 @@
 const express = require("express");
 const cron = require('node-cron');
-const jwt = require('jsonwebtoken');
-const jwksClient = require('jwks-rsa');
+const axios = require('axios');
 
 //const cronParser = require('cron-parser');
 const Plugins = require('./Plugins.js');
@@ -20,18 +19,7 @@ const route = 3001;
 
 app.use(cors())
 
-const client = jwksClient({
-    jwksUri: 'http://keycloak:8085/realms/master/protocol/openid-connect/certs'
-});
-
 app.listen(route, () => { console.log("Server listening on port: ", route) });
-
-function getKey(header, callback) {
-    client.getSigningKey(header.kid, function (err, key) {
-        var signingKey = key.publicKey || key.rsaPublicKey;
-        callback(null, signingKey);
-    });
-}
 
 app.get("/status", (req, res) => {
     console.log("\n !!! Check Status !!! \n");
@@ -119,50 +107,79 @@ app.post("/removeRecurring", async (req, res) => {
 });
 
 app.get("/getUserConfigurations", async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
-    jwt.verify(token, getKey, {}, function (err, decoded) {
-        if (err) {
-            res.status(401).send('Invalid token');
-            return;
+    try {
+        // Retrieve user ID based on the authorization token
+        const response = await axios.get('http://authhandler:3003/getUID', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+
+        // If the user is not authenticated, respond with 401 Unauthorized
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
         }
-        // console.log(decoded.sub); // Contains user information and claims
+
+        // Initialize the UserConfigHandler to fetch user settings
         const userConfigHandler = new UserConfigHandler();
-        userConfigHandler.connect()
-            .then(() => userConfigHandler.getUserSettings(decoded.sub))
-            .then(result => {
-                if (result.length === 0) {
-                    const defaultSetting = [{ userID: decoded.sub, leftDash: ["Graph View"], rightDash: ["Asset List"], darkmode: true }];
-                    res.json({ userSettings: defaultSetting })
-                } else {
-                    res.json({ userSettings: result })
-                }
+        await userConfigHandler.connect();
+        const result = await userConfigHandler.getUserSettings(response.data.userID);
 
-            }).catch((err) => {
-                console.log('Could not fetch user settings from database. Error', err);
-            });
-    });
-
+        // Determine the response based on whether user settings were found
+        if (result.length === 0) {
+            const defaultSetting = [{
+                userID: response.data.userID,
+                leftDash: ["Graph View"],
+                rightDash: ["Asset List"],
+                darkmode: true
+            }];
+            res.json({ userSettings: defaultSetting });
+        } else {
+            res.json({ userSettings: result });
+        }
+    } catch (error) {
+        // Log the error for debugging purposes and respond with 404 Not Found
+        console.error('Error while fetching user configurations:', error);
+        res.status(404).send('Error fetching user configurations');
+    }
 });
 
-app.post("/UpdateUserConfig", async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
-    jwt.verify(token, getKey, {}, function (err, decoded) {
-        if (err) {
-            res.status(401).send('Invalid token');
-            return;
-        }
-        // console.log(decoded.sub); // Contains user information and claims
 
+app.post("/UpdateUserConfig", async (req, res) => {
+    try {
+        // Authenticate the user and get their UID
+        const response = await axios.get('http://authhandler:3003/getUID', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+
+        // Check if the user is authenticated
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+
+        // Initialize UserConfigHandler to update user settings
         const userConfigHandler = new UserConfigHandler();
-        userConfigHandler.connect()
-            .then(() => userConfigHandler.updateUserSettings(decoded.sub, req.body.update))
-            .then(() => {
-                res.json({ responseFromServer: "Succeeded to update user setting!", success: "success" });
-            })
-            .catch((err) => {
-                res.json({ responseFromServer: "Failure to update user setting due to database error.", success: "database error" });
+        await userConfigHandler.connect();
+        await userConfigHandler.updateUserSettings(response.data.userID, req.body.update);
+
+        // Respond with success message
+        res.json({ responseFromServer: "Succeeded to update user setting!", success: true });
+    } catch (error) {
+        if (error.response && error.response.status === 404) {
+            // Specific error handling for database related errors
+            res.status(404).json({
+                responseFromServer: "Failure to update user setting due to database error.",
+                success: false,
+                error: error.message
             });
-    });
+        } else {
+            // Generic error handling for other errors
+            console.error('Error while updating user configurations:', error);
+            res.status(500).send('Error updating user configurations');
+        }
+    }
 });
 
 app.get("/getOSSAPIkey", (req, res) => {
@@ -194,6 +211,7 @@ app.post("/updateOSSAPIkey", async (req, res) => {
         });
 });
 
+
 cron.schedule('* * * * *', async () => {
     /* Every minute fetch from the database and see if any matching cron jobs */
 
@@ -219,7 +237,6 @@ cron.schedule('* * * * *', async () => {
             Object.keys(IpToScanWplugin).forEach(async pluginType => {
                 if (Object.keys(IpToScanWplugin[pluginType]['IpRange']).length !== 0) {
                     try {
-                        // console.log(scanSettings);
                         const response = await fetch(
                             Plugins[pluginType], {
                             method: 'POST',

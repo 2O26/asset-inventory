@@ -15,7 +15,6 @@
         "mongoose": "^6.3.3",
         "node-cron": "^3.0.3",
         "cron-parser": "^4.9.0",
-        "jsonwebtoken": "^9.0.2",
-        "jwks-rsa": "^3.1.0"
+        "axios": "^1.6.8"
     }
 }
