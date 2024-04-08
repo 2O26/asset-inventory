@@ -1,0 +1,50 @@
+.networkScanTitleConfig {
+    display: flex;
+    justify-content: center;
+    color: var(--text-color)
+}
+
+.ip-range-config {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    gap: 2rem;
+    flex-direction: column;
+    text-align: center;
+    width: 20vw;
+}
+
+.api-input {
+    /* margin: 0.5rem 0.5rem; */
+    border: none;
+    min-width: 40rem;
+    height: 3rem;
+    font-size: 1.3rem;
+    text-indent: 1rem;
+    border-radius: 0.2rem;
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+    margin-top: 1rem;
+}
+
+.settings-container input {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.settings-container input:focus {
+    outline: none;
+}
+
+.buttonContainerNetScan {
+    display: flex;
+    justify-content: center;
+}
+
+.successText {
+    margin-top: 0.3rem;
+    color: var(--text-color);
+}

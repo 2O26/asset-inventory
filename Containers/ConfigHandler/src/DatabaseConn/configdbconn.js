@@ -5,6 +5,7 @@ const dbName = 'configurations';
 
 var IPRangeSchema = require('../Schemas/IPRangeSchema');
 var RecurringScanSchema = require('../Schemas/RecurringScanSchema');
+var OSSAPIKEYSchema = require('../Schemas/OSSAPIKEYSchema');
 
 class ConfigHandler {
     constructor() { }
@@ -63,6 +64,37 @@ class ConfigHandler {
             await RecurringScanSchema.findOneAndRemove({ plugin: recurringScan.plugin, time: recurringScan.time, IpRange: recurringScan.IpRange });
         } catch (err) {
             console.log(`Error while removing IP range:`, err.message);
+        }
+    }
+
+    async getOSSAPIkey() {
+        const apikey = await OSSAPIKEYSchema.find().exec();
+        if (apikey) {
+            return apikey[0].apikey;
+        } else {
+            return "";
+        }
+    }
+
+    async updateOSSAPIkey(oldapikey, updatedapikey) {
+        // See if setting exists
+        // if not, create settings
+        // Update setting with given OSS API key 
+        const userSettings = await OSSAPIKEYSchema.find({ apikey: oldapikey }).exec();
+
+        if (userSettings.length === 0) {
+            const newSetting = { apikey: "" };
+            const newOSSAPIkeyConfig = new OSSAPIKEYSchema(newSetting);
+            try {
+                await newOSSAPIkeyConfig.save();
+            } catch (err) {
+                console.log('Error while adding OSS API key:', err.message);
+            }
+        }
+        try {
+            const result = await OSSAPIKEYSchema.findOneAndUpdate({ apikey: updatedapikey });
+        } catch (err) {
+            console.log("Error updating OSS API key");
         }
     }
 }

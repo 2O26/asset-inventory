@@ -165,6 +165,35 @@ app.post("/UpdateUserConfig", async (req, res) => {
     });
 });
 
+app.get("/getOSSAPIkey", (req, res) => {
+    const configHandler = new ConfigHandler();
+    configHandler.connect()
+        .then(() => configHandler.getOSSAPIkey())
+        .then(result => {
+            console.log("API key", result);
+            res.json({ apikey: result })
+        }).catch((err) => {
+            console.log('Could not fetch OSS API key from database. Error', err);
+        });
+})
+
+app.post("/updateOSSAPIkey", async (req, res) => {
+    const configHandler = new ConfigHandler();
+    configHandler.connect()
+        .then(() => configHandler.getOSSAPIkey())
+        .then(oldOSSapikey => {
+            configHandler.connect()
+                .then(() => configHandler.updateOSSAPIkey(oldOSSapikey, req.body.apikey))
+                .then(() => {
+                    res.json({ responseFromServer: "Succeeded to update OSS API key!!", success: "success" });
+                }).catch((err) => {
+                    res.json({ responseFromServer: "Failure to update OSS API key!!", success: "database failure" });
+                });
+        }).catch((err) => {
+            console.log('Could not fetch OSS API key from database. Error', err);
+        });
+});
+
 cron.schedule('* * * * *', async () => {
     /* Every minute fetch from the database and see if any matching cron jobs */
 

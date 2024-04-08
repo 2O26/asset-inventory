@@ -250,9 +250,9 @@ export const GetVulnerbleComponents = async (assetID) => {
     }
 }
 
-export const AddAPIOSSkey = async (apikey) => {
+export const UpdateAPIOSSkey = async (apikey) => {
     try {
-        const response = await fetch('http://localhost:3001/addOSSAPIkey', {
+        const response = await fetch('http://localhost:3001/updateOSSAPIkey', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ apikey: apikey })
