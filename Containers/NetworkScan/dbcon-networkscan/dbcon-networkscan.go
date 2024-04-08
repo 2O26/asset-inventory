@@ -94,32 +94,13 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 		State:       make(map[string]Asset),
 	}
 
-	// Loop through assets in the current scan
-	for assetID, asset := range currentScan.State {
-		found := false
-		for oldAssetID, prevAsset := range previousScan.State {
-			// Check if the IP address exists in the previous scan
-			if prevAsset.IPv4Addr == asset.IPv4Addr {
-				found = true
-				// Status has changed, update the asset
-				if prevAsset.Status != asset.Status {
-					asset.Status = "up"
-				}
-				updatedScan.State[oldAssetID] = asset
-				break
-			}
-		}
-		if !found {
-			// New IP address, add the asset
-			updatedScan.State[assetID] = asset
-		}
-	}
-
 	// Loop through assets in the previous scan
 	for oldAssetID, prevAsset := range previousScan.State {
 		found := false
 		for _, asset := range currentScan.State {
 			if prevAsset.IPv4Addr == asset.IPv4Addr {
+				// IP address exists in the current scan, update the asset
+				updatedScan.State[oldAssetID] = asset
 				found = true
 				break
 			}
@@ -130,6 +111,27 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 			updatedScan.State[oldAssetID] = prevAsset
 		}
 	}
+
+	//// Loop through assets in the current scan
+	//for assetID, asset := range currentScan.State {
+	//	found := false
+	//	for oldAssetID, prevAsset := range updatedScan.State {
+	//		// Check if the IP address exists in the previous scan
+	//		if prevAsset.IPv4Addr == asset.IPv4Addr {
+	//			found = true
+	//			// Status has changed, update the asset
+	//			if prevAsset.Status != asset.Status {
+	//				asset.Status = "up"
+	//			}
+	//			updatedScan.State[oldAssetID] = asset
+	//			break
+	//		}
+	//	}
+	//	if !found {
+	//		// New IP address, add the asset
+	//		updatedScan.State[assetID] = asset
+	//	}
+	//}
 
 	return updatedScan
 }
