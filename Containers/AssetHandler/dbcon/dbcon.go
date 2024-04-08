@@ -96,7 +96,6 @@ func AddScan(db DatabaseHelper, c *gin.Context) {
 
 	updatedAssets := make(map[string]jsonhandler.Asset)
 	for _, asset := range newScan.Assets {
-
 		id, err := flake.NextID()
 		if err != nil {
 			log.Fatalf("Failed to generate Sonyflake ID: %v", err)
@@ -110,9 +109,15 @@ func AddScan(db DatabaseHelper, c *gin.Context) {
 	// Update relations with new IDs
 	updatedRelations := make(map[string]jsonhandler.Relation)
 	for _, relation := range newScan.Relations {
-		relationID := primitive.NewObjectID().Hex() // Generate a new ID
-		updatedRelations[relationID] = relation     // Use the new ID as the key
+		id, err := flake.NextID()
+		if err != nil {
+			log.Fatalf("Failed to generate Sonyflake ID for relation: %v", err)
+		}
+
+		relationID := fmt.Sprintf("%x", id)     // Generate a new ID for the relation
+		updatedRelations[relationID] = relation // Use the new ID as the key
 	}
+
 	newScan.Relations = updatedRelations
 	result, err := db.InsertOne(context.TODO(), newScan)
 	if err != nil {
