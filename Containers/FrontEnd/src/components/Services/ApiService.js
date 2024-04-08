@@ -249,3 +249,31 @@ export const GetVulnerbleComponents = async (assetID) => {
         throw new Error('Could not fetch CVE info');
     }
 }
+
+export const AddAPIOSSkey = async (apikey) => {
+    try {
+        const response = await fetch('http://localhost:3001/addOSSAPIkey', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ apikey: apikey })
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not add API key');
+    }
+}
+
+export const GetOSSAPIkey = async () => {
+    try {
+        const response = await fetch('http://localhost:3001/getOSSAPIkey');
+        const resData = await response.json();
+        return resData;
+
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch API key');
+    }
+}
+
