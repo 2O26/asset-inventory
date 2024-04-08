@@ -223,8 +223,6 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 			scan.State[next] = asset
 		}
 
-		// NEED TO CHECK OLD SCANS AND UPDATE THE STATUS OF THE ASSET
-
 		// Skip port scanning if CmdSelection is "simple" or the IP is down
 		if cmdSelection != "simple" && isUp {
 			// Iterate over all ports
