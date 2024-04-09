@@ -11,6 +11,7 @@ import (
 	"unicode"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sony/sonyflake"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -57,7 +58,6 @@ func isValidOwner(ownerName string) bool {
 		}
 	}
 	return true
-
 }
 
 func isValidType(assetTypes []string) bool {
@@ -81,19 +81,43 @@ func AddScan(db DatabaseHelper, c *gin.Context) {
 
 	newScan.MostRecentUpdate = time.Now()
 
+	var st = sonyflake.Settings{
+		StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
+	}
+
+	flake, err := sonyflake.New(st)
+
+	if err != nil {
+		log.Fatalf("Failed to create sonyflake generator: %v", err)
+	}
+	if flake == nil {
+		log.Fatalf("sonyflake.New unexpectedly returned nil with settings: %+v", st)
+	}
+
 	updatedAssets := make(map[string]jsonhandler.Asset)
 	for _, asset := range newScan.Assets {
-		assetID := primitive.NewObjectID().Hex() // Generate a new ID
-		updatedAssets[assetID] = asset           // Use the new ID as the key
+		id, err := flake.NextID()
+		if err != nil {
+			log.Fatalf("Failed to generate Sonyflake ID: %v", err)
+		}
+
+		assetID := fmt.Sprintf("%x", id) // Generate a new ID
+		updatedAssets[assetID] = asset   // Use the new ID as the key
 	}
 	newScan.Assets = updatedAssets
 
 	// Update relations with new IDs
 	updatedRelations := make(map[string]jsonhandler.Relation)
 	for _, relation := range newScan.Relations {
-		relationID := primitive.NewObjectID().Hex() // Generate a new ID
-		updatedRelations[relationID] = relation     // Use the new ID as the key
+		id, err := flake.NextID()
+		if err != nil {
+			log.Fatalf("Failed to generate Sonyflake ID for relation: %v", err)
+		}
+
+		relationID := fmt.Sprintf("%x", id)     // Generate a new ID for the relation
+		updatedRelations[relationID] = relation // Use the new ID as the key
 	}
+
 	newScan.Relations = updatedRelations
 	result, err := db.InsertOne(context.TODO(), newScan)
 	if err != nil {
@@ -216,6 +240,99 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 		}
 	}
 	return messages, errors
+}
+
+func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugin) {
+	fmt.Println("##############Adding plugin data##############")
+	// Find the latest scan to update
+	db := &MongoDBHelper{Collection: GetCollection("scans")}
+	latestScan, err := getLatestScan(db)
+	if err != nil {
+		// Log and return error if it's not ErrNoDocuments
+		log.Printf("Failed to retrieve the latest scan: %v\n", err)
+		return
+	}
+
+	// Check if the plugin state already exists in the latest scan
+	_, exists := latestScan.PluginStates[pluginState.StateID]
+	if exists {
+		// Update the existing plugin state
+		pluginState.DateUpdated = pluginState.DateCreated
+		latestScan.PluginStates[pluginState.StateID] = pluginState
+	} else {
+		// Add the new plugin state
+		pluginState.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+		pluginState.DateUpdated = pluginState.DateCreated
+		latestScan.PluginStates[pluginState.StateID] = pluginState
+	}
+
+	// Add the new plugin
+	latestScan.Plugins[pluginState.StateID] = plugin
+
+	// Update the latest scan with the new/updated plugin data
+	update := bson.M{"$set": bson.M{"pluginStates": latestScan.PluginStates, "plugins": latestScan.Plugins}}
+	_, err = db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+	if err != nil {
+		log.Printf("Failed to add/update plugin data: %v\n", err)
+	} else {
+		log.Printf("Plugin data added/updated successfully to the latest scan.\n")
+	}
+}
+
+// addAssets adds form network scan
+func AddAssets(req AssetRequest, assetIDS []string) string {
+	// Find the latest scan to update
+	db := &MongoDBHelper{Collection: GetCollection("scans")}
+	latestScan, err := getLatestScan(db)
+	if err != nil {
+		// Log and return error if it's not ErrNoDocuments
+		log.Printf("Failed to retrieve the latest scan: %v\n", err)
+		return "Failed to retrieve the latest scan: " + err.Error()
+	}
+	newAssetIDS := []string{}
+	// Check if there are new assets to add
+	if len(req.AddAsset) > 0 {
+		var newAssets []jsonhandler.Asset
+		for i, newAsset := range req.AddAsset {
+			// Check if an asset with the same hostname already exists
+			exists := false
+			for _, existingAsset := range latestScan.Assets {
+				if existingAsset.Hostname == newAsset.Hostname {
+					exists = true
+					log.Printf("Asset with hostname %s already exists in the latest scan.\n", newAsset.Hostname)
+					break
+				}
+			}
+			if !exists {
+				newAssets = append(newAssets, newAsset)
+				newAssetIDS = append(newAssetIDS, assetIDS[i])
+			}
+		}
+		if len(newAssets) > 0 {
+			for i, newAsset := range newAssets {
+				// newAssetID := primitive.NewObjectID().Hex()
+				newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+				newAsset.DateUpdated = newAsset.DateCreated
+				latestScan.Assets[newAssetIDS[i]] = newAsset
+			}
+
+			// Update the latest scan with the new assets
+			update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
+			_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+			if err != nil {
+				log.Printf("Failed to add new assets: %v\n", err)
+				return "Failed to add new assets: " + err.Error()
+			} else {
+				log.Printf("New assets added successfully to the latest scan.\n")
+				return "New assets added successfully to the latest scan"
+			}
+		} else {
+			log.Printf("No new assets to add, all assets already exist.\n")
+			return "No new assets to add, all assets already exist"
+		}
+	}
+
+	return "No new assets to add"
 }
 
 // updateAssets updates existing assets in the latest scan
