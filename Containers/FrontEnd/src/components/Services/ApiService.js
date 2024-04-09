@@ -59,6 +59,107 @@ export const GetIPranges = async () => {
     }
 }
 
+export const CreateRealmRole = async (IPRange) => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken()
+
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+
+        const response = await fetch("http://localhost:8085/admin/realms/master/roles", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({
+                name: IPRange,
+                description: `Has access to subnet: ${IPRange}`
+            })
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response;
+        // Handle success response
+    } catch (error) {
+        console.error('There was an error!', error);
+        throw new Error('There was an error when creating role');
+        // Handle the error
+    }
+}
+
+export const DeleteRealmRole = async (IPRange) => {
+
+    const encodedRoleName = encodeURIComponent(IPRange);
+
+    if (UserService.tokenExpired()) {
+        await UserService.updateToken()
+    }
+
+    const authToken = await UserService.getToken()
+
+    const getRoleIdByName = async () => {
+        const url = `http://localhost:8085/admin/realms/master/roles/${encodedRoleName}`;
+        // const url = `http://localhost:8085/admin/realms/master/roles/wassa`;
+
+        const requestOptions = {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
+        };
+
+        try {
+            const response = await fetch(url, requestOptions);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            return data.id;
+        } catch (error) {
+            console.error('There was an error!', error);
+            return null;
+        }
+    };
+    const deleteRoleById = async (roleId) => {
+        const url = `http://localhost:8085/admin/realms/master/roles-by-id/${roleId}`;
+
+        const requestOptions = {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
+        };
+
+        try {
+            const response = await fetch(url, requestOptions);
+            return response;
+        } catch (error) {
+            console.error('There was an error!', error);
+            // Handle the error
+        }
+    };
+
+    const roleId = await getRoleIdByName();
+    if (roleId) {
+        const response = await deleteRoleById(roleId);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response;
+    } else {
+        console.error('Role ID not found for the given role name');
+        throw new Error('Role ID not found for the given role name');
+    }
+}
+
 export const AddIPranges = async (IPRange) => {
     try {
         const response = await fetch('http://localhost:3001/addIPranges', {

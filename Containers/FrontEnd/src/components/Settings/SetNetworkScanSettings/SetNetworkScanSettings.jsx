@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import './SetNetworkScanSettings.css'
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
-import { AddIPranges, GetIPranges, RmIPrange } from '../../Services/ApiService';
+import { AddIPranges, CreateRealmRole, DeleteRealmRole, GetIPranges, RmIPrange } from '../../Services/ApiService';
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { RemoveIcon } from "../../common/Icons/Icons";
 
@@ -13,6 +13,32 @@ export default function SetNetworkScanSettings() {
     const [addIPRangeFail, setAddIPRangeFail] = useState(false);
     const [rangeFromAdd, setRangeFromAdd] = useState();
 
+    const { mutate: addRole, isSuccess: successAddRole, isError: errorAddRole } = useMutation({
+        mutationFn: CreateRealmRole, // Directly pass the LogIn function
+        onSuccess: (response) => {
+            if (response.ok) {
+                console.log("Role created!")
+            }
+        },
+        onError: (error) => {
+            // Optionally handle error state
+            console.error("Role creation error: ", error);
+        }
+    });
+
+    const { mutate: rmRole, isSuccess: successRmRole, isError: errorRmRole } = useMutation({
+        mutationFn: DeleteRealmRole, // Directly pass the LogIn function
+        onSuccess: (response) => {
+            if (response.ok) {
+                console.log("Role deleted!")
+            }
+        },
+        onError: (error) => {
+            // Optionally handle error state
+            console.error("Role deletion error: ", error);
+        }
+    });
+
     const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
         mutationFn: AddIPranges, // Directly pass the LogIn function
         onSuccess: (data) => {
@@ -21,6 +47,7 @@ export default function SetNetworkScanSettings() {
                 setRangeFromAdd(data.range); // If I want to use the data
                 setAddIPRangeFail(false);
                 setAddIPRangeSuccess(true);
+                addRole(data.range)
                 refetch();
                 // console.log("IP range added sucessfully:", data);
             } else if (data.success === "wrong format") {
@@ -47,6 +74,7 @@ export default function SetNetworkScanSettings() {
                 setRangeFromAdd(data.range); // If I want to use the data
                 setAddIPRangeFail(false);
                 setAddIPRangeSuccess(true);
+                rmRole(data.range)
                 refetch();
                 // console.log("IP range added sucessfully:", data);
             } else if (data.success === "wrong format") {
@@ -130,6 +158,18 @@ export default function SetNetworkScanSettings() {
                             </li>
                         ))}
                     </ul>
+                    {successAddRole &&
+                        <div className='successMessage'>{"Role created: " + rangeFromAdd}</div>
+                    }
+                    {errorAddRole &&
+                        <div className='errorMessage'>{"Error creating role"}</div>
+                    }
+                    {successRmRole &&
+                        <div className='successMessage'>{"Role deleted"}</div>
+                    }
+                    {errorRmRole &&
+                        <div className='errorMessage'>{"Error deleting role"}</div>
+                    }
                 </div>
                 <div>
                     {expandAddIPrange ? null : <button className='standard-button' onClick={expandIPrange}> Add IP range</button>}

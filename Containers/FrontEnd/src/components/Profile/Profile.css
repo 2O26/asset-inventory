@@ -11,3 +11,11 @@
     text-align: left;
     color: var(--text-color);
 }
+
+.access-rights {
+    margin-top: 0.2rem;
+    border-radius: 0.2rem;
+    background-color: var(--secondary-color);
+    width: fit-content;
+    padding: 0.1rem 0.3rem;
+}
