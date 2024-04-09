@@ -7,19 +7,23 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sony/sonyflake"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var client *mongo.Client
 var dbName string
+
+var flake, _ = sonyflake.New(sonyflake.Settings{
+	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
+})
 
 func SetupDatabase(uri string, databaseName string) error {
 	ctx := context.TODO()
@@ -219,10 +223,17 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 		for _, newAsset := range req.AddAsset {
 			if !(isValidName(newAsset.Name) && isValidOwner(newAsset.Owner) && isValidType(newAsset.Type)) {
 				log.Printf("Error user input contains illegal charachters!")
-				errors = append(errors, "Failed to add new assets: User input contains illegal charachters!")
+				errors = append(errors, "Failed to add new assets: User input contains illegal characters!")
 				return messages, errors
 			}
-			newAssetID := primitive.NewObjectID().Hex()
+			nextU, err := flake.NextID()
+			if err != nil {
+				log.Printf("Error generating UID: %v\n", err)
+				errors = append(errors, "Failed to add new assets: "+err.Error())
+				return messages, errors
+			}
+			next := strconv.FormatUint(nextU, 10)
+			newAssetID := next
 			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 			newAsset.DateUpdated = newAsset.DateCreated
 			latestScan.Assets[newAssetID] = newAsset
@@ -431,7 +442,14 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			}
 			// Check if the new relation already exists
 			if !existingRelations[key] {
-				newRelationID := primitive.NewObjectID().Hex()
+				nextU, err := flake.NextID()
+				if err != nil {
+					log.Printf("Error generating UID: %v\n", err)
+					errors = append(errors, "Failed to add new assets: "+err.Error())
+					return messages, errors
+				}
+				next := strconv.FormatUint(nextU, 10)
+				newRelationID := next
 				newRelation.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 				latestScan.Relations[newRelationID] = newRelation
 				existingRelations[key] = true // Update existingRelations to include this new relation
