@@ -45,7 +45,6 @@ type Change struct {
 
 var client *mongo.Client
 var dbName string
-var changes Timeline
 
 var flake, _ = sonyflake.New(sonyflake.Settings{
 	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
