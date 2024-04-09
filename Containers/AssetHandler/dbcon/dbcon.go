@@ -702,3 +702,146 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
 }
+
+func GetTimelineData(c *gin.Context) {
+	assetID := c.Query("assetID")
+
+	var filter bson.D
+	if assetID != "" {
+		// Filter for an asset if provided assetID
+		filter = bson.D{{Key: "assets.assetID", Value: assetID}}
+	} else {
+		// If no assetID is provided, fetch all
+		filter = bson.D{}
+	}
+
+	db := GetCollection("timelineDB")
+	findOptions := options.Find()
+	findOptions.SetSort(bson.D{{Key: "timestamp", Value: -1}}) // Sort by time in descending order
+
+	cursor, err := db.Find(context.TODO(), filter, findOptions)
+	if err != nil {
+		log.Printf("Failed to retrieve timeline data: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve timeline data"})
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var results []bson.M
+	for cursor.Next(context.Background()) {
+		var result bson.M
+		if err := cursor.Decode(&result); err != nil {
+			log.Printf("Failed to decode result: %v\n", err)
+			continue
+		}
+		results = append(results, result)
+	}
+
+	if err := cursor.Err(); err != nil {
+		log.Printf("Error occurred during cursor iteration: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cursor iteration error"})
+		return
+	}
+
+	// Return the results
+	c.JSON(http.StatusOK, results)
+}
+
+// func saveStateDifference(latestStateID, previousStateID string) error {
+// 	// Connect to MongoDB
+// 	// client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+// 	// if err != nil {
+// 	// 	return err
+// 	// }
+// 	// defer client.Disconnect(context.Background())
+
+// 	// Get the latest and previous state documents
+// 	assetsCollection := &MongoDBHelper{Collection: GetCollection("scans")}
+
+// 	// Use the aggregation pipeline to calculate the differences
+// 	pipeline := mongo.Pipeline{
+// 		{
+// 			"$match": bson.M{
+// 				"_id": bson.M{
+// 					"$in": []string{latestStateID, previousStateID},
+// 				},
+// 			},
+// 		},
+// 		{
+// 			"$project": bson.M{
+// 				"_id":        1,
+// 				"properties": 1,
+// 				"plugins":    1,
+// 				"relations":  1,
+// 				"pluginList": 1,
+// 				"state":      1,
+// 				"differences": bson.M{
+// 					"$cond": []interface{}{
+// 						bson.M{"$eq": "$_id", latestStateID}, // Remove the comma after the closing square bracket
+// 						bson.M{
+// 							"message": "Authentication success.",
+// 							"state": bson.M{
+// 								"mostRecentUpdate": "2024-04-06T15:32:14Z",
+// 								"assets": bson.M{
+// 									"$objectToArray": "$state.assets",
+// 								},
+// 								"relations": bson.M{
+// 									"$objectToArray": "$state.relations",
+// 								},
+// 								"pluginList": "$state.pluginList",
+// 							},
+// 						},
+// 						bson.M{
+// 							"message": "Authentication success.",
+// 							"state": bson.M{
+// 								"mostRecentUpdate": "2024-04-06T15:32:14Z",
+// 								"assets": bson.M{
+// 									"$setDifference": [
+// 										bson.M{"$objectToArray": "$state.assets"},
+// 										bson.M{"$objectToArray": "$state.assets"},
+// 									],
+// 								},
+// 								"relations": bson.M{
+// 									"$setDifference": [
+// 										bson.M{"$objectToArray": "$state.relations"},
+// 										bson.M{"$objectToArray": "$state.relations"},
+// 									],
+// 								},
+// 								"pluginList": "$state.pluginList",
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	cursor, err := assetsCollection.Aggregate(context.Background(), pipeline)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer cursor.Close(context.Background())
+
+// 	// Save the differences to the "timelinedb" collection
+// 	timelinesCollection := &MongoDBHelper{Collection: GetCollection("timelineDB")}
+// 	for cursor.Next(context.Background()) {
+// 		var result bson.M
+// 		if err := cursor.Decode(&result); err != nil {
+// 			return err
+// 		}
+
+// 		_, err := timelinesCollection.InsertOne(context.Background(), bson.M{
+// 			"timestamp": time.Now(),
+// 			"differences": result["differences"],
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	if err := cursor.Err(); err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }

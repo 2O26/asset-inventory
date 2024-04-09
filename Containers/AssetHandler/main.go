@@ -415,6 +415,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not set up database: %v", err)
 	}
+
 	timelineDB := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("timelineDB")}
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
@@ -439,6 +440,8 @@ func main() {
 		// dbcon.DeleteAllDocuments(scansHelper, c)
 		dbcon.DeleteAllDocuments(timelineDB, c)
 	})
+
+	router.GET("/GetTimelineData", dbcon.GetTimelineData)
 
 	log.Println("Server starting on port 8080...")
 	if err := router.Run(":8080"); err != nil {
