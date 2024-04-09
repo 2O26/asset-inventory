@@ -45,6 +45,7 @@ type Change struct {
 
 var client *mongo.Client
 var dbName string
+var changes Timeline
 
 var flake, _ = sonyflake.New(sonyflake.Settings{
 	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
@@ -535,7 +536,6 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			// Loop through the relations to remove and delete them from the latest scan
 			for relationID, relation := range latestScan.Relations {
 				if relation.From == assetID || relation.To == assetID {
-					relations = append(relations, relation)
 					delete(latestScan.Relations, relationID)
 					changes2[relationID] = relation
 				}
