@@ -5,9 +5,10 @@ import (
 	"assetinventory/assethandler/jsonhandler"
 	"context"
 	"fmt"
-	"github.com/sony/sonyflake"
 	"strconv"
 	"time"
+
+	"github.com/sony/sonyflake"
 
 	"encoding/json"
 	"log"
