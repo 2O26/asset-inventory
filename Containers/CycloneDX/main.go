@@ -2,6 +2,7 @@ package main
 
 import (
 	dbcon "assetinventory/cyclonedx/dbcon-cyclonedx"
+	jsonhandler "assetinventory/cyclonedx/jsonhandler"
 	"bytes"
 	"fmt"
 	"io"
@@ -107,7 +108,9 @@ func uploadCycloneDX(c *gin.Context) {
 		return
 	}
 
-	// sbomData: []uint8
+	// sbomData: []byte
+	jsonhandler.InsertNewSBOMdata(sbomData, sbomData)
+	// ought I convert this to a type I can iterate over?
 	// fmt.Printf("SBOM: %T\n", sbomData)
 
 	// Map-reduce object to libararies and corresponding versions

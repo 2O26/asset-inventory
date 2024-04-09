@@ -4,8 +4,8 @@ use (
 	./Containers/AssetHandler
 	./Containers/AssetHandler/dbcon
 	./Containers/AssetHandler/jsonhandler
-	./Containers/NetworkScan
-	./Containers/NetworkScan/dbcon-networkscan
 	./Containers/CycloneDX
 	./Containers/CycloneDX/dbcon-cyclonedx
+	./Containers/NetworkScan
+	./Containers/NetworkScan/dbcon-networkscan
 )

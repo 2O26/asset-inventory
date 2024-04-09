@@ -10,8 +10,10 @@ FROM golang:1.22.0-bookworm as go-builder
 WORKDIR /app
 COPY go.mod go.sum ./
 COPY ./dbcon-cyclonedx/go.mod ./dbcon-cyclonedx/go.sum ./dbcon-cyclonedx/
+COPY ./jsonhandler/go.mod ./jsonhandler/go.sum ./jsonhandler/
 RUN go mod download
 COPY ./dbcon-cyclonedx/*.go ./dbcon-cyclonedx/
+COPY ./jsonhandler/*.go ./jsonhandler/
 COPY *.go ./
 COPY ./bom.xml ./bom.xml
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
