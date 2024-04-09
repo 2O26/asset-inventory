@@ -151,6 +151,31 @@ func GetLatestState(db DatabaseHelper, c *gin.Context) {
 	c.JSON(http.StatusOK, scan)
 }
 
+// Change struct to log changes in the timelineDB collection
+type Change struct {
+	Type          string      `bson:"type"`
+	Timestamp     time.Time   `bson:"timestamp"`
+	ChangeDetails interface{} `bson:"changeDetails"`
+}
+
+// Save the change to the timelineDB collection
+func saveChange(changeType string, changes interface{}, relations []jsonhandler.Relation) error {
+	change := Change{
+		Type:          changeType,
+		Timestamp:     time.Now(),
+		ChangeDetails: changes,
+	}
+	// Connect to the timelineDB collection
+	timelineDB := &MongoDBHelper{Collection: GetCollection("timelineDB")}
+	_, err := timelineDB.InsertOne(context.TODO(), change)
+	if err != nil {
+		log.Printf("Failed to save changings: %v", err)
+		return err
+	}
+
+	return nil
+}
+
 type AssetRequest struct {
 	AddAsset        []jsonhandler.Asset          `json:"addAsset"`        // To add new assets
 	RemoveAsset     []string                     `json:"removeAsset"`     // Asset IDs to remove
@@ -163,6 +188,9 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 	var req AssetRequest
 	var messages []string
 	var errors []string
+	var relations []jsonhandler.Relation
+	// var newAssetID string
+	// var newRelationID string
 	// Bind JSON to the req struct
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Printf("Error binding request data: %v\n", err)
@@ -187,13 +215,24 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "The request does not contain any operations to perform"})
 		return
 	}
-
+	// Prepare the change details for logging
+	changes := map[string]interface{}{
+		"addAsset":        req.AddAsset,
+		"removeAsset":     req.RemoveAsset,
+		"updateAsset":     req.UpdatedAsset,
+		"addRelations":    req.AddRelations,
+		"removeRelations": req.RemoveRelations,
+	}
 	// Call the respective functions for each operation
-	messages, errors = removeAssets(req, latestScan, db, messages, errors)
+	messages, errors, relations = removeAssets(req, latestScan, db, messages, errors)
 	messages, errors = removeRelations(req, latestScan, db, messages, errors)
 	messages, errors = addAssets(req, latestScan, db, messages, errors)
 	messages, errors = updateAssets(req, latestScan, db, messages, errors)
 	messages, errors = addRelations(req, latestScan, db, messages, errors)
+	// Log the changes to the timeline DB
+	if err := saveChange("assetHandler", changes, relations); err != nil {
+		log.Printf("Failed to save changes in timelineDB: %v", err)
+	}
 
 	// Send the response as a list of messages
 	if len(messages) > 0 {
@@ -455,7 +494,8 @@ func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 }
 
 // Removing assets and their related relations
-func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string) {
+func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, []jsonhandler.Relation) {
+	relations := []jsonhandler.Relation{}
 	if len(req.RemoveAsset) > 0 && req.RemoveAsset != nil {
 		// Loop through the assets to remove and delete them from the latest scan
 		for _, assetID := range req.RemoveAsset {
@@ -473,6 +513,7 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			// Loop through the relations to remove and delete them from the latest scan
 			for relationID, relation := range latestScan.Relations {
 				if relation.From == assetID || relation.To == assetID {
+					relations = append(relations, relation)
 					delete(latestScan.Relations, relationID)
 				}
 			}
@@ -488,7 +529,7 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			messages = append(messages, "Asset and related relations removed successfully from the latest scan")
 		}
 	}
-	return messages, errors
+	return messages, errors, relations
 }
 
 // Adding new relations
@@ -606,3 +647,102 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
 }
+
+// func saveStateDifference(latestStateID, previousStateID string) error {
+// 	// Connect to MongoDB
+// 	// client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+// 	// if err != nil {
+// 	// 	return err
+// 	// }
+// 	// defer client.Disconnect(context.Background())
+
+// 	// Get the latest and previous state documents
+// 	assetsCollection := &MongoDBHelper{Collection: GetCollection("scans")}
+
+// 	// Use the aggregation pipeline to calculate the differences
+// 	pipeline := mongo.Pipeline{
+// 		{
+// 			"$match": bson.M{
+// 				"_id": bson.M{
+// 					"$in": []string{latestStateID, previousStateID},
+// 				},
+// 			},
+// 		},
+// 		{
+// 			"$project": bson.M{
+// 				"_id":        1,
+// 				"properties": 1,
+// 				"plugins":    1,
+// 				"relations":  1,
+// 				"pluginList": 1,
+// 				"state":      1,
+// 				"differences": bson.M{
+// 					"$cond": []interface{}{
+// 						bson.M{"$eq": "$_id", latestStateID}, // Remove the comma after the closing square bracket
+// 						bson.M{
+// 							"message": "Authentication success.",
+// 							"state": bson.M{
+// 								"mostRecentUpdate": "2024-04-06T15:32:14Z",
+// 								"assets": bson.M{
+// 									"$objectToArray": "$state.assets",
+// 								},
+// 								"relations": bson.M{
+// 									"$objectToArray": "$state.relations",
+// 								},
+// 								"pluginList": "$state.pluginList",
+// 							},
+// 						},
+// 						bson.M{
+// 							"message": "Authentication success.",
+// 							"state": bson.M{
+// 								"mostRecentUpdate": "2024-04-06T15:32:14Z",
+// 								"assets": bson.M{
+// 									"$setDifference": [
+// 										bson.M{"$objectToArray": "$state.assets"},
+// 										bson.M{"$objectToArray": "$state.assets"},
+// 									],
+// 								},
+// 								"relations": bson.M{
+// 									"$setDifference": [
+// 										bson.M{"$objectToArray": "$state.relations"},
+// 										bson.M{"$objectToArray": "$state.relations"},
+// 									],
+// 								},
+// 								"pluginList": "$state.pluginList",
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	cursor, err := assetsCollection.Aggregate(context.Background(), pipeline)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer cursor.Close(context.Background())
+
+// 	// Save the differences to the "timelinedb" collection
+// 	timelinesCollection := &MongoDBHelper{Collection: GetCollection("timelineDB")}
+// 	for cursor.Next(context.Background()) {
+// 		var result bson.M
+// 		if err := cursor.Decode(&result); err != nil {
+// 			return err
+// 		}
+
+// 		_, err := timelinesCollection.InsertOne(context.Background(), bson.M{
+// 			"timestamp": time.Now(),
+// 			"differences": result["differences"],
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	if err := cursor.Err(); err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
