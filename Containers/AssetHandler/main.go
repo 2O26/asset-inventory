@@ -5,6 +5,8 @@ import (
 	"assetinventory/assethandler/jsonhandler"
 	"context"
 	"fmt"
+	"github.com/sony/sonyflake"
+	"strconv"
 	"time"
 
 	"encoding/json"
@@ -32,6 +34,10 @@ type networkAsset struct {
 	Subnet    string `bson:"subnet" json:"subnet"`
 	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
 }
+
+var flake, _ = sonyflake.New(sonyflake.Settings{
+	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
+})
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -192,7 +198,82 @@ func getNetworkScan() {
 		PluginStateID: netassets.StateID,
 	}
 	fmt.Println("PluginState: ", pluginState)
+
+	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
+	addSubnetAssetsAndRelations(netassets)
+
 	dbcon.AddPluginData(pluginState, plugin)
+}
+
+func addSubnetAssetsAndRelations(netassets networkResponse) {
+	addAsset := []jsonhandler.Asset{}
+	var assetIDs []string
+	var relationIDs []string
+	subnets := make(map[string]bool)
+
+	for _, asset := range netassets.State {
+		subnets[asset.Subnet] = true
+	}
+
+	for subnet, _ := range subnets {
+		fmt.Println("SUBNET: ", subnet)
+		asset := jsonhandler.Asset{
+			Name:        subnet,
+			Owner:       "",
+			Type:        []string{"Subnet"},
+			Criticality: 0,
+			Hostname:    subnet,
+		}
+		addAsset = append(addAsset, asset)
+	}
+
+	for i := 1; i <= len(addAsset); i++ {
+		nextU, err := flake.NextID()
+		if err != nil {
+			log.Fatal(err)
+		}
+		next := strconv.FormatUint(nextU, 10)
+		assetIDs = append(assetIDs, next)
+	}
+
+	assetRequest := dbcon.AssetRequest{
+		AddAsset: addAsset,
+	}
+	dbcon.AddAssets(assetRequest, assetIDs)
+
+	addRelations := []jsonhandler.Relation{}
+
+	//Now adding relations
+	for i := 0; i < len(assetIDs); i++ {
+		for _, subnetAsset := range addAsset {
+			for assetID, asset := range netassets.State {
+				if subnetAsset.Name == asset.Subnet {
+					//create new relation
+					relation := jsonhandler.Relation{
+						From:        assetIDs[i],
+						To:          assetID,
+						Direction:   "uni",
+						Owner:       "netscan",
+						DateCreated: time.Now().Format("2006-01-02 15:04:05"),
+					}
+					addRelations = append(addRelations, relation)
+				}
+			}
+		}
+	}
+
+	for i := 1; i <= len(addRelations); i++ {
+		nextU, err := flake.NextID()
+		if err != nil {
+			log.Fatal(err)
+		}
+		next := strconv.FormatUint(nextU, 10)
+		relationIDs = append(assetIDs, next)
+	}
+
+	relationRequest := dbcon.AssetRequest{AddRelations: addRelations}
+	dbcon.ManageAssetsAndRelations(relationRequest)
+
 }
 
 func addInitialScan(scansHelper dbcon.DatabaseHelper) {

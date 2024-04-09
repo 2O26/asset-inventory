@@ -163,6 +163,9 @@ func AddScan(db DatabaseHelper, scan Scan) {
 		log.Fatalf("Could not insert scan: %s", err)
 	}
 	log.Printf("OK!, %v", result)
+
+	//WILL HAVE TO INSERT AN EXTRA ASSET FOR THE SUBNET AS WELL AS CREATE RELATIONS BETWEEN THE SUBNET AND ITS ASSETS
+
 }
 
 func GetLatestScan(db DatabaseHelper, c *gin.Context) {
