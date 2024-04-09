@@ -2,7 +2,7 @@ package main
 
 import (
 	dbcon "assetinventory/cyclonedx/dbcon-cyclonedx"
-	jsonhandler "assetinventory/cyclonedx/jsonhandler"
+	"assetinventory/cyclonedx/jsonhandler"
 	"bytes"
 	"fmt"
 	"io"
@@ -109,7 +109,10 @@ func uploadCycloneDX(c *gin.Context) {
 	}
 
 	// sbomData: []byte
-	jsonhandler.InsertNewSBOMdata(sbomData, sbomData)
+
+	//convert to json
+
+	jsonhandler.ConvertToJSON(sbomData)
 	// ought I convert this to a type I can iterate over?
 	// fmt.Printf("SBOM: %T\n", sbomData)
 

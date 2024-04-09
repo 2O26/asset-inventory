@@ -11,9 +11,11 @@ WORKDIR /app
 COPY go.mod go.sum ./
 COPY ./dbcon-cyclonedx/go.mod ./dbcon-cyclonedx/go.sum ./dbcon-cyclonedx/
 COPY ./jsonhandler/go.mod ./jsonhandler/go.sum ./jsonhandler/
+COPY ./dbconn-libraryCVEs/go.mod ./dbconn-libraryCVEs/go.sum ./dbcon-libraryCVEs/
 RUN go mod download
 COPY ./dbcon-cyclonedx/*.go ./dbcon-cyclonedx/
 COPY ./jsonhandler/*.go ./jsonhandler/
+COPY ./dbconn-libraryCVEs/*.go ./dbconn-libraryCVEs/
 COPY *.go ./
 COPY ./bom.xml ./bom.xml
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
