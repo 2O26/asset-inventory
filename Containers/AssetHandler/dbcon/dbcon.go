@@ -557,6 +557,7 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			// Loop through the relations to remove and delete them from the latest scan
 			for relationID, relation := range latestScan.Relations {
 				if relation.From == assetID || relation.To == assetID {
+					relations = append(relations, relation)
 					delete(latestScan.Relations, relationID)
 					changes2[relationID] = RemoveRelation{
 						Relation: relation,
