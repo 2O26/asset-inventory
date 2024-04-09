@@ -191,6 +191,21 @@ type Timeline struct {
 	RemoveRelations map[string]jsonhandler.Relation `json:"removeRelations"` // Relation IDs to remove
 
 }
+type AddAsset struct {
+	Asset jsonhandler.Asset `json:"asset"`
+}
+type RemoveAsset struct {
+	Asset jsonhandler.Asset `json:"asset"`
+}
+type UpdateAsset struct {
+	Asset jsonhandler.Asset `json:"asset"`
+}
+type AddRelation struct {
+	Relation jsonhandler.Relation `json:"relation"`
+}
+type RemoveRelation struct {
+	Relation jsonhandler.Relation `json:"relation"`
+}
 
 func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 	var req AssetRequest
