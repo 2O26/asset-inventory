@@ -107,6 +107,12 @@ func uploadCycloneDX(c *gin.Context) {
 		return
 	}
 
+	// sbomData: []uint8
+	// fmt.Printf("SBOM: %T\n", sbomData)
+
+	// Map-reduce object to libararies and corresponding versions
+	// Create API calls for each libarary. Insert CVEs that have score higher than X
+
 	// Respond to the client
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf("File uploaded successfully: %s", file.Filename),

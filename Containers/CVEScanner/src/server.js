@@ -34,17 +34,19 @@ app.post("/getVulnerable", async (req, res) => {
 
         // Fetch CycloneDX file for the given asset ID
         const assetID = req.body.assetID;
-        const cycloneDXResponse = await fetch(`http://cyclonedx:8082/getCycloneDXFile?assetID=${assetID}`);
 
-        if (cycloneDXResponse.status !== 200) {
-            return res.json({ success: false, message: "Failure to fetch CycloneDX data for the asset." });
-        }
 
-        const cycloneDXData = await cycloneDXResponse.json();
-        const vulnerabilities = await CVEcheck(cycloneDXData);
+        // TODO: Fetch from the database the asset data with parsed libraries, versions and subsequent CVEs 
+        // TODO: Return this data
+
+        // if (cycloneDXResponse.status !== 200) {
+        //     return res.json({ success: false, message: "Failure to fetch CycloneDX data for the asset." });
+        // }
+
+        // Fetch CVE field per the Asset
 
         // Respond with the vulnerabilities found
-        res.json({ success: true, cycloneDXvulns: vulnerabilities });
+        res.json({ success: true, cycloneDXvulns: {} });
     } catch (error) {
         console.error('Error while processing request:', error);
         res.status(500).send('An error occurred while processing your request.');
