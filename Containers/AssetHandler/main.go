@@ -441,7 +441,10 @@ func main() {
 		dbcon.DeleteAllDocuments(timelineDB, c)
 	})
 
-	router.GET("/GetTimelineData", dbcon.GetTimelineData)
+	router.GET("/GetTimelineData", func(c *gin.Context) {
+		// dbcon.DeleteAllDocuments(scansHelper, c)
+		dbcon.GetTimelineData(timelineDB, c)
+	})
 
 	log.Println("Server starting on port 8080...")
 	if err := router.Run(":8080"); err != nil {

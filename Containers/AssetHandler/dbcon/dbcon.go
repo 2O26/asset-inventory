@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"time"
 	"unicode"
@@ -703,46 +704,40 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
 }
 
-func GetTimelineData(c *gin.Context) {
+func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 	assetID := c.Query("assetID")
 
 	var filter bson.D
+	var results []bson.M
+	var limitedResults []bson.M
+
 	if assetID != "" {
 		// Filter for an asset if provided assetID
 		filter = bson.D{{Key: "assets.assetID", Value: assetID}}
 	} else {
-		// If no assetID is provided, fetch all
+		// If no assetID is provided, fetch all and limit manually
 		filter = bson.D{}
 	}
 
-	db := GetCollection("timelineDB")
-	findOptions := options.Find()
-	findOptions.SetSort(bson.D{{Key: "timestamp", Value: -1}}) // Sort by time in descending order
-
-	cursor, err := db.Find(context.TODO(), filter, findOptions)
-	if err != nil {
-		log.Printf("Failed to retrieve timeline data: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve timeline data"})
+	results, err := db.Find(c.Request.Context(), filter)
+	if err != nil || results == nil {
+		log.Printf("Failed to fetch TimelineData: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data from timelineDB"})
 		return
 	}
-	defer cursor.Close(context.Background())
 
-	var results []bson.M
-	for cursor.Next(context.Background()) {
-		var result bson.M
-		if err := cursor.Decode(&result); err != nil {
-			log.Printf("Failed to decode result: %v\n", err)
-			continue
+	if assetID == "" {
+		// Sort by "timestamp" and limit the results manually to the latest 10 entries
+		sort.Slice(results, func(i, j int) bool {
+			return results[i]["timestamp"].(time.Time).After(results[j]["timestamp"].(time.Time))
+		})
+		if len(results) > 10 {
+			limitedResults = results[:10]
+		} else {
+			limitedResults = results
 		}
-		results = append(results, result)
+		c.JSON(http.StatusOK, limitedResults)
+	} else {
+		c.JSON(http.StatusOK, results)
 	}
-
-	if err := cursor.Err(); err != nil {
-		log.Printf("Error occurred during cursor iteration: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cursor iteration error"})
-		return
-	}
-
-	// Return the results
-	c.JSON(http.StatusOK, results)
 }
