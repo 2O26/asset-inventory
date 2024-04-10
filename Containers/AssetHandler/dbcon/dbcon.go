@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"sort"
 	"strconv"
 	"time"
 	"unicode"
@@ -704,48 +703,40 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
 }
-
 func GetTimelineData(db DatabaseHelper, c *gin.Context) {
+	ctx := context.TODO()
 	assetID := c.Query("assetID")
+	log.Printf("Retrieved assetID:%v\n", assetID)
 
-	var filter bson.D
-	var results []bson.M
-	var limitedResults []bson.M
-
+	var filter bson.M
 	if assetID != "" {
-		// Filter for an asset if provided assetID
-		// Assuming assetID is the key for the entire change
-		filter = bson.D{{Key: assetID, Value: bson.D{{}}}}
-	} else {
-		// If no assetID is provided, fetch all and limit manually
-		filter = bson.D{}
-	}
-
-	results, err := db.Find(c.Request.Context(), filter)
-	if err != nil {
-		log.Printf("Failed to fetch TimelineData: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data from timelineDB"})
-		return
-	}
-
-	if results == nil {
-		log.Printf("TimelineData is nil: %v\n", results)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data from timelineDB: results is nil"})
-		return
-	}
-
-	if assetID == "" {
-		// Sort by "timestamp" and limit the results manually to the latest 10 entries
-		sort.Slice(results, func(i, j int) bool {
-			return results[i]["timestamp"].(time.Time).After(results[j]["timestamp"].(time.Time))
-		})
-		if len(results) > 10 {
-			limitedResults = results[:10]
-		} else {
-			limitedResults = results
+		filter = bson.M{
+			"$or": []bson.M{
+				{"changeDetails.updatedasset." + assetID: bson.M{"$exists": true}},
+				{"changeDetails.addrelations." + assetID: bson.M{"$exists": true}},
+				{"changeDetails.removerelations." + assetID: bson.M{"$exists": true}},
+				{"changeDetails.removeasset." + assetID: bson.M{"$exists": true}},
+			},
 		}
-		c.JSON(http.StatusOK, limitedResults)
 	} else {
-		c.JSON(http.StatusOK, results)
+		// If no assetID is provided, retrieve all records
+		filter = bson.M{}
 	}
+
+	results, err := db.Find(ctx, filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve data"})
+		return
+	}
+
+	// How to limit 10 for each asset??
+	// Currently limiting on all
+	if assetID == "" {
+		if len(results) > 10 {
+			results = results[:10]
+		}
+	}
+
+	// Respond with the fetched data
+	c.JSON(http.StatusOK, results)
 }
