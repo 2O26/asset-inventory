@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@cypress/code-coverage": "^3.12.26",
-    "cypress": "^13.6.5",
+    "cypress": "^13.7.2",
     "xvfb": "^0.4.0"
   }
 }
