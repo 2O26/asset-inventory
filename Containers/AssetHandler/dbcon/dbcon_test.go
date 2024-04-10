@@ -788,3 +788,79 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestGetTimelineData(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockDB := new(MockDB)
+	var results []bson.M
+	results = append(results, bson.M{"assetID": "12345", "data": "Data for asset 12345"})
+
+	// Setting up the mock expectation correctly
+	mockDB.On("Find", mock.Anything, bson.D{{Key: "assets.assetID", Value: "12345"}}).Return(results, nil)
+	mockDB.On("Find", mock.Anything, bson.D{}).Return(results, nil)
+	mockErr := errors.New("database error")
+	mockDB.On("Find", mock.Anything, bson.D{{Key: "assets.assetID", Value: "invalid"}}).Return(nil, mockErr)
+
+	testCases := []struct {
+		name           string
+		assetID        string
+		expectedResult []bson.M
+		expectedError  string
+		statusCode     int
+	}{
+		{
+			name:           "Valid request with assetID",
+			assetID:        "12345",
+			expectedResult: results,
+			statusCode:     http.StatusOK,
+		},
+		{
+			name:           "Valid request without assetID",
+			assetID:        "",
+			expectedResult: results,
+			statusCode:     http.StatusOK,
+		},
+		{
+			name:          "Database error on fetch",
+			assetID:       "invalid",
+			expectedError: "Failed to fetch data from timlineDB",
+			statusCode:    http.StatusInternalServerError,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			c, r := gin.CreateTestContext(w)
+			r.GET("/GetTimelineData", func(c *gin.Context) {
+				GetTimelineData(mockDB, c)
+			})
+
+			req, _ := http.NewRequest("GET", "/GetTimelineData", nil)
+			q := req.URL.Query()
+			q.Add("assetID", tc.assetID)
+			req.URL.RawQuery = q.Encode()
+			c.Request = req
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, tc.statusCode, w.Code)
+			if tc.expectedError != "" {
+				var got gin.H
+				err := json.Unmarshal(w.Body.Bytes(), &got)
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expectedError, got["error"])
+			} else {
+				var got []bson.M
+				err := json.Unmarshal(w.Body.Bytes(), &got)
+				if err != nil {
+					// Check for nil or empty responses before type assertion
+					assert.Nil(t, got)
+				} else {
+					assert.Equal(t, tc.expectedResult, got)
+				}
+			}
+		})
+	}
+}
