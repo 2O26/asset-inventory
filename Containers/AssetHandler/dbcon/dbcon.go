@@ -713,16 +713,23 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 
 	if assetID != "" {
 		// Filter for an asset if provided assetID
-		filter = bson.D{{Key: "assets.assetID", Value: assetID}}
+		// Assuming assetID is the key for the entire change
+		filter = bson.D{{Key: assetID, Value: bson.D{{}}}}
 	} else {
 		// If no assetID is provided, fetch all and limit manually
 		filter = bson.D{}
 	}
 
 	results, err := db.Find(c.Request.Context(), filter)
-	if err != nil || results == nil {
+	if err != nil {
 		log.Printf("Failed to fetch TimelineData: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data from timelineDB"})
+		return
+	}
+
+	if results == nil {
+		log.Printf("TimelineData is nil: %v\n", results)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data from timelineDB: results is nil"})
 		return
 	}
 
