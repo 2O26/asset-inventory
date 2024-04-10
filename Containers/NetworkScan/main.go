@@ -6,9 +6,9 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +31,21 @@ func printActiveIPs(scan dbcon.Scan) { // This is a tmp function
 	}
 }
 
+var (
+	counter int
+	mu      sync.Mutex
+)
+
+func nextID() int {
+	mu.Lock()
+	defer mu.Unlock()
+	counter++
+	return counter
+}
+
+// Create a map to store the unique ID and sequence number of each request
+var requests = make(map[int]chan bool)
+
 // ping sends an ICMP echo request (ping) to the specified IP address and waits for a response.
 // It returns a boolean value indicating whether the host is up (true) or down (false), and an error value.
 //
@@ -46,21 +61,28 @@ func printActiveIPs(scan dbcon.Scan) { // This is a tmp function
 //
 // The function will return false without an error if it doesn't receive a response from the target host within the timeout.
 func ping(addr string) (bool, error) {
+	fmt.Println("Starting ping")
+
 	c, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
 	if err != nil {
 		return false, err
 	}
 	defer c.Close()
 
+	fmt.Println("Resolved IP address")
+
 	dst, err := net.ResolveIPAddr("ip4", addr)
 	if err != nil {
 		return false, err
 	}
 
+	// Generate a unique ID for this echo request
+	id := nextID()
+
 	wm := icmp.Message{
 		Type: ipv4.ICMPTypeEcho, Code: 0,
 		Body: &icmp.Echo{
-			ID: os.Getpid() & 0xffff, Seq: 1,
+			ID: int(id & 0xffff), Seq: 1, // Use the unique ID here
 			Data: []byte(""),
 		},
 	}
@@ -69,6 +91,8 @@ func ping(addr string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
+	fmt.Println("Sent ICMP message")
 
 	if _, err = c.WriteTo(wb, dst); err != nil {
 		return false, err
@@ -79,24 +103,36 @@ func ping(addr string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	n, _, err := c.ReadFrom(rb)
-	if err != nil {
-		return false, nil // Return false if no response was received
-	}
 
-	rm, err := icmp.ParseMessage(ipv4.ICMPTypeEchoReply.Protocol(), rb[:n])
-	if err != nil {
-		return false, err
-	}
+	fmt.Println("Waiting for response")
 
-	switch rm.Type {
-	case ipv4.ICMPTypeEchoReply:
-		return true, nil
-	default:
-		return false, fmt.Errorf("got %+v from %v; want echo reply", rm, dst)
+	for {
+		n, _, err := c.ReadFrom(rb)
+		if err != nil {
+			if neterr, ok := err.(net.Error); ok && neterr.Timeout() {
+				fmt.Println("Read timeout, no response received")
+				return false, nil // Return false if no response was received
+			} else {
+				return false, err
+			}
+		}
+
+		fmt.Println("Received response")
+
+		rm, err := icmp.ParseMessage(ipv4.ICMPTypeEchoReply.Protocol(), rb[:n])
+		if err != nil {
+			return false, err
+		}
+
+		switch rm.Type {
+		case ipv4.ICMPTypeEchoReply:
+			if rm.Body.(*icmp.Echo).ID == int(id&0xffff) {
+				fmt.Println("Received echo reply")
+				return true, nil
+			}
+		}
 	}
 }
-
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -156,6 +192,14 @@ func validNmapTarget(nmapTarget string) bool {
 	return match
 }
 
+const maxPort = 65535
+
+type pingResult struct {
+	ip   net.IP
+	isUp bool
+	err  error
+}
+
 func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 	fmt.Printf("Starting scan for target: %s\n", target)
 
@@ -164,6 +208,7 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 	if err != nil {
 		return dbcon.Scan{}, fmt.Errorf("invalid target: %s", err)
 	}
+	fmt.Printf("Parsed CIDR: IP: %s, Subnet: %s\n", ip, subnet)
 
 	// Create a new scan
 	scan := dbcon.Scan{
@@ -172,65 +217,72 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 		DateUpdated: time.Now().Format("2006-01-02 15:04:05"),
 		State:       make(map[string]dbcon.Asset),
 	}
+	fmt.Println("Scan object created")
 
-	// Calculate the network address and the broadcast address
-	networkAddress := ip.Mask(subnet.Mask)
+	// Create a channel to communicate the ping results
+	pingResults := make(chan pingResult)
+	fmt.Println("Ping results channel created")
+
+	// Get the network and broadcast addresses
+	networkAddress := subnet.IP
 	broadcastAddress := make(net.IP, len(networkAddress))
 	for i := range networkAddress {
 		broadcastAddress[i] = networkAddress[i] | ^subnet.Mask[i]
 	}
+	fmt.Printf("Network Address: %s, Broadcast Address: %s\n", networkAddress, broadcastAddress)
 
-	// Function to increment IP
-	inc := func(ip net.IP) {
-		for j := len(ip) - 1; j >= 0; j-- {
-			ip[j]++
-			if ip[j] > 0 {
-				break
+	var wg sync.WaitGroup
+	fmt.Println("WaitGroup created")
+
+	// Start a new goroutine for each IP address in the subnet
+	for ip := cloneIP(networkAddress); subnet.Contains(ip); inc(ip) {
+		wg.Add(1)
+		go func(ip net.IP) {
+			defer wg.Done()
+			isUp, err := ping(ip.String())
+			if err != nil {
+				fmt.Println("Error pinging: ", ip, " Error: ", err, "\n")
+			} else if isUp {
+				fmt.Println("Finished ping for: ", ip, " with status: ", isUp, "\n")
+				pingResults <- pingResult{ip: ip, isUp: isUp, err: err}
 			}
-		}
+		}(cloneIP(ip))
 	}
+	fmt.Println("Started goroutines for each IP")
 
-	// Iterate over all IPs in the subnet
-	for ip := networkAddress; ; inc(ip) {
+	// Wait for all goroutines to finish
+	go func() {
+		wg.Wait()
+		close(pingResults)
+	}()
+	fmt.Println("Waiting for all goroutines to finish")
 
-		if ip.Equal(broadcastAddress) {
-			break
-		}
-
-		// Check if the IP address is up
-		isUp, err := ping(ip.String())
-		if err != nil {
-			fmt.Printf("Error pinging IP: %s: %v\n", ip, err)
+	// Iterate over the ping results
+	for result := range pingResults {
+		if result.err != nil {
+			fmt.Printf("Error pinging IP: %s: %v\n", result.ip, result.err)
 			continue
 		}
 
 		// Update the status of the IP address in the scan
 		status := "down"
-		if isUp {
+		if result.isUp {
 			status = "up"
-			asset := dbcon.Asset{
-				Status:    status,
-				IPv4Addr:  ip.String(),
-				Subnet:    target,
-				OpenPorts: []int{},
-			}
-			nextU, err := flake.NextID()
+			asset, err := createAsset(status, result.ip.String(), target)
 			if err != nil {
-				fmt.Printf("Error generating UID: %v\n", err)
+				fmt.Printf("Error creating asset: %v\n", err)
 				return dbcon.Scan{}, err
 			}
-			next := strconv.FormatUint(nextU, 10)
-			scan.State[next] = asset
+			scan.State[asset.UID] = asset
 		}
-
-		// NEED TO CHECK OLD SCANS AND UPDATE THE STATUS OF THE ASSET
+		fmt.Printf("Updated status for IP: %s, Status: %s\n", result.ip, status)
 
 		// Skip port scanning if CmdSelection is "simple" or the IP is down
-		if cmdSelection != "simple" && isUp {
+		if cmdSelection != "simple" && result.isUp {
 			// Iterate over all ports
-			for port := 1; port <= 65535; port++ {
+			for port := 1; port <= maxPort; port++ {
 				// Try to connect to the IP on the current port
-				conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", ip, port), time.Second)
+				conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", result.ip, port), time.Second)
 				if err != nil {
 					// If the connection failed, the port is probably closed
 					continue
@@ -240,20 +292,53 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 				// If the connection succeeded, the port is open
 				fmt.Printf("Open port found: %d\n", port)
 				// Get the asset from the map
-				asset := scan.State[ip.String()]
+				asset := scan.State[result.ip.String()]
 
 				// Append the open port
 				asset.OpenPorts = append(asset.OpenPorts, port)
 
 				// Put the modified asset back into the map
-				scan.State[ip.String()] = asset
+				scan.State[result.ip.String()] = asset
 			}
 		}
-
+		fmt.Println("Finished port scanning")
 	}
 
-	fmt.Printf("Scan completed for target: %s\n", target)
+	fmt.Println("Finished scanning")
 	return scan, nil
+}
+
+func createAsset(status string, ip string, target string) (dbcon.Asset, error) {
+	nextU, err := flake.NextID()
+	if err != nil {
+		return dbcon.Asset{}, err
+	}
+	next := strconv.FormatUint(nextU, 10)
+
+	asset := dbcon.Asset{
+		UID:       next,
+		Status:    status,
+		IPv4Addr:  ip,
+		Subnet:    target,
+		OpenPorts: []int{},
+	}
+
+	return asset, nil
+}
+
+func cloneIP(ip net.IP) net.IP {
+	dup := make(net.IP, len(ip))
+	copy(dup, ip)
+	return dup
+}
+
+func inc(ip net.IP) {
+	for j := len(ip) - 1; j >= 0; j-- {
+		ip[j]++
+		if ip[j] > 0 {
+			break
+		}
+	}
 }
 
 func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
