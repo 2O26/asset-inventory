@@ -2,6 +2,7 @@ package dbcon_networkscan
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -118,7 +119,7 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 			prevAsset.Status = "down"
 			updatedScan.State[oldAssetID] = prevAsset
 		} else if !found {
-			// IP address is outside of the scan's subnet, add the previous asset with same status as before
+			// IP address is outside the scan's subnet, add the previous asset with same status as before
 			updatedScan.State[oldAssetID] = prevAsset
 		}
 	}
@@ -151,7 +152,7 @@ func AddScan(db DatabaseHelper, scan Scan) {
 	var previousScan Scan
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			// Detta är den första skannen, infoga den direkt
 			scan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
 			result, err := db.InsertOne(context.TODO(), scan)
@@ -173,9 +174,6 @@ func AddScan(db DatabaseHelper, scan Scan) {
 		log.Fatalf("Could not insert scan: %s", err)
 	}
 	log.Printf("OK!, %v", result)
-
-	//WILL HAVE TO INSERT AN EXTRA ASSET FOR THE SUBNET AS WELL AS CREATE RELATIONS BETWEEN THE SUBNET AND ITS ASSETS
-
 }
 
 func GetLatestScan(db DatabaseHelper, c *gin.Context) {
