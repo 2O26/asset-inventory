@@ -37,11 +37,12 @@ type Relation struct {
 }
 
 type BackState struct {
-	ID               primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
-	MostRecentUpdate time.Time           `json:"mostRecentUpdate"`
-	Assets           map[string]Asset    `json:"assets"`
-	Plugins          map[string]Plugin   `json:"plugins"`
-	Relations        map[string]Relation `json:"relations"`
+	ID               primitive.ObjectID     `bson:"_id,omitempty" json:"id,omitempty"`
+	MostRecentUpdate time.Time              `json:"mostRecentUpdate"`
+	Assets           map[string]Asset       `json:"assets"`
+	Plugins          map[string]Plugin      `json:"plugins"`
+	Relations        map[string]Relation    `json:"relations"`
+	PluginStates     map[string]PluginState `json:"pluginStates"`
 }
 
 type FrontState struct {
@@ -52,10 +53,10 @@ type FrontState struct {
 }
 
 type PluginState struct {
-	StateID     string         `json:"stateID"`
-	DateCreated string         `json:"dateCreated"`
-	DateUpdated string         `json:"dateUpdated"`
-	State       map[string]any `json:"state"`
+	StateID     string                 `json:"stateID"`
+	DateCreated string                 `json:"dateCreated"`
+	DateUpdated string                 `json:"dateUpdated"`
+	State       map[string]interface{} `json:"state"`
 }
 
 // BackToFront Takes a state, an arbitrary amount of plugin names and plugin data and formats the output to the style used in frontend.
@@ -77,7 +78,20 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 
 	out.Relations = in.Relations
 	copyAssets(in.Assets, outAssets) //written by Gemini
-
+	// Check if the pluginList is already populated
+	for pluginName, _ := range in.Plugins {
+		found := false
+		for _, existingPlugin := range out.PluginList {
+			if pluginName == existingPlugin {
+				found = true
+				break
+			}
+		}
+		// If not found, add the plugin to the list
+		if !found {
+			out.PluginList = append(out.PluginList, pluginName)
+		}
+	}
 	if plugins != nil {
 		//need to unmarshal all pluginStates
 		pluginStates := make(map[string]PluginState)
@@ -93,11 +107,24 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 
 			pluginStates[key] = temp
 		}
-
 		//All pluginStates have been unmarshalled, can now copy
 		insertPluginData(outAssets, pluginStates)
 	}
-
+	// Copy pluginStates to output
+	for pluginStateID, pluginState := range in.PluginStates {
+		for asset, pluginAssetData := range pluginState.State {
+			for assetID, frontAsset := range outAssets {
+				// If the asset matches the plugin asset, add the plugin data
+				if assetID == asset {
+					if frontAsset.Plugins == nil {
+						frontAsset.Plugins = make(map[string]any)
+					}
+					frontAsset.Plugins[pluginStateID] = pluginAssetData
+					outAssets[assetID] = frontAsset
+				}
+			}
+		}
+	}
 	out.Assets = outAssets //need to put output in out.assets as indices can't be modified
 
 	toPrint, err := json.Marshal(out)

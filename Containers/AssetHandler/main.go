@@ -4,6 +4,7 @@ import (
 	"assetinventory/assethandler/dbcon"
 	"assetinventory/assethandler/jsonhandler"
 	"context"
+	"fmt"
 	"time"
 
 	"encoding/json"
@@ -18,12 +19,18 @@ type StateResponse struct {
 	Message string                 `json:"message"`
 	State   jsonhandler.FrontState `json:"state"`
 }
+type networkResponse struct {
+	StateID     string
+	DateCreated string
+	DateUpdated string
+	State       map[string]networkAsset
+}
 
-type PluginState struct {
-	StateID     string         `json:"stateID"`
-	DateCreated string         `json:"dateCreated"`
-	DateUpdated string         `json:"dateUpdated"`
-	State       map[string]any `json:"state"`
+type networkAsset struct {
+	Status    string `bson:"status" json:"status"`
+	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
+	Subnet    string `bson:"subnet" json:"subnet"`
+	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
 }
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -53,7 +60,7 @@ func getNetScanStatus() json.RawMessage {
 
 	defer response.Body.Close() // Ensure the body is closed after reading
 
-	var netassets PluginState
+	var netassets jsonhandler.PluginState
 	// Read the response body
 	json.NewDecoder(response.Body).Decode(&netassets) //puts the response into netassets
 	if err != nil {
@@ -67,9 +74,10 @@ func getNetScanStatus() json.RawMessage {
 }
 
 func getLatestState(c *gin.Context) {
+	// Add assets from network scan
+	getNetworkScan()
 	// Simulate authentication
 	var authSuccess = true
-
 	if authSuccess {
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)
@@ -95,7 +103,6 @@ func getLatestState(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare scan data"})
 			return
 		}
-
 		pluginStates := make(map[string]json.RawMessage)
 		netassets := getNetScanStatus()
 		pluginStates["netscan"] = netassets
@@ -114,6 +121,7 @@ func getLatestState(c *gin.Context) {
 		pluginStates["osscan"] = mockOSScan
 
 		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil)
+
 		if err != nil {
 			log.Println(err)
 		}
@@ -128,6 +136,65 @@ func getLatestState(c *gin.Context) {
 		c.IndentedJSON(http.StatusOK, response)
 	}
 }
+
+func getNetworkScan() {
+	fmt.Println("########Getting network scan##########")
+	url := "http://networkscan:8081/getLatestScan"
+	// GET request from netscan
+	response, err := http.Get(url)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer response.Body.Close() // Ensure the body is closed after reading
+
+	var netassets networkResponse
+	// Read the response body
+	json.NewDecoder(response.Body).Decode(&netassets) //puts the response into netassets
+	if err != nil {
+		log.Fatal(err)
+	}
+	addAsset := []jsonhandler.Asset{}
+	var assetIDs []string
+	for k := range netassets.State {
+		assetIDs = append(assetIDs, k)
+	}
+	// Iterate over the State map and print UID values'
+	// There might be a bug here where the assets are not added in the right order
+	for i := 1; i <= len(netassets.State); i++ {
+		asset := jsonhandler.Asset{
+			Name:        ("netscan-" + fmt.Sprint(netassets.DateUpdated) + "-" + fmt.Sprint(i)),
+			Owner:       "",
+			Type:        []string{},
+			Criticality: 0,
+			Hostname:    "",
+		}
+		addAsset = append(addAsset, asset)
+		fmt.Println("Asset: ", asset)
+	}
+	request := dbcon.AssetRequest{
+		AddAsset: addAsset,
+	}
+	fmt.Println("Request: ", request)
+	dbcon.AddAssets(request, assetIDs)
+	pluginState := jsonhandler.PluginState{
+		StateID:     "netscan",
+		DateCreated: netassets.DateCreated,
+		DateUpdated: netassets.DateUpdated,
+		State:       make(map[string]any),
+	}
+
+	for k, v := range netassets.State {
+		pluginState.State[k] = v
+	}
+	plugin := jsonhandler.Plugin{
+		PluginStateID: netassets.StateID,
+	}
+	fmt.Println("PluginState: ", pluginState)
+	dbcon.AddPluginData(pluginState, plugin)
+}
+
 func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 	// Add initial scan
 	initialScan := jsonhandler.BackState{
@@ -218,7 +285,21 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				DateCreated: "2024-03-05 14:20:00",
 			},
 		},
-	}
+		PluginStates: map[string]jsonhandler.PluginState{
+			"IPscan": {
+				StateID:     "20240214-1300A",
+				DateCreated: "2024-02-14 13:00:00",
+				DateUpdated: "2024-02-14 13:30:00",
+				State: map[string]interface{}{
+					"65f8671cfe55e5c76465d840": map[string]interface{}{
+						"status":    "down",
+						"ipv4Addr":  "192.168.1.1",
+						"subnet":    "192.168.1.0/24",
+						"openPorts": []int{},
+					},
+				},
+			},
+		}}
 	_, err := scansHelper.InsertOne(context.Background(), initialScan)
 	if err != nil {
 		log.Fatalf("Failed to add initial scan: %v", err)

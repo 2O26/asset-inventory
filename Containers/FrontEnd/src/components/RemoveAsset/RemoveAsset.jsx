@@ -2,39 +2,36 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 import './RemoveAsset.css';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { UpdateAsset } from '../Services/ApiService';
 
 export default function RemoveAsset({ checkedItems, onAssetRemoved }) {
-    const [isLoading, setIsLoading] = useState(false);
-    const [isError, setIsError] = useState(false);
     const [open, setOpen] = useState(false);
+    const [isError, setIsError] = useState(false); // Added isError state
+
     const queryClient = useQueryClient();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-
-        const assetData = {
-            removeAsset: Object.keys(checkedItems).filter(key => checkedItems[key])
-        };
-
-        try {
-            await UpdateAsset(assetData);
+    const { mutate: removeAsset, isLoading, error } = useMutation({
+        mutationFn: UpdateAsset,
+        onSuccess: () => {
             queryClient.invalidateQueries(['getState']);
             setOpen(false);
             onAssetRemoved();
-        } catch (error) {
-            setIsError(true);
-            console.error('Error removing asset:', error);
-        } finally {
-            setIsLoading(false);
-        }
+        },
+    });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const assetData = {
+            removeAsset: Object.keys(checkedItems).filter(key => checkedItems[key])
+        };
+        removeAsset(assetData);
     };
 
     const handleOpenModal = () => {
         if (Object.values(checkedItems).some(val => val)) {
             setOpen(true);
+            setIsError(false); // Reset isError state when opening modal
         } else {
             setIsError(true);
         }
@@ -42,7 +39,7 @@ export default function RemoveAsset({ checkedItems, onAssetRemoved }) {
 
     const handleCloseModal = () => {
         setOpen(false);
-        setIsError(false);
+        setIsError(false); // Reset isError state when closing modal
     };
 
     return (

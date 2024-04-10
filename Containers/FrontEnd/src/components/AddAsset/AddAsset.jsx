@@ -2,21 +2,26 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 import './AddAsset.css';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { UpdateAsset } from '../Services/ApiService';
 
 export default function AddAsset() {
     const [data, setData] = useState({ name: "", type: "", crit: 1, owner: "" });
-    const [isLoading, setIsLoading] = useState(false);
-    const [isError, setIsError] = useState(false);
     const [open, setOpen] = useState(false);
 
     const queryClient = useQueryClient();
 
+    const { mutate: addAsset, isLoading, isError, error } = useMutation({
+        mutationFn: UpdateAsset,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['getState']);
+            setOpen(false);
+            setData({ name: "", type: "", crit: 1, owner: "" });
+        },
+    });
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
-
         const assetData = {
             addAsset: [{
                 Name: data.name,
@@ -25,18 +30,7 @@ export default function AddAsset() {
                 Owner: data.owner
             }]
         };
-
-        try {
-            await UpdateAsset(assetData);
-            queryClient.invalidateQueries(['getState']);
-            setOpen(false);
-            setData({ name: "", type: "", crit: 1, owner: "" });
-        } catch (error) {
-            setIsError(true);
-            console.error('Error adding asset:', error);
-        } finally {
-            setIsLoading(false);
-        }
+        addAsset(assetData);
     };
 
     return (
@@ -63,7 +57,7 @@ export default function AddAsset() {
                         <label htmlFor="asset-owner">Owner</label>
                         <input className="inputFields" value={data.owner} onChange={(e) => setData({ ...data, owner: e.target.value })} type="text" placeholder="John Doe" id="asset-owner" name="asset-owner" required />
                         {isLoading && <LoadingSpinner />}
-                        {isError && <p className="errorMessage">Could not add asset</p>}
+                        {isError && <p className="errorMessage">{error.message}</p>}
                         <div className="AuthBtnContainer">
                             <button className="standard-button" disabled={isLoading} type="submit">Add</button>
                             <button className="standard-button" onClick={() => setOpen(false)}>Cancel</button>

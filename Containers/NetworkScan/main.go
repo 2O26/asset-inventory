@@ -21,7 +21,7 @@ import (
 var scanResultGlobal dbcon.Scan
 
 var flake, _ = sonyflake.New(sonyflake.Settings{
-	StartTime: time.Now(),
+	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
 })
 
 func printActiveIPs(scan dbcon.Scan) { // This is a tmp function
@@ -275,7 +275,7 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 			}
 			scan.State[asset.UID] = asset
 		}
-		fmt.Printf("Updated status for IP: %s, Status: %s\n", result.ip, status)
+
 
 		// Skip port scanning if CmdSelection is "simple" or the IP is down
 		if cmdSelection != "simple" && result.isUp {
