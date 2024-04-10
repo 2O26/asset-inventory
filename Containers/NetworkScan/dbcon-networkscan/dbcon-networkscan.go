@@ -20,6 +20,7 @@ type Scan struct {
 }
 
 type Asset struct {
+	UID       string `bson:"uid" json:"uid"`
 	Status    string `bson:"status" json:"status"`
 	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
 	Subnet    string `bson:"subnet" json:"subnet"`
