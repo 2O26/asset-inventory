@@ -22,21 +22,21 @@
         }
     ],
     "removeAsset": [
-        "66155bc48e418d8c87446102",
-        "65fb497f691fc662ec190"
+        "65f8671cfe55e5c76465d841",
+        "65fb497f691fc662e"
     ],
     "updateAsset": {
         "65f8671cfe55e5c76465d843": {
-            "name": "Work Laptop#####",
+            "name": "Work Laptop",
             "owner": "UID_6372",
             "type": [
                 "Laptop",
                 "Windows"
             ],
-            "criticality": 4,
+            "criticality": 1,
             "hostname": "Work-Laptop-56"
         },
-        "65f8671cfe55e565d878": {
+        "65f8671cfe5565d878": {
             "name": "Work Laptop",
             "owner": "UID_6372",
             "type": [
@@ -49,20 +49,20 @@
     },
     "addRelations": [
         {
-            "from": "661555a5e79bb8366e78bb65",
-            "to": "65f8671cfe55e5c76465d842",
+            "from": "65f8671cfe55e5c76465d842",
+            "to": "45394445419413510",
             "direction": "uni",
             "owner": "UID_6372"
         },
         {
-            "from": "6615e79bb8366e78bb65",
-            "to": "65f86e55e5c76465d842",
+            "from": "6615e79bbbb65",
+            "to": "6576465d842",
             "direction": "uni",
             "owner": "UID_6372"
         }
     ],
     "removeRelations": [
-        "65f8671cfe55e5c76465d846",
-        "65f8671cfe55e5c76"
+        "661555a5e79bb8366e78bb66",
+        "65f8671c5e5c76"
     ]
 }

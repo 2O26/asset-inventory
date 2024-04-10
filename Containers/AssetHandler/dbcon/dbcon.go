@@ -184,27 +184,12 @@ type AssetRequest struct {
 	RemoveRelations []string                     `json:"removeRelations"` // Relation IDs to remove
 }
 type Timeline struct {
-	AddAsset        map[string]AddAsset       `json:"addAsset"`        // To add new assets
-	RemoveAsset     map[string]RemoveAsset    `json:"removeAsset"`     // Asset IDs to remove
-	UpdatedAsset    map[string]UpdateAsset    `json:"updateAsset"`     // Asset ID to updated Asset mapping
-	AddRelations    map[string]AddRelation    `json:"addRelations"`    // Relations to add
-	RemoveRelations map[string]RemoveRelation `json:"removeRelations"` // Relation IDs to remove
+	AddAsset        map[string]jsonhandler.Asset    `json:"addAsset"`        // To add new assets
+	RemoveAsset     map[string]jsonhandler.Asset    `json:"removeAsset"`     // Asset IDs to remove
+	UpdatedAsset    map[string]jsonhandler.Asset    `json:"updateAsset"`     // Asset ID to updated Asset mapping
+	AddRelations    map[string]jsonhandler.Relation `json:"addRelations"`    // Relations to add
+	RemoveRelations map[string]jsonhandler.Relation `json:"removeRelations"` // Relation IDs to remove
 
-}
-type AddAsset struct {
-	Asset jsonhandler.Asset `json:"asset"`
-}
-type RemoveAsset struct {
-	Asset jsonhandler.Asset `json:"asset"`
-}
-type UpdateAsset struct {
-	Asset jsonhandler.Asset `json:"asset"`
-}
-type AddRelation struct {
-	Relation jsonhandler.Relation `json:"relation"`
-}
-type RemoveRelation struct {
-	Relation jsonhandler.Relation `json:"relation"`
 }
 
 func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
@@ -212,12 +197,12 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 	var messages []string
 	var errors []string
 	var changes Timeline
-	var changesAddedAssets map[string]AddAsset
-	var changesUpdatedAssets map[string]UpdateAsset
-	var changesRemovedAssets map[string]RemoveAsset
-	var changesRemovedRelations1 map[string]RemoveRelation
-	var changesRemovedRelations2 map[string]RemoveRelation
-	var changesAddedRelations map[string]AddRelation
+	var changesAddedAssets map[string]jsonhandler.Asset
+	var changesUpdatedAssets map[string]jsonhandler.Asset
+	var changesRemovedAssets map[string]jsonhandler.Asset
+	var changesRemovedRelations1 map[string]jsonhandler.Relation
+	var changesRemovedRelations2 map[string]jsonhandler.Relation
+	var changesAddedRelations map[string]jsonhandler.Relation
 	// Bind JSON to the req struct
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Printf("Error binding request data: %v\n", err)
@@ -286,8 +271,8 @@ func GetLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 }
 
 // addAssets adds new assets to the latest scan
-func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]AddAsset) {
-	changes := make(map[string]AddAsset)
+func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Asset) {
+	changes := make(map[string]jsonhandler.Asset)
 	if len(req.AddAsset) > 0 {
 		// Loop through the new assets and add them to the latest scan
 		for _, newAsset := range req.AddAsset {
@@ -307,9 +292,7 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 			newAsset.DateUpdated = newAsset.DateCreated
 			latestScan.Assets[newAssetID] = newAsset
-			changes[newAssetID] = AddAsset{
-				Asset: newAsset,
-			}
+			changes[newAssetID] = newAsset
 		}
 
 		// Update the latest scan with the new assets
@@ -495,8 +478,8 @@ func AddRelations(req AssetRequest, relationIDS []string) string {
 }
 
 // updateAssets updates existing assets in the latest scan
-func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]UpdateAsset) {
-	changes := make(map[string]UpdateAsset)
+func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Asset) {
+	changes := make(map[string]jsonhandler.Asset)
 	if len(req.UpdatedAsset) > 0 {
 		// Loop through the updated assets and update them in the latest scan
 		for assetID, updatedAsset := range req.UpdatedAsset {
@@ -509,9 +492,7 @@ func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				updatedAsset.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
 				updatedAsset.DateCreated = existingAsset.DateCreated
 				latestScan.Assets[assetID] = updatedAsset
-				changes[assetID] = UpdateAsset{
-					Asset: updatedAsset,
-				}
+				changes[assetID] = updatedAsset
 			} else if !exists {
 				log.Printf("Asset with ID %s not found.\n", assetID)
 				messages = append(messages, "Asset not found")
@@ -532,9 +513,9 @@ func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 }
 
 // Removing assets and their related relations
-func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]RemoveAsset, map[string]RemoveRelation) {
-	changes := make(map[string]RemoveAsset)
-	changes2 := make(map[string]RemoveRelation)
+func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Asset, map[string]jsonhandler.Relation) {
+	changes := make(map[string]jsonhandler.Asset)
+	changes2 := make(map[string]jsonhandler.Relation)
 	if len(req.RemoveAsset) > 0 && req.RemoveAsset != nil {
 		// Loop through the assets to remove and delete them from the latest scan
 		for _, assetID := range req.RemoveAsset {
@@ -545,10 +526,7 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			}
 			if asset, exists := latestScan.Assets[assetID]; exists {
 				delete(latestScan.Assets, assetID)
-				changes[assetID] = RemoveAsset{
-					Asset: asset,
-				}
-
+				changes[assetID] = asset
 			} else if !exists {
 				log.Printf("Cannot remove asset, asset with ID %s not found.\n", assetID)
 				messages = append(messages, "Cannot remove asset, Asset not found")
@@ -557,9 +535,7 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			for relationID, relation := range latestScan.Relations {
 				if relation.From == assetID || relation.To == assetID {
 					delete(latestScan.Relations, relationID)
-					changes2[relationID] = RemoveRelation{
-						Relation: relation,
-					}
+					changes2[relationID] = relation
 				}
 
 			}
@@ -579,8 +555,8 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 }
 
 // Adding new relations
-func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]AddRelation) {
-	changes := make(map[string]AddRelation)
+func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Relation) {
+	changes := make(map[string]jsonhandler.Relation)
 	if len(req.AddRelations) > 0 {
 		// Create a map to track existing relations and avoid duplicates
 		existingRelations := make(map[string]bool)
@@ -617,9 +593,7 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				latestScan.Relations[newRelationID] = newRelation
 				existingRelations[key] = true // Update existingRelations to include this new relation
 				anyNewRelationsAdded = true
-				changes[newRelationID] = AddRelation{
-					Relation: newRelation,
-				}
+				changes[newRelationID] = newRelation
 			} else {
 				log.Printf("No new relations were added as they already exist.\n")
 				messages = append(messages, "No new relations were added as they already exist")
@@ -642,8 +616,8 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 }
 
 // removeRelations removes specified relations from the latest scan
-func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]RemoveRelation) {
-	changes := make(map[string]RemoveRelation)
+func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Relation) {
+	changes := make(map[string]jsonhandler.Relation)
 	if len(req.RemoveRelations) > 0 {
 		// Loop through the relations to remove and delete them from the latest scan
 		var removedRelations []string
@@ -656,10 +630,7 @@ func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db Data
 			if relation, exists := latestScan.Relations[relationID]; exists {
 				delete(latestScan.Relations, relationID)
 				removedRelations = append(removedRelations, relationID)
-				changes[relationID] = RemoveRelation{
-
-					Relation: relation,
-				}
+				changes[relationID] = relation
 			} else {
 				log.Printf("Failed to remove relation, Relation with ID %s not found in the latest scan.\n", relationID)
 				messages = append(messages, "Failed to remove relation, Relation not found in the latest scan")
