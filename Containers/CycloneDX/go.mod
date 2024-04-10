@@ -6,7 +6,7 @@ require (
 	assetinventory/cyclonedx/dbcon-cyclonedx v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.9.1
 	assetinventory/cyclonedx/jsonhandler v0.0.0-00010101000000-000000000000
-	assetinventory/cyclonedx/dbcon-libraryCVEs v0.0.0-00010101000000-000000000000
+	assetinventory/cyclonedx/dbconVulnreport v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -54,4 +54,4 @@ replace assetinventory/cyclonedx/dbcon-cyclonedx => ./dbcon-cyclonedx
 
 replace assetinventory/cyclonedx/jsonhandler => ./jsonhandler
 
-replace assetinventory/cyclonedx/dbcon-libraryCVEs => ./dbcon-libraryCVEs
+replace assetinventory/cyclonedx/dbconVulnreport => ./dbcon-vulnreport

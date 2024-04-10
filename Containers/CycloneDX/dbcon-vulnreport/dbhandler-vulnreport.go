@@ -1,4 +1,4 @@
-package dbcon_libraryCVEs
+package dbconVulnreport
 
 import (
 	"context"

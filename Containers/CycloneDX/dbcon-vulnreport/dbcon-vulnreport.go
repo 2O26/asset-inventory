@@ -1,11 +1,10 @@
-package dbcon_libraryCVEs
+package dbconVulnreport
 
 import (
 	"context"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,9 +13,48 @@ import (
 )
 
 type CycloneDXDocument struct {
-	ID               string    `bson:"_id,omitempty"`
-	SBOMData         []byte    `bson:"sbom_data"`
-	MostRecentUpdate time.Time `json:"mostRecentUpdate"`
+	ID         string              `bson:"_id,omitempty"`
+	SBOMData   []byte              `bson:"sbom_data"`
+	VulnReport VulnerabilityReport `bson:"vuln_report"`
+}
+
+type VulnerabilityReport struct {
+	Vulnerabilities map[string]VulnerabilityDetail `json:"vulnerabilities"`
+}
+
+// VulnerabilityDetail captures common fields across ecosystems, with some fields being more relevant to certain ecosystems.
+type VulnerabilityDetail struct {
+	Name         string      `json:"name"`
+	Severity     string      `json:"severity"`
+	IsDirect     bool        `json:"isDirect"`
+	Via          []ViaDetail `json:"via"`
+	Effects      []string    `json:"effects"`
+	Range        string      `json:"range"`
+	Nodes        []string    `json:"nodes"`
+	FixAvailable bool        `json:"fixAvailable"`
+	Ecosystem    string      `json:"ecosystem"` // Added to specify the package ecosystem (e.g., npm, maven, go)
+}
+
+// ViaDetail captures information about the path through which a vulnerability is introduced.
+type ViaDetail struct {
+	Name       string   `json:"name"`
+	Dependency string   `json:"dependency"`
+	Title      string   `json:"title"`
+	URL        string   `json:"url"`
+	Severity   string   `json:"severity"`
+	CWE        []string `json:"cwe"`
+	CVSS       CVSS     `json:"cvss"`
+	Range      string   `json:"range"`
+	Ecosystem  string   `json:"ecosystem"`            // Added to specify the package ecosystem
+	GroupID    string   `json:"groupId,omitempty"`    // Specific to Maven
+	ArtifactID string   `json:"artifactId,omitempty"` // Specific to Maven
+	ModulePath string   `json:"modulePath,omitempty"` // Specific to Go modules
+}
+
+// CVSS captures the CVSS score details of the vulnerability.
+type CVSS struct {
+	Score        float64 `json:"score"`
+	VectorString string  `json:"vectorString"`
 }
 
 var client *mongo.Client
@@ -46,11 +84,15 @@ func GetCollection(collectionName string) *mongo.Collection {
 	return client.Database(dbName).Collection(collectionName)
 }
 
-func SaveCycloneDX(db DatabaseHelper, sbomData []byte, assetID string) error {
+func SaveReducedSBOM(db DatabaseHelper, sbomData []byte, assetID string) error {
+	var vulnreport VulnerabilityReport = VulnerabilityReport{
+		Vulnerabilities: make(map[string]VulnerabilityDetail), // Initializes the map so it's not nil
+	}
+
 	doc := CycloneDXDocument{
-		ID:               assetID,
-		SBOMData:         sbomData,
-		MostRecentUpdate: time.Now(),
+		ID:         assetID,
+		SBOMData:   sbomData,
+		VulnReport: vulnreport,
 	}
 
 	filter := bson.M{"_id": assetID}
@@ -77,48 +119,6 @@ func SaveCycloneDX(db DatabaseHelper, sbomData []byte, assetID string) error {
 	}
 
 	return nil
-}
-
-// GetCycloneDXFile retrieves the CycloneDX file for the specified asset ID from the database.
-func GetCycloneDXFile(db DatabaseHelper, c *gin.Context) {
-	// Fetch the assetID from the POST request
-	var assetID string
-
-	if id := c.Query("assetID"); id != "" { // Check if asset ID is provided as a query parameter
-		assetID = id
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Asset ID is missing"})
-		return
-	}
-
-	// Define a filter to find the document with the specified asset ID
-	filter := bson.M{"_id": assetID}
-
-	// Find the document in the database
-	result := db.FindOne(context.Background(), filter)
-	if err := result.Err(); err != nil {
-		if err == mongo.ErrNoDocuments {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": fmt.Sprintf("CycloneDX file not found for asset ID: %s", assetID),
-			})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("failed to find CycloneDX file in database: %v", err),
-		})
-		return
-	}
-
-	// Extract the CycloneDX file data from the document
-	var doc CycloneDXDocument
-	if err := result.Decode(&doc); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("failed to decode CycloneDX file data: %v", err),
-		})
-		return
-	}
-
-	c.Data(http.StatusOK, "application/json", doc.SBOMData)
 }
 
 func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {

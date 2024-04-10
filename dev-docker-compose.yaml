@@ -59,8 +59,6 @@ services:
     command: --quiet --syslog
     ports:
       - "27017:27017"
-    expose:
-      - "27017"
     volumes:
       - dbstorage:/data/db
       - dbconfig:/data/configdb
@@ -71,8 +69,6 @@ services:
     command: [ "mongod", "--port", "27018", "--quiet", "--syslog" ]
     ports:
       - "27018:27018"
-    expose:
-      - "27018"
     volumes:
       - configstorage:/data/db
       - configdbconfig:/data/configdb
@@ -83,11 +79,19 @@ services:
     command: [ "mongod", "--port", "27020", "--quiet", "--syslog" ]
     ports:
       - "27020:27020"
-    expose:
-      - "27020"
     volumes:
       - cyclonedxstorage:/data/db
       - cyclonedxconfig:/data/configdb
+
+  cvestorage:
+    image: mongo
+    restart: always
+    command: [ "mongod", "--port", "27021", "--quiet", "--syslog" ]
+    ports:
+      - "27021:27021"
+    volumes:
+      - cvestorage:/data/db
+      - cveconfig:/data/configdb
 
   keycloakstorage:
     image: postgres:latest
@@ -136,6 +140,8 @@ volumes:
   keycloak_data:
   cyclonedxstorage:
   cyclonedxconfig:
+  cvestorage:
+  cveconfig:
 
 
 networks:

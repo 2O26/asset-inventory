@@ -2,6 +2,7 @@ package main
 
 import (
 	dbcon "assetinventory/cyclonedx/dbcon-cyclonedx"
+	cve_db "assetinventory/cyclonedx/dbconVulnreport"
 	"assetinventory/cyclonedx/jsonhandler"
 	"bytes"
 	"fmt"
@@ -92,15 +93,9 @@ func uploadCycloneDX(c *gin.Context) {
 	// Fetch the assetID from the POST request
 	assetID := c.PostForm("assetID")
 
-	// Log the file information
-	fmt.Printf("Uploaded File: %+v\n", file.Filename)
-	fmt.Printf("File Size: %+v\n", file.Size)
-	fmt.Printf("MIME Header: %+v\n", file.Header)
-	fmt.Printf("Asset ID: %s\n", assetID)
-
 	// Save the SBOM data to the database
-	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
-	err = dbcon.SaveCycloneDX(db, sbomData, assetID)
+	db_fullSBOM := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
+	err = dbcon.SaveCycloneDX(db_fullSBOM, sbomData, assetID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to save SBOM to database",
@@ -108,15 +103,25 @@ func uploadCycloneDX(c *gin.Context) {
 		return
 	}
 
-	// sbomData: []byte
-
 	//convert to json
+	reducedSBOMjson, err := jsonhandler.ConvertToJSON(sbomData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to save SBOM to CVE database",
+		})
+		return
+	}
+	fmt.Printf("%s\n", string(reducedSBOMjson))
 
-	jsonhandler.ConvertToJSON(sbomData)
-	// ought I convert this to a type I can iterate over?
-	// fmt.Printf("SBOM: %T\n", sbomData)
+	db_reducedSBOM := &cve_db.MongoDBHelper{Collection: cve_db.GetCollection("reducedSBOMS")}
+	err = cve_db.SaveReducedSBOM(db_reducedSBOM, reducedSBOMjson, assetID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to save reduced SBOM to database",
+		})
+		return
+	}
 
-	// Map-reduce object to libararies and corresponding versions
 	// Create API calls for each libarary. Insert CVEs that have score higher than X
 
 	// Respond to the client
@@ -150,6 +155,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not set up database: %v", err)
 	}
+	err = cve_db.SetupDatabase("mongodb://cyclonedxstorage:27021", "SBOM")
+	if err != nil {
+		log.Fatalf("Could not set up CVE database: %v", err)
+	}
+
 	router.POST("/uploadCycloneDX", uploadCycloneDX)
 	sbomHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
 

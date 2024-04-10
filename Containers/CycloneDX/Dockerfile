@@ -11,11 +11,11 @@ WORKDIR /app
 COPY go.mod go.sum ./
 COPY ./dbcon-cyclonedx/go.mod ./dbcon-cyclonedx/go.sum ./dbcon-cyclonedx/
 COPY ./jsonhandler/go.mod ./jsonhandler/go.sum ./jsonhandler/
-COPY ./dbconn-libraryCVEs/go.mod ./dbconn-libraryCVEs/go.sum ./dbcon-libraryCVEs/
+COPY ./dbcon-vulnreport/go.mod ./dbcon-vulnreport/go.sum ./dbcon-vulnreport/
 RUN go mod download
 COPY ./dbcon-cyclonedx/*.go ./dbcon-cyclonedx/
 COPY ./jsonhandler/*.go ./jsonhandler/
-COPY ./dbconn-libraryCVEs/*.go ./dbconn-libraryCVEs/
+COPY ./dbcon-vulnreport/*.go ./dbcon-vulnreport/
 COPY *.go ./
 COPY ./bom.xml ./bom.xml
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
@@ -24,7 +24,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app/
-
 COPY ./bom.json ./bom.json
 COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin /bin
 COPY --from=go-builder /cyclonedx /cyclonedx

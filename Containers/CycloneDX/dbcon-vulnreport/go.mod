@@ -1,4 +1,4 @@
-module assetinventory/cyclonedx/dbcon-libraryCVEs
+module assetinventory/cyclonedx/dbconVulnreport
 
 go 1.22.0
 

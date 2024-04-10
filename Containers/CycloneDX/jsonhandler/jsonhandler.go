@@ -29,10 +29,10 @@ type Author struct {
 
 // Component represents a software component in CycloneDX.
 type Component struct {
-	Type     string    `json:"type"`
-	Name     string    `json:"name"`
-	Version  string    `json:"version"`
-	Licenses []License `json:"licenses,omitempty"`
+	Type    string `json:"type"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Purl    string `json:"purl"`
 	// v1.2 supports sub-components
 	Components []Component `json:"components,omitempty"`
 }
@@ -51,22 +51,29 @@ type CycloneDX struct {
 	Components  []Component `json:"components,omitempty"`
 }
 
-func ConvertToJSON(in []byte) {
+type ReducedSBOM struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
+func ConvertToJSON(in []byte) ([]byte, error) {
 	var cycloneDX CycloneDX
 	err := json.Unmarshal(in, &cycloneDX)
 	if err != nil {
 		fmt.Printf("Error unmarshalling input bytes: %v\n", err)
-		return
+		return in, fmt.Errorf("Error unmarshalling input bytes: %v\n", err)
 	}
 
 	// Marshal the CycloneDX document into JSON.
 	SBOMJSON, err := json.MarshalIndent(cycloneDX, "", "  ")
 	if err != nil {
-		fmt.Printf("Error marshaling to JSON: %v\n", err)
-		return
+		return SBOMJSON, fmt.Errorf("Error marshaling to JSON: %v\n", err)
 	}
-	fmt.Println(string(SBOMJSON))
+	return SBOMJSON, nil
+}
 
+func reduceToLibraries(SBOMjson []byte) ([]byte, error) {
+	return SBOMjson, nil
 }
 
 func InsertNewSBOMdata(in []byte, out []byte) {
