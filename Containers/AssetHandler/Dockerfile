@@ -8,15 +8,16 @@ FROM golang:latest
 WORKDIR /app
 # go.mod : describes modules properties, including dependencies on other modules and on versions on Go
 # go.sum : file contains cryptographic hashes for each module version that your project depends on. (maintains integrity and reproducibility)
-COPY go.mod go.sum ./  
+COPY go.mod go.sum ./
 # Copy the jsonhandler and dbcon-networkscan
-COPY ./jsonhandler ./jsonhandler
-COPY ./dbcon ./dbcon
+COPY ./jsonhandler/go.mod ./jsonhandler/go.sum ./jsonhandler/
+COPY ./dbcon/go.mod ./dbcon/go.sum ./dbcon/
 # install the Go modules necessary to compile it.
-RUN go mod download 
+RUN go mod download
 # Copy source code to container
 COPY *.go ./
-
+COPY ./jsonhandler/*.go ./jsonhandler/
+COPY ./dbcon/*.go ./dbcon/
 # Run tests for jsonhandler and dbcon-networkscan
 # RUN go test assetinventory/... -v
 
@@ -24,8 +25,8 @@ COPY *.go ./
 RUN CGO_ENABLED=0 GOOS=linux go build -o /assethandler
 # Expose port 8080 (the port that the API is listening to)
 EXPOSE 8080
-# Run the binary 
-ENTRYPOINT ["/assethandler"] 
+# Run the binary
+ENTRYPOINT ["/assethandler"]
 
 # https://docs.docker.com/language/golang/run-tests/
 # # Run the tests in the container
@@ -38,7 +39,6 @@ ENTRYPOINT ["/assethandler"]
 # # Set the workdir in the lean deb image
 # WORKDIR /
 
-# # 
 # COPY --from=build-stage /assethandler /assethandler
 
 
