@@ -703,6 +703,7 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
 }
+
 func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 	ctx := context.TODO()
 	assetID := c.Query("assetID")
