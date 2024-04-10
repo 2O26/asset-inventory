@@ -18,6 +18,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import { MdCyclone } from "react-icons/md";
 import { BsFiletypePdf } from "react-icons/bs";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
+import { RiRadioButtonLine } from "react-icons/ri";
 
 
 
@@ -170,5 +171,11 @@ export const CrossIcon = ({ size = 30, color = null }) => {
 export const LinkAddIcon = ({ size = 30, color = null }) => {
     return (
         <MdAddLink size={size} color={color} />
+    )
+}
+
+export const StatusIcon = ({ size = 15, color = "green" }) => {
+    return (
+        <RiRadioButtonLine size={size} color={color} />
     )
 }

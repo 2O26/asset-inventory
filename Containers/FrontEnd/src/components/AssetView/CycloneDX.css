@@ -70,3 +70,7 @@
     overflow: scroll;
     border: none;
 }
+
+.json-tree-container {
+    width: 100%
+}
