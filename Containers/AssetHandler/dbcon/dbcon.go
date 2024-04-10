@@ -19,6 +19,29 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type AssetRequest struct {
+	AddAsset        []jsonhandler.Asset          `json:"addAsset"`        // To add new assets
+	RemoveAsset     []string                     `json:"removeAsset"`     // Asset IDs to remove
+	UpdatedAsset    map[string]jsonhandler.Asset `json:"updateAsset"`     // Asset ID to updated Asset mapping
+	AddRelations    []jsonhandler.Relation       `json:"addRelations"`    // Relations to add
+	RemoveRelations []string                     `json:"removeRelations"` // Relation IDs to remove
+}
+type Timeline struct {
+	AddAsset        map[string]jsonhandler.Asset    `json:"addAsset"`        // To add new assets
+	RemoveAsset     map[string]jsonhandler.Asset    `json:"removeAsset"`     // Asset IDs to remove
+	UpdatedAsset    map[string]jsonhandler.Asset    `json:"updateAsset"`     // Asset ID to updated Asset mapping
+	AddRelations    map[string]jsonhandler.Relation `json:"addRelations"`    // Relations to add
+	RemoveRelations map[string]jsonhandler.Relation `json:"removeRelations"` // Relation IDs to remove
+
+}
+
+// Change struct to log changes in the timelineDB collection
+type Change struct {
+	Type          string    `bson:"type"`
+	Timestamp     time.Time `bson:"timestamp"`
+	ChangeDetails Timeline  `bson:"changeDetails"`
+}
+
 var client *mongo.Client
 var dbName string
 
@@ -150,13 +173,6 @@ func GetLatestState(db DatabaseHelper, c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, scan)
-}
-
-// Change struct to log changes in the timelineDB collection
-type Change struct {
-	Type          string    `bson:"type"`
-	Timestamp     time.Time `bson:"timestamp"`
-	ChangeDetails Timeline  `bson:"changeDetails"`
 }
 
 // Save the change to the timelineDB collection
