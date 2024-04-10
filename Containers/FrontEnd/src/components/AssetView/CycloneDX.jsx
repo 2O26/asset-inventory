@@ -112,27 +112,29 @@ export default function CycloneDX({ assetID }) {
                         </div>
                         <div className='json-container'>
                             {selectedView === 'FullFile' && (
-                                <div>
+                                <div className='json-tree-container'>
                                     <JSONTree data={fileFocus} theme={theme} hideRoot />
                                 </div>
                             )}
                             {selectedView === 'Metadata' && (
-                                <div>
+                                <div className='json-tree-container'>
                                     <CDXMetadata data={fileFocus["metadata"]} />
                                 </div>
                             )}
                             {selectedView === 'Libraries' && (
-                                <div>
+                                <div className='json-tree-container'>
                                     <CDXLibraries data={fileFocus.components} />
                                 </div>
                             )}
-                            {selectedView === 'Frameworks' && (<div>
-                                <CDXFramework data={fileFocus.components} />
-                            </div>
+                            {selectedView === 'Frameworks' && (
+                                <div className='json-tree-container'>
+                                    <CDXFramework data={fileFocus.components} />
+                                </div>
                             )}
                             {selectedView === 'VulnerbleComponents' && (
-
-                                <CDXCVE assetID={assetID} />
+                                <div className='json-tree-container'>
+                                    <CDXCVE assetID={assetID} />
+                                </div>
                             )}
                         </div>
                     </div>

@@ -4,6 +4,7 @@ import { JSONTree } from 'react-json-tree';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { GetVulnerbleComponents } from '../../Services/ApiService';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
+import { StatusIcon } from '../../common/Icons/Icons';
 const theme = {
     base00: 'var(--base-00)',
     base01: 'var(--base-01)',
@@ -84,29 +85,39 @@ export const CDXCVE = ({ assetID }) => {
             <div>
                 <h3> NPM vulnerbilities</h3>
                 {filteredLibraries.vulnerabilities && (
-                    <div>
-                        {Object.keys(filteredLibraries.vulnerabilities).map((key, index) => (
-                            <div key={index}>
-                                <div
-                                    className={visibilityStates[index] ? "settings-header show-content" : "settings-header"}
-                                    onClick={() => toggleVisibility(index)}
-                                    style={{ cursor: 'pointer' }}>
-                                    {/* Assuming the 'name' property exists within the vulnerability details object */}
-                                    <strong>{filteredLibraries.vulnerabilities[key].name}</strong>
-                                    <button className='arrow-container'>
-                                        {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
-                                    </button>
-                                </div>
-                                {visibilityStates[index] && (
-                                    <div className='settings-container'>
-                                        {/* Here 'key' is used directly, as it is the unique identifier of the vulnerability */}
-                                        <p> Name: {filteredLibraries.vulnerabilities[key].name} </p>
-                                        {/* Accessing the 'severity' property from the vulnerability details object */}
-                                        <p> Severity: {filteredLibraries.vulnerabilities[key].severity} </p>
+                    <div className='center-flex-column'>
+                        {Object.keys(filteredLibraries.vulnerabilities).map((key, index) => {
+                            const sevScale = { "critical": "#FF0000", "high": "#FFA500", "moderate": "#FFEA00", "low": "0F0" }
+                            const severity = filteredLibraries.vulnerabilities[key].severity;
+                            return (
+                                <div key={index} className='json-tree-container'>
+                                    <div
+                                        className={visibilityStates[index] ? "drop-down-header show-content" : "drop-down-header"}
+                                        onClick={() => toggleVisibility(index)}
+                                        style={{ cursor: 'pointer' }}>
+                                        {/* Assuming the 'name' property exists within the vulnerability details object */}
+                                        <div />
+                                        <strong>{filteredLibraries.vulnerabilities[key].name}</strong>
+                                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                            <div style={{ marginRight: "0.2rem" }}>
+                                                <StatusIcon size={15} color={sevScale[severity]} />
+                                            </div>
+                                            <button className='arrow-container'>
+                                                {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
+                                            </button>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-                        ))}
+                                    {visibilityStates[index] && (
+                                        <div className='settings-container'>
+                                            {/* Here 'key' is used directly, as it is the unique identifier of the vulnerability */}
+                                            <p> Name: {filteredLibraries.vulnerabilities[key].name} </p>
+                                            {/* Accessing the 'severity' property from the vulnerability details object */}
+                                            <p> Severity: {severity} </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
                     </div>
                 )}
 

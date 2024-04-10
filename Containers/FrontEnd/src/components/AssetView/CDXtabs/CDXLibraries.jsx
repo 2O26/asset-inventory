@@ -101,9 +101,9 @@ export const CDXLibraries = (components) => {
                 <div className='center-flex-column'>
                     <SearchBar onSearch={setSearchTerm} />
                     {filteredAssets.map((component, index) => (
-                        <div key={index}>
+                        <div key={index} className="json-tree-container">
                             <div
-                                className={visibilityStates[index] ? "settings-header show-content" : "settings-header"}
+                                className={visibilityStates[index] ? "drop-down-header show-content" : "drop-down-header"}
                                 onClick={() => toggleVisibility(index)}
                                 style={{ cursor: 'pointer' }}>
                                 <strong>{component.name}</strong>

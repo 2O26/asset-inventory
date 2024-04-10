@@ -7,7 +7,6 @@ function containsNumber(str) {
     return /\d/.test(str);
 }
 
-console.log("roles: ", UserService.getRoles())
 export default function Profile() {
     return (
         <div className='center-flex-column'>
