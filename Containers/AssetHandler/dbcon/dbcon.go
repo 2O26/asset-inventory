@@ -293,23 +293,31 @@ func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugi
 // addAssets adds form network scan
 func AddAssets(req AssetRequest, assetIDS []string) string {
 	// Find the latest scan to update
+	firstScan := false
 	db := &MongoDBHelper{Collection: GetCollection("scans")}
-	latestScan, err := GetLatestScan(db)
-
-	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
-		// Log and return error if it's not ErrNoDocuments
-		log.Printf("Failed to retrieve the latest scan: %v\n", err)
-		return "Failed to retrieve the latest scan: " + err.Error()
-	} else if err.Error() == mongo.ErrNoDocuments.Error() {
-		log.Println("No assets found. Assuming that the inventory is devoid of assets.")
+	var latestScan jsonhandler.BackState
+	latestScan, _ = GetLatestScan(db)
+	if latestScan.Assets == nil {
+		firstScan = true
+		//No assets in previous scan, need to initialize latestScan
+		latestScan.Assets = make(map[string]jsonhandler.Asset)
+		latestScan.Relations = make(map[string]jsonhandler.Relation)
+		latestScan.PluginStates = make(map[string]jsonhandler.PluginState)
+		latestScan.Plugins = make(map[string]jsonhandler.Plugin)
 	}
+
+	//if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
+	//	// Log and return error if it's not ErrNoDocuments
+	//	log.Printf("Failed to retrieve the latest scan: %v\n", err)
+	//	return "Failed to retrieve the latest scan: " + err.Error()
+	//}
 
 	var newAssetIDS []string
 	// Check if there are new assets to add
 	if len(req.AddAsset) > 0 {
 		var newAssets []jsonhandler.Asset
 		for i, newAsset := range req.AddAsset {
-			// Check if an asset with the same hostname already exists
+			// Check if an asset with the same name already exists
 			exists := false
 			for _, existingAsset := range latestScan.Assets {
 				if existingAsset.Hostname == newAsset.Hostname {
@@ -323,17 +331,25 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 				newAssetIDS = append(newAssetIDS, assetIDS[i])
 			}
 		}
+
 		if len(newAssets) > 0 {
 			for i, newAsset := range newAssets {
 				// newAssetID := primitive.NewObjectID().Hex()
 				newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 				newAsset.DateUpdated = newAsset.DateCreated
+
 				latestScan.Assets[newAssetIDS[i]] = newAsset
 			}
 
 			// Update the latest scan with the new assets
+
 			update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
-			_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+			var err error
+			if firstScan {
+				_, err = db.InsertOne(context.TODO(), latestScan)
+			} else {
+				_, err = db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+			}
 			if err != nil {
 				log.Printf("Failed to add new assets: %v\n", err)
 				return "Failed to add new assets: " + err.Error()

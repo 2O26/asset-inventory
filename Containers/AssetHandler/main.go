@@ -161,7 +161,7 @@ func getNetworkScan() {
 			Owner:       "",
 			Type:        []string{},
 			Criticality: 0,
-			Hostname:    "",
+			Hostname:    netassets.State[assetIDs[i-1]].IPv4Addr,
 		}
 		addAsset = append(addAsset, asset)
 		fmt.Println("Asset: ", asset)
