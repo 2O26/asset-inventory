@@ -96,11 +96,16 @@ export const CDXCVE = ({ assetID }) => {
                                         onClick={() => toggleVisibility(index)}
                                         style={{ cursor: 'pointer' }}>
                                         {/* Assuming the 'name' property exists within the vulnerability details object */}
-                                        <StatusIcon size={15} color={sevScale[severity]} />
+                                        <div />
                                         <strong>{filteredLibraries.vulnerabilities[key].name}</strong>
-                                        <button className='arrow-container'>
-                                            {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
-                                        </button>
+                                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                            <div style={{ marginRight: "0.2rem" }}>
+                                                <StatusIcon size={15} color={sevScale[severity]} />
+                                            </div>
+                                            <button className='arrow-container'>
+                                                {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
+                                            </button>
+                                        </div>
                                     </div>
                                     {visibilityStates[index] && (
                                         <div className='settings-container'>
