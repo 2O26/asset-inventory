@@ -2,7 +2,6 @@ package dbcon_networkscan
 
 import (
 	"context"
-	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -152,7 +151,7 @@ func AddScan(db DatabaseHelper, scan Scan) {
 	var previousScan Scan
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
+		if err == mongo.ErrNoDocuments {
 			// Detta är den första skannen, infoga den direkt
 			scan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
 			result, err := db.InsertOne(context.TODO(), scan)
