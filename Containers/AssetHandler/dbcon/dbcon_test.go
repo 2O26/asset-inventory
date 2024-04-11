@@ -3,7 +3,6 @@ package dbcon
 import (
 	"assetinventory/assethandler/jsonhandler"
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -123,24 +122,19 @@ var ( // Mock data
 )
 
 func TestSetupDatabase(t *testing.T) {
+	// Arrange
 	mockDB := new(MockDB)
-	ctx := context.TODO()
-	uri := "mongodb://localhost:27017/"
-	dbName := "test_db"
+	mockClient := &mongo.Client{}
+	mockDB.On("Connect", mock.Anything, mock.Anything).Return(mockClient, nil)
+	mockDB.On("Ping", mock.Anything, mock.Anything).Return(nil)
 
-	// Set up expectations for the mock
-	mockDB.On("Connect", ctx, mock.Anything).Return(&mongo.Client{}, nil)
+	// Act
+	err := SetupDatabase("mongodb://localhost:27017", "testdb")
 
-	// Call the SetupDatabase function with the mock
-	_, err := mockDB.Connect(ctx, nil)
+	// Assert
 	assert.NoError(t, err)
-	err = SetupDatabase(uri, dbName)
-	if err != nil {
-		t.Errorf("SetupDatabase failed: %v", err)
-	}
-
-	// Assert that the expectations were met and no error occurred
-	assert.NoError(t, err)
+	assert.Equal(t, mockClient, client)
+	assert.Equal(t, "testdb", dbName)
 	mockDB.AssertExpectations(t)
 }
 
@@ -257,12 +251,12 @@ func TestGetLatestScan(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			gin.SetMode(gin.TestMode)
 			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
+			// c, _ := gin.CreateTestContext(w)
 			if tc.name == "Get Scan" {
 				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(latestScan, nil, nil))
-				c.Request, _ = http.NewRequest("GET", "/GetLatestScan", bytes.NewBuffer(tc.request)) // Use tc.request directly
+				// c.Request, _ = http.NewRequest("GET", "/GetLatestScan", bytes.NewBuffer(tc.request)) // Use tc.request directly
 
-				GetLatestScan(mockDB, c)
+				GetLatestScan(mockDB)
 
 				var responseScan jsonhandler.BackState
 				err := json.Unmarshal(w.Body.Bytes(), &responseScan)
@@ -273,9 +267,9 @@ func TestGetLatestScan(t *testing.T) {
 			}
 			if tc.name == "No Scan" {
 				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, nil, nil))
-				c.Request, _ = http.NewRequest("GET", "/GetLatestScan", bytes.NewBuffer(tc.request)) // Use tc.request directly
+				// c.Request, _ = http.NewRequest("GET", "/GetLatestScan", bytes.NewBuffer(tc.request)) // Use tc.request directly
 
-				GetLatestScan(mockDB, c)
+				GetLatestScan(mockDB)
 
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -611,7 +605,7 @@ func TestManageAssetsAndRelations_getLatestScan(t *testing.T) {
 			c.Request, _ = http.NewRequest("POST", "/assetHandler", bytes.NewBuffer(jsonData))
 
 			// ManageAssetsAndRelations(mockDB, c)
-			GetLatestScan(mockDB, c)
+			GetLatestScan(mockDB)
 
 			var response map[string]interface{}
 			err := json.Unmarshal(w.Body.Bytes(), &response)

@@ -52,8 +52,8 @@ func SetupDatabase(uri string, databaseName string) error {
 	ctx := context.TODO()
 	clientOptions := options.Client().ApplyURI(uri)
 
-	var err error
-	client, err = mongo.Connect(ctx, clientOptions)
+	// var err error
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -191,37 +191,6 @@ func saveChange(changeType string, changes Timeline) error {
 	return nil
 }
 
-type AssetRequest struct {
-	AddAsset        []jsonhandler.Asset          `json:"addAsset"`        // To add new assets
-	RemoveAsset     []string                     `json:"removeAsset"`     // Asset IDs to remove
-	UpdatedAsset    map[string]jsonhandler.Asset `json:"updateAsset"`     // Asset ID to updated Asset mapping
-	AddRelations    []jsonhandler.Relation       `json:"addRelations"`    // Relations to add
-	RemoveRelations []string                     `json:"removeRelations"` // Relation IDs to remove
-}
-type Timeline struct {
-	AddAsset        map[string]jsonhandler.Asset    `json:"addAsset"`        // To add new assets
-	RemoveAsset     map[string]jsonhandler.Asset    `json:"removeAsset"`     // Asset IDs to remove
-	UpdatedAsset    map[string]jsonhandler.Asset    `json:"updateAsset"`     // Asset ID to updated Asset mapping
-	AddRelations    map[string]jsonhandler.Relation `json:"addRelations"`    // Relations to add
-	RemoveRelations map[string]jsonhandler.Relation `json:"removeRelations"` // Relation IDs to remove
-
-}
-type AddAsset struct {
-	Asset jsonhandler.Asset `json:"asset"`
-}
-type RemoveAsset struct {
-	Asset jsonhandler.Asset `json:"asset"`
-}
-type UpdateAsset struct {
-	Asset jsonhandler.Asset `json:"asset"`
-}
-type AddRelation struct {
-	Relation jsonhandler.Relation `json:"relation"`
-}
-type RemoveRelation struct {
-	Relation jsonhandler.Relation `json:"relation"`
-}
-
 func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 	var req AssetRequest
 	var messages []string
@@ -309,13 +278,13 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 			if !(isValidName(newAsset.Name) && isValidOwner(newAsset.Owner) && isValidType(newAsset.Type)) {
 				log.Printf("Error user input contains illegal charachters!")
 				errors = append(errors, "Failed to add new assets: User input contains illegal characters!")
-				return messages, errors
+				return messages, errors, changes
 			}
 			nextU, err := flake.NextID()
 			if err != nil {
 				log.Printf("Error generating UID: %v\n", err)
 				errors = append(errors, "Failed to add new assets: "+err.Error())
-				return messages, errors
+				return messages, errors, changes
 			}
 			next := strconv.FormatUint(nextU, 10)
 			newAssetID := next
@@ -615,7 +584,7 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				if err != nil {
 					log.Printf("Error generating UID: %v\n", err)
 					errors = append(errors, "Failed to add new assets: "+err.Error())
-					return messages, errors
+					return messages, errors, changes
 				}
 				next := strconv.FormatUint(nextU, 10)
 				newRelationID := next
