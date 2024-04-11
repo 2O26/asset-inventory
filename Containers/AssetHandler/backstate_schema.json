@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Asset inventory backend state schema",
+  "description": "A state as retrieved from the AssetHandler database",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "ID of a state as taken directly from the AssetHandler database.",
+      "type": "string"
+    },
+    "mostRecentUpdate": {
+      "description": "Timestamp of most recent update.",
+      "type": "string"
+    },
+    "assets": {
+      "description": "Map of all assets present in state",
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]+$": {
+          "description": "Asset ID.",
+          "type": "object",
+          "properties": {
+            "Name": {
+              "description": "Name of asset.",
+              "type": "string"
+            },
+            "Owner": {
+              "description": "Owner of asset.",
+              "type": "string"
+            },
+            "Type": {
+              "description": "Type(s) of asset.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "Created at": {
+              "description": "Timestamp of asset creation.",
+              "type": "string"
+            },
+            "Updated at": {
+              "description": "Timestamp of most recent asset update.",
+              "type": "string"
+            },
+            "Criticality": {
+              "description": "Criticality of asset.",
+              "type": "integer"
+            },
+            "Hostname": {
+              "description": "IP address of asset (if applicable). Name of the key will be updated in the future.",
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "relations": {
+      "description": "Map of all relations currently present in the inventory.",
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]+$": {
+          "description": "Asset IDs.",
+          "type": "object",
+          "properties": {
+            "from": {
+              "description": "Asset ID of the asset the relation comes from.",
+              "type": "string"
+            },
+            "to": {
+              "description": "Asset ID of the asset the relation goes to.",
+              "type": "string"
+            },
+            "direction": {
+              "description": "Property that defines if relation is unidirectional or bidirectional. Must be set to either uni or bi.",
+              "type": "string",
+              "enum": [
+                "uni",
+                "bi"
+              ]
+            },
+            "owner": {
+              "description": "Name of relation's owner.",
+              "type": "string"
+            },
+            "dateCreated": {
+              "description": "Timestamp of when the relation was created.",
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "pluginStates": {
+      "description": "States of all plugins present in the current state.",
+      "type": "object",
+      "properties": {
+        "string":{
+          "description": "Name of plugin",
+          "type": "object",
+          "properties": {
+            "stateID": {
+              "description": "ID of plugin's current state.",
+              "type": "string"
+            },
+            "dateCreated": {
+              "description": "Timestamp of plugin state's creation.",
+              "type": "string"
+            },
+            "dateUpdated": {
+              "description": "Timestamp of plugin state's most recent update.",
+              "type": "string"
+            },
+            "state":{
+              "description": "Plugin state data.",
+              "type": "object",
+              "patternProperties": {
+                "^[0-9]+$": {
+                  "description": "Plugin asset's ID.",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

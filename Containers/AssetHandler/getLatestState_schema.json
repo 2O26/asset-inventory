@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Asset inventory Schema",
+  "description": "A state retrieved from /getLatestState",
+  "type": "object",
+  "properties": {
+    "message": {
+      "description": "A message containing information that isn't the state, such as Authentication status.",
+      "type": "string"
+    },
+    "state": {
+      "description": "The state of the inventory.",
+      "type": "object",
+      "properties": {
+        "mostRecentUpdate": {
+          "description": "The timestamp for the latest update of the state.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "assets": {
+          "description": "A map containing all assets present in the state.",
+          "type": "object",
+          "patternProperties": {
+            "^[0-9]+$": {
+              "description": "The ID of an asset in the asset inventory.",
+              "type": "object",
+              "properties": {
+                "Name": {
+                  "description": "The name of an asset.",
+                  "type": "string"
+                },
+                "Owner": {
+                  "description": "The name of the asset's owner.",
+                  "type": "string"
+                },
+                "Type": {
+                  "Description": "An array containing the type(s) of an asset.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "Created at": {
+                  "description": "Time when asset was created.",
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "Updated at": {
+                  "description": "Time when asset was created.",
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "Criticality": {
+                  "description": "Criticality of asset.",
+                  "type": "integer"
+                },
+                "Hostname": {
+                  "description": "IP of asset (if applicable). Will be updated in the future.",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "plugins": {
+            "description": "A map containing all plugin information related to an asset.",
+            "type": "object",
+            "string": {
+              "description": "The name of a given plugin.",
+              "type": "object"
+            }
+          }
+        },
+        "relations": {
+          "description": "Map containing all relations of all assets in the state.",
+          "type": "object",
+          "properties": {
+            "string": {
+              "description": "Relation ID.",
+              "type": "object",
+              "properties": {
+                "from": {
+                  "description": "Asset ID of the asset the relation comes from.",
+                  "type": "string"
+                },
+                "to": {
+                  "description": "Asset ID of the asset the relation goes to.",
+                  "type": "string"
+                },
+                "direction": {
+                  "description": "Property that defines if relation is unidirectional or bidirectional. Must be set to either uni or bi.",
+                  "type": "string",
+                  "enum": [
+                    "uni",
+                    "bi"
+                  ]
+                },
+                "owner": {
+                  "description": "Name of relation's owner.",
+                  "type": "string"
+                },
+                "dateCreated": {
+                  "description": "Timestamp of when the relation was created.",
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        },
+        "pluginList": {
+          "description": "Names of all plugins present in the current state.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
