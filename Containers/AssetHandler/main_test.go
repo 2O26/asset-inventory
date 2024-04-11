@@ -2,7 +2,7 @@ package main
 
 import (
 	//"assetinventory/assethandler/dbcon"
-	//"assetinventory/assethandler/jsonhandler"
+	"assetinventory/assethandler/jsonhandler"
 	//"errors"
 	"testing"
 	"fmt"
@@ -88,7 +88,8 @@ func TestGetNetScanStatus(t *testing.T) {
 	//addInitialScan(scansHelper)
 	fmt.Println("5")
 	router1.GET("/status", func(c *gin.Context) {
-		c.String(http.StatusOK, "This is a test response")
+		var respBody jsonhandler.PluginState
+		c.JSON(http.StatusOK, respBody)
 	})
 	fmt.Println("6")
 	log.Println("Server starting on port 8081...")
@@ -96,8 +97,8 @@ func TestGetNetScanStatus(t *testing.T) {
 		log.Fatalf("Failed to start server: %v", err)
 	}*/
 	fmt.Println("7")
-	router1.Run(":8081")
-
+	//router1.Run(":8081")
+	fmt.Println("7,50")
     server1 := &http.Server{
         Addr:    ":8081",
         Handler: router1,
@@ -112,7 +113,7 @@ func TestGetNetScanStatus(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	JsonTestMsg := getNetScanStatus()
 	fmt.Println("8")
-	if JsonTestMsg != nil {
+	if string(JsonTestMsg) != `{"stateID":"","dateCreated":"","dateUpdated":"","state":null}` {
 		t.Errorf("Expected not nil got nil")
 	}
 	//error := Perform(getNetScanStatus, JsonTestMsg)

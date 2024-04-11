@@ -55,7 +55,7 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 func getNetScanStatus() json.RawMessage {
-	url := "http://networkscan:8081/status"
+	url := "http://localhost:8081/status"
 
 	// GET request from netscan
 	response, err := http.Get(url)
