@@ -92,13 +92,13 @@ func TestGetNetScanStatus(t *testing.T) {
 	})
 	fmt.Println("6")
 	log.Println("Server starting on port 8081...")
-	if err := router1.Run(":8081"); err != nil {
+	/*if err := router1.Run(":8081"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
-	}
-
-	//router1.Run(":8081")
+	}*/
+	fmt.Println("7")
+	router1.Run(":8081")
 	
-    /*server1 := &http.Server{
+    server1 := &http.Server{
         Addr:    ":8081",
         Handler: router1,
     }
@@ -107,10 +107,11 @@ func TestGetNetScanStatus(t *testing.T) {
         if err := server1.ListenAndServe(); err != nil && err != http.ErrServerClosed {
             t.Fatalf("failed to start server1: %v", err)
         }
-    }()*/
-
+    }()
+	fmt.Println("7,5")
 	time.Sleep(2 * time.Second)
 	JsonTestMsg := getNetScanStatus()
+	fmt.Println("8")
 	if JsonTestMsg != nil {
 		t.Errorf("Expected not nil got nil")
 	}
@@ -122,7 +123,7 @@ func TestGetNetScanStatus(t *testing.T) {
 }
 
 func TestGetLatestState(t *testing.T) {
-
+	fmt.Println("9")
 	/*TODO
 	jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil) -> Error
 	var authSuccess = true
