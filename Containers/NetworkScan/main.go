@@ -152,8 +152,6 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	fmt.Println(flake.NextID())
-
 	err := dbcon.SetupDatabase("mongodb://netscanstorage:27019/", "scan")
 	if err != nil {
 		log.Fatalf("Error setting up database: %v", err)

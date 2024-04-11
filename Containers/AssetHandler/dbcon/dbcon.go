@@ -7,19 +7,23 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sony/sonyflake"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var client *mongo.Client
 var dbName string
+
+var flake, _ = sonyflake.New(sonyflake.Settings{
+	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
+})
 
 func SetupDatabase(uri string, databaseName string) error {
 	ctx := context.TODO()
@@ -128,7 +132,7 @@ func AddScan(db DatabaseHelper, c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Scan added successfully", "result": result})
 }
 
-func GetLatestScan(db DatabaseHelper, c *gin.Context) {
+func GetLatestState(db DatabaseHelper, c *gin.Context) {
 	var scan jsonhandler.BackState
 
 	// Find the latest scan based on the mostRecentUpdate field
@@ -166,7 +170,7 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 		return
 	}
 	// Find the latest scan to update
-	latestScan, err := getLatestScan(db)
+	latestScan, err := GetLatestScan(db)
 	if err != nil {
 		log.Printf("Error retrieving the latest scan: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -201,9 +205,9 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 	}
 }
 
-// getLatestScan retrieves the latest scan from the database and returns it along with any error that occurs.
+// GetLatestScan retrieves the latest scan from the database and returns it along with any error that occurs.
 
-func getLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
+func GetLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 	var latestScan jsonhandler.BackState
 	if err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&latestScan); err != nil {
 		log.Printf("Failed to retrieve the latest scan: %v\n", err)
@@ -219,10 +223,17 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 		for _, newAsset := range req.AddAsset {
 			if !(isValidName(newAsset.Name) && isValidOwner(newAsset.Owner) && isValidType(newAsset.Type)) {
 				log.Printf("Error user input contains illegal charachters!")
-				errors = append(errors, "Failed to add new assets: User input contains illegal charachters!")
+				errors = append(errors, "Failed to add new assets: User input contains illegal characters!")
 				return messages, errors
 			}
-			newAssetID := primitive.NewObjectID().Hex()
+			nextU, err := flake.NextID()
+			if err != nil {
+				log.Printf("Error generating UID: %v\n", err)
+				errors = append(errors, "Failed to add new assets: "+err.Error())
+				return messages, errors
+			}
+			next := strconv.FormatUint(nextU, 10)
+			newAssetID := next
 			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 			newAsset.DateUpdated = newAsset.DateCreated
 			latestScan.Assets[newAssetID] = newAsset
@@ -246,7 +257,7 @@ func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugi
 	fmt.Println("##############Adding plugin data##############")
 	// Find the latest scan to update
 	db := &MongoDBHelper{Collection: GetCollection("scans")}
-	latestScan, err := getLatestScan(db)
+	latestScan, err := GetLatestScan(db)
 	if err != nil {
 		// Log and return error if it's not ErrNoDocuments
 		log.Printf("Failed to retrieve the latest scan: %v\n", err)
@@ -282,19 +293,31 @@ func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugi
 // addAssets adds form network scan
 func AddAssets(req AssetRequest, assetIDS []string) string {
 	// Find the latest scan to update
+	firstScan := false
 	db := &MongoDBHelper{Collection: GetCollection("scans")}
-	latestScan, err := getLatestScan(db)
-	if err != nil {
-		// Log and return error if it's not ErrNoDocuments
-		log.Printf("Failed to retrieve the latest scan: %v\n", err)
-		return "Failed to retrieve the latest scan: " + err.Error()
+	var latestScan jsonhandler.BackState
+	latestScan, _ = GetLatestScan(db)
+	if latestScan.Assets == nil {
+		firstScan = true
+		//No assets in previous scan, need to initialize latestScan
+		latestScan.Assets = make(map[string]jsonhandler.Asset)
+		latestScan.Relations = make(map[string]jsonhandler.Relation)
+		latestScan.PluginStates = make(map[string]jsonhandler.PluginState)
+		latestScan.Plugins = make(map[string]jsonhandler.Plugin)
 	}
-	newAssetIDS := []string{}
+
+	//if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
+	//	// Log and return error if it's not ErrNoDocuments
+	//	log.Printf("Failed to retrieve the latest scan: %v\n", err)
+	//	return "Failed to retrieve the latest scan: " + err.Error()
+	//}
+
+	var newAssetIDS []string
 	// Check if there are new assets to add
 	if len(req.AddAsset) > 0 {
 		var newAssets []jsonhandler.Asset
 		for i, newAsset := range req.AddAsset {
-			// Check if an asset with the same hostname already exists
+			// Check if an asset with the same name already exists
 			exists := false
 			for _, existingAsset := range latestScan.Assets {
 				if existingAsset.Hostname == newAsset.Hostname {
@@ -308,17 +331,25 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 				newAssetIDS = append(newAssetIDS, assetIDS[i])
 			}
 		}
+
 		if len(newAssets) > 0 {
 			for i, newAsset := range newAssets {
 				// newAssetID := primitive.NewObjectID().Hex()
 				newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 				newAsset.DateUpdated = newAsset.DateCreated
+
 				latestScan.Assets[newAssetIDS[i]] = newAsset
 			}
 
 			// Update the latest scan with the new assets
+
 			update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
-			_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+			var err error
+			if firstScan {
+				_, err = db.InsertOne(context.TODO(), latestScan)
+			} else {
+				_, err = db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+			}
 			if err != nil {
 				log.Printf("Failed to add new assets: %v\n", err)
 				return "Failed to add new assets: " + err.Error()
@@ -333,6 +364,61 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 	}
 
 	return "No new assets to add"
+}
+
+// AddRelations adds relations from network scan
+func AddRelations(req AssetRequest, relationIDS []string) string {
+	// Find the latest scan to update
+	db := &MongoDBHelper{Collection: GetCollection("scans")}
+	latestScan, err := GetLatestScan(db)
+	if err != nil {
+		// Log and return error if it's not ErrNoDocuments
+		log.Printf("Failed to retrieve the latest scan: %v\n", err)
+		return "Failed to retrieve the latest scan: " + err.Error()
+	}
+	var newRelationIDS []string
+	// Check if there are new assets to add
+	if len(req.AddRelations) > 0 {
+		var newRelations []jsonhandler.Relation
+		for i, newRelation := range req.AddRelations {
+			// Check if the relation already exists
+			exists := false
+			for _, existingRelation := range latestScan.Relations {
+				if existingRelation.From == newRelation.From && existingRelation.To == newRelation.To {
+					exists = true
+					log.Printf("Relation from %s to %s already exists in the latest scan.\n", newRelation.From, newRelation.To)
+					break
+				}
+			}
+			if !exists {
+				newRelations = append(newRelations, newRelation)
+				newRelationIDS = append(newRelationIDS, relationIDS[i])
+			}
+		}
+		if len(newRelations) > 0 {
+			for i, newRelation := range newRelations {
+				// newAssetID := primitive.NewObjectID().Hex()
+				newRelation.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+				latestScan.Relations[newRelationIDS[i]] = newRelation
+			}
+
+			// Update the latest scan with the new assets
+			update := bson.M{"$set": bson.M{"relations": latestScan.Relations}}
+			_, err := db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
+			if err != nil {
+				log.Printf("Failed to add new relations: %v\n", err)
+				return "Failed to add new relations: " + err.Error()
+			} else {
+				log.Printf("New relations added successfully to the latest scan.\n")
+				return "New relations added successfully to the latest scan"
+			}
+		} else {
+			log.Printf("No new relations to add, all relations already exist.\n")
+			return "No new relations to add, all relations already exist"
+		}
+	}
+
+	return "No new relations to add"
 }
 
 // updateAssets updates existing assets in the latest scan
@@ -431,7 +517,14 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			}
 			// Check if the new relation already exists
 			if !existingRelations[key] {
-				newRelationID := primitive.NewObjectID().Hex()
+				nextU, err := flake.NextID()
+				if err != nil {
+					log.Printf("Error generating UID: %v\n", err)
+					errors = append(errors, "Failed to add new assets: "+err.Error())
+					return messages, errors
+				}
+				next := strconv.FormatUint(nextU, 10)
+				newRelationID := next
 				newRelation.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 				latestScan.Relations[newRelationID] = newRelation
 				existingRelations[key] = true // Update existingRelations to include this new relation

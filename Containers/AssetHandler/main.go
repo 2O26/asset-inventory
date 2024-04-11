@@ -5,6 +5,8 @@ import (
 	"assetinventory/assethandler/jsonhandler"
 	"context"
 	"fmt"
+	"github.com/sony/sonyflake"
+	"strconv"
 	"time"
 
 	"encoding/json"
@@ -32,6 +34,10 @@ type networkAsset struct {
 	Subnet    string `bson:"subnet" json:"subnet"`
 	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
 }
+
+var flake, _ = sonyflake.New(sonyflake.Settings{
+	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
+})
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -106,19 +112,6 @@ func getLatestState(c *gin.Context) {
 		pluginStates := make(map[string]json.RawMessage)
 		netassets := getNetScanStatus()
 		pluginStates["netscan"] = netassets
-		var mockOSScan = json.RawMessage(`
-		{
-			"stateID": "20240417-1400B",
-			"dateCreated": "2024-02-30 23:00:00",
-			"dateUpdated": "2024-02-31 23:00:30",
-			"state": {
-				"AID_4123523": {
-					"OS": "Windows XP"
-				}
-			}
-		}`)
-
-		pluginStates["osscan"] = mockOSScan
 
 		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil)
 
@@ -155,7 +148,7 @@ func getNetworkScan() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	addAsset := []jsonhandler.Asset{}
+	var addAsset []jsonhandler.Asset
 	var assetIDs []string
 	for k := range netassets.State {
 		assetIDs = append(assetIDs, k)
@@ -164,11 +157,11 @@ func getNetworkScan() {
 	// There might be a bug here where the assets are not added in the right order
 	for i := 1; i <= len(netassets.State); i++ {
 		asset := jsonhandler.Asset{
-			Name:        ("netscan-" + fmt.Sprint(netassets.DateUpdated) + "-" + fmt.Sprint(i)),
+			Name:        "netscan-" + fmt.Sprint(netassets.DateUpdated) + "-" + fmt.Sprint(i),
 			Owner:       "",
 			Type:        []string{},
 			Criticality: 0,
-			Hostname:    "",
+			Hostname:    netassets.State[assetIDs[i-1]].IPv4Addr,
 		}
 		addAsset = append(addAsset, asset)
 		fmt.Println("Asset: ", asset)
@@ -192,7 +185,109 @@ func getNetworkScan() {
 		PluginStateID: netassets.StateID,
 	}
 	fmt.Println("PluginState: ", pluginState)
+
+	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
+	addSubnetAssets(netassets)
+	addSubnetRelations(netassets)
+
 	dbcon.AddPluginData(pluginState, plugin)
+
+}
+
+func addSubnetAssets(netassets networkResponse) {
+	var addAsset []jsonhandler.Asset
+	var assetIDs []string
+	subnets := make(map[string]bool)
+
+	for _, asset := range netassets.State {
+		subnets[asset.Subnet] = true
+	}
+
+	for subnet, _ := range subnets {
+		fmt.Println("SUBNET: ", subnet)
+		asset := jsonhandler.Asset{
+			Name:        subnet,
+			Owner:       "netscan",
+			Type:        []string{"Subnet"},
+			Criticality: 0,
+			Hostname:    subnet,
+		}
+		addAsset = append(addAsset, asset)
+	}
+
+	for i := 1; i <= len(addAsset); i++ {
+		nextU, err := flake.NextID()
+		if err != nil {
+			log.Fatal(err)
+		}
+		next := strconv.FormatUint(nextU, 10)
+		assetIDs = append(assetIDs, next)
+	}
+
+	assetRequest := dbcon.AssetRequest{
+		AddAsset: addAsset,
+	}
+	dbcon.AddAssets(assetRequest, assetIDs)
+
+}
+
+func addSubnetRelations(netassets networkResponse) {
+	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
+	latestScan, err := dbcon.GetLatestScan(db)
+	if err != nil {
+		// Log and return error if it's not ErrNoDocuments
+		log.Printf("Failed to retrieve the latest scan: %v\n", err)
+		return
+	}
+	var addRelation []jsonhandler.Relation
+	var relationIDs []string
+	subnets := make(map[string]bool)
+	subnetAssets := make(map[string]jsonhandler.Asset)
+	for _, asset := range netassets.State {
+		subnets[asset.Subnet] = true
+	}
+	// Find all assets in subnet, then add relations between them.
+	// dbcon.Addrelations will check if they already exist
+	for subnet, _ := range subnets {
+		for assetID, asset := range latestScan.Assets {
+			if subnet == asset.Hostname && asset.Type[0] == "Subnet" {
+				//we have found the subnet asset. Add it to subnets
+				subnetAssets[assetID] = asset
+			}
+		}
+	}
+	//Now have all subnet assets. Adding relations between subnets and assets
+
+	for subnetAssetID, subnetAsset := range subnetAssets {
+		for netAssetID, netAsset := range netassets.State {
+			if netAsset.Subnet == subnetAsset.Hostname {
+				//have match, now make relation
+				relation := jsonhandler.Relation{
+					From:        subnetAssetID,
+					To:          netAssetID,
+					Direction:   "uni",
+					Owner:       "netscan",
+					DateCreated: time.Now().Format("2006-01-02 15:04:05"),
+				}
+				addRelation = append(addRelation, relation)
+			}
+		}
+	}
+	//generate relation IDs
+	for i := 1; i <= len(addRelation); i++ {
+		nextU, err := flake.NextID()
+		if err != nil {
+			log.Fatal(err)
+		}
+		next := strconv.FormatUint(nextU, 10)
+		relationIDs = append(relationIDs, next)
+	}
+
+	relationRequest := dbcon.AssetRequest{
+		AddRelations: addRelation,
+	}
+	dbcon.AddRelations(relationRequest, relationIDs)
+
 }
 
 func addInitialScan(scansHelper dbcon.DatabaseHelper) {
@@ -327,8 +422,9 @@ func main() {
 	router.POST("/AddScan", func(c *gin.Context) {
 		dbcon.AddScan(scansHelper, c)
 	})
+
 	router.GET("/GetLatestScan", func(c *gin.Context) {
-		dbcon.GetLatestScan(scansHelper, c)
+		dbcon.GetLatestState(scansHelper, c)
 	})
 
 	router.POST("/assetHandler", func(c *gin.Context) {
