@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"time"
 	"unicode"
@@ -14,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sony/sonyflake"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -680,12 +682,19 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 
 	var filter bson.M
 	if assetID != "" {
+		// If assetID provided, filter for it
 		filter = bson.M{
 			"$or": []bson.M{
 				{"changeDetails.updatedasset." + assetID: bson.M{"$exists": true}},
+				{"changeDetails.addasset." + assetID: bson.M{"$exists": true}},
+				{"changeDetails.removeasset." + assetID: bson.M{"$exists": true}},
 				{"changeDetails.addrelations." + assetID: bson.M{"$exists": true}},
 				{"changeDetails.removerelations." + assetID: bson.M{"$exists": true}},
-				{"changeDetails.removeasset." + assetID: bson.M{"$exists": true}},
+				// Wildcard not working, RelationID required?
+				// {"changeDetails.addrelations.*.from": assetID},
+				// {"changeDetails.addrelations.*.to": assetID},
+				// {"changeDetails.removerelations.*.from": assetID},
+				// {"changeDetails.removerelations.*.to": assetID},
 			},
 		}
 	} else {
@@ -699,14 +708,18 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 		return
 	}
 
-	// How to limit 10 for each asset??
-	// Currently limiting on all
-	if assetID == "" {
-		if len(results) > 10 {
-			results = results[:10]
-		}
+	// Sort results by time
+	// Timestamp stored as primitive.DateTime
+	sort.Slice(results, func(i, j int) bool {
+		dt1 := results[i]["timestamp"].(primitive.DateTime)
+		dt2 := results[j]["timestamp"].(primitive.DateTime)
+		return dt1 > dt2
+	})
+
+	// Limit to 10 most recent entries
+	if len(results) > 10 {
+		results = results[:10]
 	}
 
-	// Respond with the fetched data
 	c.JSON(http.StatusOK, results)
 }
