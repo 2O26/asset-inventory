@@ -97,7 +97,7 @@ func TestGetNetScanStatus(t *testing.T) {
 	}*/
 	fmt.Println("7")
 	router1.Run(":8081")
-	
+
     server1 := &http.Server{
         Addr:    ":8081",
         Handler: router1,
