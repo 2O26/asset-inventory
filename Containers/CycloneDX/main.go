@@ -3,8 +3,10 @@ package main
 import (
 	dbcon "assetinventory/cyclonedx/dbcon-cyclonedx"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +15,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+type LibraryCVEreq struct {
+	AssetID string `json:"assetID"`
+}
+
+type LibraryCVEresp struct {
+	Success string `json:"response"`
+}
 
 func uploadCycloneDX(c *gin.Context) {
 	// Limit the size of the request body to 10MB
@@ -104,6 +114,37 @@ func uploadCycloneDX(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to save SBOM to database",
 		})
+		return
+	}
+
+	// Send POST request to cvescanner:3002/librarySort
+	reqBody := LibraryCVEreq{
+		AssetID: assetID,
+	}
+	reqBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		fmt.Println("Error marshaling request body:", err)
+		return
+	}
+
+	resp, err := http.Post("http://cvescanner:3002/librarySort", "application/json", bytes.NewBuffer(reqBytes))
+	if err != nil {
+		fmt.Println("Error making POST request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return
+	}
+
+	// Optionally, unmarshal the response body into a struct
+	var respBody LibraryCVEresp
+	if err := json.Unmarshal(body, &respBody); err != nil {
+		fmt.Println("Error unmarshaling response body:", err)
 		return
 	}
 

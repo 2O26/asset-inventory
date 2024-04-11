@@ -69,9 +69,16 @@ class ConfigHandler {
 
     async getOSSAPIkey() {
         const apikey = await OSSAPIKEYSchema.find().exec();
-        if (apikey) {
+        if (apikey.length !== 0) {
             return apikey[0].apikey;
         } else {
+            const newSetting = { apikey: "" };
+            const newOSSAPIkeyConfig = new OSSAPIKEYSchema(newSetting);
+            try {
+                await newOSSAPIkeyConfig.save();
+            } catch (err) {
+                console.log('Error while adding OSS API key:', err.message);
+            }
             return "";
         }
     }
@@ -79,9 +86,8 @@ class ConfigHandler {
     async updateOSSAPIkey(oldapikey, updatedapikey) {
         // See if setting exists
         // if not, create settings
-        // Update setting with given OSS API key 
+        // Update setting with given OSS API key
         const userSettings = await OSSAPIKEYSchema.find({ apikey: oldapikey }).exec();
-
         if (userSettings.length === 0) {
             const newSetting = { apikey: "" };
             const newOSSAPIkeyConfig = new OSSAPIKEYSchema(newSetting);

@@ -299,6 +299,7 @@ app.post("/UpdateUserConfig", async (req, res) => {
 });
 
 app.get("/getOSSAPIkey", (req, res) => {
+    console.log("Enters")
     const configHandler = new ConfigHandler();
     configHandler.connect()
         .then(() => configHandler.getOSSAPIkey())
