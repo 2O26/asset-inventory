@@ -29,6 +29,7 @@ app.get("/status", (req, res) => {
     res.send("Check Status");
 });
 
+//If authenticated will return e.g. { "authenticated": true, "userID": "adkfji2329uf2dafkds2" }
 app.get("/getUID", async (req, res) => {
     const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
     jwt.verify(token, getKey, {}, async function (err, decoded) {
@@ -37,8 +38,41 @@ app.get("/getUID", async (req, res) => {
             res.status(401).json({ "authenticated": false, message: 'Invalid token' });
             return;
         } else {
-            console.log("Successfully authenticated: ", decoded.preferred_username)
+            console.log("Successfully authenticated (getUid): ", decoded.preferred_username)
             res.json({ "authenticated": true, "userID": decoded.sub })
+        }
+    });
+});
+
+//If authenticated will return e.g. { "authenticated": true, "roles": ["192.168.1.0/24", "10.0.0.0/32"], "isAdmin": true/false }
+app.get("/getRoles", async (req, res) => {
+
+    function containsNumber(str) {
+        return /\d/.test(str);
+    }
+
+    const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
+
+    jwt.verify(token, getKey, {}, async function (err, decoded) {
+        if (err) {
+            console.error("Authentication Error:", err)
+            res.status(401).json({ "authenticated": false, message: 'Invalid token' });
+            return;
+        } else {
+            let subnetRoles = [];
+            let isAdmin = false;
+
+            for (const [key, role] of Object.entries(decoded.realm_access.roles)) {
+                if (containsNumber(role)) {
+                    subnetRoles.push(role);
+                }
+                if (role === "admin") {
+                    isAdmin = true;
+                }
+            }
+
+            console.log("Successfully authenticated (getRoles): ", decoded.preferred_username)
+            res.json({ "authenticated": true, "roles": subnetRoles, "isAdmin": isAdmin })
         }
     });
 });

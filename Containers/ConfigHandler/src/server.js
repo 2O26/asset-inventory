@@ -26,83 +26,199 @@ app.get("/status", (req, res) => {
     res.send("Check Status");
 });
 
-app.get("/getIPranges", (req, res) => {
-    const configHandler = new ConfigHandler();
-    configHandler.connect()
-        .then(() => configHandler.getIPranges())
-        .then(result => {
-            res.json({ ipranges: result })
-        }).catch((err) => {
-            console.log('Could not fetch IP ranges from database. Error', err);
+app.get("/getIPranges", async (req, res) => {
+    try {
+        const response = await axios.get('http://authhandler:3003/getUID', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
         });
-});
 
-app.post("/addIPranges", (req, res) => {
-    if (IPRangechecker(req.body.iprange)) {
+        // If the user is not authenticated, respond with 401 Unauthorized
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+
         const configHandler = new ConfigHandler();
-
         configHandler.connect()
-            .then(() => configHandler.addIPrange(req.body.iprange))
-            .then(() => {
-                res.json({ responseFromServer: "Succeeded to add IPrange!!", success: "success", range: req.body.iprange });
+            .then(() => configHandler.getIPranges())
+            .then(result => {
+                res.json({ ipranges: result })
             }).catch((err) => {
-                res.json({ responseFromServer: "Failure to add IPrange!!", success: "database failure", range: req.body.iprange });
+                console.log('Could not fetch IP ranges from database. Error', err);
             });
-    } else {
-        res.json({ responseFromServer: "Failure to add IPrange!!", success: "wrong format", range: req.body.iprange });
+
+    } catch (error) {
+        console.error('Error while fetching ip ranges:', error);
+        res.status(500).send('Error fetching ip rangess');
     }
 });
 
-app.post("/removeIPrange", (req, res) => {
-
-    const configHandler = new ConfigHandler();
-    configHandler.connect()
-        .then(() => configHandler.removeIPrange(req.body.iprange))
-        .then(() => {
-            res.json({ responseFromServer: "Succeeded to remove IPrange!", success: "success", range: req.body.iprange });
-        }).catch((err) => {
-            // If no document matched the IP range to be removed
-            res.json({ responseFromServer: "Failure to remove IPrange due to database error.", success: "database error", range: req.body.iprange });
+app.post("/addIPranges", async (req, res) => {
+    try {
+        const response = await axios.get('http://authhandler:3003/getRoles', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
         });
+
+        // If the user is not authenticated, respond with 401 Unauthorized
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+        if (!response.data.isAdmin) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        if (IPRangechecker(req.body.iprange)) {
+            const configHandler = new ConfigHandler();
+
+            configHandler.connect()
+                .then(() => configHandler.addIPrange(req.body.iprange))
+                .then(() => {
+                    res.json({ responseFromServer: "Succeeded to add IPrange!!", success: "success", range: req.body.iprange });
+                }).catch((err) => {
+                    res.json({ responseFromServer: "Failure to add IPrange!!", success: "database failure", range: req.body.iprange });
+                });
+        } else {
+            res.json({ responseFromServer: "Failure to add IPrange!!", success: "wrong format", range: req.body.iprange });
+        }
+
+    } catch (error) {
+        console.error('Error while adding ip ranges:', error);
+        res.status(500).send('Error adding ip rangess');
+    }
+});
+
+app.post("/removeIPrange", async (req, res) => {
+
+    try {
+        const response = await axios.get('http://authhandler:3003/getRoles', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+
+        // If the user is not authenticated, respond with 401 Unauthorized
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+        if (!response.data.isAdmin) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        const configHandler = new ConfigHandler();
+        configHandler.connect()
+            .then(() => configHandler.removeIPrange(req.body.iprange))
+            .then(() => {
+                res.json({ responseFromServer: "Succeeded to remove IPrange!", success: "success", range: req.body.iprange });
+            }).catch((err) => {
+                // If no document matched the IP range to be removed
+                res.json({ responseFromServer: "Failure to remove IPrange due to database error.", success: "database error", range: req.body.iprange });
+            });
+    } catch (error) {
+        console.error('Error while adding ip ranges:', error);
+        res.status(500).send('Error adding ip rangess');
+    }
 });
 
 
-app.get("/getRecurring", (req, res) => {
-    const configHandler = new ConfigHandler();
-    configHandler.connect()
-        .then(() => configHandler.getRecurringScans())
-        .then(result => {
-            res.json({ recurring: result })
-        }).catch((err) => {
-            console.log('Could not fetch recurring scans from database. Error', err);
+app.get("/getRecurring", async (req, res) => {
+
+    try {
+        const response = await axios.get('http://authhandler:3003/getRoles', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
         });
+
+        // If the user is not authenticated, respond with 401 Unauthorized
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+        if (!response.data.isAdmin) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        const configHandler = new ConfigHandler();
+        configHandler.connect()
+            .then(() => configHandler.getRecurringScans())
+            .then(result => {
+                res.json({ recurring: result })
+            }).catch((err) => {
+                console.log('Could not fetch recurring scans from database. Error', err);
+            });
+
+    } catch (error) {
+        console.error('Error while fetching recurring scans:', error);
+        res.status(500).send('Error fetching recurring scans');
+    }
 })
 
 app.post("/addRecurring", async (req, res) => {
-    const configHandler = new ConfigHandler();
-    if (RecurringScanFormat(req.body.recurring)) {
-        configHandler.connect()
-            .then(() => configHandler.addRecurringScan(req.body.recurring))
-            .then(() => {
-                res.json({ responseFromServer: "Succeeded to add recurring scan!!", success: "success", recurring: req.body.recurring });
-            }).catch((err) => {
-                res.json({ responseFromServer: "Failure to add recurring scan!!", success: "database failure", recurring: req.body.recurring });
-            });
-    } else {
-        res.json({ responseFromServer: "Failure to add recurring scan!!", success: "wrong format", recurring: req.body.recurring });
+    try {
+        const response = await axios.get('http://authhandler:3003/getRoles', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+
+        // If the user is not authenticated, respond with 401 Unauthorized
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+        if (!response.data.isAdmin) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        const configHandler = new ConfigHandler();
+        if (RecurringScanFormat(req.body.recurring)) {
+            configHandler.connect()
+                .then(() => configHandler.addRecurringScan(req.body.recurring))
+                .then(() => {
+                    res.json({ responseFromServer: "Succeeded to add recurring scan!!", success: "success", recurring: req.body.recurring });
+                }).catch((err) => {
+                    res.json({ responseFromServer: "Failure to add recurring scan!!", success: "database failure", recurring: req.body.recurring });
+                });
+        } else {
+            res.json({ responseFromServer: "Failure to add recurring scan!!", success: "wrong format", recurring: req.body.recurring });
+        }
+
+    } catch (error) {
+        console.error('Error while adding recurring scans:', error);
+        res.status(500).send('Error adding recurring scans');
     }
 });
 
 app.post("/removeRecurring", async (req, res) => {
-
-    const configHandler = new ConfigHandler();
-    configHandler.connect()
-        .then(() => configHandler.removeRecurringScan(req.body.recurring))
-        .then(() => {
-            res.json({ responseFromServer: "Succeeded to remove recurring scan!", success: "success", range: req.body.recurring });
-        }).catch((err) => {
-            res.json({ responseFromServer: "Failure to remove recurring scan due to database error.", success: "database error", recurring: req.body.recurring });
+    try {
+        const response = await axios.get('http://authhandler:3003/getRoles', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
         });
+
+        // If the user is not authenticated, respond with 401 Unauthorized
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+        if (!response.data.isAdmin) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        const configHandler = new ConfigHandler();
+        configHandler.connect()
+            .then(() => configHandler.removeRecurringScan(req.body.recurring))
+            .then(() => {
+                res.json({ responseFromServer: "Succeeded to remove recurring scan!", success: "success", range: req.body.recurring });
+            }).catch((err) => {
+                res.json({ responseFromServer: "Failure to remove recurring scan due to database error.", success: "database error", recurring: req.body.recurring });
+            });
+
+    } catch (error) {
+        console.error('Error while removing recurring scans:', error);
+        res.status(500).send('Error removing recurring scans');
+    }
 
 });
 

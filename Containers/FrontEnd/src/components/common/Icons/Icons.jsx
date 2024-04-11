@@ -134,10 +134,10 @@ export const PDFIcon = ({ size = 30 }) => {
 
 export const InfoIcon = ({ size = 30, component: Component, text = null }) => {
     return (
-        <div class="info-container">
+        <div className="info-container">
             <IoIosInformationCircleOutline size={size} />
-            {Component && <div class="info-component"> <Component />  </div>}
-            {text && <div class="info-text">  {text}  </div>}
+            {Component && <div className="info-component"> <Component />  </div>}
+            {text && <div className="info-text">  {text}  </div>}
         </div>
     )
 }

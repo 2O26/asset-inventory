@@ -49,16 +49,6 @@ export const StartNetScan = async (scanSettings) => {
     }
 }
 
-export const GetIPranges = async () => {
-    try {
-        const response = await fetch('http://localhost:3001/getIPranges');
-        return response.json();
-    } catch (err) {
-        console.error(err);
-        throw new Error('Could not fetch IP ranges');
-    }
-}
-
 export const CreateRealmRole = async (IPRange) => {
     try {
         if (UserService.tokenExpired()) {
@@ -160,11 +150,40 @@ export const DeleteRealmRole = async (IPRange) => {
     }
 }
 
+export const GetIPranges = async () => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
+        const response = await fetch('http://localhost:3001/getIPranges', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            }
+        });
+        return response.json();
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch IP ranges');
+    }
+}
+
 export const AddIPranges = async (IPRange) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
         const response = await fetch('http://localhost:3001/addIPranges', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: JSON.stringify({ iprange: IPRange })
         });
         const resData = await response.json();
@@ -177,9 +196,17 @@ export const AddIPranges = async (IPRange) => {
 
 export const RmIPrange = async (IPRange) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
         const response = await fetch('http://localhost:3001/removeIPrange', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: JSON.stringify({ iprange: IPRange })
         });
         const resData = await response.json();
@@ -192,8 +219,20 @@ export const RmIPrange = async (IPRange) => {
 
 export const GetRecurring = async () => {
     try {
-        const response = await fetch('http://localhost:3001/getRecurring');
-        return response.json();
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
+        const response = await fetch('http://localhost:3001/getRecurring', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            }
+        });
+        const resData = await response.json();
+        return resData;
 
     } catch (err) {
         console.error(err);
@@ -203,9 +242,17 @@ export const GetRecurring = async () => {
 
 export const AddRecurring = async (recurring) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
         const response = await fetch('http://localhost:3001/addRecurring', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: JSON.stringify(recurring)
         });
         const resData = await response.json();
@@ -218,9 +265,17 @@ export const AddRecurring = async (recurring) => {
 
 export const RmRecurring = async (recurring) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
         const response = await fetch('http://localhost:3001/removeRecurring', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: JSON.stringify({ recurring: recurring })
         });
         const resData = await response.json();

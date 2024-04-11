@@ -187,9 +187,9 @@ export default function RecurringScanSettings() {
                                     </select>
                                 </div>
                                 <div>
-                                    <p className='settingsText'>  Time interval to perform the scan
+                                    <div className='settingsText'>  Time interval to perform the scan
                                         <InfoIcon size={22} component={CronMap} />
-                                        : </p>
+                                        : </div>
                                     <input
                                         type="RecurringScanTime"
                                         id="RecurringScanInputTime"
