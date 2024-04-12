@@ -5,9 +5,10 @@ import (
 	"assetinventory/assethandler/jsonhandler"
 	"context"
 	"fmt"
-	"github.com/sony/sonyflake"
 	"strconv"
 	"time"
+
+	"github.com/sony/sonyflake"
 
 	"encoding/json"
 	"log"
@@ -407,8 +408,6 @@ func main() {
 	router := gin.Default()
 	// Apply the CORS middleware
 	router.Use(CORSMiddleware())
-
-	router.GET("/getLatestState", getLatestState)
 	// router.POST("/uploadCycloneDX", uploadCycloneDX)
 
 	err := dbcon.SetupDatabase("mongodb://dbstorage:27017/", "scan")
@@ -416,9 +415,11 @@ func main() {
 		log.Fatalf("Could not set up database: %v", err)
 	}
 
+	timelineDB := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("timelineDB")}
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
 	addInitialScan(scansHelper)
+	router.GET("/getLatestState", getLatestState)
 	router.POST("/AddScan", func(c *gin.Context) {
 		dbcon.AddScan(scansHelper, c)
 	})
@@ -428,14 +429,21 @@ func main() {
 	})
 
 	router.POST("/assetHandler", func(c *gin.Context) {
-		dbcon.ManageAssetsAndRelations(scansHelper, c)
+		dbcon.ManageAssetsAndRelations(scansHelper, timelineDB, c)
 	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
-		dbcon.PrintAllDocuments(scansHelper, c)
+		// dbcon.PrintAllDocuments(scansHelper, c)
+		dbcon.PrintAllDocuments(timelineDB, c)
 	})
 
 	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
 		dbcon.DeleteAllDocuments(scansHelper, c)
+		dbcon.DeleteAllDocuments(timelineDB, c)
+	})
+
+	router.GET("/GetTimelineData", func(c *gin.Context) {
+		// dbcon.DeleteAllDocuments(scansHelper, c)
+		dbcon.GetTimelineData(timelineDB, c)
 	})
 
 	log.Println("Server starting on port 8080...")
