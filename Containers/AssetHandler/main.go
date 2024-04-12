@@ -408,8 +408,6 @@ func main() {
 	router := gin.Default()
 	// Apply the CORS middleware
 	router.Use(CORSMiddleware())
-
-	router.GET("/getLatestState", getLatestState)
 	// router.POST("/uploadCycloneDX", uploadCycloneDX)
 
 	err := dbcon.SetupDatabase("mongodb://dbstorage:27017/", "scan")
@@ -421,6 +419,7 @@ func main() {
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
 	addInitialScan(scansHelper)
+	router.GET("/getLatestState", getLatestState)
 	router.POST("/AddScan", func(c *gin.Context) {
 		dbcon.AddScan(scansHelper, c)
 	})
@@ -430,7 +429,7 @@ func main() {
 	})
 
 	router.POST("/assetHandler", func(c *gin.Context) {
-		dbcon.ManageAssetsAndRelations(scansHelper, c)
+		dbcon.ManageAssetsAndRelations(scansHelper, timelineDB, c)
 	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
 		// dbcon.PrintAllDocuments(scansHelper, c)
@@ -438,7 +437,7 @@ func main() {
 	})
 
 	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
-		// dbcon.DeleteAllDocuments(scansHelper, c)
+		dbcon.DeleteAllDocuments(scansHelper, c)
 		dbcon.DeleteAllDocuments(timelineDB, c)
 	})
 

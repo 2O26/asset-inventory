@@ -54,8 +54,8 @@ func SetupDatabase(uri string, databaseName string) error {
 	ctx := context.TODO()
 	clientOptions := options.Client().ApplyURI(uri)
 
-	// var err error
-	client, err := mongo.Connect(ctx, clientOptions)
+	var err error
+	client, err = mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -177,13 +177,13 @@ func GetLatestState(db DatabaseHelper, c *gin.Context) {
 }
 
 // Save the change to the timelineDB collection
-func saveChange(changeType string, changes Timeline) error {
+func saveChange(changeType string, changes Timeline, timelineDB DatabaseHelper) error {
 	change := Change{
 		Type:          changeType,
 		Timestamp:     time.Now(),
 		ChangeDetails: changes,
 	}
-	timelineDB := &MongoDBHelper{Collection: GetCollection("timelineDB")}
+	// timelineDB := &MongoDBHelper{Collection: GetCollection("timelineDB")}
 	_, err := timelineDB.InsertOne(context.TODO(), change)
 	if err != nil {
 		log.Printf("Failed to save changings for timeline: %v", err)
@@ -193,7 +193,7 @@ func saveChange(changeType string, changes Timeline) error {
 	return nil
 }
 
-func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
+func ManageAssetsAndRelations(db DatabaseHelper, timelineDB DatabaseHelper, c *gin.Context) {
 	var req AssetRequest
 	var messages []string
 	var errors []string
@@ -248,7 +248,7 @@ func ManageAssetsAndRelations(db DatabaseHelper, c *gin.Context) {
 	}
 	// Only save the changes if the request contains operations
 	if len(changes.AddAsset) > 0 || len(changes.RemoveAsset) > 0 || len(changes.UpdatedAsset) > 0 || len(changes.AddRelations) > 0 || len(changes.RemoveRelations) > 0 {
-		saveChange("Asset and Relation manually changed", changes)
+		saveChange("Asset and Relation manually changed", changes, timelineDB)
 	}
 	// Send the response as a list of messages
 	if len(messages) > 0 {
