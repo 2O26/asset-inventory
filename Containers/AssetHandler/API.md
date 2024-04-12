@@ -31,46 +31,47 @@ The output is a JSON document that complies with the following schema:
         "assets": {
           "description": "A map containing all assets present in the state.",
           "type": "object",
-          "properties": {
-            "^[0-9]+$": {
-              "description": "The ID of an asset in the asset inventory.",
-              "type": "object",
-              "properties": {
-                "Name": {
-                  "description": "The name of an asset.",
-                  "type": "string"
-                },
-                "Owner": {
-                  "description": "The name of the asset's owner.",
-                  "type": "string"
-                },
-                "Type": {
-                  "Description": "An array containing the type(s) of an asset.",
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "Created at": {
-                  "description": "Time when asset was created.",
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "Updated at": {
-                  "description": "Time when asset was created.",
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "Criticality": {
-                  "description": "Criticality of asset.",
-                  "type": "integer"
-                },
-                "Hostname": {
-                  "description": "IP of asset (if applicable). Will be updated in the future.",
+          "additionalProperties": {
+            "description": "The ID of an asset in the asset inventory.",
+            "type": "object",
+            "properties": {
+              "Name": {
+                "description": "The name of an asset.",
+                "type": "string"
+              },
+              "Owner": {
+                "description": "The name of the asset's owner.",
+                "type": "string"
+              },
+              "Type": {
+                "Description": "An array containing the type(s) of an asset.",
+                "type": "array",
+                "items": {
                   "type": "string"
                 }
+              },
+              "Created at": {
+                "description": "Time when asset was created.",
+                "type": "string",
+                "format": "date-time"
+              },
+              "Updated at": {
+                "description": "Time when asset was created.",
+                "type": "string",
+                "format": "date-time"
+              },
+              "Criticality": {
+                "description": "Criticality of asset.",
+                "type": "integer"
+              },
+              "Hostname": {
+                "description": "IP of asset (if applicable). Will be updated in the future.",
+                "type": "string"
               }
             }
+          },
+          "propertyNames": {
+            "pattern": "^[0-9]+$"                 
           },
           "plugins": {
             "description": "A map containing all plugin information related to an asset.",
@@ -85,7 +86,7 @@ The output is a JSON document that complies with the following schema:
           "description": "Map containing all relations of all assets in the state.",
           "type": "object",
           "properties": {
-            "string": {
+            "additionalProperties": {
               "description": "Relation ID.",
               "type": "object",
               "properties": {
@@ -112,9 +113,11 @@ The output is a JSON document that complies with the following schema:
                 "dateCreated": {
                   "description": "Timestamp of when the relation was created.",
                   "type": "string",
-                  "format": "date-time"
                 }
               }
+            },
+            "propertyNames": {
+              "pattern": "^[0-9]+$"
             }
           }
         },

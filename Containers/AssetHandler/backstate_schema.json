@@ -16,44 +16,45 @@
     "assets": {
       "description": "Map of all assets present in state",
       "type": "object",
-      "patternProperties": {
-        "^[0-9]+$": {
-          "description": "Asset ID.",
-          "type": "object",
-          "properties": {
-            "Name": {
-              "description": "Name of asset.",
-              "type": "string"
-            },
-            "Owner": {
-              "description": "Owner of asset.",
-              "type": "string"
-            },
-            "Type": {
-              "description": "Type(s) of asset.",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "Created at": {
-              "description": "Timestamp of asset creation.",
-              "type": "string"
-            },
-            "Updated at": {
-              "description": "Timestamp of most recent asset update.",
-              "type": "string"
-            },
-            "Criticality": {
-              "description": "Criticality of asset.",
-              "type": "integer"
-            },
-            "Hostname": {
-              "description": "IP address of asset (if applicable). Name of the key will be updated in the future.",
+      "additionalProperties": {
+        "description": "Asset ID.",
+        "type": "object",
+        "properties": {
+          "Name": {
+            "description": "Name of asset.",
+            "type": "string"
+          },
+          "Owner": {
+            "description": "Owner of asset.",
+            "type": "string"
+          },
+          "Type": {
+            "description": "Type(s) of asset.",
+            "type": "array",
+            "items": {
               "type": "string"
             }
+          },
+          "Created at": {
+            "description": "Timestamp of asset creation.",
+            "type": "string"
+          },
+          "Updated at": {
+            "description": "Timestamp of most recent asset update.",
+            "type": "string"
+          },
+          "Criticality": {
+            "description": "Criticality of asset.",
+            "type": "integer"
+          },
+          "Hostname": {
+            "description": "IP address of asset (if applicable). Name of the key will be updated in the future.",
+            "type": "string"
           }
         }
+      },
+      "propertyNames": {
+        "pattern": "^[0-9]+$"
       }
     },
     "relations": {
