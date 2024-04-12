@@ -167,6 +167,10 @@ func removeCycloneDX(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("CycloneDX file removed."),
+	})
+
 }
 
 func CORSMiddleware() gin.HandlerFunc {
