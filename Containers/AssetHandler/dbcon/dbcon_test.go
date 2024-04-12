@@ -535,7 +535,7 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 	// Simulate an error while updating the db
 	mockDB.On("UpdateOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.UpdateResult{}, mockErr)
 	mockDBTimline := new(MockDB)
-	mockDBTimline.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
+	mockDBTimline.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("error while inserting to the db"))
 
 	invalidRequest := `{
         "AddAsset": [{

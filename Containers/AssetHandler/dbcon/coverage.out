@@ -39,7 +39,7 @@ assetinventory/assethandler/dbcon/dbcon.go:170.9,172.4 1 0
 assetinventory/assethandler/dbcon/dbcon.go:173.3,173.9 1 0
 assetinventory/assethandler/dbcon/dbcon.go:176.2,176.29 1 0
 assetinventory/assethandler/dbcon/dbcon.go:180.87,188.16 3 1
-assetinventory/assethandler/dbcon/dbcon.go:188.16,191.3 2 0
+assetinventory/assethandler/dbcon/dbcon.go:188.16,191.3 2 1
 assetinventory/assethandler/dbcon/dbcon.go:193.2,193.12 1 1
 assetinventory/assethandler/dbcon/dbcon.go:196.93,208.47 11 1
 assetinventory/assethandler/dbcon/dbcon.go:208.47,212.3 3 1
