@@ -154,6 +154,21 @@ func uploadCycloneDX(c *gin.Context) {
 	})
 }
 
+func removeCycloneDX(c *gin.Context) {
+	assetID := c.PostForm("assetID")
+	fmt.Printf("Asset ID: %s\n", assetID)
+
+	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
+	err := dbcon.RemoveCycloneDX(db, assetID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to remove SBOM from database.",
+		})
+		return
+	}
+
+}
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -180,6 +195,7 @@ func main() {
 		log.Fatalf("Could not set up database: %v", err)
 	}
 	router.POST("/uploadCycloneDX", uploadCycloneDX)
+	router.POST("/removeCycloneDX", removeCycloneDX)
 	sbomHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
 
 	router.GET("/getCycloneDXFile", func(c *gin.Context) {

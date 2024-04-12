@@ -79,6 +79,17 @@ func SaveCycloneDX(db DatabaseHelper, sbomData []byte, assetID string) error {
 	return nil
 }
 
+func RemoveCycloneDX(db DatabaseHelper, assetID string) error {
+	filter := bson.M{"_id": assetID}
+	result, err := db.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	} else if result.DeletedCount == 0 {
+		return fmt.Errorf("no files deleted")
+	}
+	return nil
+}
+
 // GetCycloneDXFile retrieves the CycloneDX file for the specified asset ID from the database.
 func GetCycloneDXFile(db DatabaseHelper, c *gin.Context) {
 	// Fetch the assetID from the POST request
