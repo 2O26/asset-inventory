@@ -308,3 +308,147 @@ Backend states are on a different format to the output from /getLatestState and 
   }
 }
 ```
+### POST /assetHandler
+This endpoint manages assets and relationships based on the provided request. It allows adding, updating, and removing assets and their relationships.
+
+#### Request
+- **Method**: POST
+- **URL**: `/assetHandler`
+- **Content-Type**: `application/json`
+- **Body**:
+  A JSON object detailing the asset and relationship modifications to perform.
+
+**Example Request Body**:
+```json
+{
+    "addAsset": [
+        {
+            "name": "New PS5",
+            "owner": "IT Department",
+            "type": [
+                "Gaming Console",
+                "PlayStation"
+            ],
+            "criticality": 5,
+            "hostname": "PS5-1"
+        },
+        {
+            "name": "My iPhone",
+            "owner": "IT Department",
+            "type": [
+                "Mobile",
+                "iOS"
+            ],
+            "criticality": 3,
+            "hostname": "iPhone-1"
+        }
+    ],
+    "removeAsset": [
+        "65f8671cfe55e5c76465d841",
+        "65fb497f691fc662e"
+    ],
+    "updateAsset": {
+        "65f8671cfe55e5c76465d843": {
+            "name": "Work Laptop",
+            "owner": "UID_6372",
+            "type": [
+                "Laptop",
+                "Windows"
+            ],
+            "criticality": 1,
+            "hostname": "Work-Laptop-56"
+        },
+        "65f8671cfe5565d878": {
+            "name": "Work Laptop",
+            "owner": "UID_6372",
+            "type": [
+                "Laptop",
+                "Windows"
+            ],
+            "criticality": 4,
+            "hostname": "Work-Laptop-56"
+        }
+    },
+    "addRelations": [
+        {
+            "from": "65f8671cfe55e5c76465d842",
+            "to": "45394445419413510",
+            "direction": "uni",
+            "owner": "UID_6372"
+        },
+        {
+            "from": "6615e79bbbb65",
+            "to": "6576465d842",
+            "direction": "uni",
+            "owner": "UID_6372"
+        }
+    ],
+    "removeRelations": [
+        "661555a5e79bb8366e78bb66",
+        "65f8671c5e5c76"
+    ]
+}
+```
+### Successful Response Example:
+
+**HTTP Status Code**: 200 OK
+
+**Content**:
+
+```json
+{
+  "messages": ["Asset added successfully", "Relation added successfully"],
+  "errors": []
+}
+```
+### Error Responses
+**400 Bad Request:**
+**Content**: `{"error": "Invalid request data: <error details>"}`
+- **Description:** Returned when the request body cannot be parsed or fails validation checks.
+
+**500 Internal Server Error:**
+**Content:** ```{"error": "Failed to update database entries"}```
+- **Description:** Returned if there is a failure during the database update operations.
+
+
+## GET /printAllDocuments
+
+### Description
+printAllDocuments retrieves all documents from the asset inventory timeline database.
+### Request
+- **Method**: GET
+- **URL**: `/printAllDocuments`
+
+### Response
+The response includes all documents found in the database.
+
+### Successful Response Example
+**HTTP Status Code**: 200 OK  
+**Content**: JSON array containing all documents.
+
+### Error Responses
+- **500 Internal Server Error**
+  - **Content**: `{"error": "Error fetching documents"}`
+  - **Description**: Returned when the database operation fails to retrieve documents.
+
+## GET /deleteAllDocuments
+
+### Description
+deleteAllDocuments deletes all documents from the asset inventory timeline database.
+
+### Request
+- **Method**: GET
+- **URL**: `/deleteAllDocuments`
+
+### Response
+Confirms the deletion of documents and provides a count of how many documents were deleted.
+
+### Successful Response Example
+**HTTP Status Code**: 200 OK  
+**Content**: `{"message": "Documents deleted", "count": X}`
+- X represents the number of documents deleted.
+
+### Error Responses
+- **500 Internal Server Error**
+  - **Content**: `{"error": "Error deleting documents"}`
+  - **Description**: Returned when the database operation fails to delete the documents.
