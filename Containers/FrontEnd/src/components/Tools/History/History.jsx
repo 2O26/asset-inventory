@@ -102,9 +102,9 @@ const options = {
 
 const countryCode = 'en-SE'
 
-export default function History({ width = "80vw", height = "84vh" }) {
+export default function History({ width = "80vw", height = "84vh", isDashboard = false }) {
     return (
-        <div className='center-flex-column'>
+        <div className='center-flex-column' style={{ margin: isDashboard ? "0 0" : "1.5rem 0" }}>
             <div className='history-container' style={{ width: width, height: height }}>
                 <div className='history-content'>
                     {Object.values(historyData).map((value, index) => {

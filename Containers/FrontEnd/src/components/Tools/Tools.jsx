@@ -25,7 +25,7 @@ export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = 
         },
         "History": {
             "icon": <HistoryIcon size={size} />,
-            "component": <History width={width} height={height} />,
+            "component": <History width={width} height={height} isDashboard={true} />,
 
         }
     }
