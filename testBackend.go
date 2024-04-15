@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	// List all directories and test files
+	// List all directories containing Go code
 	modules, testFiles, err := findModulesAndTests()
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -27,7 +27,7 @@ func main() {
 
 	// Run tests with coverage for each module
 	for i, module := range modules {
-		testFile := testFiles[i] // Corresponding test file name
+		testFile := testFiles[i]
 		fmt.Println("\nRunning tests for module:", module)
 		fmt.Println("Test file:", testFile) // Print the test file name
 		cmd := exec.Command("go", "test", "-v", "-cover", "./...")
@@ -42,9 +42,9 @@ func main() {
 		coverage := extractCoverage(output)
 		fmt.Println("percent code covered by test:", coverage)
 
-		// Convert coverage string to float and accumulate
+		// Convert coverage string to float
 		covFloat, err := strconv.ParseFloat(strings.TrimSuffix(coverage, "%"), 64)
-		if err == nil { // Only count successful conversions
+		if err == nil {
 			totalCoverage += covFloat
 			count++
 		}
@@ -112,7 +112,7 @@ func printFailedTests(output string) {
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
 		if strings.Contains(line, "--- FAIL:") {
-			fmt.Println(line) // Print the line containing failed test details
+			fmt.Println(line)
 		}
 	}
 }
