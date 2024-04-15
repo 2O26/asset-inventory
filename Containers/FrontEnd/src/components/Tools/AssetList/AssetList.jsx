@@ -51,7 +51,7 @@ export function SearchBar({ onSearch }) {
     );
 }
 
-export default function AssetList({ width = "95vw", height = "100%", isDashboard = false }) {
+export default function AssetList({ width = "95vw", height = "84vh", isDashboard = false }) {
     const navigate = useNavigate();
     const { data, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['getState'],

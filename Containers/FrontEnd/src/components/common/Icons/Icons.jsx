@@ -19,6 +19,7 @@ import { MdCyclone } from "react-icons/md";
 import { BsFiletypePdf } from "react-icons/bs";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
 import { RiRadioButtonLine } from "react-icons/ri";
+import { LuHistory } from "react-icons/lu";
 
 
 
@@ -123,6 +124,11 @@ export const LogsIcon = ({ size = 30 }) => {
 export const GraphIcon = ({ size = 30 }) => {
     return (
         <GrGraphQl size={size} />
+    )
+}
+export const HistoryIcon = ({ size = 30 }) => {
+    return (
+        <LuHistory size={size} />
     )
 }
 
