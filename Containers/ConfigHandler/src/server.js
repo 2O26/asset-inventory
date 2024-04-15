@@ -299,12 +299,10 @@ app.post("/UpdateUserConfig", async (req, res) => {
 });
 
 app.get("/getOSSAPIkey", (req, res) => {
-    console.log("Enters")
     const configHandler = new ConfigHandler();
     configHandler.connect()
         .then(() => configHandler.getOSSAPIkey())
         .then(result => {
-            console.log("API key", result);
             res.json({ apikey: result })
         }).catch((err) => {
             console.log('Could not fetch OSS API key from database. Error', err);
