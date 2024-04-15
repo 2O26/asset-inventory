@@ -4,13 +4,15 @@ import DasboardSettings from './DasboardSettings/DashboardSettings';
 import RecurringScanSettings from './RecurringScanSettings/RecurringScanSettings';
 import RenderOnRole from '../ProtectedRoutes/RenderOnRole';
 import CVEScanSettings from './CVEScanner/CVEScannerSettings';
+import DocLinkSettings from './DocLinkSettings/DocLinkSettings';
 import './Settings.css'
 
 const settingsDict = {
     "Dashboard Settings": <DasboardSettings />,
     "Network Scan Settings": <RenderOnRole roles={['admin']}><SetNetworkScanSettings /></RenderOnRole>,
     "Recurring Scan Settings": <RenderOnRole roles={['admin']}>< RecurringScanSettings /></RenderOnRole>,
-    "CVE Scan Settings": <RenderOnRole roles={['admin']}>< CVEScanSettings /></RenderOnRole>
+    "CVE Scan Settings": <RenderOnRole roles={['admin']}>< CVEScanSettings /></RenderOnRole>,
+    "Doc Link Settings":<RenderOnRole roles={['admin']}>< DocLinkSettings /></RenderOnRole>
 };
 
 export default function Settings() {

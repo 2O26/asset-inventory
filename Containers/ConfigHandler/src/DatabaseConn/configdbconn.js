@@ -6,6 +6,8 @@ const dbName = 'configurations';
 var IPRangeSchema = require('../Schemas/IPRangeSchema');
 var RecurringScanSchema = require('../Schemas/RecurringScanSchema');
 var OSSAPIKEYSchema = require('../Schemas/OSSAPIKEYSchema');
+var OSSAPIKEYSchema2 = require('../Schemas/OSSAPIKEYSchema2');
+
 
 class ConfigHandler {
     constructor() { }
@@ -99,6 +101,43 @@ class ConfigHandler {
         }
         try {
             const result = await OSSAPIKEYSchema.findOneAndUpdate({ apikey: updatedapikey });
+        } catch (err) {
+            console.log("Error updating OSS API key");
+        }
+    }
+
+    async getOSSAPIkey2() {
+        const apikey = await OSSAPIKEYSchema2.find().exec();
+        if (apikey.length !== 0) {
+            return apikey[0].apikey;
+        } else {
+            const newSetting = { apikey: "" };
+            const newOSSAPIkeyConfig = new OSSAPIKEYSchema2(newSetting);
+            try {
+                await newOSSAPIkeyConfig.save();
+            } catch (err) {
+                console.log('Error while adding OSS API key:', err.message);
+            }
+            return "";
+        }
+    }
+
+    async updateOSSAPIkey2(oldapikey, updatedapikey) {
+        // See if setting exists
+        // if not, create settings
+        // Update setting with given OSS API key
+        const userSettings = await OSSAPIKEYSchema2.find({ apikey: oldapikey }).exec();
+        if (userSettings.length === 0) {
+            const newSetting = { apikey: "" };
+            const newOSSAPIkeyConfig = new OSSAPIKEYSchema2(newSetting);
+            try {
+                await newOSSAPIkeyConfig.save();
+            } catch (err) {
+                console.log('Error while adding OSS API key:', err.message);
+            }
+        }
+        try {
+            const result = await OSSAPIKEYSchema2.findOneAndUpdate({ apikey: updatedapikey });
         } catch (err) {
             console.log("Error updating OSS API key");
         }

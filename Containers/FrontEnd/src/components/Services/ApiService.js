@@ -441,3 +441,30 @@ export const GetOSSAPIkey = async () => {
     }
 }
 
+export const UpdateAPIOSSkey2 = async (apikey) => {
+    try {
+        const response = await fetch('http://localhost:3001/updateOSSAPIkey2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ apikey: apikey })
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not add API key');
+    }
+}
+
+export const GetOSSAPIkey2 = async () => {
+    try {
+        const response = await fetch('http://localhost:3001/getOSSAPIkey2');
+        const resData = await response.json();
+        return resData;
+
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch API key');
+    }
+}
+
