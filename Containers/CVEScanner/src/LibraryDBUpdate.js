@@ -25,9 +25,12 @@ async function updateLibDB(cveSave, assetID, cycloneDXjson, previousState) {
 
             if (existingLibrary) {
                 if (!existingLibrary.assetids) {
-                    existingLibrary.assetids = []; // Initialize if not present
+                    existingLibrary.assetids = [];
                 }
-                existingLibrary.assetids.push(assetID);
+                if (!existingLibrary.assetids.includes(assetID)) {
+                    // We dont want to add the assetid if it already exists in the array (avoid duplicates)
+                    existingLibrary.assetids.push(assetID);
+                }
                 await cveSave.updateAssetIDstoLibraryEntry(component.purl, existingLibrary.assetids);
             } else if (!newLibrariesMap.has(component.purl)) { // Check if not already added to newLibraries
                 const newLib = {
@@ -46,7 +49,7 @@ async function updateLibDB(cveSave, assetID, cycloneDXjson, previousState) {
 function LibraryDBupdate(assetID, res) {
     const cveSave = new CVEscanSave();
     cveSave.connect()
-        .then(() => cveSave.getPrevLibraries())
+        .then(() => cveSave.getAllLibraries())
         .then(async previousState => {
 
             const cycloneDXjson = await fetchCycloneDX(assetID);
@@ -54,8 +57,8 @@ function LibraryDBupdate(assetID, res) {
                 res.json({ success: false, message: "Failure to fetch SBOM data" });
                 return;
             }
-            removeExisting(cveSave, assetID);
-            updateLibDB(cveSave, assetID, cycloneDXjson, previousState)
+            await removeExisting(cveSave, assetID);
+            await updateLibDB(cveSave, assetID, cycloneDXjson, previousState)
         }).catch((err) => {
             console.log("Could not get previous state of libraries: ", err)
             res.json({ Success: false });

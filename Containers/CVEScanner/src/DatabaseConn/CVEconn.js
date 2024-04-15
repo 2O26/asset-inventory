@@ -21,9 +21,38 @@ class CVEscanSave {
     };
 
 
-    async getPrevLibraries() {
+    async getAllLibraries() {
         const libraries = await LibrarySchema.find().exec();
         return libraries;
+    }
+
+    async getVulnerableAssetIDLibraries(assetid) {
+        var query = {
+            assetids: {
+                $in: [assetid]
+            }, // Checks if the asset ID is in the assetids array
+            $or: [
+                { "CVE.title": { $exists: true, $ne: "" } },
+                { "CVE.cvss": { $exists: true, $ne: null } },
+                { "CVE.severity": { $exists: true, $ne: "" } },
+                { "CVE.url": { $exists: true, $ne: "" } }
+            ]
+        };
+        const libraries = await LibrarySchema.find(query).exec();
+        return libraries
+    }
+
+    async getVulnerableAllLibraries(assetid) {
+        var query = {
+            $or: [
+                { "CVE.title": { $exists: true, $ne: "" } },
+                { "CVE.cvss": { $exists: true, $ne: null } },
+                { "CVE.severity": { $exists: true, $ne: "" } },
+                { "CVE.url": { $exists: true, $ne: "" } }
+            ]
+        };
+        const libraries = await LibrarySchema.find(query).exec();
+        return libraries
     }
 
     async savePartialLibraries(newLibrariesMap) {
@@ -59,7 +88,7 @@ class CVEscanSave {
         try {
             const result = await LibrarySchema.findOneAndUpdate(filter, { assetids: assetids });
         } catch (err) {
-            console.log("Error updating OSS API key");
+            console.error("Error updating asset IDs for library:", err);
         }
     }
 

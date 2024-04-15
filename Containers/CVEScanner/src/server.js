@@ -3,7 +3,7 @@ const axios = require('axios');
 
 
 const { CVEcheck } = require("./OSSCVEscan/OSSCVEscan");
-const { LibraryDBupdate } = require("./librarySort");
+const { LibraryDBupdate } = require("./LibraryDBUpdate");
 const CVEscanSave = require("./DatabaseConn/CVEconn");
 
 
@@ -22,6 +22,41 @@ app.listen(route, () => { console.log("Server listening on port: ", route) });
 app.get("/status", (req, res) => {
     console.log("\n !!! Check Status !!! \n");
     res.send("Check Status");
+});
+
+app.get("/getAllLibraries", async (req, res) => {
+    /*
+        Return all libraries from libraries DB.
+    */
+
+    try {
+        // Authenticate the user and get their UID
+        const authResponse = await axios.get('http://authhandler:3003/getUID', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+
+        if (!authResponse.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+
+        const cveSave = new CVEscanSave();
+        cveSave.connect()
+            .then(() => cveSave.getAllLibraries())
+            .then(libraries => {
+                res.json({ success: true, libraries: libraries });
+            })
+            .catch((err) => {
+                console.log("Could not get libraries: ", err)
+                res.json({ success: false, libraries: {} });
+            });
+
+    } catch (error) {
+        console.error('Error while processing request:', error);
+        res.status(500).send('An error occurred while processing your request.');
+    }
+
 });
 
 app.post("/getVulnerableAssetID", async (req, res) => {
@@ -43,14 +78,20 @@ app.post("/getVulnerableAssetID", async (req, res) => {
             return res.status(401).send('Invalid token');
         }
 
-        // Fetch CycloneDX file for the given asset ID
+        const assetid = req.body.assetID;
+        console.log(assetid)
 
+        const cveSave = new CVEscanSave();
+        cveSave.connect()
+            .then(() => cveSave.getVulnerableAssetIDLibraries(assetid))
+            .then(libraries => {
+                res.json({ success: true, cycloneDXvulns: libraries });
+            })
+            .catch((err) => {
+                console.log("Could not get libraries: ", err)
+                res.json({ success: false, libraries: {} });
+            });
 
-        // const cycloneDXData = await cycloneDXResponse.json();
-        // const vulnerabilities = await CVEcheck(cycloneDXData);
-
-        // Respond with the vulnerabilities found
-        res.json({ success: true, cycloneDXvulns: {} });
     } catch (error) {
         console.error('Error while processing request:', error);
         res.status(500).send('An error occurred while processing your request.');
@@ -75,14 +116,17 @@ app.post("/getVulnerableAssetAll", async (req, res) => {
             return res.status(401).send('Invalid token');
         }
 
-        // Fetch CycloneDX file for the given asset ID
+        cveSave.connect()
+            .then(() => cveSave.getVulnerableAllLibraries(assetid))
+            .then(libraries => {
+                res.json({ success: true, cycloneDXvulns: libraries });
+            })
+            .catch((err) => {
+                console.log("Could not get libraries: ", err)
+                res.json({ success: false, libraries: {} });
+            });
 
 
-        // const cycloneDXData = await cycloneDXResponse.json();
-        // const vulnerabilities = await CVEcheck(cycloneDXData);
-
-        // Respond with the vulnerabilities found
-        res.json({ success: true, cycloneDXvulns: {} });
     } catch (error) {
         console.error('Error while processing request:', error);
         res.status(500).send('An error occurred while processing your request.');
@@ -153,7 +197,6 @@ async function checkIfVulnerbilities(assetID) {
             - run function that invokes an external API call to check for CVEs
         - [x] Save result to database
     */
-    console.log("Checking for vulnerabilities")
     const purlsWithVulnerbilities = await CVEcheck(assetID);
     const cveSave = new CVEscanSave();
     cveSave.connect()

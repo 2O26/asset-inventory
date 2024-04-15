@@ -386,34 +386,6 @@ export const GetCDXfiles = async (assetID) => {
     }
 }
 
-export const GetVulnerbleComponents = async (assetID) => {
-    const return_data = {}
-    try {
-
-        if (UserService.tokenExpired()) {
-            UserService.updateToken()
-        }
-        const authToken = await UserService.getToken()
-
-        const response = await fetch('http://localhost:3002/getVulnerable', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
-                'Authorization': `Bearer ${authToken}`,
-            },
-            body: JSON.stringify({ "assetID": assetID })
-        });
-
-
-        const return_data = await response.json();
-
-        return return_data;
-    } catch (err) {
-        console.error(err);
-        throw new Error('Could not fetch CVE info');
-    }
-}
-
 export const UpdateAPIOSSkey = async (apikey) => {
     try {
         const response = await fetch('http://localhost:3001/updateOSSAPIkey', {
@@ -441,3 +413,75 @@ export const GetOSSAPIkey = async () => {
     }
 }
 
+export const GetAllSBOMLibraries = async () => {
+
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
+        const response = await fetch('http://localhost:3002/getAllLibraries', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        const result = await response.json();
+        return result;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch user settings');
+    }
+}
+
+export const GetVulnerbleComponents = async (assetID) => {
+    try {
+
+        if (UserService.tokenExpired()) {
+            UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
+        const response = await fetch('http://localhost:3002/getVulnerableAssetID', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({ "assetID": assetID })
+        });
+        const return_data = await response.json();
+
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch CVE info');
+    }
+}
+
+export const GetVulnerbleComponentsAll = async (assetID) => {
+    try {
+
+        if (UserService.tokenExpired()) {
+            UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
+        const response = await fetch('http://localhost:3002/getVulnerableAssetAll', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({ "assetID": assetID })
+        });
+        const return_data = await response.json();
+
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch CVE info');
+    }
+}

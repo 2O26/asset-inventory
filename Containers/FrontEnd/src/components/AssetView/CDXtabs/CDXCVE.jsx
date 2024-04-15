@@ -54,7 +54,7 @@ export const CDXCVE = ({ assetID }) => {
             //                 component.description.toLowerCase().includes(searchTerm.toLowerCase()));
             //     });
             if (CVEData.cycloneDXvulns) {
-                setFilteredfilteredLibraries(CVEData.cycloneDXvulns.npm);
+                setFilteredfilteredLibraries(CVEData.cycloneDXvulns);
             }
 
         }
@@ -62,6 +62,12 @@ export const CDXCVE = ({ assetID }) => {
 
     function handleClick() {
         console.log(CVEData.cycloneDXvulns.npm.vulnerabilities)
+    }
+
+    function consoleVulnerbleLibraries() {
+        if (filteredLibraries) {
+            console.log(filteredLibraries)
+        }
     }
 
     if (loadingCVE) {
@@ -83,7 +89,10 @@ export const CDXCVE = ({ assetID }) => {
     return (
         <div>
             <div>
-                <h3> NPM vulnerbilities</h3>
+                <h3> SBOM library vulnerbilities</h3>
+                {filteredLibraries && (
+                    <button className='standard-button' onClick={() => consoleVulnerbleLibraries()}> Console vulns for asset</button>
+                )}
                 {filteredLibraries.vulnerabilities && (
                     <div className='center-flex-column'>
                         {Object.keys(filteredLibraries.vulnerabilities).map((key, index) => {

@@ -19,7 +19,7 @@ import { MdCyclone } from "react-icons/md";
 import { BsFiletypePdf } from "react-icons/bs";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
 import { RiRadioButtonLine } from "react-icons/ri";
-
+import { MdOutlineScreenSearchDesktop } from "react-icons/md";
 
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
@@ -177,5 +177,11 @@ export const LinkAddIcon = ({ size = 30, color = null }) => {
 export const StatusIcon = ({ size = 15, color = "green" }) => {
     return (
         <RiRadioButtonLine size={size} color={color} />
+    )
+}
+
+export const SBOMSearch = ({ size = 30, color = null }) => {
+    return (
+        <MdOutlineScreenSearchDesktop size={size} color={color} />
     )
 }
