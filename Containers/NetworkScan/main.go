@@ -44,7 +44,7 @@ func nextID() int {
 }
 
 // Create a map to store the unique ID and sequence number of each request
-var requests = make(map[int]chan bool)
+// var requests = make(map[int]chan bool)
 
 // ping sends an ICMP echo request (ping) to the specified IP address and waits for a response.
 // It returns a boolean value indicating whether the host is up (true) or down (false), and an error value.
@@ -239,9 +239,9 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 			defer wg.Done()
 			isUp, err := ping(ip.String())
 			if err != nil {
-				fmt.Println("Error pinging: ", ip, " Error: ", err, "\n")
+				fmt.Println("Error pinging: ", ip, " Error: ", err)
 			} else if isUp {
-				fmt.Println("Finished ping for: ", ip, " with status: ", isUp, "\n")
+				fmt.Println("Finished ping for: ", ip, " with status: ", isUp)
 				pingResults <- pingResult{ip: ip, isUp: isUp, err: err}
 			}
 		}(cloneIP(ip))
@@ -273,7 +273,6 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 			}
 			scan.State[asset.UID] = asset
 		}
-
 
 		// Skip port scanning if CmdSelection is "simple" or the IP is down
 		if cmdSelection != "simple" && result.isUp {
