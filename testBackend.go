@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -22,8 +23,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	var totalCoverage float64
-	var count int
+	var totalCoveredLines float64
+	var totalLines int
 
 	// Run tests with coverage for each module
 	for i, module := range modules {
@@ -38,6 +39,7 @@ func main() {
 			fmt.Printf("Error running tests for module %s: %v\n", module, err)
 			printFailedTests(output) // Function to print failed test names
 		}
+
 		// Extract coverage percentage from output
 		coverage := extractCoverage(output)
 		fmt.Println("percent code covered by test:", coverage)
@@ -45,13 +47,23 @@ func main() {
 		// Convert coverage string to float
 		covFloat, err := strconv.ParseFloat(strings.TrimSuffix(coverage, "%"), 64)
 		if err == nil {
-			totalCoverage += covFloat
-			count++
+			// Determine the number of lines of code in the module
+			loc, err := countLinesOfCode(module)
+			if err != nil {
+				fmt.Println("Error counting LOC:", err)
+				continue
+			}
+
+			// Calculate the number of covered lines
+			coveredLines := (covFloat / 100.0) * float64(loc)
+
+			totalCoveredLines += coveredLines
+			totalLines += loc
 		}
 	}
 
-	if count > 0 {
-		overallCoverage := totalCoverage / float64(count)
+	if totalLines > 0 {
+		overallCoverage := (totalCoveredLines / float64(totalLines)) * 100
 		fmt.Printf("\nOverall code coverage: %.2f%%\n", overallCoverage)
 	} else {
 		fmt.Println("\nNo valid coverage data to calculate overall percentage.")
@@ -106,6 +118,31 @@ func extractCoverage(output string) string {
 		}
 	}
 	return final
+}
+
+func countLinesOfCode(dir string) (int, error) {
+	count := 0
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") && !strings.HasSuffix(info.Name(), "_test.go") {
+			// Count lines in the file
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				count++
+			}
+			return scanner.Err()
+		}
+		return nil
+	})
+	return count, err
 }
 
 func printFailedTests(output string) {
