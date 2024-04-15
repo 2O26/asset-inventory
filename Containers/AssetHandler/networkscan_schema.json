@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Asset inventory backend state schema",
+  "description": "A state as retrieved from the AssetHandler database",
+  "type": "object",
+  "properties": {
+    "StateID": {
+      "type": "string"
+    },
+    "DateCreated": {
+      "type": "string"
+    },
+    "DateUpdated": {
+      "type": "string"
+    },
+    "State": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["up", "down"]
+          },
+          "ipv4Addr": {
+            "type": "string",
+            "format": "ipv4"
+          },
+          "subnet": {
+            "type": "string"
+          },
+          "openPorts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "propertyNames": {
+        "pattern": "^[0-9]+$"
+      }
+    }
+  }
+}
