@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +12,14 @@ import (
 )
 
 func main() {
+	// Hardcode source files
+	mainFiles := map[string]string{
+		"Containers/AssetHandler/dbcon":        "Containers/AssetHandler/dbcon/dbcon.go",
+		"Containers/AssetHandler/jsonhandler":  "Containers/AssetHandler/jsonhandler/jsonhandler.go",
+		"Containers/CycloneDX/dbcon-cyclonedx": "Containers/CycloneDX/dbcon-cyclonedx/dbcon-cyclonedx.go",
+		"Containers/NetworkScan":               "Containers/NetworkScan/main.go",
+	}
+
 	// List all directories containing Go code
 	modules, testFiles, err := findModulesAndTests()
 	if err != nil {
@@ -29,36 +38,36 @@ func main() {
 	// Run tests with coverage for each module
 	for i, module := range modules {
 		testFile := testFiles[i]
+		modulePath := filepath.Join(".", module) // Use relative path
 		fmt.Println("\nRunning tests for module:", module)
-		fmt.Println("Test file:", testFile) // Print the test file name
+		fmt.Println("Test file:", testFile)
 		cmd := exec.Command("go", "test", "-v", "-cover", "./...")
-		cmd.Dir = module
+		cmd.Dir = modulePath
 		out, err := cmd.CombinedOutput()
 		output := string(out)
 		if err != nil {
 			fmt.Printf("Error running tests for module %s: %v\n", module, err)
-			printFailedTests(output) // Function to print failed test names
+			printFailedTests(output)
 		}
 
 		// Extract coverage percentage from output
 		coverage := extractCoverage(output)
-		fmt.Println("percent code covered by test:", coverage)
+		fmt.Println("Percent code covered by test:", coverage)
 
 		// Convert coverage string to float
 		covFloat, err := strconv.ParseFloat(strings.TrimSuffix(coverage, "%"), 64)
 		if err == nil {
-			// Determine the number of lines of code in the module
-			loc, err := countLinesOfCode(module)
+			filePath := filepath.Join(".", mainFiles[module]) // Use relative path
+			loc, err := countLinesOfCode(filePath)
 			if err != nil {
-				fmt.Println("Error counting LOC:", err)
+				fmt.Printf("Error counting LOC: %v\n", err)
 				continue
 			}
-
-			// Calculate the number of covered lines
-			coveredLines := (covFloat / 100.0) * float64(loc)
-
+			coveredLines := math.Round((covFloat / 100.0) * float64(loc))
 			totalCoveredLines += coveredLines
 			totalLines += loc
+
+			fmt.Printf("Total lines in file: %d, Covered lines: %.2f\n", loc, coveredLines)
 		}
 	}
 
@@ -77,12 +86,11 @@ func findModulesAndTests() ([]string, []string, error) {
 		if err != nil {
 			return err
 		}
-		// Check if it's a directory that contains test files
 		if info.IsDir() {
 			testFile, found := findTestFile(path)
 			if found {
 				modules = append(modules, path)
-				testFiles = append(testFiles, testFile) // Save the test file name
+				testFiles = append(testFiles, testFile)
 			}
 		}
 		return nil
@@ -120,29 +128,19 @@ func extractCoverage(output string) string {
 	return final
 }
 
-func countLinesOfCode(dir string) (int, error) {
-	count := 0
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") && !strings.HasSuffix(info.Name(), "_test.go") {
-			// Count lines in the file
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
+func countLinesOfCode(filePath string) (int, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
 
-			scanner := bufio.NewScanner(file)
-			for scanner.Scan() {
-				count++
-			}
-			return scanner.Err()
-		}
-		return nil
-	})
-	return count, err
+	scanner := bufio.NewScanner(file)
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
+	return count, scanner.Err()
 }
 
 func printFailedTests(output string) {
