@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Tools.css';
-import { AssetListIcon, IpScannerIcon, LogsIcon, GraphIcon, PDFIcon, AdminConsoleIcon, HistoryIcon } from '../common/Icons/Icons';
+
+import { AssetListIcon, IpScannerIcon, LogsIcon, GraphIcon, PDFIcon, AdminConsoleIcon, SBOMSearch, HistoryIcon } from '../common/Icons/Icons';
 import { RedirectToLogServer } from './ViewLogs/ViewLogs.jsx';
 
 import AssetList from './AssetList/AssetList.jsx';
@@ -29,6 +30,7 @@ export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = 
 
         }
     }
+    // TODO: Add global SBOM Library search here
 );
 
 export default function Tools() {
@@ -57,6 +59,9 @@ export default function Tools() {
                     <button className='button-tool' onClick={() => navigate("/tools/history")}>
                         <HistoryIcon size={60} />
                         <div> History </div>
+                    <button className='button-tool' onClick={() => navigate("/tools/SBOMLibrarySearch")}>
+                        <SBOMSearch size={60} />
+                        <div> Global SBOM library search</div>
                     </button>
                     <button className='button-tool' onClick={() => PDFDownload(data.state)}>
                         <PDFIcon size={60} />

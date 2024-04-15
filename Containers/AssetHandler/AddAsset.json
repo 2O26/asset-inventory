@@ -9,24 +9,34 @@
             ],
             "criticality": 5,
             "hostname": "PS5-1"
+        },
+        {
+            "name": "My iPhone",
+            "owner": "IT Department",
+            "type": [
+                "Mobile",
+                "iOS"
+            ],
+            "criticality": 3,
+            "hostname": "iPhone-1"
         }
     ],
     "removeAsset": [
-        "65fb497f691e94fc062ec196",
-        "65fb497f691e94fc062ec190"
+        "65f8671cfe55e5c76465d841",
+        "65fb497f691fc662e"
     ],
     "updateAsset": {
-        "65f8671cfe55e5c76465d841": {
+        "65f8671cfe55e5c76465d843": {
             "name": "Work Laptop",
             "owner": "UID_6372",
             "type": [
                 "Laptop",
                 "Windows"
             ],
-            "criticality": 4,
+            "criticality": 1,
             "hostname": "Work-Laptop-56"
         },
-        "65f8671cfe55e5c76465d878": {
+        "65f8671cfe5565d878": {
             "name": "Work Laptop",
             "owner": "UID_6372",
             "type": [
@@ -39,26 +49,20 @@
     },
     "addRelations": [
         {
-            "from": "65f8671cfe55e5c76465d848",
-            "to": "65f8671cfe55e5c76465d850",
+            "from": "65f8671cfe55e5c76465d842",
+            "to": "45394445419413510",
             "direction": "uni",
             "owner": "UID_6372"
         },
         {
-            "from": "65f8671cfe55e5c76465d840",
-            "to": "65f8671cfe55e5c76465d841",
-            "direction": "uni",
-            "owner": "UID_6372"
-        },
-        {
-            "from": "65fb4a4f691e94fc062ec192",
-            "to": "65fb4a4f691e94fc062ec191",
+            "from": "6615e79bbbb65",
+            "to": "6576465d842",
             "direction": "uni",
             "owner": "UID_6372"
         }
     ],
     "removeRelations": [
-        "65fafa26ec9a5699235bbd4b",
-        "65f8671cfe55e5c76465d848"
+        "661555a5e79bb8366e78bb66",
+        "65f8671c5e5c76"
     ]
 }

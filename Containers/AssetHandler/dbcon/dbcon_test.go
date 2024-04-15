@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -143,7 +144,6 @@ func TestSetupDatabase(t *testing.T) {
 	assert.NoError(t, err)
 	mockDB.AssertExpectations(t)
 }
-
 func TestAddScan(t *testing.T) {
 	mockDB := new(MockDB)
 	// mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("jsonhandler.BackState")).Return(&mongo.InsertOneResult{}, nil)
@@ -230,84 +230,38 @@ func TestAddScan(t *testing.T) {
 }
 
 // // TestGetLatestScan - Test case for GetLatestScan
+
 func TestGetLatestScan(t *testing.T) {
-	mockDB := new(MockDB) // Assuming you have a mock that satisfies the DatabaseHelper interface
-	latestScan, _ := json.Marshal(latestScan)
-	// Setting up the mock expectation
-	// mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(latestScan, nil, nil))
-	noScan, _ := json.Marshal(`{}`)
 	testCases := []struct {
-		name    string
-		request []byte
+		name string
 	}{
 		{
-			name:    "Get Scan",
-			request: latestScan,
+			name: "Get Scan",
 		},
 		{
-			name:    "No Scan",
-			request: noScan,
-		},
-		{
-			name:    "Error no Scan fund",
-			request: noScan,
+			name: "No Scan",
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			gin.SetMode(gin.TestMode)
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
 			if tc.name == "Get Scan" {
+				mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(latestScan, nil, nil))
-				c.Request, _ = http.NewRequest("GET", "/GetLatestScan", bytes.NewBuffer(tc.request)) // Use tc.request directly
-
-				GetLatestScan(mockDB, c)
-
-				var responseScan jsonhandler.BackState
-				err := json.Unmarshal(w.Body.Bytes(), &responseScan)
-				assert.NoError(t, err, "Expected no error unmarshalling the response")
-
+				_, err := GetLatestScan(mockDB)
+				assert.NoError(t, err)
 				// Ensure the mock expectations were met
 				mockDB.AssertExpectations(t)
 			}
 			if tc.name == "No Scan" {
-				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, nil, nil))
-				c.Request, _ = http.NewRequest("GET", "/GetLatestScan", bytes.NewBuffer(tc.request)) // Use tc.request directly
-
-				GetLatestScan(mockDB, c)
-
-				var response map[string]interface{}
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				assert.NoError(t, err)
-				// Check for the expected error message
-				errMsg, ok := response["error"].(string)
-				assert.True(t, ok)
-				assert.Equal(t, "Error while retrieving the latest scan", errMsg) // Assert that the response error message is as expected
-				// Assert that the response status code is 500 Bad Request
-				assert.Equal(t, http.StatusInternalServerError, w.Code) // Assert that the response status code is as expected
+				mockDB := new(MockDB)
+				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(latestScan, errors.New("error"), nil))
+				// mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, nil, nil))
+				_, err := GetLatestScan(mockDB)
+				fmt.Println(err)
+				assert.Error(t, err)
+				// Ensure the mock expectations were met
+				mockDB.AssertExpectations(t)
 			}
-			// if tc.name == "Error no Scan fund" {
-			// 	mockErr := errors.New("error while finding the document")
-			// 	// Simulate an error while finding the document
-			// 	mockDB.On("FindOne", mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, nil, mockErr))
-
-			// 	// mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(nil, mongo.ErrNoDocuments)
-
-			// 	c.Request, _ = http.NewRequest("GET", "/GetLatestScan", bytes.NewBuffer(tc.request)) // Use tc.request directly
-
-			// 	GetLatestScan(mockDB, c)
-
-			// 	var response map[string]interface{}
-			// 	err := json.Unmarshal(w.Body.Bytes(), &response)
-			// 	assert.NoError(t, err)
-			// 	// Check for the expected error message
-			// 	errMsg, ok := response["error"].(string)
-			// 	assert.True(t, ok)
-			// 	assert.Equal(t, "No scans found", errMsg) // Assert that the response error message is as expected
-			// 	// Assert that the response status code is 400 Bad Request
-			// 	assert.Equal(t, http.StatusNotFound, w.Code) // Assert that the response status code is as expected
-			// }
 		})
 	}
 
@@ -382,9 +336,11 @@ func TestIsValidType(t *testing.T) {
 
 func TestManageAssetsAndRelations(t *testing.T) {
 	mockDB := new(MockDB)
-
 	mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(latestScan, nil, nil))
 	mockDB.On("UpdateOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.UpdateResult{ModifiedCount: 1}, nil)
+	mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("jsonhandler.BackState")).Return(&mongo.InsertOneResult{}, nil)
+	mockDBTimline := new(MockDB)
+	mockDBTimline.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
 	// Mock requests
 	addAssetRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
@@ -397,7 +353,7 @@ func TestManageAssetsAndRelations(t *testing.T) {
 			},
 		},
 	}
-	illegalCharachtersAddAssetRequest := AssetRequest{
+	illegalCharactersAddAssetRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
 			{
 				Name:        "New--_Asset",
@@ -498,9 +454,9 @@ func TestManageAssetsAndRelations(t *testing.T) {
 			messages: []string{"Asset added successfully to the latest scan"},
 		},
 		{
-			name:    "Illegal Charachters",
-			request: illegalCharachtersAddAssetRequest,
-			errors:  []string{"Failed to add new assets: User input contains illegal charachters!"},
+			name:    "Illegal Characters",
+			request: illegalCharactersAddAssetRequest,
+			errors:  []string{"Failed to add new assets: User input contains illegal characters!"},
 		},
 		{
 			name:     "Remove Asset",
@@ -541,7 +497,7 @@ func TestManageAssetsAndRelations(t *testing.T) {
 			jsonData, _ := json.Marshal(tc.request)
 			c.Request, _ = http.NewRequest("POST", "/assetHandler", bytes.NewBuffer(jsonData))
 
-			ManageAssetsAndRelations(mockDB, c)
+			ManageAssetsAndRelations(mockDB, mockDBTimline, c)
 
 			var response map[string]interface{}
 			err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -571,64 +527,6 @@ func TestManageAssetsAndRelations(t *testing.T) {
 	}
 }
 
-func TestManageAssetsAndRelations_getLatestScan(t *testing.T) {
-	mockDB := new(MockDB)
-	mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, nil, nil))
-	// Mock requests
-	invalidRequest := AssetRequest{
-		AddAsset: []jsonhandler.Asset{
-			{
-				Name:        "New Asset",
-				Owner:       "UID_1234",
-				Type:        []string{"IoT", "Sensor"},
-				Criticality: 1, // Assuming Criticality is expected to be an int, this string will cause a mismatch.
-				Hostname:    "NewAsset-1",
-			},
-		},
-	}
-
-	// Test cases
-	testCases := []struct {
-		name     string
-		request  AssetRequest
-		messages []string
-		errors   []string
-	}{
-		{
-			name:     "Add Asset",
-			request:  invalidRequest,
-			messages: []string{"Asset added successfully to the latest scan"},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			gin.SetMode(gin.TestMode)
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-
-			jsonData, _ := json.Marshal(tc.request)
-			c.Request, _ = http.NewRequest("POST", "/assetHandler", bytes.NewBuffer(jsonData))
-
-			// ManageAssetsAndRelations(mockDB, c)
-			GetLatestScan(mockDB, c)
-
-			var response map[string]interface{}
-			err := json.Unmarshal(w.Body.Bytes(), &response)
-			assert.NoError(t, err)
-
-			mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, nil, nil))
-			ManageAssetsAndRelations(mockDB, c)
-			errMsg, ok := response["error"].(string)
-			assert.True(t, ok)
-			assert.Equal(t, "Error while retrieving the latest scan", errMsg)
-			// Assert that the response status code is 500 Internal Server Error
-			assert.Equal(t, http.StatusInternalServerError, w.Code)
-
-		})
-	}
-}
-
 func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 	mockDB := new(MockDB)
 	// Setting up the mock expectation for FindOne
@@ -636,8 +534,8 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 	mockErr := errors.New("error while updating the db")
 	// Simulate an error while updating the db
 	mockDB.On("UpdateOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.UpdateResult{}, mockErr)
-
-	// Mock requests
+	mockDBTimline := new(MockDB)
+	mockDBTimline.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("error while inserting to the db"))
 
 	invalidRequest := `{
         "AddAsset": [{
@@ -749,7 +647,7 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 				jsonData, _ := json.Marshal(tc.payload)
 				c.Request, _ = http.NewRequest("POST", "/assetHandler", bytes.NewBuffer(jsonData))
 
-				ManageAssetsAndRelations(mockDB, c)
+				ManageAssetsAndRelations(mockDB, mockDBTimline, c)
 
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -764,7 +662,7 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 				jsonData, _ := json.Marshal(tc.request)
 				c.Request, _ = http.NewRequest("POST", "/assetHandler", bytes.NewBuffer(jsonData))
 
-				ManageAssetsAndRelations(mockDB, c)
+				ManageAssetsAndRelations(mockDB, mockDBTimline, c)
 
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)

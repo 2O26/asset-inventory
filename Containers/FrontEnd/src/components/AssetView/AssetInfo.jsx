@@ -13,9 +13,9 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
     return (
         <div className='asset-info-container' >
             <div>{title}</div>
-            <div key={data.state.assets[assetID].properties.name}>
+            <div key={data.state.assets && data.state.assets[assetID] ? data.state.assets[assetID].properties.name : 'defaultKey'}>
                 {/* Standard information */}
-                {Object.entries(data.state.assets[assetID].properties).map(([key, value], index) => {
+                {data.state.assets && data.state.assets[assetID] && Object.entries(data.state.assets[assetID].properties).map(([key, value], index) => {
                     const isList = Array.isArray(value);
                     return (
                         isList ? (
@@ -48,7 +48,7 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                 <hr />
 
                 {/* Plugin information */}
-                {showPluginInfo && Object.values(data.state.assets[assetID].plugins).map((plugin, pluginIndex, pluginArray) => (
+                {data.state.assets && data.state.assets[assetID] && showPluginInfo && Object.values(data.state.assets[assetID].plugins).map((plugin, pluginIndex, pluginArray) => (
                     <React.Fragment key={pluginIndex}>
                         {Object.entries(plugin).map(([key, value]) => {
                             const isList = Array.isArray(value);
