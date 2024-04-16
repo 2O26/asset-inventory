@@ -692,3 +692,276 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestGetTimelineData(t *testing.T) {
+	testCases := []struct {
+		name     string
+		assetID  string
+		results  []bson.M
+		err      error
+		expected []bson.M
+		status   int
+	}{
+		{
+			name:    "test case 1",
+			assetID: "46330870528737286",
+			results: []bson.M{
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedrelations": primitive.A{
+							bson.M{"from": "46330870528737286", "to": "46330870528802822"},
+							bson.M{"from": "46331125206941706", "to": "46330870528737286"},
+							bson.M{"from": "46330870528731186", "to": "46330870528802822"},
+						},
+						"removedrelations": primitive.A{
+							bson.M{"from": "46330870528737286", "to": "46330870528802833"},
+							bson.M{"from": "46331125206941706", "to": "46330870028737286"},
+						},
+						"updatedassets": bson.M{
+
+							"46330870528737286": bson.M{
+								"criticality": bson.M{
+									"after":  1,
+									"before": 2,
+								},
+							},
+
+							"46330870529937286": bson.M{},
+						},
+					},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"removedrelations": []interface{}{
+							map[string]interface{}{"from": "46330870528737286", "to": "46330870528802822"},
+							map[string]interface{}{"from": "46331125206941706", "to": "46330870528737286"},
+							map[string]interface{}{"from": "46330870528733386", "to": "46330870528802822"},
+						},
+						"removedassets": primitive.A{
+							"46330870528737286",
+							"46330870998737286",
+						},
+						"addedassets": primitive.A{
+							"46330870528737286",
+							"46330870528223336",
+						},
+					},
+					"timestamp": primitive.DateTime(1681736000000),
+				}},
+			err: nil,
+
+			status: http.StatusOK,
+		},
+		{
+			name:    "test case 2",
+			assetID: "NonExistentID",
+			results: []bson.M{ /* populate with results not containing the assetID */ },
+			status:  http.StatusOK,
+		},
+		{
+			name:    "test case 3",
+			assetID: "46330870528737286",
+			results: []bson.M{
+				{"_id": "661e5c9d850b67e8699da766",
+					"change":    []interface{}{},
+					"timestamp": primitive.DateTime(1681736000000)},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedrelations":   nil,
+						"removedrelations": nil,
+					},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+			},
+			status: http.StatusOK,
+		},
+		{
+			name:    "test case 4",
+			assetID: "46330870528737286",
+			results: []bson.M{
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"updatedassets": []interface{}{
+							map[string]interface{}{
+								"46330870528737286": map[string]interface{}{
+									"criticality": map[string]interface{}{
+										"after":  1,
+										"before": 2,
+									},
+								},
+							},
+						},
+						"addedassets":      []interface{}{},
+						"removedassets":    []interface{}{},
+						"addedrelations":   []interface{}{},
+						"removedrelations": []interface{}{},
+					},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+			},
+			status: http.StatusOK,
+		},
+		{
+			name:    "test case 5",
+			assetID: "46330870528737286",
+			results: []bson.M{
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.A{
+						"addedassets"},
+					"timestamp": primitive.DateTime(1681736000000),
+				}},
+			status: http.StatusOK,
+		},
+		{
+			name:    "test case 6",
+			assetID: "46330870528737286",
+			results: []bson.M{
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedrelations": primitive.A{
+							map[string]interface{}{"from": "46330870528737286", "to": "46330870528802822"},
+						},
+						"removedrelations": primitive.A{
+							map[string]interface{}{"from": "46330870528737286", "to": "46330870528802822"},
+						},
+					},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				},
+				{
+					"_id": "661e5c9d850b67e8699da766",
+					"change": bson.M{
+						"addedassets": primitive.A{
+							"46330870528737286",
+						}},
+					"timestamp": primitive.DateTime(1681736000000),
+				}},
+			status: http.StatusOK,
+		},
+		{
+			name:    "test case 7",
+			assetID: "46330870528737286",
+			results: nil,
+			err:     errors.New("error while fetching data"),
+			status:  http.StatusInternalServerError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.name == "test case 7" {
+				mockDB := &MockDB{}
+				mockDB.On("Find", mock.Anything, mock.Anything).Return(tc.results, tc.err)
+				w := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(w)
+				c.Request, _ = http.NewRequest("GET", "/GetTimelineData?assetID="+tc.assetID, nil)
+
+				GetTimelineData(mockDB, c)
+
+				assert.Equal(t, tc.status, w.Code)
+				if tc.err == nil {
+					var results []bson.M
+					err := json.Unmarshal(w.Body.Bytes(), &results)
+					assert.Error(t, err)
+
+				}
+			} else {
+				mockDB := &MockDB{}
+				mockDB.On("Find", mock.Anything, mock.Anything).Return(tc.results, tc.err)
+
+				w := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(w)
+				c.Request, _ = http.NewRequest("GET", "/GetTimelineData?assetID="+tc.assetID, nil)
+
+				GetTimelineData(mockDB, c)
+
+				assert.Equal(t, tc.status, w.Code)
+
+				if tc.err == nil {
+					var results []bson.M
+					err := json.Unmarshal(w.Body.Bytes(), &results)
+					assert.NoError(t, err)
+
+				}
+
+			}
+		})
+	}
+}
