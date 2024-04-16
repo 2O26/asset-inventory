@@ -2,12 +2,10 @@ const express = require("express");
 const axios = require('axios');
 
 
-const { CVEcheck } = require("./OSSCVEscan/OSSCVEscan");
+const { CVEcheck, CVEcheckAll } = require("./OSSCVEscan/OSSCVEscan");
 const { LibraryDBupdate } = require("./LibraryDBUpdate");
 const CVEscanSave = require("./DatabaseConn/CVEconn");
 
-
-// const app = express(express.json());
 const app = express();
 app.use(express.json());
 const cors = require("cors");
@@ -139,18 +137,18 @@ app.post("/librarySort", async (req, res) => {
         Launched from the cycloneDX backend when a new SBOM is added.
         - [x] Make a GET request to fetch the SBOM file of given asset
         - [x] If assetID exists on any libraries, remove the entries. Alternatively remove the entire entry
-        - [x] Check if purl already exists in CVE library database. 
+        - [x] Check if purl already exists in CVE library database.
             - [x] If yes, add the asset to the list
-            - [x] If no, add a new library entry. 
+            - [x] If no, add a new library entry.
         - [x] Partial save of the libraries to DB (We dont want to wait for all the external API calls to have functionality of library DB)
         - [] API call to check CVEs for the new library entries (create call, just check conn and then exit func)
         - [x] Make a GET request to fetch the SBOM file of given asset
         - [x] If assetID exists on any libraries, remove the entries. Alternatively remove the entire entry
-        - [x] Check if purl already exists in CVE library database. 
+        - [x] Check if purl already exists in CVE library database.
             - [x] If yes, add the asset to the list
-            - [x] If no, add a new library entry. 
+            - [x] If no, add a new library entry.
         - [x] Partial save of the libraries to DB (We dont want to wait for all the external API calls to have functionality of library DB)
-        - [] API call to check CVEs for the new library entries (create call, just check conn and then exit func)
+        - [x] API call to check CVEs for the new library entries (create call, just check conn and then exit func)
     */
 
 
@@ -186,9 +184,13 @@ app.post("/removeAssetidLibs"), async (req, res) => {
 
 app.post("/recheckVulnerabilitiesAll", async (req, res) => {
     /*
-        - [] For each library + version combo
-            - run function that invokes an external API call to check for CVEs
+        POST request here to update the CVE database for the libraries
+
+        - [x] For each library + version combo
+            - [x] Run function that invokes an external API call to check for CVEs
     */
+    checkIfSBOMVulnsAll();
+    res.json({ Success: true });
 })
 
 async function checkIfVulnerbilities(assetID) {
@@ -198,6 +200,16 @@ async function checkIfVulnerbilities(assetID) {
         - [x] Save result to database
     */
     const purlsWithVulnerbilities = await CVEcheck(assetID);
+    const cveSave = new CVEscanSave();
+    cveSave.connect()
+        .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))
+        .catch((err) => {
+            console.log("Could not save purl CVE data: ", err)
+        });
+}
+
+async function checkIfSBOMVulnsAll() {
+    const purlsWithVulnerbilities = await CVEcheckAll();
     const cveSave = new CVEscanSave();
     cveSave.connect()
         .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))

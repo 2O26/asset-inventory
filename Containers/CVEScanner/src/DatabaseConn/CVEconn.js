@@ -119,6 +119,17 @@ class CVEscanSave {
         }
     }
 
+    async getAllPurls() {
+        try {
+            const results = await LibrarySchema.find();
+            const reducedResult = await results.map(result => result.purl)
+            return reducedResult;
+        } catch (error) {
+            console.error('Error fetching documents:', error);
+            return [];
+        }
+    }
+
     async addCVEsToPurl(purlsWithVulnerbilities) {
         Object.keys(purlsWithVulnerbilities).forEach(async key => {
             try {

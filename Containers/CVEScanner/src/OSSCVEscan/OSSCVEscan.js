@@ -39,14 +39,31 @@ async function checkVulnerabilities(purl, apikey) {
     }
 }
 
-async function getPurlsOfAssetID(assetID) {
-    // Get all the purl:s associated with the given asset-id
+async function getAllPurls() {
+    /*
+        Get all the purl:s in the library DB
+    */
     const cveSave = new CVEscanSave();
     return cveSave.connect()
-        .then(() => cveSave.getPurls(assetID))  // Execute getPurls after successful connection
+        .then(() => cveSave.getAllPurls())
         .then(result => {
-            // console.log(result); // Logs the result before returning
-            return result;  // Returns the result to the caller
+            return result;
+        })
+        .catch(err => {
+            console.log("Could not get purls: ", err);
+            return [];  // Return an empty array in case of error
+        });
+}
+
+async function getPurlsOfAssetID(assetID) {
+    /*
+        Get all the purl:s associated with the given asset-id
+    */
+    const cveSave = new CVEscanSave();
+    return cveSave.connect()
+        .then(() => cveSave.getPurls(assetID))
+        .then(result => {
+            return result;
         })
         .catch(err => {
             console.log("Could not get purls: ", err);
@@ -59,19 +76,51 @@ async function processPurlsInBatches(purl_list, apikey, batchSize) {
         Response data: { code: 400, message: 'Request for more than 128 components' }
         Thus we have to divide the libraries to batches of 128 and accumulate the results to an object
     */
-    let accumulatedResult = [];  // This could also be an array or any other data structure
+    let accumulatedResult = [];
 
     for (let i = 0; i < purl_list.length; i += batchSize) {
         const batch = purl_list.slice(i, i + batchSize);
         const batchResult = await checkVulnerabilities(batch, apikey);  // Process each batch and expect a result
         // Accumulate results; merge or concatenate based on your data structure
-        // push array of objects
         accumulatedResult.push(batchResult);
     }
-    return accumulatedResult;  // Return the final accumulated results
+    return accumulatedResult;
+}
+
+async function CVEcheckAll() {
+    /*
+        Mother function to check all libraries for CVEs
+    */
+    try {
+        const apikey = await getAPIkey();
+        if (apikey === "") {
+            console.log("Erronous api key or could not fetch it from settings")
+            return {}
+        }
+        console.log("API KEY: ", apikey);
+
+        const purl_list = await getAllPurls();
+        const OSSresponses = await processPurlsInBatches(purl_list, apikey, 128);
+        // Reduce to an array of library objects that contain CVEs
+        const componentsWithVulnerabilities = OSSresponses.flatMap(subArray =>
+            subArray.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
+        );
+        const objectivizedComponentsWithVulnerabilities = {}
+        componentsWithVulnerabilities.forEach(component => {
+            objectivizedComponentsWithVulnerabilities[component.coordinates] = component.vulnerabilities;
+        })
+
+        return objectivizedComponentsWithVulnerabilities;
+    } catch (err) {
+        console.error('Error scanning CVEs:', err.message);
+        return {};
+    }
 }
 
 async function CVEcheck(assetID) {
+    /*
+        Mother function to check libraries associated with a specific asset for CVEs
+    */
     try {
         const apikey = await getAPIkey();
         if (apikey === "") {
@@ -88,12 +137,8 @@ async function CVEcheck(assetID) {
         );
         const objectivizedComponentsWithVulnerabilities = {}
         componentsWithVulnerabilities.forEach(component => {
-            // objectivizedComponentsWithVulnerabilities[component.coordinates] = JSON.stringify(component.vulnerabilities, null, 2)
             objectivizedComponentsWithVulnerabilities[component.coordinates] = component.vulnerabilities;
-            // console.log('Coordinate:', component.coordinates);
-            // console.log('Vulnerabilities:', JSON.stringify(component.vulnerabilities, null, 2));
         })
-        // console.log(objectivizedComponentsWithVulnerabilities)
 
         return objectivizedComponentsWithVulnerabilities;
     } catch (err) {
@@ -102,4 +147,4 @@ async function CVEcheck(assetID) {
     }
 }
 
-module.exports = { CVEcheck };
+module.exports = { CVEcheck, CVEcheckAll };
