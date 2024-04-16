@@ -11,121 +11,128 @@ import (
 	"strings"
 )
 
-func main() {
-	// List all directories containing Go code
-	modules, testFiles, err := findModulesAndTests()
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
+const (
+	reset  = "\033[0m"
+	red    = "\033[31m"
+	green  = "\033[32m"
+	yellow = "\033[33m"
+	cyan   = "\033[36m"
+	white  = "\033[37m"
+	blue   = "\033[94m"
+)
 
-	if len(modules) == 0 {
-		fmt.Println("No Go modules found.")
-		os.Exit(0)
+func main() {
+	fmt.Println(cyan + "Starting Go code test coverage analysis..." + reset)
+	allFiles, err := findAllGoFiles()
+	if err != nil {
+		fmt.Println(red, "Error:", err, reset)
+		os.Exit(1)
 	}
 
 	var totalCoveredLines float64
 	var totalLines int
 
-	// Run tests with coverage for each module
-	for i, module := range modules {
-		testFile := testFiles[i]
-		sourceFile := findSourceFile(testFile)
-		modulePath := filepath.Join(".", module) // Use relative path
-		fmt.Println("\nRunning tests for module:", module)
-		fmt.Println("Test file:", testFile)
-		fmt.Println("Source file:", sourceFile)
-		cmd := exec.Command("go", "test", "-v", "-cover", "./...")
-		cmd.Dir = modulePath
-		out, err := cmd.CombinedOutput()
-		output := string(out)
+	for _, file := range allFiles {
+		modulePath, sourceFile := filepath.Split(file)
+		testFile := strings.TrimSuffix(sourceFile, ".go") + "_test.go"
+
+		moduleName := getModuleName(file)                   // Get the container name
+		header := centerAlignHeader(moduleName, sourceFile) // Now pass moduleName instead of modulePath
+		fmt.Println(cyan + header + reset)
+
+		loc, err := countLinesOfCode(filepath.Join(modulePath, sourceFile))
 		if err != nil {
-			fmt.Printf("Error running tests for module %s: %v\n", module, err)
-			printFailedTests(output)
+			fmt.Println(red, "Error counting LOC:", err, reset)
+			continue
 		}
+		totalLines += loc
 
-		// Extract coverage percentage from output
-		coverage := extractCoverage(output)
-		fmt.Println("Percent code covered by test:", coverage)
-
-		// Convert coverage string to float
-		covFloat, err := strconv.ParseFloat(strings.TrimSuffix(coverage, "%"), 64)
-		if err == nil {
-			// sourceFile := findSourceFile(testFile)
-			filePath := filepath.Join(modulePath, sourceFile)
-			loc, err := countLinesOfCode(filePath)
+		if _, err := os.Stat(filepath.Join(modulePath, testFile)); err == nil {
+			fmt.Println("Test file:", testFile)
+			cmd := exec.Command("go", "test", "-v", "-cover", ".")
+			cmd.Dir = modulePath
+			out, err := cmd.CombinedOutput()
+			output := string(out)
 			if err != nil {
-				fmt.Printf("Error counting LOC: %v\n", err)
-				continue
+				fmt.Printf("%sError running tests for module %s: %v%s\n", red, modulePath, err, reset)
+				printFailedTests(output)
 			}
-			coveredLines := math.Round((covFloat / 100.0) * float64(loc))
-			totalCoveredLines += coveredLines
-			totalLines += loc
 
-			fmt.Printf("Total lines in file: %d, Covered lines: %.2f\n", loc, coveredLines)
+			coverage := extractCoverage(output)
+			fmt.Println("Percent code covered by test:", colorCoverage(coverage))
+
+			covFloat, err := strconv.ParseFloat(strings.TrimSuffix(coverage, "%"), 64)
+			if err == nil {
+				coveredLines := math.Round((covFloat / 100.0) * float64(loc))
+				totalCoveredLines += coveredLines
+				fmt.Printf("Total lines in file: %d, Covered lines: %d\n", loc, int(coveredLines))
+			}
+		} else {
+			fmt.Println(red + "Test file: Not Found" + reset)
+			fmt.Println("Percent code covered by test:", red+"0%"+reset)
+			fmt.Printf("Total lines in file: %d, Covered lines: 0\n", loc)
 		}
 	}
 
+	fmt.Println(cyan + "----------------------------------------" + reset)
 	if totalLines > 0 {
 		overallCoverage := (totalCoveredLines / float64(totalLines)) * 100
-		fmt.Printf("\nOverall code coverage: %.2f%%\n", overallCoverage)
+		fmt.Printf("\nOverall code coverage: %s%s\n", colorCoverage(fmt.Sprintf("%.2f%%", overallCoverage)), reset)
 	} else {
 		fmt.Println("\nNo valid coverage data to calculate overall percentage.")
 	}
 }
 
-func findModulesAndTests() ([]string, []string, error) {
-	var modules []string
-	var testFiles []string
+func centerAlignHeader(moduleName, sourceFile string) string {
+	baseHeader := fmt.Sprintf("Running Test for %s - %s", moduleName, sourceFile)
+	headerLength := 70
+	if len(baseHeader) > headerLength {
+		baseHeader = baseHeader[:headerLength] // Truncate if too long
+	}
+	totalDashes := headerLength - len(baseHeader)
+	leftDashes := totalDashes / 2
+	rightDashes := totalDashes - leftDashes
+	return strings.Repeat("-", leftDashes) + baseHeader + strings.Repeat("-", rightDashes)
+}
+
+func findAllGoFiles() ([]string, error) {
+	var files []string
 	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
-			testFile, found := findTestFile(path)
-			if found {
-				modules = append(modules, path)
-				testFiles = append(testFiles, testFile)
-			}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") && !strings.HasSuffix(info.Name(), "_test.go") && info.Name() != "testBackend.go" {
+			files = append(files, path)
 		}
 		return nil
 	})
-	return modules, testFiles, err
-}
-
-func findTestFile(dir string) (string, bool) {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return "", false
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() && strings.HasSuffix(entry.Name(), "_test.go") {
-			return entry.Name(), true
-		}
-	}
-	return "", false
-}
-
-func findSourceFile(testFileName string) string {
-	baseName := strings.TrimSuffix(testFileName, "_test.go")
-	return baseName + ".go"
+	return files, err
 }
 
 func extractCoverage(output string) string {
 	lines := strings.Split(output, "\n")
-	final := "0%"
 	for _, line := range lines {
 		if strings.Contains(line, "coverage:") && strings.Contains(line, "%") {
 			fields := strings.Fields(line)
 			for _, field := range fields {
 				if strings.Contains(field, "%") {
-					final = field
-					break
+					return field
 				}
 			}
 		}
 	}
-	return final
+	return "0%"
+}
+
+func getModuleName(path string) string {
+	segments := strings.Split(filepath.Clean(path), string(os.PathSeparator))
+	// Iterate through segments to find the index of "Containers"
+	for i, segment := range segments {
+		if segment == "Containers" && i+1 < len(segments) {
+			return segments[i+1] // Return the next segment which is the container name
+		}
+	}
+	return "Unknown" // Default case if the structure is not as expected
 }
 
 func countLinesOfCode(filePath string) (int, error) {
@@ -147,7 +154,21 @@ func printFailedTests(output string) {
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
 		if strings.Contains(line, "--- FAIL:") {
-			fmt.Println(line)
+			fmt.Println(red + line + reset)
 		}
+	}
+}
+
+func colorCoverage(coverage string) string {
+	covFloat, _ := strconv.ParseFloat(strings.TrimSuffix(coverage, "%"), 64)
+	switch {
+	case covFloat < 33:
+		return red + coverage + reset
+	case covFloat < 67:
+		return yellow + coverage + reset
+	case covFloat < 90:
+		return green + coverage + reset
+	default:
+		return cyan + coverage + reset
 	}
 }
