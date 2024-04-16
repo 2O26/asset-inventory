@@ -59,6 +59,7 @@ export default function Tools() {
                     <button className='button-tool' onClick={() => navigate("/tools/history")}>
                         <HistoryIcon size={60} />
                         <div> History </div>
+                    </button>
                     <button className='button-tool' onClick={() => navigate("/tools/SBOMLibrarySearch")}>
                         <SBOMSearch size={60} />
                         <div> Global SBOM library search</div>
