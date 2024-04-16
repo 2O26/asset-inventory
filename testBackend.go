@@ -22,7 +22,6 @@ const (
 )
 
 func main() {
-	fmt.Println(cyan + "Starting Go code test coverage analysis..." + reset)
 	allFiles, err := findAllGoFiles()
 	if err != nil {
 		fmt.Println(red, "Error:", err, reset)
