@@ -1,0 +1,20 @@
+.history-container {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    color: var(--text-color);
+    background-color: var(--main-color);
+    position: relative;
+    overflow: scroll;
+    box-shadow: var(--box-shadow);
+}
+
+.history-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    text-align: left;
+    width: 100%;
+    gap: 1rem;
+    margin: 1rem 0;
+    color: var(--text-color);
+}
