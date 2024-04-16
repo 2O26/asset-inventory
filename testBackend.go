@@ -36,8 +36,8 @@ func main() {
 		modulePath, sourceFile := filepath.Split(file)
 		testFile := strings.TrimSuffix(sourceFile, ".go") + "_test.go"
 
-		moduleName := getModuleName(file)                   // Get the container name
-		header := centerAlignHeader(moduleName, sourceFile) // Now pass moduleName instead of modulePath
+		moduleName := getModuleName(file)
+		header := centerAlignHeader(moduleName, sourceFile)
 		fmt.Println(cyan + header + reset)
 
 		loc, err := countLinesOfCode(filepath.Join(modulePath, sourceFile))
@@ -87,7 +87,7 @@ func centerAlignHeader(moduleName, sourceFile string) string {
 	baseHeader := fmt.Sprintf("Running Test for %s - %s", moduleName, sourceFile)
 	headerLength := 70
 	if len(baseHeader) > headerLength {
-		baseHeader = baseHeader[:headerLength] // Truncate if too long
+		baseHeader = baseHeader[:headerLength]
 	}
 	totalDashes := headerLength - len(baseHeader)
 	leftDashes := totalDashes / 2
@@ -126,13 +126,12 @@ func extractCoverage(output string) string {
 
 func getModuleName(path string) string {
 	segments := strings.Split(filepath.Clean(path), string(os.PathSeparator))
-	// Iterate through segments to find the index of "Containers"
 	for i, segment := range segments {
 		if segment == "Containers" && i+1 < len(segments) {
-			return segments[i+1] // Return the next segment which is the container name
+			return segments[i+1]
 		}
 	}
-	return "Unknown" // Default case if the structure is not as expected
+	return "Unknown" // Worst case
 }
 
 func countLinesOfCode(filePath string) (int, error) {
