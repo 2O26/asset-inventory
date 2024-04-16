@@ -191,11 +191,28 @@ func GetLatestState(db DatabaseHelper, c *gin.Context) {
 
 // Save the change to the timelineDB collection
 func saveChange(changes Timeline, timelineDB DatabaseHelper) error {
+	// Create a new Timeline struct with only the non-empty fields
+	if len(changes.AddedAssets) == 0 {
+		changes.AddedAssets = nil
+	}
+	if len(changes.RemovedAssets) == 0 {
+		changes.RemovedAssets = nil
+	}
+	if len(changes.AddedRelations) == 0 {
+		changes.AddedRelations = nil
+	}
+	if len(changes.RemovedRelations) == 0 {
+		changes.RemovedRelations = nil
+	}
+	if len(changes.UpdatedAssets) == 0 {
+		changes.UpdatedAssets = nil
+	}
+
 	changeDetails := Change{
 		Timestamp: time.Now(),
 		Change:    changes,
 	}
-	// timelineDB := &MongoDBHelper{Collection: GetCollection("timelineDB")}
+
 	_, err := timelineDB.InsertOne(context.TODO(), changeDetails)
 	if err != nil {
 		log.Printf("Failed to save changings for timeline: %v", err)
@@ -204,7 +221,6 @@ func saveChange(changes Timeline, timelineDB DatabaseHelper) error {
 
 	return nil
 }
-
 func ManageAssetsAndRelations(db DatabaseHelper, timelineDB DatabaseHelper, c *gin.Context) {
 	var req AssetRequest
 	var messages []string
@@ -704,8 +720,10 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 				{"change.updatedassets." + assetID: bson.M{"$exists": true}},
 				{"change.addedassets": bson.M{"$in": []string{assetID}}},
 				{"change.removedassets": bson.M{"$in": []string{assetID}}},
-				{"change.removedrelations": bson.M{"$elemMatch": bson.M{"from": assetID, "to": assetID}}},
-				{"change.addedrelations": bson.M{"$elemMatch": bson.M{"from": assetID, "to": assetID}}},
+				{"change.removedrelations": bson.M{"$elemMatch": bson.M{"from": assetID}}},
+				{"change.removedrelations": bson.M{"$elemMatch": bson.M{"to": assetID}}},
+				{"change.addedrelations": bson.M{"$elemMatch": bson.M{"from": assetID}}},
+				{"change.addedrelations": bson.M{"$elemMatch": bson.M{"to": assetID}}},
 			},
 		}
 	}
@@ -715,7 +733,12 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve data", "details": err.Error()})
 		return
 	}
-
+	// sort.Slice(results, func(i, j int) bool {
+	// 	dt1 := results[i]["timestamp"].(primitive.DateTime)
+	// 	dt2 := results[j]["timestamp"].(primitive.DateTime)
+	// 	return dt1 > dt2
+	// })
+	// fmt.Println(results)
 	// Process and filter results to include only relevant changes related to assetID
 	if assetID != "" {
 		for i, result := range results {
@@ -723,21 +746,24 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 			if !ok {
 				continue
 			}
-
 			// Only keep fields where assetID is present
 			for key, value := range changeDetails {
 				switch key {
 				case "updatedassets":
 					updatedAssets, ok := value.(bson.M)
-					if !ok {
+					if !ok || len(updatedAssets) == 0 {
+						delete(changeDetails, key)
 						continue
 					}
-					if _, ok := updatedAssets[assetID]; !ok {
-						delete(changeDetails, key)
+					for ID := range updatedAssets {
+						if assetID != ID {
+							delete(updatedAssets, ID)
+						}
 					}
-				case "addedassets", "removedassets":
+				case "addedassets":
 					assets, ok := value.(primitive.A)
-					if !ok {
+					if !ok || len(assets) == 0 {
+						delete(changeDetails, key)
 						continue
 					}
 					var filteredAssets primitive.A
@@ -751,12 +777,29 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 					} else {
 						delete(changeDetails, key)
 					}
-				case "addedrelations", "removedrelations":
+				case "removedassets":
+					assets, ok := value.(primitive.A)
+					if !ok || len(assets) == 0 {
+						delete(changeDetails, key)
+						continue
+					}
+					var filteredAssets primitive.A
+					for _, asset := range assets {
+						if asset == assetID {
+							filteredAssets = append(filteredAssets, asset)
+						}
+					}
+					if len(filteredAssets) > 0 {
+						changeDetails[key] = filteredAssets
+					} else {
+						delete(changeDetails, key)
+					}
+				case "addedrelations":
 					if value == nil {
 						delete(changeDetails, key)
 					} else {
 						relations, ok := value.(primitive.A)
-						if !ok {
+						if !ok || len(relations) == 0 {
 							continue
 						}
 						var filteredRelations primitive.A
@@ -772,7 +815,31 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 						if len(filteredRelations) > 0 {
 							changeDetails[key] = filteredRelations
 						} else {
-							delete(changeDetails, key)
+							delete(changeDetails, key) // Ensure no empty relations array is left
+						}
+					}
+				case "removedrelations":
+					if value == nil {
+						delete(changeDetails, key)
+					} else {
+						relations, ok := value.(primitive.A)
+						if !ok || len(relations) == 0 {
+							continue
+						}
+						var filteredRelations primitive.A
+						for _, relation := range relations {
+							relMap, ok := relation.(bson.M)
+							if !ok {
+								continue
+							}
+							if relMap["from"] == assetID || relMap["to"] == assetID {
+								filteredRelations = append(filteredRelations, relation)
+							}
+						}
+						if len(filteredRelations) > 0 {
+							changeDetails[key] = filteredRelations
+						} else {
+							delete(changeDetails, key) // Ensure no empty relations array is left
 						}
 					}
 				}
