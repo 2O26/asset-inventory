@@ -165,8 +165,13 @@ app.post("/librarySort", async (req, res) => {
         // }
 
         const assetID = req.body.assetID;
-        await LibraryDBupdate(assetID, res);
-        checkIfVulnerbilities(assetID);
+
+        try {
+            await LibraryDBupdate(assetID, res);
+            checkIfVulnerabilities(assetID);  // Only runs if the update is successful
+        } catch (error) {
+            console.error("Error during library update or vulnerability check: ", error);
+        }
         res.json({ Success: true });
 
     } catch (error) {
@@ -189,11 +194,11 @@ app.post("/recheckVulnerabilitiesAll", async (req, res) => {
         - [x] For each library + version combo
             - [x] Run function that invokes an external API call to check for CVEs
     */
-    checkIfSBOMVulnsAll();
+    await checkIfSBOMVulnsAll();
     res.json({ Success: true });
 })
 
-async function checkIfVulnerbilities(assetID) {
+async function checkIfVulnerabilities(assetID) {
     /*
         - [x] For every library + version combo that contains assetID
             - run function that invokes an external API call to check for CVEs

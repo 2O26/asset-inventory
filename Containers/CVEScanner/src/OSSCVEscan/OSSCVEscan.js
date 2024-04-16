@@ -20,6 +20,10 @@ async function getAPIkey() {
 }
 
 async function checkVulnerabilities(purl, apikey) {
+    /*
+        Check CVEs for libraries attached in the parameter against the Sonatype OSS index
+    */
+
     const apiUrl = `https://ossindex.sonatype.org/api/v3/component-report`;
     const component = purl;
 
@@ -100,11 +104,13 @@ async function CVEcheckAll() {
         console.log("API KEY: ", apikey);
 
         const purl_list = await getAllPurls();
+
         const OSSresponses = await processPurlsInBatches(purl_list, apikey, 128);
         // Reduce to an array of library objects that contain CVEs
         const componentsWithVulnerabilities = OSSresponses.flatMap(subArray =>
             subArray.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
         );
+
         const objectivizedComponentsWithVulnerabilities = {}
         componentsWithVulnerabilities.forEach(component => {
             objectivizedComponentsWithVulnerabilities[component.coordinates] = component.vulnerabilities;
@@ -128,7 +134,6 @@ async function CVEcheck(assetID) {
             return {}
         }
         console.log("API KEY: ", apikey);
-
         const purl_list = await getPurlsOfAssetID(assetID);
         const OSSresponses = await processPurlsInBatches(purl_list, apikey, 128);
         // Reduce to an array of library objects that contain CVEs
@@ -139,7 +144,7 @@ async function CVEcheck(assetID) {
         componentsWithVulnerabilities.forEach(component => {
             objectivizedComponentsWithVulnerabilities[component.coordinates] = component.vulnerabilities;
         })
-
+        console.log("Amount of Vulnerble Libraries: ", Object.keys(objectivizedComponentsWithVulnerabilities).length)
         return objectivizedComponentsWithVulnerabilities;
     } catch (err) {
         console.error('Error scanning CVEs:', err.message);
