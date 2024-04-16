@@ -6,7 +6,7 @@ const iconTypeMap = {
     "Laptop": <LaptopIcon />
 }
 
-const statusMap = { "alert": <AlertIcon />, "active": <ActiveIcon />, "offline": <OfflineIcon /> }
+const statusMap = { "alert": <AlertIcon />, "up": <ActiveIcon />, "down": <OfflineIcon /> }
 
 
 export const CustomNodeComponent = ({ data }) => {
@@ -21,7 +21,7 @@ export const CustomNodeComponent = ({ data }) => {
             <div className={`wrapper gradient `}>
                 <div className="inner">
                     <div className="body">
-                        {/* {data.status && statusMap[data.status]} */}
+                        {data.status && statusMap[data.status]}
                         <div>
                             <div className="title">{data.label}</div>
                             {data.type && <div className="subline">{data.type}</div>}
