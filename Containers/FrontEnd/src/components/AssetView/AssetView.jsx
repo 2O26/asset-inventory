@@ -41,7 +41,7 @@ export default function AssetView() {
     };
 
     useEffect(() => {
-        if (assetID && data) {
+        if (assetID && data && (Object.keys(data.state.assets).length != 0)) {
             filterRelationsByAID(assetID)
         }
     }, [assetID, data])
@@ -49,8 +49,8 @@ export default function AssetView() {
 
     if (isLoading) return <LoadingSpinner />
     if (isError) return <div className='errorMessage'>{error.message}</div>
-    // if (!data.state.assets[assetID]) return <Navigate to='/' />;
-    // if (!data.state.assets[assetID]) return <div>No asset data!</div>;
+    if (Object.keys(data.state.assets).length === 0) return <div className='errorMessage'>No existing assets</div>;
+    if (!data.state.assets[assetID]) return <div className='errorMessage'>This asset no longer exists</div>;
 
 
 

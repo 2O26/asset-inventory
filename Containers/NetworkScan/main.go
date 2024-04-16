@@ -198,15 +198,32 @@ type pingResult struct {
 	err  error
 }
 
-func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
-	fmt.Printf("Starting scan for target: %s\n", target)
-
+func getNetworkAndBroadcastAddresses(target string) (net.IP, net.IP, *net.IPNet, error) {
 	// Split the target into IP and subnet
 	ip, subnet, err := net.ParseCIDR(target)
 	if err != nil {
-		return dbcon.Scan{}, fmt.Errorf("invalid target: %s", err)
+		return nil, nil, nil, fmt.Errorf("invalid target: %s", err)
 	}
 	fmt.Printf("Parsed CIDR: IP: %s, Subnet: %s\n", ip, subnet)
+
+	// Get the network and broadcast addresses
+	networkAddress := subnet.IP
+	broadcastAddress := make(net.IP, len(networkAddress))
+	for i := range networkAddress {
+		broadcastAddress[i] = networkAddress[i] | ^subnet.Mask[i]
+	}
+	fmt.Printf("Network Address: %s, Broadcast Address: %s\n", networkAddress, broadcastAddress)
+
+	return networkAddress, broadcastAddress, subnet, nil
+}
+
+func performSimpleScan(target string) (dbcon.Scan, error) {
+	fmt.Printf("Starting scan for target: %s\n", target)
+
+	networkAddress, _, subnet, err := getNetworkAndBroadcastAddresses(target)
+	if err != nil {
+		return dbcon.Scan{}, err
+	}
 
 	// Create a new scan
 	scan := dbcon.Scan{
@@ -220,14 +237,6 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 	// Create a channel to communicate the ping results
 	pingResults := make(chan pingResult)
 	fmt.Println("Ping results channel created")
-
-	// Get the network and broadcast addresses
-	networkAddress := subnet.IP
-	broadcastAddress := make(net.IP, len(networkAddress))
-	for i := range networkAddress {
-		broadcastAddress[i] = networkAddress[i] | ^subnet.Mask[i]
-	}
-	fmt.Printf("Network Address: %s, Broadcast Address: %s\n", networkAddress, broadcastAddress)
 
 	var wg sync.WaitGroup
 	fmt.Println("WaitGroup created")
@@ -274,36 +283,79 @@ func performScan(target string, cmdSelection string) (dbcon.Scan, error) {
 			scan.State[asset.UID] = asset
 		}
 
-
-		// Skip port scanning if CmdSelection is "simple" or the IP is down
-		if cmdSelection != "simple" && result.isUp {
-			// Iterate over all ports
-			for port := 1; port <= maxPort; port++ {
-				// Try to connect to the IP on the current port
-				conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", result.ip, port), time.Second)
-				if err != nil {
-					// If the connection failed, the port is probably closed
-					continue
-				}
-				conn.Close()
-
-				// If the connection succeeded, the port is open
-				fmt.Printf("Open port found: %d\n", port)
-				// Get the asset from the map
-				asset := scan.State[result.ip.String()]
-
-				// Append the open port
-				asset.OpenPorts = append(asset.OpenPorts, port)
-
-				// Put the modified asset back into the map
-				scan.State[result.ip.String()] = asset
-			}
-		}
-		fmt.Println("Finished port scanning")
 	}
 
 	fmt.Println("Finished scanning")
 	return scan, nil
+}
+
+func performAdvancedScan(target string) (dbcon.Scan, error) {
+	fmt.Println("Entered performAdvancedScan function")
+
+	networkAddress, _, subnet, err := getNetworkAndBroadcastAddresses(target)
+	println("Network address: ", networkAddress, " Subnet: ", subnet)
+	if err != nil {
+		return dbcon.Scan{}, err
+	}
+
+	// Create a new scan
+	scan := dbcon.Scan{
+		StateID:     "", // Replace with actual state ID
+		DateCreated: time.Now().Format("2006-01-02 15:04:05"),
+		DateUpdated: time.Now().Format("2006-01-02 15:04:05"),
+		State:       make(map[string]dbcon.Asset),
+	}
+	fmt.Println("Scan object created")
+
+	for ip := cloneIP(networkAddress); subnet.Contains(ip); inc(ip) {
+		var openPorts []int
+
+		// Check if IP address is up and discover open ports
+		for port := 0; port <= 1024; port++ {
+			address := fmt.Sprintf("%s:%d", ip.String(), port)
+			conn, err := net.DialTimeout("tcp", address, time.Second*20)
+			println("Connection: ", conn, " Error: ", err) // Added println
+			if err != nil {
+				fmt.Printf("Port %d is closed or filtered\n", port)
+				continue
+			}
+			conn.Close()
+			fmt.Printf("Port %d is open\n", port)
+
+			// Add the open port to the openPorts slice
+			openPorts = append(openPorts, port)
+		}
+
+		// Create an asset if any open ports were found
+		if len(openPorts) > 0 {
+			asset, err := createAsset("up", ip.String(), target)
+			if err != nil {
+				fmt.Printf("Failed to create asset for IP %s: %v\n", ip.String(), err)
+				continue
+			}
+
+			// Add the open ports to the asset's OpenPorts field
+			asset.OpenPorts = openPorts
+
+			scan.State[asset.UID] = asset
+		}
+	}
+
+	return scan, nil
+}
+func getNetworkInterface() (*net.Interface, error) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp != 0 && iface.Flags&net.FlagLoopback == 0 {
+			return &iface, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no active network interface found")
 }
 
 func createAsset(status string, ip string, target string) (dbcon.Asset, error) {
@@ -343,29 +395,40 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 	var req dbcon.ScanRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		fmt.Printf("Error 1: %+v\n", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Failed to bind JSON: %+v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to bind JSON"})
 		return
 	}
 
-	// Print the request body
-	fmt.Printf("Received request: %+v\n", req)
+	log.Printf("Received request: %+v\n", req)
 
-	fmt.Printf("Starting to scan...\n")
+	log.Printf("Starting to scan...\n")
+
 	// Perform the scan for each target in the request
 	for target := range req.IPRanges {
-		scanResult, err := performScan(target, req.CmdSelection)
-		if err != nil {
-			fmt.Printf("Error 2: %+v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+		var err error
+
+		switch req.CmdSelection {
+		case "extensive":
+			scanResultGlobal, err = performAdvancedScan(target)
+		case "simple":
+			scanResultGlobal, err = performSimpleScan(target)
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No valid scan selection provided"})
 			return
 		}
 
-		scanResultGlobal = scanResult
-		printActiveIPs(scanResult) // Print the active IP addresses
+		if err != nil {
+			log.Printf("Failed to perform scan: %+v\n", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to perform scan"})
+			return
+		}
+
+		printActiveIPs(scanResultGlobal) // Print the active IP addresses
 	}
 
-	fmt.Printf("Finished postNetScan\n")
+	log.Printf("Finished postNetScan\n")
 
 	dbcon.AddScan(db, scanResultGlobal)
 
