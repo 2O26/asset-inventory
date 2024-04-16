@@ -733,12 +733,6 @@ func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve data", "details": err.Error()})
 		return
 	}
-	// sort.Slice(results, func(i, j int) bool {
-	// 	dt1 := results[i]["timestamp"].(primitive.DateTime)
-	// 	dt2 := results[j]["timestamp"].(primitive.DateTime)
-	// 	return dt1 > dt2
-	// })
-	// fmt.Println(results)
 	// Process and filter results to include only relevant changes related to assetID
 	if assetID != "" {
 		for i, result := range results {
