@@ -12,14 +12,6 @@ import (
 )
 
 func main() {
-	// Hardcode source files
-	mainFiles := map[string]string{
-		"Containers/AssetHandler/dbcon":        "Containers/AssetHandler/dbcon/dbcon.go",
-		"Containers/AssetHandler/jsonhandler":  "Containers/AssetHandler/jsonhandler/jsonhandler.go",
-		"Containers/CycloneDX/dbcon-cyclonedx": "Containers/CycloneDX/dbcon-cyclonedx/dbcon-cyclonedx.go",
-		"Containers/NetworkScan":               "Containers/NetworkScan/main.go",
-	}
-
 	// List all directories containing Go code
 	modules, testFiles, err := findModulesAndTests()
 	if err != nil {
@@ -38,9 +30,11 @@ func main() {
 	// Run tests with coverage for each module
 	for i, module := range modules {
 		testFile := testFiles[i]
+		sourceFile := findSourceFile(testFile)
 		modulePath := filepath.Join(".", module) // Use relative path
 		fmt.Println("\nRunning tests for module:", module)
 		fmt.Println("Test file:", testFile)
+		fmt.Println("Source file:", sourceFile)
 		cmd := exec.Command("go", "test", "-v", "-cover", "./...")
 		cmd.Dir = modulePath
 		out, err := cmd.CombinedOutput()
@@ -57,7 +51,8 @@ func main() {
 		// Convert coverage string to float
 		covFloat, err := strconv.ParseFloat(strings.TrimSuffix(coverage, "%"), 64)
 		if err == nil {
-			filePath := filepath.Join(".", mainFiles[module]) // Use relative path
+			// sourceFile := findSourceFile(testFile)
+			filePath := filepath.Join(modulePath, sourceFile)
 			loc, err := countLinesOfCode(filePath)
 			if err != nil {
 				fmt.Printf("Error counting LOC: %v\n", err)
@@ -109,6 +104,11 @@ func findTestFile(dir string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func findSourceFile(testFileName string) string {
+	baseName := strings.TrimSuffix(testFileName, "_test.go")
+	return baseName + ".go"
 }
 
 func extractCoverage(output string) string {
