@@ -248,9 +248,9 @@ func performSimpleScan(target string) (dbcon.Scan, error) {
 			defer wg.Done()
 			isUp, err := ping(ip.String())
 			if err != nil {
-				fmt.Println("Error pinging: ", ip, " Error: ", err, "\n")
+				fmt.Println("Error pinging: ", ip, " Error: ", err)
 			} else if isUp {
-				fmt.Println("Finished ping for: ", ip, " with status: ", isUp, "\n")
+				fmt.Println("Finished ping for: ", ip, " with status: ", isUp)
 				pingResults <- pingResult{ip: ip, isUp: isUp, err: err}
 			}
 		}(cloneIP(ip))
