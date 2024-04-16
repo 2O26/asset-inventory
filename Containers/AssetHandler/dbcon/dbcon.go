@@ -28,19 +28,32 @@ type AssetRequest struct {
 	RemoveRelations []string                     `json:"removeRelations"` // Relation IDs to remove
 }
 type Timeline struct {
-	AddAsset        map[string]jsonhandler.Asset    `json:"addAsset"`        // To add new assets
-	RemoveAsset     map[string]jsonhandler.Asset    `json:"removeAsset"`     // Asset IDs to remove
-	UpdatedAsset    map[string]jsonhandler.Asset    `json:"updateAsset"`     // Asset ID to updated Asset mapping
-	AddRelations    map[string]jsonhandler.Relation `json:"addRelations"`    // Relations to add
-	RemoveRelations map[string]jsonhandler.Relation `json:"removeRelations"` // Relation IDs to remove
+	AddedAssets      []string                `json:"Added Assets"`      // To add new assets
+	RemovedAssets    []string                `json:"Removed Assets"`    // Asset IDs to remove
+	UpdatedAssets    map[string]AssetChanges `json:"Updated Assets"`    // Asset ID to updated Asset mapping
+	AddedRelations   []relationChang         `json:"Added Relations"`   // Relations to add
+	RemovedRelations []relationChang         `json:"Removed Relations"` // Relation IDs to remove
 
+}
+type relationChang struct {
+	From string `json:"from"`
+	To   string `json:"to"`
+}
+type updateAsset[T any] struct {
+	Before T `json:"before"`
+	After  T `json:"after"`
+}
+type AssetChanges struct {
+	Name        updateAsset[string]   `json:"name"`
+	Owner       updateAsset[string]   `json:"owner"`
+	Criticality updateAsset[int]      `json:"criticality"`
+	Type        updateAsset[[]string] `json:"type"`
 }
 
 // Change struct to log changes in the timelineDB collection
 type Change struct {
-	Type          string    `bson:"type"`
-	Timestamp     time.Time `bson:"timestamp"`
-	ChangeDetails Timeline  `bson:"changeDetails"`
+	Timestamp time.Time `bson:"timestamp"`
+	Change    Timeline  `bson:"change"`
 }
 
 var client *mongo.Client
@@ -177,14 +190,13 @@ func GetLatestState(db DatabaseHelper, c *gin.Context) {
 }
 
 // Save the change to the timelineDB collection
-func saveChange(changeType string, changes Timeline, timelineDB DatabaseHelper) error {
-	change := Change{
-		Type:          changeType,
-		Timestamp:     time.Now(),
-		ChangeDetails: changes,
+func saveChange(changes Timeline, timelineDB DatabaseHelper) error {
+	changeDetails := Change{
+		Timestamp: time.Now(),
+		Change:    changes,
 	}
 	// timelineDB := &MongoDBHelper{Collection: GetCollection("timelineDB")}
-	_, err := timelineDB.InsertOne(context.TODO(), change)
+	_, err := timelineDB.InsertOne(context.TODO(), changeDetails)
 	if err != nil {
 		log.Printf("Failed to save changings for timeline: %v", err)
 		return err
@@ -198,12 +210,12 @@ func ManageAssetsAndRelations(db DatabaseHelper, timelineDB DatabaseHelper, c *g
 	var messages []string
 	var errors []string
 	var changes Timeline
-	var changesAddedAssets map[string]jsonhandler.Asset
-	var changesUpdatedAssets map[string]jsonhandler.Asset
-	var changesRemovedAssets map[string]jsonhandler.Asset
-	var changesRemovedRelations1 map[string]jsonhandler.Relation
-	var changesRemovedRelations2 map[string]jsonhandler.Relation
-	var changesAddedRelations map[string]jsonhandler.Relation
+	var changesAddedAssets []string
+	var changesUpdatedAssets map[string]AssetChanges
+	var changesRemovedAssets []string
+	var changesRemovedRelations1 []relationChang
+	var changesRemovedRelations2 []relationChang
+	var changesAddedRelations []relationChang
 	// Bind JSON to the req struct
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Printf("Error binding request data: %v\n", err)
@@ -235,20 +247,18 @@ func ManageAssetsAndRelations(db DatabaseHelper, timelineDB DatabaseHelper, c *g
 	messages, errors, changesUpdatedAssets = updateAssets(req, latestScan, db, messages, errors)
 	messages, errors, changesAddedRelations = addRelations(req, latestScan, db, messages, errors)
 	// Combine all the changes
-	for relationID, relation := range changesRemovedRelations1 {
-		changesRemovedRelations2[relationID] = relation
-	}
+	copy(changesRemovedRelations2, changesRemovedRelations1)
 	// Combine all the changes
 	changes = Timeline{
-		AddAsset:        changesAddedAssets,
-		RemoveAsset:     changesRemovedAssets,
-		UpdatedAsset:    changesUpdatedAssets,
-		AddRelations:    changesAddedRelations,
-		RemoveRelations: changesRemovedRelations2,
+		AddedAssets:      changesAddedAssets,
+		RemovedAssets:    changesRemovedAssets,
+		UpdatedAssets:    changesUpdatedAssets,
+		AddedRelations:   changesAddedRelations,
+		RemovedRelations: changesRemovedRelations2,
 	}
 	// Only save the changes if the request contains operations
-	if len(changes.AddAsset) > 0 || len(changes.RemoveAsset) > 0 || len(changes.UpdatedAsset) > 0 || len(changes.AddRelations) > 0 || len(changes.RemoveRelations) > 0 {
-		saveChange("Asset and Relation manually changed", changes, timelineDB)
+	if len(changes.AddedAssets) > 0 || len(changes.RemovedAssets) > 0 || len(changes.UpdatedAssets) > 0 || len(changes.AddedRelations) > 0 || len(changes.RemovedRelations) > 0 {
+		saveChange(changes, timelineDB)
 	}
 	// Send the response as a list of messages
 	if len(messages) > 0 {
@@ -272,8 +282,8 @@ func GetLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 }
 
 // addAssets adds new assets to the latest scan
-func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Asset) {
-	changes := make(map[string]jsonhandler.Asset)
+func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, []string) {
+	changes := []string{}
 	if len(req.AddAsset) > 0 {
 		// Loop through the new assets and add them to the latest scan
 		for _, newAsset := range req.AddAsset {
@@ -293,7 +303,7 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
 			newAsset.DateUpdated = newAsset.DateCreated
 			latestScan.Assets[newAssetID] = newAsset
-			changes[newAssetID] = newAsset
+			changes = append(changes, newAssetID)
 		}
 
 		// Update the latest scan with the new assets
@@ -479,8 +489,8 @@ func AddRelations(req AssetRequest, relationIDS []string) string {
 }
 
 // updateAssets updates existing assets in the latest scan
-func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Asset) {
-	changes := make(map[string]jsonhandler.Asset)
+func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]AssetChanges) {
+	changes := make(map[string]AssetChanges)
 	if len(req.UpdatedAsset) > 0 {
 		// Loop through the updated assets and update them in the latest scan
 		for assetID, updatedAsset := range req.UpdatedAsset {
@@ -493,7 +503,12 @@ func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				updatedAsset.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
 				updatedAsset.DateCreated = existingAsset.DateCreated
 				latestScan.Assets[assetID] = updatedAsset
-				changes[assetID] = updatedAsset
+				assetChange := AssetChanges{
+					Name:        updateAsset[string]{Before: existingAsset.Name, After: updatedAsset.Name},
+					Owner:       updateAsset[string]{Before: existingAsset.Owner, After: updatedAsset.Owner},
+					Criticality: updateAsset[int]{Before: existingAsset.Criticality, After: updatedAsset.Criticality},
+					Type:        updateAsset[[]string]{Before: existingAsset.Type, After: updatedAsset.Type}}
+				changes[assetID] = assetChange
 			} else if !exists {
 				log.Printf("Asset with ID %s not found.\n", assetID)
 				messages = append(messages, "Asset not found")
@@ -514,9 +529,9 @@ func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 }
 
 // Removing assets and their related relations
-func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Asset, map[string]jsonhandler.Relation) {
-	changes := make(map[string]jsonhandler.Asset)
-	changes2 := make(map[string]jsonhandler.Relation)
+func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, []string, []relationChang) {
+	changes := []string{}
+	changes2 := []relationChang{}
 	if len(req.RemoveAsset) > 0 && req.RemoveAsset != nil {
 		// Loop through the assets to remove and delete them from the latest scan
 		for _, assetID := range req.RemoveAsset {
@@ -525,9 +540,9 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				messages = append(messages, "Asset ID is empty")
 				continue
 			}
-			if asset, exists := latestScan.Assets[assetID]; exists {
+			if _, exists := latestScan.Assets[assetID]; exists {
 				delete(latestScan.Assets, assetID)
-				changes[assetID] = asset
+				changes = append(changes, assetID)
 			} else if !exists {
 				log.Printf("Cannot remove asset, asset with ID %s not found.\n", assetID)
 				messages = append(messages, "Cannot remove asset, Asset not found")
@@ -536,7 +551,7 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			for relationID, relation := range latestScan.Relations {
 				if relation.From == assetID || relation.To == assetID {
 					delete(latestScan.Relations, relationID)
-					changes2[relationID] = relation
+					changes2 = append(changes2, relationChang{From: relation.From, To: relation.To})
 				}
 
 			}
@@ -556,8 +571,8 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 }
 
 // Adding new relations
-func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Relation) {
-	changes := make(map[string]jsonhandler.Relation)
+func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, []relationChang) {
+	changes := []relationChang{}
 	if len(req.AddRelations) > 0 {
 		// Create a map to track existing relations and avoid duplicates
 		existingRelations := make(map[string]bool)
@@ -594,7 +609,7 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				latestScan.Relations[newRelationID] = newRelation
 				existingRelations[key] = true // Update existingRelations to include this new relation
 				anyNewRelationsAdded = true
-				changes[newRelationID] = newRelation
+				changes = append(changes, relationChang{From: newRelation.From, To: newRelation.To})
 			} else {
 				log.Printf("No new relations were added as they already exist.\n")
 				messages = append(messages, "No new relations were added as they already exist")
@@ -617,8 +632,8 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 }
 
 // removeRelations removes specified relations from the latest scan
-func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, map[string]jsonhandler.Relation) {
-	changes := make(map[string]jsonhandler.Relation)
+func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, []relationChang) {
+	changes := []relationChang{}
 	if len(req.RemoveRelations) > 0 {
 		// Loop through the relations to remove and delete them from the latest scan
 		var removedRelations []string
@@ -631,7 +646,7 @@ func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db Data
 			if relation, exists := latestScan.Relations[relationID]; exists {
 				delete(latestScan.Relations, relationID)
 				removedRelations = append(removedRelations, relationID)
-				changes[relationID] = relation
+				changes = append(changes, relationChang{From: relation.From, To: relation.To})
 			} else {
 				log.Printf("Failed to remove relation, Relation with ID %s not found in the latest scan.\n", relationID)
 				messages = append(messages, "Failed to remove relation, Relation not found in the latest scan")
@@ -675,39 +690,98 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
 }
 
+// GetTimelineData retrieves the latest 10 changes from the timelineDB collection
+// and returns them as a JSON response.
 func GetTimelineData(db DatabaseHelper, c *gin.Context) {
 	ctx := context.TODO()
 	assetID := c.Query("assetID")
-	log.Printf("Retrieved assetID:%v\n", assetID)
-
-	var filter bson.M
+	log.Printf("Retrieved assetID: %v\n", assetID)
+	filter := bson.M{}
+	// Filter changes based on assetID
 	if assetID != "" {
-		// If assetID provided, filter for it
 		filter = bson.M{
 			"$or": []bson.M{
-				{"changeDetails.updatedasset." + assetID: bson.M{"$exists": true}},
-				{"changeDetails.addasset." + assetID: bson.M{"$exists": true}},
-				{"changeDetails.removeasset." + assetID: bson.M{"$exists": true}},
-				{"changeDetails.addrelations." + assetID: bson.M{"$exists": true}},
-				{"changeDetails.removerelations." + assetID: bson.M{"$exists": true}},
-				// Wildcard not working, RelationID required?
-				// {"changeDetails.addrelations.*.from": assetID},
-				// {"changeDetails.addrelations.*.to": assetID},
-				// {"changeDetails.removerelations.*.from": assetID},
-				// {"changeDetails.removerelations.*.to": assetID},
+				{"change.updatedassets." + assetID: bson.M{"$exists": true}},
+				{"change.addedassets": bson.M{"$in": []string{assetID}}},
+				{"change.removedassets": bson.M{"$in": []string{assetID}}},
+				{"change.removedrelations": bson.M{"$elemMatch": bson.M{"from": assetID, "to": assetID}}},
+				{"change.addedrelations": bson.M{"$elemMatch": bson.M{"from": assetID, "to": assetID}}},
 			},
 		}
-	} else {
-		// If no assetID is provided, retrieve all records
-		filter = bson.M{}
 	}
 
 	results, err := db.Find(ctx, filter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve data", "details": err.Error()})
 		return
 	}
 
+	// Process and filter results to include only relevant changes related to assetID
+	if assetID != "" {
+		for i, result := range results {
+			changeDetails, ok := result["change"].(bson.M)
+			if !ok {
+				continue
+			}
+
+			// Only keep fields where assetID is present
+			for key, value := range changeDetails {
+				switch key {
+				case "updatedassets":
+					updatedAssets, ok := value.(bson.M)
+					if !ok {
+						continue
+					}
+					if _, ok := updatedAssets[assetID]; !ok {
+						delete(changeDetails, key)
+					}
+				case "addedassets", "removedassets":
+					assets, ok := value.(primitive.A)
+					if !ok {
+						continue
+					}
+					var filteredAssets primitive.A
+					for _, asset := range assets {
+						if asset == assetID {
+							filteredAssets = append(filteredAssets, asset)
+						}
+					}
+					if len(filteredAssets) > 0 {
+						changeDetails[key] = filteredAssets
+					} else {
+						delete(changeDetails, key)
+					}
+				case "addedrelations", "removedrelations":
+					if value == nil {
+						delete(changeDetails, key)
+					} else {
+						relations, ok := value.(primitive.A)
+						if !ok {
+							continue
+						}
+						var filteredRelations primitive.A
+						for _, relation := range relations {
+							relMap, ok := relation.(bson.M)
+							if !ok {
+								continue
+							}
+							if relMap["from"] == assetID || relMap["to"] == assetID {
+								filteredRelations = append(filteredRelations, relation)
+							}
+						}
+						if len(filteredRelations) > 0 {
+							changeDetails[key] = filteredRelations
+						} else {
+							delete(changeDetails, key)
+						}
+					}
+				}
+
+			}
+
+			results[i]["change"] = changeDetails
+		}
+	}
 	// Sort results by time
 	// Timestamp stored as primitive.DateTime
 	sort.Slice(results, func(i, j int) bool {
