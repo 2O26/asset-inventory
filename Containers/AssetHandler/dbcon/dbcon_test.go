@@ -310,7 +310,10 @@ func TestGetLatestScan(t *testing.T) {
 			// }
 		})
 	}
+}
 
+func TestAddAssets(t *testing.T){
+	
 }
 
 func TestIsValidName(t *testing.T) {

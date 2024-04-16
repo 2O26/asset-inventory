@@ -175,6 +175,7 @@ func getNetworkScan(url ...string) {
 	}
 	fmt.Println("Request: ", request)
 	fmt.Println(assetIDs)
+	fmt.Println("5.5")
 	dbcon.AddAssets(request, assetIDs)
 	fmt.Println("6")
 	pluginState := jsonhandler.PluginState{
