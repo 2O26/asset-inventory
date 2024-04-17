@@ -70,6 +70,32 @@ export const CDXCVE = ({ assetID }) => {
         }
     }
 
+    function getColor(value) {
+        // Define start and end colors in RGB
+        const startColor = { r: 0, g: 255, b: 0 }; // Green
+        const midColor = { r: 255, g: 255, b: 0 }; // Yellow
+        const endColor = { r: 255, g: 0, b: 0 };   // Red
+
+        let r, g, b;
+
+        if (value < 5.0) {
+            // Scale factor between green and yellow
+            let scale = value / 5.0;
+            r = startColor.r + (midColor.r - startColor.r) * scale;
+            g = startColor.g + (midColor.g - startColor.g) * scale;
+            b = startColor.b + (midColor.b - startColor.b) * scale;
+        } else {
+            // Scale factor between yellow and red
+            let scale = (value - 5.0) / 5.0;
+            r = midColor.r + (endColor.r - midColor.r) * scale;
+            g = midColor.g + (endColor.g - midColor.g) * scale;
+            b = midColor.b + (endColor.b - midColor.b) * scale;
+        }
+
+        // Convert RGB to Hexadecimal color
+        return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`;
+    }
+
     if (loadingCVE) {
         return (
             <div>
@@ -99,8 +125,6 @@ export const CDXCVE = ({ assetID }) => {
                     {filteredLibraries && (
                         <div className='center-flex-column'>
                             {Object.keys(filteredLibraries).map((key, index) => {
-                                const sevScale = { "critical": "#FF0000", "high": "#FFA500", "moderate": "#FFEA00", "low": "0F0" }
-                                const severity = filteredLibraries[key].severity;
                                 return (
                                     <div key={index} className='json-tree-container'>
                                         <div
@@ -112,7 +136,7 @@ export const CDXCVE = ({ assetID }) => {
                                             <strong>{filteredLibraries[key].name}</strong>
                                             <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                                                 <div style={{ marginRight: "0.2rem" }}>
-                                                    <StatusIcon size={15} color={sevScale[severity]} />
+                                                    <StatusIcon size={15} color={getColor(filteredLibraries[key].CVE[0].cvssScore)} />
                                                 </div>
                                                 <button className='arrow-container'>
                                                     {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
@@ -124,7 +148,6 @@ export const CDXCVE = ({ assetID }) => {
                                                 {/* Here 'key' is used directly, as it is the unique identifier of the vulnerability */}
                                                 <p> Library name: {filteredLibraries[key].name} </p>
                                                 {/* Accessing the 'severity' property from the vulnerability details object */}
-                                                <p> Severity: {severity} </p>
                                                 <p>CVE: {filteredLibraries[key].CVE[0].cve}</p>
                                                 <p>CVE score: {filteredLibraries[key].CVE[0].cvssScore}</p>
                                                 <p>Description: {filteredLibraries[key].CVE[0].description}</p>

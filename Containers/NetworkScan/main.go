@@ -405,7 +405,7 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 	log.Printf("Starting to scan...\n")
 
 	// Perform the scan for each target in the request
-	for target := range req.IPRanges {
+	for _, target := range req.IPRanges {
 
 		var err error
 
