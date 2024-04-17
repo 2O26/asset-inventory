@@ -126,6 +126,14 @@ func TestGetNetworkScan(t *testing.T) {
 
 	fmt.Println("1")
 
+	if err := server1.Shutdown(context.Background()); err != nil {
+        t.Fatalf("failed to shutdown server: %v", err)
+    }
+	time.Sleep(5 * time.Second)
+
+
+
+
 
 	/*JsonTestMsg := getNetworkScan("http://localhost:8081/GetLatestScan")
 	fmt.Println("8")
@@ -136,10 +144,7 @@ func TestGetNetworkScan(t *testing.T) {
 	/*if err := server1.Shutdown(context.Background()); err != nil {
         t.Fatalf("failed to shutdown server: %v", err)
     }*/
-	if err := server1.Shutdown(context.Background()); err != nil {
-        t.Fatalf("failed to shutdown server: %v", err)
-    }
-	time.Sleep(5 * time.Second)
+
 }
 
 func TestGetLatestState(t *testing.T) {
@@ -271,4 +276,12 @@ func TestGetLatestState(t *testing.T) {
         t.Fatalf("failed to shutdown server: %v", err)
     }*/
 	
+}
+
+func TestAddSubnetAssets(t *testing.T) {
+
+}
+
+func TestAddSubnetRelations(t *testing.T) {
+	//TODO 
 }
