@@ -313,6 +313,14 @@ func TestGetLatestScan(t *testing.T) {
 }
 
 func TestAddAssets(t *testing.T){
+	//AddAssets(req AssetRequest, assetIDS []string) string 
+
+	mockDB := new(MockDB)
+	testRequest := AssetRequest{
+		AddAsset: addAsset,
+	}
+	testIDS := []string{"Asset1"}
+	AddAssets(testRequest, testIDS)
 	
 }
 

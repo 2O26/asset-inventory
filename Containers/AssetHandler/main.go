@@ -188,15 +188,18 @@ func getNetworkScan(url ...string) {
 	for k, v := range netassets.State {
 		pluginState.State[k] = v
 	}
+	fmt.Println("8")
 	plugin := jsonhandler.Plugin{
 		PluginStateID: netassets.StateID,
 	}
+	fmt.Println("9")
 	fmt.Println("PluginState: ", pluginState)
 
 	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
 	addSubnetAssets(netassets)
+	fmt.Println("19")
 	addSubnetRelations(netassets)
-
+	fmt.Println("71")
 	dbcon.AddPluginData(pluginState, plugin)
 
 }
