@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Plugin data schema",
+  "description": "Format for data retrieved from any plugin.",
+  "type": "object",
+  "properties": {
+    "StateID": {
+      "description": "ID of plugin's current state.",
+      "type": "string"
+    },
+    "DateCreated": {
+      "description": "Creation date of plugin state.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "DateUpdated": {
+      "description": "Time of most recent update.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "State": {
+      "description": "The plugin data, on a per-asset basis.",
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]+$": {
+          "description": "Asset ID.",
+          "type": "object"
+        }
+      }
+    }
+  }
+}

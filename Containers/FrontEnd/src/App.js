@@ -13,6 +13,9 @@ import AssetList from './components/Tools/AssetList/AssetList';
 import AssetView from './components/AssetView/AssetView';
 import GraphView from './components/Tools/GraphView/GraphView';
 import NetworkScan from './components/Tools/NetworkScan/NetworkScan';
+import History from './components/Tools/History/History';
+import SBOMLibrarySearch from './components/Tools/SBOMLibrarySearch/SBOMLibrarySearch';
+
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { SaveUserSetting, GetUserSettings } from './components/Services/ApiService';
 
@@ -102,6 +105,8 @@ function App() {
         <Route path="/tools/asset-list" element={<AssetList />} />
         <Route path="/tools/graph-view" element={<GraphView />} />
         <Route path="/tools/network-scan" element={<NetworkScan />} />
+        <Route path="/tools/history" element={<History />} />
+        <Route path="/tools/SBOMLibrarySearch" element={<SBOMLibrarySearch />} />
         {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
       </Routes>
     </BrowserRouter>

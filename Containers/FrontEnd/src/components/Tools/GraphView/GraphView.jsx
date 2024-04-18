@@ -184,6 +184,9 @@ export default function GraphView({ width = '100vw', height = '90vh', selectedAs
 
     if (isLoading) return <LoadingSpinner />;
     if (isError) return <div className='errorMessage'>{error.message}</div>;
+    if (Object.keys(data.state.assets).length === 0) {
+        return <div className='errorMessage'>No existing assets</div>;
+    }
 
     const parsedState = ParseState(data, selectedAsset);
 

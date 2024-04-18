@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Tools.css';
-import { AssetListIcon, IpScannerIcon, LogsIcon, GraphIcon, PDFIcon, AdminConsoleIcon, DocumentationIcon} from '../common/Icons/Icons';
+
+import { AssetListIcon, IpScannerIcon, LogsIcon, GraphIcon, PDFIcon, AdminConsoleIcon, SBOMSearch, HistoryIcon, DocumentationIcon} from '../common/Icons/Icons';
 import { RedirectToLogServer } from './ViewLogs/ViewLogs.jsx';
 
 import AssetList from './AssetList/AssetList.jsx';
 import GraphView from './GraphView/GraphView.jsx';
+import History from './History/History.jsx';
 import PDFDownload from './PDFDownload/PDFDownload.jsx';
 import { RedirectToDocumentation } from './DocLink/DocLink';
 
@@ -23,7 +25,13 @@ export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = 
             "icon": <GraphIcon size={size} />,
             "component": <GraphView width={width} height={height} isDashboard={true} />,
         },
+        "History": {
+            "icon": <HistoryIcon size={size} />,
+            "component": <History width={width} height={height} isDashboard={true} />,
+
+        }
     }
+    // TODO: Add global SBOM Library search here
 );
 
 export default function Tools() {
@@ -48,6 +56,14 @@ export default function Tools() {
                     <button className='button-tool' onClick={() => navigate("/tools/graph-view")}>
                         <GraphIcon size={60} />
                         <div> Graph View</div>
+                    </button>
+                    <button className='button-tool' onClick={() => navigate("/tools/history")}>
+                        <HistoryIcon size={60} />
+                        <div> History </div>
+                    </button>
+                    <button className='button-tool' onClick={() => navigate("/tools/SBOMLibrarySearch")}>
+                        <SBOMSearch size={60} />
+                        <div> Global SBOM library search</div>
                     </button>
                     <button className='button-tool' onClick={() => PDFDownload(data.state)}>
                         <PDFIcon size={60} />

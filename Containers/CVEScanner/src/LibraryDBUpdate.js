@@ -18,16 +18,19 @@ async function removeExisting(cveSave, assetID) {
 
 async function updateLibDB(cveSave, assetID, cycloneDXjson, previousState) {
     // First iterate over new data as the previousState can be empty.
-    const newLibrariesMap = new Map(); // Use a Map to track new libraries by purl for quick lookup
+    let newLibrariesMap = new Map(); // Use a Map to track new libraries by purl for quick lookup
     cycloneDXjson.components.forEach(async component => {
         if (component.type === "library") {
             const existingLibrary = previousState.find(libraryPrev => libraryPrev.purl === component.purl);
 
             if (existingLibrary) {
                 if (!existingLibrary.assetids) {
-                    existingLibrary.assetids = []; // Initialize if not present
+                    existingLibrary.assetids = [];
                 }
-                existingLibrary.assetids.push(assetID);
+                if (!existingLibrary.assetids.includes(assetID)) {
+                    // We dont want to add the assetid if it already exists in the array (avoid duplicates)
+                    existingLibrary.assetids.push(assetID);
+                }
                 await cveSave.updateAssetIDstoLibraryEntry(component.purl, existingLibrary.assetids);
             } else if (!newLibrariesMap.has(component.purl)) { // Check if not already added to newLibraries
                 const newLib = {
@@ -44,23 +47,26 @@ async function updateLibDB(cveSave, assetID, cycloneDXjson, previousState) {
 }
 
 function LibraryDBupdate(assetID, res) {
-    const cveSave = new CVEscanSave();
-    cveSave.connect()
-        .then(() => cveSave.getPrevLibraries())
-        .then(async previousState => {
-
-            const cycloneDXjson = await fetchCycloneDX(assetID);
-            if (cycloneDXjson === "failure") {
-                res.json({ success: false, message: "Failure to fetch SBOM data" });
-                return;
-            }
-            removeExisting(cveSave, assetID);
-            updateLibDB(cveSave, assetID, cycloneDXjson, previousState)
-        }).catch((err) => {
-            console.log("Could not get previous state of libraries: ", err)
-            res.json({ Success: false });
-            return
-        });
+    return new Promise((resolve, reject) => {
+        const cveSave = new CVEscanSave();
+        cveSave.connect()
+            .then(() => cveSave.getAllLibraries())
+            .then(async previousState => {
+                const cycloneDXjson = await fetchCycloneDX(assetID);
+                if (cycloneDXjson === "failure") {
+                    res.json({ success: false, message: "Failure to fetch SBOM data" });
+                    reject("Failed to fetch SBOM data");
+                } else {
+                    await removeExisting(cveSave, assetID);
+                    await updateLibDB(cveSave, assetID, cycloneDXjson, previousState);
+                    resolve("Update successful");
+                }
+            }).catch(err => {
+                console.log("Could not get previous state of libraries: ", err);
+                res.json({ success: false });
+                reject(err);
+            });
+    });
 }
 
 

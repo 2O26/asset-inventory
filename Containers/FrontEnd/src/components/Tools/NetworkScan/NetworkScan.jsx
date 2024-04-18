@@ -11,7 +11,7 @@ export default function NetworkScanPage() {
 
     const [scanSettings, setScanSettings] = useState({
         cmdSelection: '', // or null, if you prefer
-        IPRanges: {}
+        IPRanges: []
     });
 
     const { data, isLoading, isError, error, refetch } = useQuery({
@@ -52,20 +52,35 @@ export default function NetworkScanPage() {
         const range = event.target.value;
         const isChecked = event.target.checked;
 
-        // Update the IPRanges part of the state
-        setScanSettings(prevSettings => ({
-            ...prevSettings,
-            IPRanges: {
-                ...prevSettings.IPRanges,
-                [range]: isChecked
+        setScanSettings(prevSettings => {
+            // Copy the current list of selected IP ranges
+            const updatedIPRanges = [...prevSettings.IPRanges];
+
+            if (isChecked) {
+                // Add the IP range to the list if it is checked and not already included
+                if (!updatedIPRanges.includes(range)) {
+                    updatedIPRanges.push(range);
+                }
+            } else {
+                // Remove the IP range from the list if it is unchecked
+                const index = updatedIPRanges.indexOf(range);
+                if (index !== -1) {
+                    updatedIPRanges.splice(index, 1);
+                }
             }
-        }));
+
+            return {
+                ...prevSettings,
+                IPRanges: updatedIPRanges
+            };
+        });
     };
+
 
     const attemptToScan = (event) => {
         event.preventDefault();
-        setDeployedNetscan(false);
         console.log(scanSettings);
+        setDeployedNetscan(false);
         mutate(scanSettings);
 
     }
@@ -128,7 +143,7 @@ export default function NetworkScanPage() {
                                     type="checkbox"
                                     value={iprange}
                                     name="rangetype"
-                                    checked={scanSettings.IPRanges[iprange] || false}
+                                    checked={scanSettings.IPRanges.includes(iprange)}
                                     onChange={changeScanRange}
                                 />
                             </label>
@@ -136,11 +151,12 @@ export default function NetworkScanPage() {
                     </div>
 
 
-                    <div className='buttonContainer'>
-                        <button className='standard-button' disabled={isPending} type="submit">
-                            <div> Start scan </div>
-                        </button>
-                    </div>
+                    <button
+                        className='standard-button'
+                        disabled={isPending || !scanSettings.cmdSelection || scanSettings.IPRanges.length === 0}
+                        type="submit">
+                        <div> Start scan </div>
+                    </button>
                     <div>
                         {isPending && <LoadingSpinner />}
                         {deployedNetscan &&

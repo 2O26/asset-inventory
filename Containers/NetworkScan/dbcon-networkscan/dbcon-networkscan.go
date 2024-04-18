@@ -48,8 +48,8 @@ type Nmaprun struct {
 }
 
 type ScanRequest struct {
-	CmdSelection string          `json:"cmdSelection"`
-	IPRanges     map[string]bool `json:"IPRanges"`
+	CmdSelection string		`json:"cmdSelection"`
+	IPRanges     []string 	`json:"IPRanges"`
 }
 
 type Hostname struct {

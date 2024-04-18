@@ -20,6 +20,8 @@ import { BsFiletypePdf } from "react-icons/bs";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
 import { RiRadioButtonLine } from "react-icons/ri";
 import { IoIosDocument } from "react-icons/io";
+import { LuHistory } from "react-icons/lu";
+import { MdOutlineScreenSearchDesktop } from "react-icons/md";
 
 
 
@@ -132,6 +134,11 @@ export const GraphIcon = ({ size = 30 }) => {
         <GrGraphQl size={size} />
     )
 }
+export const HistoryIcon = ({ size = 30 }) => {
+    return (
+        <LuHistory size={size} />
+    )
+}
 
 export const PDFIcon = ({ size = 30 }) => {
     return (
@@ -184,5 +191,11 @@ export const LinkAddIcon = ({ size = 30, color = null }) => {
 export const StatusIcon = ({ size = 15, color = "green" }) => {
     return (
         <RiRadioButtonLine size={size} color={color} />
+    )
+}
+
+export const SBOMSearch = ({ size = 30, color = null }) => {
+    return (
+        <MdOutlineScreenSearchDesktop size={size} color={color} />
     )
 }

@@ -2,12 +2,10 @@ const express = require("express");
 const axios = require('axios');
 
 
-const { CVEcheck } = require("./OSSCVEscan/OSSCVEscan");
-const { LibraryDBupdate } = require("./librarySort");
+const { CVEcheck, CVEcheckAll } = require("./OSSCVEscan/OSSCVEscan");
+const { LibraryDBupdate } = require("./LibraryDBUpdate");
 const CVEscanSave = require("./DatabaseConn/CVEconn");
 
-
-// const app = express(express.json());
 const app = express();
 app.use(express.json());
 const cors = require("cors");
@@ -22,6 +20,41 @@ app.listen(route, () => { console.log("Server listening on port: ", route) });
 app.get("/status", (req, res) => {
     console.log("\n !!! Check Status !!! \n");
     res.send("Check Status");
+});
+
+app.get("/getAllLibraries", async (req, res) => {
+    /*
+        Return all libraries from libraries DB.
+    */
+
+    try {
+        // Authenticate the user and get their UID
+        const authResponse = await axios.get('http://authhandler:3003/getUID', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+
+        if (!authResponse.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+
+        const cveSave = new CVEscanSave();
+        cveSave.connect()
+            .then(() => cveSave.getAllLibraries())
+            .then(libraries => {
+                res.json({ success: true, libraries: libraries });
+            })
+            .catch((err) => {
+                console.log("Could not get libraries: ", err)
+                res.json({ success: false, libraries: {} });
+            });
+
+    } catch (error) {
+        console.error('Error while processing request:', error);
+        res.status(500).send('An error occurred while processing your request.');
+    }
+
 });
 
 app.post("/getVulnerableAssetID", async (req, res) => {
@@ -43,14 +76,20 @@ app.post("/getVulnerableAssetID", async (req, res) => {
             return res.status(401).send('Invalid token');
         }
 
-        // Fetch CycloneDX file for the given asset ID
+        const assetid = req.body.assetID;
+        console.log(assetid)
 
+        const cveSave = new CVEscanSave();
+        cveSave.connect()
+            .then(() => cveSave.getVulnerableAssetIDLibraries(assetid))
+            .then(libraries => {
+                res.json({ success: true, cycloneDXvulns: libraries });
+            })
+            .catch((err) => {
+                console.log("Could not get libraries: ", err)
+                res.json({ success: false, libraries: {} });
+            });
 
-        // const cycloneDXData = await cycloneDXResponse.json();
-        // const vulnerabilities = await CVEcheck(cycloneDXData);
-
-        // Respond with the vulnerabilities found
-        res.json({ success: true, cycloneDXvulns: {} });
     } catch (error) {
         console.error('Error while processing request:', error);
         res.status(500).send('An error occurred while processing your request.');
@@ -75,14 +114,17 @@ app.post("/getVulnerableAssetAll", async (req, res) => {
             return res.status(401).send('Invalid token');
         }
 
-        // Fetch CycloneDX file for the given asset ID
+        cveSave.connect()
+            .then(() => cveSave.getVulnerableAllLibraries(assetid))
+            .then(libraries => {
+                res.json({ success: true, cycloneDXvulns: libraries });
+            })
+            .catch((err) => {
+                console.log("Could not get libraries: ", err)
+                res.json({ success: false, libraries: {} });
+            });
 
 
-        // const cycloneDXData = await cycloneDXResponse.json();
-        // const vulnerabilities = await CVEcheck(cycloneDXData);
-
-        // Respond with the vulnerabilities found
-        res.json({ success: true, cycloneDXvulns: {} });
     } catch (error) {
         console.error('Error while processing request:', error);
         res.status(500).send('An error occurred while processing your request.');
@@ -95,18 +137,18 @@ app.post("/librarySort", async (req, res) => {
         Launched from the cycloneDX backend when a new SBOM is added.
         - [x] Make a GET request to fetch the SBOM file of given asset
         - [x] If assetID exists on any libraries, remove the entries. Alternatively remove the entire entry
-        - [x] Check if purl already exists in CVE library database. 
+        - [x] Check if purl already exists in CVE library database.
             - [x] If yes, add the asset to the list
-            - [x] If no, add a new library entry. 
+            - [x] If no, add a new library entry.
         - [x] Partial save of the libraries to DB (We dont want to wait for all the external API calls to have functionality of library DB)
         - [] API call to check CVEs for the new library entries (create call, just check conn and then exit func)
         - [x] Make a GET request to fetch the SBOM file of given asset
         - [x] If assetID exists on any libraries, remove the entries. Alternatively remove the entire entry
-        - [x] Check if purl already exists in CVE library database. 
+        - [x] Check if purl already exists in CVE library database.
             - [x] If yes, add the asset to the list
-            - [x] If no, add a new library entry. 
+            - [x] If no, add a new library entry.
         - [x] Partial save of the libraries to DB (We dont want to wait for all the external API calls to have functionality of library DB)
-        - [] API call to check CVEs for the new library entries (create call, just check conn and then exit func)
+        - [x] API call to check CVEs for the new library entries (create call, just check conn and then exit func)
     */
 
 
@@ -123,8 +165,13 @@ app.post("/librarySort", async (req, res) => {
         // }
 
         const assetID = req.body.assetID;
-        await LibraryDBupdate(assetID, res);
-        checkIfVulnerbilities(assetID);
+
+        try {
+            await LibraryDBupdate(assetID, res);
+            checkIfVulnerabilities(assetID);  // Only runs if the update is successful
+        } catch (error) {
+            console.error("Error during library update or vulnerability check: ", error);
+        }
         res.json({ Success: true });
 
     } catch (error) {
@@ -142,19 +189,32 @@ app.post("/removeAssetidLibs"), async (req, res) => {
 
 app.post("/recheckVulnerabilitiesAll", async (req, res) => {
     /*
-        - [] For each library + version combo
-            - run function that invokes an external API call to check for CVEs
+        POST request here to update the CVE database for the libraries
+
+        - [x] For each library + version combo
+            - [x] Run function that invokes an external API call to check for CVEs
     */
+    await checkIfSBOMVulnsAll();
+    res.json({ Success: true });
 })
 
-async function checkIfVulnerbilities(assetID) {
+async function checkIfVulnerabilities(assetID) {
     /*
         - [x] For every library + version combo that contains assetID
             - run function that invokes an external API call to check for CVEs
         - [x] Save result to database
     */
-    console.log("Checking for vulnerabilities")
     const purlsWithVulnerbilities = await CVEcheck(assetID);
+    const cveSave = new CVEscanSave();
+    cveSave.connect()
+        .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))
+        .catch((err) => {
+            console.log("Could not save purl CVE data: ", err)
+        });
+}
+
+async function checkIfSBOMVulnsAll() {
+    const purlsWithVulnerbilities = await CVEcheckAll();
     const cveSave = new CVEscanSave();
     cveSave.connect()
         .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))

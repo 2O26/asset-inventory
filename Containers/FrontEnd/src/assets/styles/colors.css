@@ -75,7 +75,7 @@
 }
 
 /* Blue Light Theme */
-:root .light {
+/* :root .light {
     --main-color: #FFF;
     --secondary-color: #d3d3d3;
     --accent-color: #4053fb;
@@ -96,6 +96,51 @@
 
     --hr-color-1: rgba(0, 0, 0, 0);
     --hr-color-2: rgba(64, 83, 251, 0.75);
+
+    --graph-bg: rgb(222, 222, 222);
+    --selected-node: #b3c9fd;
+
+    --base-00: var(--main-color);
+    --base-01: #383830;
+    --base-02: #49483e;
+    --base-03: #f96edd;
+    --base-04: #a59f85;
+    --base-05: #f8f8f2;
+    --base-06: #f5f4f1;
+    --base-07: #f9f8f5;
+    --base-08: #f92672;
+    --base-09: #fd971f;
+    --base-0A: #f4bf75;
+    --base-0B: var(--text-color);
+    --base-0C: #a1efe4;
+    --base-0D: #4f86fc;
+    --base-0E: #ae81ff;
+    --base-0F: #cc6633;
+} */
+
+:root .light {
+
+    --new-blue: #015eff;
+    --main-color: #FFF;
+    --secondary-color: #d3d3d3;
+    --accent-color: var(--new-blue);
+
+    --text-color: #222222;
+    --text-hover: var(--new-blue);
+
+    --logo-color: var(--new-blue);
+
+    --background-color: #bdbdbd;
+
+    --button-color: var(--new-blue);
+    --button-text: #000000;
+    --button-text-hover: white;
+    --button-hover: var(--new-blue);
+    --button-active: #5c5c5c;
+    --button-shadow: #5c5c5c6a;
+
+    --hr-color-1: rgba(0, 0, 0, 0);
+    --hr-color-2: var(--new-blue);
 
     /* Graph View Colors */
     --graph-bg: rgb(222, 222, 222);
