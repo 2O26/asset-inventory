@@ -6,11 +6,6 @@ services:
       - 3000:3000
     volumes:
       - ./Containers/FrontEnd/src:/app/src
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:3000/ || exit 1" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
 
   assethandler:
     image: assethandler
@@ -111,14 +106,6 @@ services:
     image: cypresslocal
     volumes:
       - ./Containers/Cypress/coverage/lcov-report:/app/coverage/lcov-report/
-    depends_on:
-      frontenddev:
-        condition: service_healthy
-      # - dbstorage
-      # - assethandler
-      # - configstorage
-      # - confighandler
-      # - networkscan
 
 volumes:
   configstorage:

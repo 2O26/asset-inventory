@@ -26,14 +26,23 @@
 
 Cypress.Commands.add('login', () => {
 
-    cy.origin(Cypress.env('kc-url'), () => {
-        cy.visit(Cypress.env('base-url'))
-        cy.get('#username').type('admin')
-        cy.get('#password').type('admin')
-        cy.get('#kc-login').click()
-    })
+    // cy.origin("http://*", () => {
+    //     cy.visit(Cypress.env('base-url'))
+    //     cy.get('#username').type('admin')
+    //     cy.get('#password').type('admin')
+    //     cy.get('#kc-login').click()
+    // })
+
+    cy.visit(Cypress.env('kc-url'))
+    cy.get('#username').type('admin')
+    cy.get('#password').type('admin')
+    cy.get('#kc-login').click()
+    cy.visit(Cypress.env('base-url'))
+
 });
 
 Cypress.Commands.add('logout', () => {
+    // cy.origin("http://*", () => {
     cy.contains('Log Out').click()
+    // })
 })

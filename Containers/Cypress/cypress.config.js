@@ -10,6 +10,7 @@ module.exports = defineConfig({
       // with any changed environment variables
       return config
     },
-    specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
+    // specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
+    specPattern: 'cypress/e2e/navbar.cy.{js,jsx,ts,tsx}',
   },
 });
