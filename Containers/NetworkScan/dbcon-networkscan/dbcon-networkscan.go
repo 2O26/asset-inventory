@@ -25,6 +25,7 @@ type Asset struct {
 	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
 	Subnet    string `bson:"subnet" json:"subnet"`
 	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
+	ScanType  string `bson:"scanType" json:"scanType"`
 }
 
 type Host struct {
@@ -48,8 +49,8 @@ type Nmaprun struct {
 }
 
 type ScanRequest struct {
-	CmdSelection string		`json:"cmdSelection"`
-	IPRanges     []string 	`json:"IPRanges"`
+	CmdSelection string   `json:"cmdSelection"`
+	IPRanges     []string `json:"IPRanges"`
 }
 
 type Hostname struct {
@@ -107,6 +108,9 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 		for _, asset := range currentScan.State {
 			if prevAsset.IPv4Addr == asset.IPv4Addr {
 				// IP address exists in the current scan, update the asset
+				if prevAsset.ScanType == "extensive" && asset.ScanType == "simple" {
+					asset.OpenPorts = prevAsset.OpenPorts // Preserve ports from advanced scan
+				}
 				updatedScan.State[oldAssetID] = asset
 				found = true
 				break
