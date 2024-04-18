@@ -33,7 +33,7 @@ export default function CVEScanSettings() {
     });
 
     const { data: apiData, isLoading: isLoading, isError: isErrorKey, error: keyerror, refetch: refetchAPIkey } = useQuery({
-        queryKey: ['API key'],
+        queryKey: ['API key2'],
         queryFn: GetOSSAPIkey2,
         enabled: true
     });
@@ -77,7 +77,7 @@ export default function CVEScanSettings() {
     return (
         <div >
             <div>
-                <h3> Sonatype OSS index key: </h3>
+                <h3> Documentation Link: </h3>
             </div>
             <hr />
             <div>
@@ -94,18 +94,18 @@ export default function CVEScanSettings() {
                     {isPendingMutAdd && <LoadingSpinner />}
                     {addAPIKeySuccess &&
                         <div>
-                            <p className='successText'>Successfully updated API key ✅</p>
+                            <p className='successText'>Successfully updated Doc Link ✅</p>
                         </div>
                     }
                     {addAPIKeyFail &&
                         <div>
-                            <p className='successText'> Failed to update API key. ❌</p>
+                            <p className='successText'> Failed to update Doc Link. ❌</p>
                         </div>
                     }
 
                     <div className='buttonContainerNetScan'>
                         <button className='standard-button' type="submit">
-                            <div> Update API key </div>
+                            <div> Update Doc Link </div>
                         </button>
                     </div>
                 </form>

@@ -7,6 +7,7 @@ import { RedirectToLogServer } from './ViewLogs/ViewLogs.jsx';
 import AssetList from './AssetList/AssetList.jsx';
 import GraphView from './GraphView/GraphView.jsx';
 import PDFDownload from './PDFDownload/PDFDownload.jsx';
+import { fetchAndOpenLink } from './DocLink/DocLink';
 
 import { GetState } from "../Services/ApiService";
 import { useQuery } from "@tanstack/react-query"
@@ -62,6 +63,12 @@ export default function Tools() {
                         <button className='button-tool' onClick={() => window.open("http://localhost:8085", "_blank")}>
                             <AdminConsoleIcon size={60} />
                             <div> Admin Console</div>
+                        </button>
+                    </RenderOnRole>
+                    <RenderOnRole roles={['admin']}>
+                        <button className='button-tool' onClick={() => fetchAndOpenLink()}>
+                            <AdminConsoleIcon size={60} />
+                            <div>Documentation Link</div>
                         </button>
                     </RenderOnRole>
                 </div>
