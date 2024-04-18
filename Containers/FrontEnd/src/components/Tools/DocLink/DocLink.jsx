@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GetOSSAPIkey2 } from '../../Services/ApiService';
 
-export const fetchAndOpenLink = async () => {
+export const RedirectToDocumentation = async () => {
     try {
         const resData = await GetOSSAPIkey2(); // Call the function to get the link
         const link = resData.apikey; // Assuming 'link' is the key in resData containing the URL

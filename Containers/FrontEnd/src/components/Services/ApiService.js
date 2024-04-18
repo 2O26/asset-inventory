@@ -441,8 +441,8 @@ export const GetOSSAPIkey = async () => {
     }
 }
 
-export const UpdateAPIOSSkey2 = async (apikey) => {
-    try {
+export const UpdateAPIOSSkey2 = async (apikey) => { //The code for Updating/getting OSS API keys is reused identically
+    try {                                           //but at different URLs for the Documentation Link feature.
         const response = await fetch('http://localhost:3001/updateOSSAPIkey2', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

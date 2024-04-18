@@ -19,10 +19,17 @@ import { MdCyclone } from "react-icons/md";
 import { BsFiletypePdf } from "react-icons/bs";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
 import { RiRadioButtonLine } from "react-icons/ri";
+import { IoIosDocument } from "react-icons/io";
 
 
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
+
+export const DocumentationIcon = ({ size = 30 }) => {
+    return (
+        <IoIosDocument size={size} />
+    )
+}
 
 export const AdminConsoleIcon = ({ size = 30 }) => {
     return (
