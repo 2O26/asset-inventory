@@ -294,9 +294,13 @@ func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugi
 func AddAssets(req AssetRequest, assetIDS []string) string {
 	// Find the latest scan to update
 	firstScan := false
+	fmt.Println("5.7")
 	db := &MongoDBHelper{Collection: GetCollection("scans")}
+	fmt.Println("5.70")
 	var latestScan jsonhandler.BackState
+	fmt.Println("5.701")
 	latestScan, _ = GetLatestScan(db)
+	fmt.Println("5.71")
 	if latestScan.Assets == nil {
 		firstScan = true
 		//No assets in previous scan, need to initialize latestScan
@@ -305,7 +309,7 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 		latestScan.PluginStates = make(map[string]jsonhandler.PluginState)
 		latestScan.Plugins = make(map[string]jsonhandler.Plugin)
 	}
-
+	fmt.Println("5.72")
 	//if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
 	//	// Log and return error if it's not ErrNoDocuments
 	//	log.Printf("Failed to retrieve the latest scan: %v\n", err)
@@ -319,6 +323,7 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 		for i, newAsset := range req.AddAsset {
 			// Check if an asset with the same name already exists
 			exists := false
+			fmt.Println("5.73")
 			for _, existingAsset := range latestScan.Assets {
 				if existingAsset.Hostname == newAsset.Hostname {
 					exists = true
@@ -326,12 +331,13 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 					break
 				}
 			}
+			fmt.Println("5.74")
 			if !exists {
 				newAssets = append(newAssets, newAsset)
 				newAssetIDS = append(newAssetIDS, assetIDS[i])
 			}
 		}
-
+		fmt.Println("5.75")
 		if len(newAssets) > 0 {
 			for i, newAsset := range newAssets {
 				// newAssetID := primitive.NewObjectID().Hex()
@@ -340,7 +346,7 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 
 				latestScan.Assets[newAssetIDS[i]] = newAsset
 			}
-
+			fmt.Println("5.76")
 			// Update the latest scan with the new assets
 
 			update := bson.M{"$set": bson.M{"assets": latestScan.Assets}}
@@ -350,6 +356,7 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 			} else {
 				_, err = db.UpdateOne(context.TODO(), bson.M{"_id": latestScan.ID}, update)
 			}
+			fmt.Println("5.77")
 			if err != nil {
 				log.Printf("Failed to add new assets: %v\n", err)
 				return "Failed to add new assets: " + err.Error()
@@ -362,7 +369,7 @@ func AddAssets(req AssetRequest, assetIDS []string) string {
 			return "No new assets to add, all assets already exist"
 		}
 	}
-
+	fmt.Println("5.78")
 	return "No new assets to add"
 }
 

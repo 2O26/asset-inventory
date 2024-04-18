@@ -53,7 +53,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-
+/*
 func getNetScanStatus() json.RawMessage {
 	url := "http://localhost:8081/status"
 
@@ -77,11 +77,13 @@ func getNetScanStatus() json.RawMessage {
 	log.Println("NetscanStatus Gave:", string(netassetsJSON))
 	return netassetsJSON
 
-}
+}*/
 
 func getLatestState(c *gin.Context) {
 	// Add assets from network scan
-	getNetworkScan()
+	var url1 string
+	url1 = "http://localhost:8081/GetLatestScan"
+	getNetworkScan(url1)
 	// Simulate authentication
 	var authSuccess = true
 	if authSuccess {
@@ -109,9 +111,6 @@ func getLatestState(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare scan data"})
 			return
 		}
-		pluginStates := make(map[string]json.RawMessage)
-		netassets := getNetScanStatus()
-		pluginStates["netscan"] = netassets
 
 		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil)
 
@@ -130,11 +129,13 @@ func getLatestState(c *gin.Context) {
 	}
 }
 
-func getNetworkScan() {
+func getNetworkScan(url ...string) {
 	fmt.Println("########Getting network scan##########")
-	url := "http://networkscan:8081/getLatestScan"
+	if len(url) == 0 || url[0] == ""{
+		url[0] = "http://networkscan:8081/getLatestScan"
+	}
 	// GET request from netscan
-	response, err := http.Get(url)
+	response, err := http.Get(url[0])
 
 	if err != nil {
 		log.Fatal(err)
@@ -148,11 +149,13 @@ func getNetworkScan() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	var addAsset []jsonhandler.Asset
 	var assetIDs []string
 	for k := range netassets.State {
 		assetIDs = append(assetIDs, k)
 	}
+
 	// Iterate over the State map and print UID values'
 	// There might be a bug here where the assets are not added in the right order
 	for i := 1; i <= len(netassets.State); i++ {
@@ -166,30 +169,37 @@ func getNetworkScan() {
 		addAsset = append(addAsset, asset)
 		fmt.Println("Asset: ", asset)
 	}
+	fmt.Println("5")
 	request := dbcon.AssetRequest{
 		AddAsset: addAsset,
 	}
 	fmt.Println("Request: ", request)
+	fmt.Println(assetIDs)
+	fmt.Println("5.5")
 	dbcon.AddAssets(request, assetIDs)
+	fmt.Println("6")
 	pluginState := jsonhandler.PluginState{
 		StateID:     "netscan",
 		DateCreated: netassets.DateCreated,
 		DateUpdated: netassets.DateUpdated,
 		State:       make(map[string]any),
 	}
-
+	fmt.Println("7")
 	for k, v := range netassets.State {
 		pluginState.State[k] = v
 	}
+	fmt.Println("8")
 	plugin := jsonhandler.Plugin{
 		PluginStateID: netassets.StateID,
 	}
+	fmt.Println("9")
 	fmt.Println("PluginState: ", pluginState)
 
 	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
 	addSubnetAssets(netassets)
+	fmt.Println("19")
 	addSubnetRelations(netassets)
-
+	fmt.Println("71")
 	dbcon.AddPluginData(pluginState, plugin)
 
 }

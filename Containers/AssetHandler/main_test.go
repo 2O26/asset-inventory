@@ -15,7 +15,7 @@ import (
 	//"net/url"
 	"context"
 
-	//"encoding/json"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
 	//"github.com/stretchr/testify/assert"
@@ -71,34 +71,45 @@ func TestCORSMiddleware(t *testing.T) {
 	fmt.Println("Test CORSMiddleware *SUCCESSFUL*")
 }
 
-func TestGetNetScanStatus(t *testing.T) {
-	fmt.Println("1")
+func TestGetNetworkScan(t *testing.T) {
 	router1 := gin.Default()
-	fmt.Println("2")
 	router1.Use(CORSMiddleware())
-	fmt.Println("3")
 	//mockDB := new(mock.Mock)
 	/*err := dbcon.SetupDatabase("mongodb://netscanstorage:27019/", "scan")
 	if err != nil {
 		log.Fatalf("Error setting up database: %v", err)
 	}*/
-	fmt.Println("4")
 	//mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("PluginState")).Return(&mongo.InsertOneResult{}, nil)
 	//scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	//addInitialScan(scansHelper)
-	fmt.Println("5")
-	router1.GET("/status", func(c *gin.Context) {
-		var respBody jsonhandler.PluginState
-		c.JSON(http.StatusOK, respBody)
+	testResp := networkResponse{
+		StateID:     "123",
+		DateCreated: "2024-04-11",
+		DateUpdated: "2024-04-12",
+		State: map[string]networkAsset{
+			"asset1": {
+            Status:    "active",
+            IPv4Addr:  "192.168.1.1",
+            Subnet:    "255.255.255.0",
+            OpenPorts: []int{80, 443},
+			},
+			"asset2": {
+            Status:    "active",
+            IPv4Addr:  "192.168.1.2",
+            Subnet:    "255.255.255.0",
+            OpenPorts: []int{81, 423},
+			},
+		},
+	}
+	router1.GET("/GetLatestScan", func(c *gin.Context) {
+		c.JSON(http.StatusOK, testResp)
 	})
-	fmt.Println("6")
 	log.Println("Server starting on port 8081...")
 	/*if err := router1.Run(":8081"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}*/
-	fmt.Println("7")
 	//router1.Run(":8081")
-	fmt.Println("7,50")
+
     server1 := &http.Server{
         Addr:    ":8081",
         Handler: router1,
@@ -109,9 +120,22 @@ func TestGetNetScanStatus(t *testing.T) {
             t.Fatalf("failed to start server1: %v", err)
         }
     }()
-	fmt.Println("7,5")
+
 	time.Sleep(2 * time.Second)
-	JsonTestMsg := getNetScanStatus()
+	getNetworkScan("http://localhost:8081/GetLatestScan")
+
+	fmt.Println("1")
+
+	if err := server1.Shutdown(context.Background()); err != nil {
+        t.Fatalf("failed to shutdown server: %v", err)
+    }
+	time.Sleep(5 * time.Second)
+
+
+
+
+
+	/*JsonTestMsg := getNetworkScan("http://localhost:8081/GetLatestScan")
 	fmt.Println("8")
 	if string(JsonTestMsg) != `{"stateID":"","dateCreated":"","dateUpdated":"","state":null}` {
 		t.Errorf("Expected not nil got nil")
@@ -120,11 +144,10 @@ func TestGetNetScanStatus(t *testing.T) {
 	/*if err := server1.Shutdown(context.Background()); err != nil {
         t.Fatalf("failed to shutdown server: %v", err)
     }*/
-	time.Sleep(5 * time.Second)
+
 }
 
 func TestGetLatestState(t *testing.T) {
-	fmt.Println("9")
 	/*TODO
 	jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil) -> Error
 	var authSuccess = true
@@ -184,7 +207,7 @@ func TestGetLatestState(t *testing.T) {
     }
 	
 	//json.Marshal(scanResult) -> Error
-	/*responseBody := json.RawMessage(`
+	responseBody := json.RawMessage(`
 		{
 			"stateID": "20240417-1400B",
 			"dateCreated": "2024-02-30 23:00:00",
@@ -214,7 +237,7 @@ func TestGetLatestState(t *testing.T) {
     }()
 		//ROUTER SERVER 8081    
 	router1 := gin.Default()
-    router1.GET("/status", func(c *gin.Context) {
+    router1.GET("/GetLatestScan", func(c *gin.Context) {
         respReader := responseBody
 		c.JSON(http.StatusOK, respReader)
     })
@@ -253,4 +276,12 @@ func TestGetLatestState(t *testing.T) {
         t.Fatalf("failed to shutdown server: %v", err)
     }*/
 	
+}
+
+func TestAddSubnetAssets(t *testing.T) {
+
+}
+
+func TestAddSubnetRelations(t *testing.T) {
+	//TODO 
 }

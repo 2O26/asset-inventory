@@ -310,7 +310,58 @@ func TestGetLatestScan(t *testing.T) {
 			// }
 		})
 	}
+}
 
+func TestAddAssets(t *testing.T){
+	//AddAssets(req AssetRequest, assetIDS []string) string 
+
+	//Tests todo:
+	// "No new assets to add"
+	// "No new assets to add, all assets already exist"
+	// "New assets added successfully to the latest scan"
+	// "Failed to add new assets: " + err.Error()
+
+
+
+	mockDB := new(MockDB)
+	testRequest := AssetRequest{
+		AddAsset: []jsonhandler.Asset{
+			{
+				Name:        "NewAsset",
+				Owner:       "UID",
+				Type:        []string{"IoT"},
+				Criticality: 3,
+				Hostname:    "NewAsset1",
+			},
+		},
+	}
+	testIDS := []string{"Asset1"}
+	AddAssets(testRequest, testIDS)
+	
+}
+
+func TestAddRelations(t *testing.T){
+	//AddRelations(req AssetRequest, relationIDS []string) string
+	//TODO
+	//return "Failed to retrieve the latest scan: " + err.Error()
+	//log.Printf("Relation from %s to %s already exists in the latest scan.\n", newRelation.From, newRelation.To)
+	//return "Failed to add new relations: " + err.Error()
+	//return "New relations added successfully to the latest scan"
+	//return "No new relations to add, all relations already exist"
+	//return "No new relations to add"
+	testRequest := AssetRequest{
+		AddRelations: []jsonhandler.Relation{
+			{
+				From:			"NewAsset",
+				To:				"OldAsset",
+				Direction:		"uni",
+				Owner:			"3",
+				DateCreated:	"NewAsset1",
+			},
+		},
+	}
+	testIDS := []string{"Relation1"}
+	AddRelations(testRequest, testIDS)
 }
 
 func TestIsValidName(t *testing.T) {
