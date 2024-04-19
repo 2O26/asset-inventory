@@ -277,7 +277,7 @@ func performSimpleScan(target string) (dbcon.Scan, error) {
 		status := "down"
 		if result.isUp {
 			status = "up"
-			asset, err := createAsset(status, result.ip.String(), target)
+			asset, err := createAsset(status, result.ip.String(), target, "simple")
 			if err != nil {
 				fmt.Printf("Error creating asset: %v\n", err)
 				return dbcon.Scan{}, err
@@ -330,7 +330,7 @@ func performAdvancedScan(target string) (dbcon.Scan, error) {
 
 		// Create an asset if any open ports were found
 		if len(openPorts) > 0 {
-			asset, err := createAsset("up", ip.String(), target)
+			asset, err := createAsset("up", ip.String(), target, "extensive")
 			if err != nil {
 				fmt.Printf("Failed to create asset for IP %s: %v\n", ip.String(), err)
 				continue
@@ -361,7 +361,7 @@ func performAdvancedScan(target string) (dbcon.Scan, error) {
 	return nil, fmt.Errorf("no active network interface found")
 } */
 
-func createAsset(status string, ip string, target string) (dbcon.Asset, error) {
+func createAsset(status string, ip string, target string, scanType string) (dbcon.Asset, error) {
 	nextU, err := flake.NextID()
 	if err != nil {
 		return dbcon.Asset{}, err
@@ -374,6 +374,7 @@ func createAsset(status string, ip string, target string) (dbcon.Asset, error) {
 		IPv4Addr:  ip,
 		Subnet:    target,
 		OpenPorts: []int{},
+		ScanType:  scanType,
 	}
 
 	return asset, nil
