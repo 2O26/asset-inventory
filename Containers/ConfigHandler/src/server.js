@@ -270,7 +270,7 @@ app.post("/updateOSSAPIkey", async (req, res) => {
     }
 });
 
-app.get("/getOSSAPIkey2", async (req, res) => {
+app.get("/getDocLink", async (req, res) => {
     try {
         const response = await axios.get('http://authhandler:3003/getUID', {
             headers: {
@@ -285,11 +285,11 @@ app.get("/getOSSAPIkey2", async (req, res) => {
         const apikey = await configHandler.getOSSAPIkey2()
         res.json({ apikey: apikey })
     } catch (error) {
-        res.status(500).send('Error fetching OSS API key');
+        res.status(500).send('Error fetching Doc Link');
     }
 })
 
-app.post("/updateOSSAPIkey2", async (req, res) => {
+app.post("/updateDocLink", async (req, res) => {
     try {
         const response = await axios.get('http://authhandler:3003/getUID', {
             headers: {
@@ -303,10 +303,10 @@ app.post("/updateOSSAPIkey2", async (req, res) => {
         await configHandler.connect();
         const oldOSSapikey = await configHandler.getOSSAPIkey2();
         await configHandler.updateOSSAPIkey2(oldOSSapikey, req.body.apikey)
-        res.json({ responseFromServer: "Succeeded to update OSS API key!!", success: "success" });
+        res.json({ responseFromServer: "Succeeded to update Doc Link!!", success: "success" });
 
     } catch (error) {
-        res.status(500).send('Error fetching OSS API key');
+        res.status(500).send('Error fetching Doc Link');
     }
 });
 

@@ -117,7 +117,7 @@ class ConfigHandler {
             try {
                 await newOSSAPIkeyConfig.save();
             } catch (err) {
-                console.log('Error while adding OSS API key:', err.message);
+                console.log('Error while adding Doc Link:', err.message);
             }
             return "";
         }
@@ -134,13 +134,13 @@ class ConfigHandler {
             try {
                 await newOSSAPIkeyConfig.save();
             } catch (err) {
-                console.log('Error while adding OSS API key:', err.message);
+                console.log('Error while adding Doc Link:', err.message);
             }
         }
         try {
             const result = await OSSAPIKEYSchema2.findOneAndUpdate({ apikey: updatedapikey });
         } catch (err) {
-            console.log("Error updating OSS API key");
+            console.log("Error updating Doc Link");
         }
     }
 }

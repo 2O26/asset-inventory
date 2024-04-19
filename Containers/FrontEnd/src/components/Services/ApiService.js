@@ -473,7 +473,7 @@ export const UpdateAPIOSSkey2 = async (apikey) => { //The code for Updating/gett
         }
 
         const authToken = await UserService.getToken();
-        const response = await fetch('http://localhost:3001/updateOSSAPIkey2', {
+        const response = await fetch('http://localhost:3001/updateDocLink', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -485,7 +485,7 @@ export const UpdateAPIOSSkey2 = async (apikey) => { //The code for Updating/gett
         return resData;
     } catch (err) {
         console.error(err);
-        throw new Error('Network response was not ok, could not add API key');
+        throw new Error('Network response was not ok, could not add Doc Link');
     }
 }
 
@@ -497,7 +497,7 @@ export const GetOSSAPIkey2 = async () => {
 
         const authToken = await UserService.getToken();
 
-        const response = await fetch('http://localhost:3001/getOSSAPIkey2', {
+        const response = await fetch('http://localhost:3001/getDocLink', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -508,7 +508,7 @@ export const GetOSSAPIkey2 = async () => {
 
     } catch (err) {
         console.error(err);
-        throw new Error('Could not fetch API key');
+        throw new Error('Could not fetch Doc Link');
     }
 }
 
