@@ -168,7 +168,7 @@ app.post("/librarySort", async (req, res) => {
 
         try {
             await LibraryDBupdate(assetID, res);
-            checkIfVulnerabilities(assetID);  // Only runs if the update is successful
+            checkIfVulnerabilities(assetID, req.headers.authorization);  // Only runs if the update is successful
         } catch (error) {
             console.error("Error during library update or vulnerability check: ", error);
         }
@@ -198,13 +198,13 @@ app.post("/recheckVulnerabilitiesAll", async (req, res) => {
     res.json({ Success: true });
 })
 
-async function checkIfVulnerabilities(assetID) {
+async function checkIfVulnerabilities(assetID, authToken) {
     /*
         - [x] For every library + version combo that contains assetID
             - run function that invokes an external API call to check for CVEs
         - [x] Save result to database
     */
-    const purlsWithVulnerbilities = await CVEcheck(assetID);
+    const purlsWithVulnerbilities = await CVEcheck(assetID, authToken);
     const cveSave = new CVEscanSave();
     cveSave.connect()
         .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))

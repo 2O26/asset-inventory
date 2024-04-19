@@ -3,8 +3,13 @@ const axios = require('axios');
 const CVEscanSave = require("../DatabaseConn/CVEconn");
 
 
-async function getAPIkey() {
-    const url = "http://confighandler:3001/getOSSAPIkey"
+async function getAPIkey(authToken) {
+    const response = await fetch('http://localhost:3001/getOSSAPIkey', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${authToken}`
+        }
+    });
     try {
         const apikeyResponse = await axios.get(url);
         if (apikeyResponse.status !== 200) {
@@ -91,12 +96,12 @@ async function processPurlsInBatches(purl_list, apikey, batchSize) {
     return accumulatedResult;
 }
 
-async function CVEcheckAll() {
+async function CVEcheckAll(authToken) {
     /*
         Mother function to check all libraries for CVEs
     */
     try {
-        const apikey = await getAPIkey();
+        const apikey = await getAPIkey(authToken);
         if (apikey === "") {
             console.log("Erronous api key or could not fetch it from settings")
             return {}
@@ -123,12 +128,12 @@ async function CVEcheckAll() {
     }
 }
 
-async function CVEcheck(assetID) {
+async function CVEcheck(assetID, authToken) {
     /*
         Mother function to check libraries associated with a specific asset for CVEs
     */
     try {
-        const apikey = await getAPIkey();
+        const apikey = await getAPIkey(authToken);
         if (apikey === "") {
             console.log("Erronous api key or could not fetch it from settings")
             return {}
