@@ -1,0 +1,9 @@
+FROM node:latest AS base
+WORKDIR /app
+COPY package*.json ./
+# Build step 2: Run tests
+FROM base AS test
+ENV NODE_ENV=test
+RUN npm install
+COPY . .
+RUN npm test

@@ -44,7 +44,7 @@ app.get("/getUID", async (req, res) => {
     });
 });
 
-//If authenticated will return e.g. { "authenticated": true, "roles": ["192.168.1.0/24", "10.0.0.0/32"], "isAdmin": true/false }
+//If authenticated will return e.g. { "authenticated": true, "roles": ["192.168.1.0/24", "10.0.0.0/32"], "isAdmin": true/false, "canManageAssets": true/false }
 app.get("/getRoles", async (req, res) => {
 
     function containsNumber(str) {
@@ -61,6 +61,7 @@ app.get("/getRoles", async (req, res) => {
         } else {
             let subnetRoles = [];
             let isAdmin = false;
+            let canManageAssets = false
 
             for (const [key, role] of Object.entries(decoded.realm_access.roles)) {
                 if (containsNumber(role)) {
@@ -69,10 +70,13 @@ app.get("/getRoles", async (req, res) => {
                 if (role === "admin") {
                     isAdmin = true;
                 }
+                if (role === "manage-assets") {
+                    canManageAssets = true;
+                }
             }
 
             console.log("Successfully authenticated (getRoles): ", decoded.preferred_username)
-            res.json({ "authenticated": true, "roles": subnetRoles, "isAdmin": isAdmin })
+            res.json({ "authenticated": true, "roles": subnetRoles, "isAdmin": isAdmin, "canManageAssets": canManageAssets })
         }
     });
 });

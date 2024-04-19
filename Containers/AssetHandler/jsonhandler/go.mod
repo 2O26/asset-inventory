@@ -3,8 +3,9 @@ module assetinventory/assethandler/jsonhandler
 go 1.22.0
 
 require (
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/wI2L/jsondiff v0.5.1
-	go.mongodb.org/mongo-driver v1.14.0
+	go.mongodb.org/mongo-driver v1.15.0
 )
 
 require (

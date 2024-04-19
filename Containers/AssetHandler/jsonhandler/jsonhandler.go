@@ -3,6 +3,8 @@ package jsonhandler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,6 +18,13 @@ type Asset struct {
 	DateUpdated string   `json:"Updated at"`
 	Criticality int      `json:"Criticality"`
 	Hostname    string   `json:"Hostname"`
+}
+
+type networkAsset struct {
+	Status    string `bson:"status" json:"status"`
+	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
+	Subnet    string `bson:"subnet" json:"subnet"`
+	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
 }
 
 type FrontAsset struct {
@@ -164,4 +173,73 @@ func insertPluginData(inAssets map[string]FrontAsset, plugins map[string]PluginS
 			}
 		}
 	}
+}
+
+func NeedToKnow(inState FrontState, roles []string) FrontState {
+	// Function will be primarily used to filter out data that the user does not have access to
+	var alteredState FrontState
+	alteredState.Assets = make(map[string]FrontAsset)
+	alteredState.Relations = make(map[string]Relation)
+	alteredState.PluginList = inState.PluginList
+	alteredState.MostRecentUpdate = inState.MostRecentUpdate
+
+	//find assets that user can view, and add them to the state
+	//the code below only accounts for assets from the network scan, as roles aren't set for ordinary assets yet
+	for assetID, asset := range inState.Assets {
+		netscanData, ok := asset.Plugins["netscan"].(map[string]any)
+		if ok {
+			var netProps networkAsset
+			err := mapstructure.Decode(netscanData, &netProps)
+
+			if err != nil {
+				continue //ADD ERROR HERE
+			}
+			for _, role := range roles {
+				fmt.Println("ASSET NAME", asset.Name)
+				if netProps.Subnet == role {
+					// user can view asset, add it to alteredState
+					alteredState.Assets[assetID] = asset
+				}
+			}
+		} else {
+			// asset does not have netscan data, and since all users have access to manually added assets
+			// we add them. Edge case being the subnet assets
+			if len(roles) <= 0 {
+				if asset.Type[0] != "Subnet" {
+					alteredState.Assets[assetID] = asset
+				}
+			} else {
+				for _, role := range roles {
+					if asset.Type[0] != "Subnet" {
+						//Not a subnet asset, add it
+						alteredState.Assets[assetID] = asset
+					} else if asset.Type[0] == "Subnet" && asset.Name == role {
+						alteredState.Assets[assetID] = asset
+					}
+				}
+			}
+		}
+	}
+
+	//also need to copy relations
+	for relationID, relation := range inState.Relations {
+		from := false
+		to := false
+		for assetID := range alteredState.Assets {
+			if relation.From == assetID {
+				from = true
+			} else if relation.To == assetID {
+				to = true
+			}
+		}
+		if from && to {
+			alteredState.Relations[relationID] = relation
+		}
+	}
+
+	alteredStateJSON, _ := json.Marshal(alteredState)
+
+	fmt.Println("Altered state: ", string(alteredStateJSON))
+	return alteredState
+
 }

@@ -5,12 +5,23 @@ import UserService from './UserService';
 export const AssetHandlerStatus = async () => {
     // assethandler status check
 
-    const response = await fetch('/assetHandlerStatus');
+    if (UserService.tokenExpired()) {
+        await UserService.updateToken()
+    }
+    const authToken = await UserService.getToken();
+    const response = await fetch('http://localhost:8080/assetHandlerStatus', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${authToken}`
+        }
+    });
 
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
-    return response.json();
+
+    const return_data = await response.json();
+    return return_data;
 };
 
 export const LogIn = async (userData) => {
@@ -25,12 +36,23 @@ export const LogIn = async (userData) => {
 };
 
 export const GetState = async () => {
-    const response = await fetch('http://localhost:8080/getLatestState');
+
+    if (UserService.tokenExpired()) {
+        await UserService.updateToken()
+    }
+    const authToken = await UserService.getToken();
+    const response = await fetch('http://localhost:8080/getLatestState', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${authToken}`
+        }
+    });
 
     if (!response.ok) {
         throw new Error('Network response was not ok, could not fetch state');
     }
-    return response.json();
+    const return_data = await response.json();
+    return return_data;
 };
 
 export const StartNetScan = async (scanSettings) => {
@@ -118,6 +140,7 @@ export const DeleteRealmRole = async (IPRange) => {
             return null;
         }
     };
+
     const deleteRoleById = async (roleId) => {
         const url = `http://localhost:8085/admin/realms/master/roles-by-id/${roleId}`;
 
@@ -164,7 +187,9 @@ export const GetIPranges = async () => {
                 'Authorization': `Bearer ${authToken}`,
             }
         });
-        return response.json();
+
+        const return_data = await response.json();
+        return return_data;
     } catch (err) {
         console.error(err);
         throw new Error('Could not fetch IP ranges');
@@ -287,9 +312,18 @@ export const RmRecurring = async (recurring) => {
 }
 
 export const UpdateAsset = async (data) => {
+
+    if (UserService.tokenExpired()) {
+        await UserService.updateToken()
+    }
+    const authToken = await UserService.getToken()
+
     const response = await fetch('http://localhost:8080/assetHandler', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+        },
         body: JSON.stringify(data)
     });
 
@@ -298,7 +332,8 @@ export const UpdateAsset = async (data) => {
             throw new Error(error.error || 'Something went wrong.');
         });
     }
-    return response.json();
+    const resData = await response.json();
+    return resData;
 }
 
 export const UploadCycloneDX = async (data) => {
@@ -326,7 +361,6 @@ export const UploadCycloneDX = async (data) => {
         alert('Error uploading file: ' + error.message);
     }
 }
-
 
 export const SaveUserSetting = async (data) => {
     try {
@@ -388,9 +422,17 @@ export const GetCDXfiles = async (assetID) => {
 
 export const UpdateAPIOSSkey = async (apikey) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
         const response = await fetch('http://localhost:3001/updateOSSAPIkey', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
             body: JSON.stringify({ apikey: apikey })
         });
         const resData = await response.json();
@@ -403,7 +445,18 @@ export const UpdateAPIOSSkey = async (apikey) => {
 
 export const GetOSSAPIkey = async () => {
     try {
-        const response = await fetch('http://localhost:3001/getOSSAPIkey');
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
+        const response = await fetch('http://localhost:3001/getOSSAPIkey', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
         const resData = await response.json();
         return resData;
 
@@ -413,11 +466,19 @@ export const GetOSSAPIkey = async () => {
     }
 }
 
-export const UpdateAPIOSSkey2 = async (apikey) => { //The code for Updating/getting OSS API keys is reused identically
-    try {                                           //but at different URLs for the Documentation Link feature.
+export const UpdateAPIOSSkey2 = async (apikey) => { //The code for Updating/getting OSS API keys is reused identically but at different URLs for the Documentation Link feature.
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
         const response = await fetch('http://localhost:3001/updateOSSAPIkey2', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
             body: JSON.stringify({ apikey: apikey })
         });
         const resData = await response.json();
@@ -430,7 +491,18 @@ export const UpdateAPIOSSkey2 = async (apikey) => { //The code for Updating/gett
 
 export const GetOSSAPIkey2 = async () => {
     try {
-        const response = await fetch('http://localhost:3001/getOSSAPIkey2');
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
+        const response = await fetch('http://localhost:3001/getOSSAPIkey2', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
         const resData = await response.json();
         return resData;
 

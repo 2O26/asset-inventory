@@ -22,6 +22,13 @@ type StateResponse struct {
 	Message string                 `json:"message"`
 	State   jsonhandler.FrontState `json:"state"`
 }
+
+type authResponse struct {
+	Authenticated bool     `json:"authenticated"`
+	Roles         []string `json:"roles"`
+	IsAdmin       bool     `json:"isAdmin"`
+}
+
 type networkResponse struct {
 	StateID     string
 	DateCreated string
@@ -80,12 +87,60 @@ func getNetScanStatus() json.RawMessage {
 
 }
 
+func authorizeUser(c *gin.Context) authResponse {
+
+	emptyAuth := authResponse{
+		Authenticated: false,
+		Roles:         nil,
+		IsAdmin:       false,
+	}
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		response := StateResponse{Message: "No authorization token provided."}
+		c.IndentedJSON(http.StatusUnauthorized, response)
+		return emptyAuth
+	}
+
+	// Perform authentication
+	authURL := "http://authhandler:3003/getRoles"
+	req, err := http.NewRequest("GET", authURL, nil)
+	if err != nil {
+		log.Printf("Failed to fetch authentication token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch authentication token"})
+		return emptyAuth
+	}
+	req.Header.Add("Authorization", authHeader)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Failed to connect to validation server: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to validation server"})
+		return emptyAuth
+	}
+
+	defer resp.Body.Close()
+
+	var auth authResponse
+	fmt.Println("Response Status:", resp.StatusCode)
+	err = json.NewDecoder(resp.Body).Decode(&auth)
+	if err != nil {
+		log.Printf("Failed to fetch authentication token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch authentication token"})
+		return emptyAuth
+	}
+
+	return auth
+
+}
+
 func getLatestState(c *gin.Context) {
+
+	auth := authorizeUser(c)
+
 	// Add assets from network scan
-	getNetworkScan()
-	// Simulate authentication
-	var authSuccess = true
-	if authSuccess {
+	if auth.Authenticated {
+
+		getNetworkScan()
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)
 
@@ -123,10 +178,13 @@ func getLatestState(c *gin.Context) {
 		var currentState jsonhandler.FrontState
 		json.Unmarshal(currentStateJSON, &currentState)
 		log.Println(string(currentStateJSON))
+
+		// Will now remove any data that a user cannot access.
+		if auth.IsAdmin == false {
+			currentState = jsonhandler.NeedToKnow(currentState, auth.Roles)
+		}
+
 		response := StateResponse{Message: "Authentication success.", State: currentState}
-		c.IndentedJSON(http.StatusOK, response)
-	} else {
-		response := StateResponse{Message: "Authenication failure."}
 		c.IndentedJSON(http.StatusOK, response)
 	}
 }
@@ -171,7 +229,7 @@ func getNetworkScan() {
 		AddAsset: addAsset,
 	}
 	fmt.Println("Request: ", request)
-	dbcon.AddAssets(request, assetIDs)
+	_, addedassets := dbcon.AddAssets(request, assetIDs)
 	pluginState := jsonhandler.PluginState{
 		StateID:     "netscan",
 		DateCreated: netassets.DateCreated,
@@ -188,14 +246,28 @@ func getNetworkScan() {
 	fmt.Println("PluginState: ", pluginState)
 
 	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
-	addSubnetAssets(netassets)
-	addSubnetRelations(netassets)
+	addedSubnetAssets := addSubnetAssets(netassets)
+	addedRelations := addSubnetRelations(netassets)
 
-	dbcon.AddPluginData(pluginState, plugin)
+	addPluginData := dbcon.AddPluginData(pluginState, plugin)
+	addedassets = append(addedassets, addedSubnetAssets...)
+	changes := dbcon.Timeline{
+		AddedAssets:      addedassets,
+		RemovedAssets:    nil,
+		UpdatedAssets:    addPluginData,
+		AddedRelations:   addedRelations,
+		RemovedRelations: nil,
+	}
+	timelineDB := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("timelineDB")}
+
+	err = dbcon.SaveChange(changes, timelineDB)
+	if err != nil {
+		log.Fatalf("Failed to save changes: %v", err)
+	}
 
 }
 
-func addSubnetAssets(netassets networkResponse) {
+func addSubnetAssets(netassets networkResponse) []string {
 	var addAsset []jsonhandler.Asset
 	var assetIDs []string
 	subnets := make(map[string]bool)
@@ -228,17 +300,17 @@ func addSubnetAssets(netassets networkResponse) {
 	assetRequest := dbcon.AssetRequest{
 		AddAsset: addAsset,
 	}
-	dbcon.AddAssets(assetRequest, assetIDs)
-
+	_, addedSubnetAssets := dbcon.AddAssets(assetRequest, assetIDs)
+	return addedSubnetAssets
 }
 
-func addSubnetRelations(netassets networkResponse) {
+func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	latestScan, err := dbcon.GetLatestScan(db)
 	if err != nil {
 		// Log and return error if it's not ErrNoDocuments
 		log.Printf("Failed to retrieve the latest scan: %v\n", err)
-		return
+		return nil
 	}
 	var addRelation []jsonhandler.Relation
 	var relationIDs []string
@@ -287,7 +359,8 @@ func addSubnetRelations(netassets networkResponse) {
 	relationRequest := dbcon.AssetRequest{
 		AddRelations: addRelation,
 	}
-	dbcon.AddRelations(relationRequest, relationIDs)
+	_, AddRelations := dbcon.AddRelations(relationRequest, relationIDs)
+	return AddRelations
 
 }
 
@@ -429,7 +502,20 @@ func main() {
 	})
 
 	router.POST("/assetHandler", func(c *gin.Context) {
-		dbcon.ManageAssetsAndRelations(scansHelper, timelineDB, c)
+		auth := authorizeUser(c)
+		if auth.Authenticated {
+			if auth.IsAdmin {
+				dbcon.ManageAssetsAndRelations(scansHelper, timelineDB, c)
+			} else {
+				log.Println("User with insufficient privileges tried to access /assetHandler.")
+				response := StateResponse{Message: "Insufficient privileges for requested operation."}
+				c.IndentedJSON(http.StatusForbidden, response)
+			}
+		} else {
+			log.Println("Unauthorized user tried to access /assetHandler.")
+			response := StateResponse{Message: "User unauthorized."}
+			c.IndentedJSON(http.StatusUnauthorized, response)
+		}
 	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
 		// dbcon.PrintAllDocuments(scansHelper, c)

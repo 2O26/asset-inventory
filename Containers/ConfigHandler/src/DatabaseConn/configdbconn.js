@@ -21,6 +21,7 @@ class ConfigHandler {
             .catch((err) => {
                 console.error('Database connection error', dbName);
                 console.error(' trying to connect to server:', connection);
+                throw err;
             });
     };
 
