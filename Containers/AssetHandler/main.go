@@ -229,7 +229,7 @@ func getNetworkScan() {
 		AddAsset: addAsset,
 	}
 	fmt.Println("Request: ", request)
-	dbcon.AddAssets(request, assetIDs)
+	_, addedassets := dbcon.AddAssets(request, assetIDs)
 	pluginState := jsonhandler.PluginState{
 		StateID:     "netscan",
 		DateCreated: netassets.DateCreated,
@@ -246,14 +246,28 @@ func getNetworkScan() {
 	fmt.Println("PluginState: ", pluginState)
 
 	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
-	addSubnetAssets(netassets)
-	addSubnetRelations(netassets)
+	addedSubnetAssets := addSubnetAssets(netassets)
+	addedRelations := addSubnetRelations(netassets)
 
-	dbcon.AddPluginData(pluginState, plugin)
+	addPluginData := dbcon.AddPluginData(pluginState, plugin)
+	addedassets = append(addedassets, addedSubnetAssets...)
+	changes := dbcon.Timeline{
+		AddedAssets:      addedassets,
+		RemovedAssets:    nil,
+		UpdatedAssets:    addPluginData,
+		AddedRelations:   addedRelations,
+		RemovedRelations: nil,
+	}
+	timelineDB := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("timelineDB")}
+
+	err = dbcon.SaveChange(changes, timelineDB)
+	if err != nil {
+		log.Fatalf("Failed to save changes: %v", err)
+	}
 
 }
 
-func addSubnetAssets(netassets networkResponse) {
+func addSubnetAssets(netassets networkResponse) []string {
 	var addAsset []jsonhandler.Asset
 	var assetIDs []string
 	subnets := make(map[string]bool)
@@ -286,17 +300,17 @@ func addSubnetAssets(netassets networkResponse) {
 	assetRequest := dbcon.AssetRequest{
 		AddAsset: addAsset,
 	}
-	dbcon.AddAssets(assetRequest, assetIDs)
-
+	_, addedSubnetAssets := dbcon.AddAssets(assetRequest, assetIDs)
+	return addedSubnetAssets
 }
 
-func addSubnetRelations(netassets networkResponse) {
+func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	latestScan, err := dbcon.GetLatestScan(db)
 	if err != nil {
 		// Log and return error if it's not ErrNoDocuments
 		log.Printf("Failed to retrieve the latest scan: %v\n", err)
-		return
+		return nil
 	}
 	var addRelation []jsonhandler.Relation
 	var relationIDs []string
@@ -345,7 +359,8 @@ func addSubnetRelations(netassets networkResponse) {
 	relationRequest := dbcon.AssetRequest{
 		AddRelations: addRelation,
 	}
-	dbcon.AddRelations(relationRequest, relationIDs)
+	_, AddRelations := dbcon.AddRelations(relationRequest, relationIDs)
+	return AddRelations
 
 }
 
