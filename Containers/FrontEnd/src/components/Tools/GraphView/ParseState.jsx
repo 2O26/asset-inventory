@@ -9,10 +9,11 @@ export function ParseState(jsonData) {
         const nodeName = asset.properties.Name;
         const nodeType = asset.properties.Type[0]
         const nodeStatus = asset.plugins?.netscan?.status
+        const assetIP = asset.properties.IP
 
         nodes.push({
             id: nodeId,
-            data: { label: nodeName, type: nodeType, status: nodeStatus },
+            data: { label: nodeName, type: nodeType, status: nodeStatus, ip: assetIP, id: nodeId },
             position: { x: 0, y: 0 }, // Assuming initial position
             type: 'turbo'
         });

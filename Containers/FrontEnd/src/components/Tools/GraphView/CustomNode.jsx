@@ -26,7 +26,9 @@ export const CustomNodeComponent = ({ data }) => {
                         </div>
                         <div>
                             <div className="title">{data.label}</div>
-                            {data.type && <div className="subline">{data.type}</div>}
+                            {data.id && <div className="subline">id: {data.id}</div>}
+                            {data.type && <div className="subline">type: {data.type}</div>}
+                            {data.ip && <div className="subline">ip: {data.ip}</div>}
                         </div>
                     </div>
                     <Handle type="target" position={Position.Left} />

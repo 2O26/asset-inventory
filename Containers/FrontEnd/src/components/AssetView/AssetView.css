@@ -235,6 +235,7 @@
 }
 
 .addRelation-container {
+    width: 90%;
     border-radius: 0.5rem;
     box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.4);
     padding: 1rem;

@@ -17,6 +17,7 @@ export default function AssetView() {
     let { assetID } = useParams();
     const [selectedView, setSelectedView] = useState('Information');
     const [filteredRelations, setFilteredRelations] = useState([]);
+    const [assetIDs, setAssetIDs] = useState([]);
     const [isExpanded, setIsExpanded] = useState(true); // Is asset view expanded or not?
     const { data, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['getState'],
@@ -27,6 +28,17 @@ export default function AssetView() {
     const handleButtonClick = (view) => {
         setSelectedView(view);
     }
+
+    const getAssetIDs = (jsonData) => {
+        // Check if jsonData and jsonData.state.assets exist
+        if (!jsonData || !jsonData.state || !jsonData.state.assets) {
+            return []; // Return an empty array if the structure is not as expected
+        }
+
+        // Return the keys from the assets object, which are the asset IDs
+        return Object.keys(jsonData.state.assets);
+    }
+
 
     const filterRelationsByAID = (aid) => {
         // Filtering the relations
@@ -44,6 +56,7 @@ export default function AssetView() {
     useEffect(() => {
         if (assetID && data && (Object.keys(data.state.assets).length != 0)) {
             filterRelationsByAID(assetID)
+            setAssetIDs(getAssetIDs(data))
         }
     }, [assetID, data])
 
@@ -109,7 +122,7 @@ export default function AssetView() {
                         <History height='100%' width='25vw' assetID={assetID} isDashboard={true} isAssetView={true}></History>)
                     }
                     {selectedView === 'Edit' && (
-                        <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch}></EditAsset>)
+                        <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch} assetIDs={assetIDs}></EditAsset>)
                     }
                     {selectedView === 'CycloneDx' && (
                         <CycloneDX assetID={assetID} ></CycloneDX>)

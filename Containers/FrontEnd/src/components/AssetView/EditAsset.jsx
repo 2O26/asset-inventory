@@ -5,9 +5,11 @@ import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 import { useMutation } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { GetState } from '../Services/ApiService'
+import Select from 'react-select';
 
 
-export default function EditAsset({ assetData, assetID, relationData, refetch }) {
+
+export default function EditAsset({ assetData, assetID, relationData, refetch, assetIDs }) {
     const [errorMessage, setErrorMessage] = useState(null)
 
     // const dontDisplayList = ["Created at", "Updated at", "Hostname"];
@@ -178,18 +180,57 @@ export default function EditAsset({ assetData, assetID, relationData, refetch })
                         }
                         {showAddRelation &&
                             <div className='addRelation-container' style={{ marginTop: "1.25rem" }}>
-                                <h3 style={{ marginBottom: "1rem" }}>Add Relation </h3>
+                                <h3 style={{ marginBottom: "1rem" }}>Add Relation</h3>
                                 {Object.entries(newRelationData).map(([key, value], index) => (
                                     <div key={index}>
                                         <div className='inputContainer'>
-                                            <label className='inputLabel'>{`${key[0].toUpperCase()}${key.slice(1)}`}</label>
-                                            <input
+                                            <label className='inputLabel' style={{ marginTop: "0.5rem" }}>{`${key[0].toUpperCase()}${key.slice(1)}`}</label>
+                                            {key === "from" || key === "to" ? (
+                                                <Select
+                                                    // // If you want to style the select box here is wher you edit: https://react-select.com/styles
+                                                    // styles={{
+                                                    //     control: (baseStyles, state) => ({
+                                                    //         ...baseStyles,
+                                                    //         marginTop: "0.5rem",
+                                                    //         borderStyle: 'none',
+                                                    //         background: 'var(--background-color)',
+                                                    //     }),
+                                                    //     option: (baseStyles, state) => ({
+                                                    //         ...baseStyles,
+                                                    //         backgroundColor: 'var(--background-color)',
+                                                    //         color: 'var(--text-color)',
+                                                    //         cursor: 'pointer',
+                                                    //     })
+                                                    // }}
+                                                    value={assetIDs.find(option => option.value === value)}
+                                                    onChange={(option) => setNewRelationData({ ...newRelationData, [key]: option.value })}
+                                                    options={assetIDs.map(id => ({ value: id, label: id }))}
+                                                    placeholder="Select an Asset ID"
+                                                    isSearchable={true}
+                                                    id={key}
+                                                    name={key}
+                                                />
+                                            ) : (key === "direction" ? <select
                                                 className="inputFields"
                                                 value={value}
                                                 onChange={(e) => setNewRelationData({ ...newRelationData, [key]: e.target.value })}
                                                 id={key}
                                                 name={key}
-                                            />
+                                            >
+                                                <option value="uni">Unidirectional</option>
+                                                <option value="bi">Bidirectional</option>
+                                            </select>
+                                                :
+                                                (
+                                                    <input
+                                                        className="inputFields"
+                                                        value={value}
+                                                        onChange={(e) => setNewRelationData({ ...newRelationData, [key]: e.target.value })}
+                                                        id={key}
+                                                        type="text"
+                                                        name={key}
+                                                    />
+                                                ))}
                                         </div>
                                     </div>
                                 ))}
