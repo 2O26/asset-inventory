@@ -192,8 +192,6 @@ func validNmapTarget(nmapTarget string) bool {
 	return match
 }
 
-const maxPort = 65535
-
 type pingResult struct {
 	ip   net.IP
 	isUp bool
@@ -345,21 +343,6 @@ func performAdvancedScan(target string) (dbcon.Scan, error) {
 
 	return scan, nil
 }
-
-/* func getNetworkInterface() (*net.Interface, error) {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagUp != 0 && iface.Flags&net.FlagLoopback == 0 {
-			return &iface, nil
-		}
-	}
-
-	return nil, fmt.Errorf("no active network interface found")
-} */
 
 func createAsset(status string, ip string, target string) (dbcon.Asset, error) {
 	nextU, err := flake.NextID()
