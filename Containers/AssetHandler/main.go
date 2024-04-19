@@ -22,6 +22,13 @@ type StateResponse struct {
 	Message string                 `json:"message"`
 	State   jsonhandler.FrontState `json:"state"`
 }
+
+type authResponse struct {
+	Authenticated bool     `json:"authenticated"`
+	Roles         []string `json:"roles"`
+	IsAdmin       bool     `json:"isAdmin"`
+}
+
 type networkResponse struct {
 	StateID     string
 	DateCreated string
@@ -80,12 +87,60 @@ func getNetScanStatus() json.RawMessage {
 
 }
 
+func authorizeUser(c *gin.Context) authResponse {
+
+	emptyAuth := authResponse{
+		Authenticated: false,
+		Roles:         nil,
+		IsAdmin:       false,
+	}
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		response := StateResponse{Message: "No authorization token provided."}
+		c.IndentedJSON(http.StatusUnauthorized, response)
+		return emptyAuth
+	}
+
+	// Perform authentication
+	authURL := "http://authhandler:3003/getRoles"
+	req, err := http.NewRequest("GET", authURL, nil)
+	if err != nil {
+		log.Printf("Failed to fetch authentication token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch authentication token"})
+		return emptyAuth
+	}
+	req.Header.Add("Authorization", authHeader)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Failed to connect to validation server: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to validation server"})
+		return emptyAuth
+	}
+
+	defer resp.Body.Close()
+
+	var auth authResponse
+	fmt.Println("Response Status:", resp.StatusCode)
+	err = json.NewDecoder(resp.Body).Decode(&auth)
+	if err != nil {
+		log.Printf("Failed to fetch authentication token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch authentication token"})
+		return emptyAuth
+	}
+
+	return auth
+
+}
+
 func getLatestState(c *gin.Context) {
+
+	auth := authorizeUser(c)
+
 	// Add assets from network scan
-	getNetworkScan()
-	// Simulate authentication
-	var authSuccess = true
-	if authSuccess {
+	if auth.Authenticated {
+
+		getNetworkScan()
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)
 
@@ -123,10 +178,13 @@ func getLatestState(c *gin.Context) {
 		var currentState jsonhandler.FrontState
 		json.Unmarshal(currentStateJSON, &currentState)
 		log.Println(string(currentStateJSON))
+
+		// Will now remove any data that a user cannot access.
+		if auth.IsAdmin == false {
+			currentState = jsonhandler.NeedToKnow(currentState, auth.Roles)
+		}
+
 		response := StateResponse{Message: "Authentication success.", State: currentState}
-		c.IndentedJSON(http.StatusOK, response)
-	} else {
-		response := StateResponse{Message: "Authenication failure."}
 		c.IndentedJSON(http.StatusOK, response)
 	}
 }
@@ -429,7 +487,20 @@ func main() {
 	})
 
 	router.POST("/assetHandler", func(c *gin.Context) {
-		dbcon.ManageAssetsAndRelations(scansHelper, timelineDB, c)
+		auth := authorizeUser(c)
+		if auth.Authenticated {
+			if auth.IsAdmin {
+				dbcon.ManageAssetsAndRelations(scansHelper, timelineDB, c)
+			} else {
+				log.Println("User with insufficient privileges tried to access /assetHandler.")
+				response := StateResponse{Message: "Insufficient privileges for requested operation."}
+				c.IndentedJSON(http.StatusForbidden, response)
+			}
+		} else {
+			log.Println("Unauthorized user tried to access /assetHandler.")
+			response := StateResponse{Message: "User unauthorized."}
+			c.IndentedJSON(http.StatusUnauthorized, response)
+		}
 	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
 		// dbcon.PrintAllDocuments(scansHelper, c)
