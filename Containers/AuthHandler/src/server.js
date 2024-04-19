@@ -31,17 +31,22 @@ app.get("/status", (req, res) => {
 
 //If authenticated will return e.g. { "authenticated": true, "userID": "adkfji2329uf2dafkds2" }
 app.get("/getUID", async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
-    jwt.verify(token, getKey, {}, async function (err, decoded) {
-        if (err) {
-            console.error("Authentication Error:", err)
-            res.status(401).json({ "authenticated": false, message: 'Invalid token' });
-            return;
-        } else {
-            console.log("Successfully authenticated (getUid): ", decoded.preferred_username)
-            res.json({ "authenticated": true, "userID": decoded.sub })
-        }
-    });
+    try {
+        const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
+        jwt.verify(token, getKey, {}, async function (err, decoded) {
+            if (err) {
+                console.error("Authentication Error:", err)
+                res.status(401).json({ "authenticated": false, message: 'Invalid token' });
+                return;
+            } else {
+                console.log("Successfully authenticated (getUid): ", decoded.preferred_username)
+                res.json({ "authenticated": true, "userID": decoded.sub })
+            }
+        });
+    } catch (error) {
+        console.log("Recieved no authentication token")
+        res.status(401).json({ "authenticated": false, message: 'Recieved no authentication token' });
+    }
 });
 
 //If authenticated will return e.g. { "authenticated": true, "roles": ["192.168.1.0/24", "10.0.0.0/32"], "isAdmin": true/false, "canManageAssets": true/false }
@@ -50,33 +55,37 @@ app.get("/getRoles", async (req, res) => {
     function containsNumber(str) {
         return /\d/.test(str);
     }
+    try {
+        const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
+        jwt.verify(token, getKey, {}, async function (err, decoded) {
+            if (err) {
+                console.error("Authentication Error:", err)
+                res.status(401).json({ "authenticated": false, message: 'Invalid token' });
+                return;
+            } else {
+                let subnetRoles = [];
+                let isAdmin = false;
+                let canManageAssets = false
 
-    const token = req.headers.authorization.split(' ')[1]; // Assuming 'Bearer ' prefix
+                for (const [key, role] of Object.entries(decoded.realm_access.roles)) {
+                    if (containsNumber(role)) {
+                        subnetRoles.push(role);
+                    }
+                    if (role === "admin") {
+                        isAdmin = true;
+                    }
+                    if (role === "manage-assets") {
+                        canManageAssets = true;
+                    }
+                }
 
-    jwt.verify(token, getKey, {}, async function (err, decoded) {
-        if (err) {
-            console.error("Authentication Error:", err)
-            res.status(401).json({ "authenticated": false, message: 'Invalid token' });
-            return;
-        } else {
-            let subnetRoles = [];
-            let isAdmin = false;
-            let canManageAssets = false
-
-            for (const [key, role] of Object.entries(decoded.realm_access.roles)) {
-                if (containsNumber(role)) {
-                    subnetRoles.push(role);
-                }
-                if (role === "admin") {
-                    isAdmin = true;
-                }
-                if (role === "manage-assets") {
-                    canManageAssets = true;
-                }
+                console.log("Successfully authenticated (getRoles): ", decoded.preferred_username)
+                res.json({ "authenticated": true, "roles": subnetRoles, "isAdmin": isAdmin, "canManageAssets": canManageAssets })
             }
+        });
+    } catch (error) {
+        console.log("Recieved no authentication token")
+        res.status(401).json({ "authenticated": false, message: 'Recieved no authentication token' });
+    }
 
-            console.log("Successfully authenticated (getRoles): ", decoded.preferred_username)
-            res.json({ "authenticated": true, "roles": subnetRoles, "isAdmin": isAdmin, "canManageAssets": canManageAssets })
-        }
-    });
 });
