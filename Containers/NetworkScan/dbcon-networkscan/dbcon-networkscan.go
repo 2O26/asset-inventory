@@ -109,7 +109,10 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 		for assetID, asset := range currentScan.State {
 			if prevAsset.IPv4Addr == asset.IPv4Addr {
 				// IP address exists in the current scan, update the asset
-				if len(asset.OpenPorts) == 0 {
+				if asset.ScanType == "extensive" {
+					// Use new ports when extensive scan
+				} else {
+					// Preserve ports if simple scan
 					asset.OpenPorts = prevAsset.OpenPorts
 				}
 
