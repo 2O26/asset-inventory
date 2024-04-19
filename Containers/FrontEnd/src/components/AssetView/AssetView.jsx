@@ -10,6 +10,7 @@ import EditAsset from './EditAsset';
 import { LeftArrow, RightArrow } from '../common/Icons/Icons';
 import { CSSTransition } from 'react-transition-group';
 import CycloneDX from './CycloneDX';
+import History from '../Tools/History/History';
 
 
 export default function AssetView() {
@@ -105,7 +106,7 @@ export default function AssetView() {
                         </div>)
                     }
                     {selectedView === 'History' && (
-                        <AssetInfo data={data} assetID={assetID} title={"History Page"} showPluginInfo={false}></AssetInfo>)
+                        <History height='100%' width='25vw' assetID={assetID} isDashboard={true} isAssetView={true}></History>)
                     }
                     {selectedView === 'Edit' && (
                         <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch}></EditAsset>)

@@ -506,7 +506,6 @@ export const GetVulnerbleComponents = async (assetID) => {
             body: JSON.stringify({ "assetID": assetID })
         });
         const return_data = await response.json();
-
         return return_data;
     } catch (err) {
         console.error(err);
@@ -536,5 +535,33 @@ export const GetVulnerbleComponentsAll = async (assetID) => {
     } catch (err) {
         console.error(err);
         throw new Error('Could not fetch CVE info');
+    }
+}
+
+export const GetHistory = async (assetID) => {
+    try {
+
+        if (UserService.tokenExpired()) {
+            UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
+        const bodyData = assetID ? `?assetID=${assetID}` : ''
+        const response = await fetch(`http://localhost:8080/GetTimelineData${bodyData}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
+                    'Authorization': `Bearer ${authToken}`,
+                }
+            }
+        );
+
+        const return_data = await response.json();
+
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch event history ');
     }
 }

@@ -1,76 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { JSONTree } from 'react-json-tree';
+import { useQuery } from '@tanstack/react-query';
+import { GetHistory } from '../../Services/ApiService';
+import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
+
 import './History.css'
-
-
-const historyData =
-    [
-        {
-            "timestamp": "2024-04-15T14:47:20.298Z",
-            "changes": {
-                "Added Assets": ["46286191946891269", "66286191947891267"],
-                "Removed Assets": [],
-                "Added Relations": [
-                    {
-                        "from": "34f8671cfe55e5c76465d840",
-                        "to": "45f8671cfe55e5c76465d841"
-                    },
-                    {
-                        "from": "99f8671cfe55e5c76465d840",
-                        "to": "77f8671cfe55e5c76465d841"
-                    }
-                ],
-                "Removed Relations": [],
-                "Updated Assets": [{
-                    "65f8671cfe55e5c76465d843": {
-                        "Criticality": { "before": 1, "after": 2 },
-                        "Type": {
-                            "before":
-                                [
-                                    "Laptop",
-                                    "Windows"
-                                ],
-                            "after":
-                                [
-                                    "Laptop",
-                                    "MAC"
-                                ]
-                        }
-                    }
-                },
-                {
-                    "53f8671cfe55e5c76465d843": {
-                        "Name": { "before": "Server A", "after": "Server B" },
-                    }
-                }]
-            }
-        },
-        {
-            "timestamp": "2023-04-12T15:47:20.298Z",
-            "changes": {
-                "Added Assets": [],
-                "Removed Assets": ["76286191946843269", "99286191947891267"],
-                "Added Relations": [],
-                "Removed Relations": [
-                    {
-                        "from": "65f8671cfe55e5c76465d840",
-                        "to": "65f8671cfe55e5c76465d841"
-                    },
-                    {
-                        "from": "65f8671cfe55e5c76465d840",
-                        "to": "65f8671cfe55e5c76465d841"
-                    },
-
-                ],
-                "Updated Assets": {
-                    "74f8671cfe55e5c76465d843": {
-                        "Name": { "before": "Work Laptop", "after": "Martins Laptop" },
-                        "Owner": { "before": "UID_6372", "after": "UID_5433" }
-                    }
-                }
-            }
-        }
-    ]
 
 const theme = {
     base00: 'var(--base-00)',
@@ -102,10 +36,28 @@ const options = {
 
 const countryCode = 'en-SE'
 
-export default function History({ width = "80vw", height = "84vh", isDashboard = false }) {
+export default function History({ width = "80vw", height = "84vh", isDashboard = false, isAssetView = false, assetID = null }) {
+
+    const { data: historyData, isLoading, isError, error, refetch } = useQuery({
+        queryKey: ['getHistory'],
+        queryFn: () => GetHistory(assetID),
+        enabled: true
+    });
+    console.log("data: ", historyData)
+
+    useEffect(() => {
+        refetch()
+    }, [assetID])
+
+    if (isLoading) return <LoadingSpinner />;
+    if (isError) return <div className='errorMessage'> {error.message}</div>;
+    if (isAssetView && !historyData) return <div className='asset-info-container'> <div className='errorMessage'> This asset has no hisotry</div></div>;
+
+
+
     return (
-        <div className='center-flex-column' style={{ margin: isDashboard ? "0 0" : "1.5rem 0" }}>
-            <div className='history-container' style={{ width: width, height: height }}>
+        <div className='center-flex-column' style={{ margin: (isDashboard) ? "0 0" : "1.5rem 0" }}>
+            <div className={isAssetView ? 'asset-info-container' : 'history-container'} style={{ width: width, height: height }}>
                 <div className='history-content'>
                     {Object.values(historyData).map((value, index) => {
                         const date = new Date(value.timestamp)
@@ -114,19 +66,21 @@ export default function History({ width = "80vw", height = "84vh", isDashboard =
                             <div key={index}>
                                 <h2 style={{ marginBottom: "1rem" }}>{formattedDate}</h2>
                                 {
-                                    Object.entries(value.changes).map(([key, val], index) => (
-                                        val.length != 0 && (
-                                            <div key={index} style={{ marginLeft: "3rem" }}>
-                                                <h3>{key}</h3>
-                                                <JSONTree data={val} theme={theme} hideRoot />
-                                            </div>
+                                    Object.entries(value.change).map(([key, val], index) => {
+                                        console.log("val2: ", val)
+                                        return (
+                                            val && (
+                                                <div key={index} style={{ marginLeft: "3rem" }}>
+                                                    <h3>{key}</h3>
+                                                    <JSONTree data={val} theme={theme} hideRoot />
+                                                </div>
+                                            )
                                         )
-                                    ))
+                                    })
                                 }
                             </div>
                         )
                     })
-
                     }
                 </div>
             </div>

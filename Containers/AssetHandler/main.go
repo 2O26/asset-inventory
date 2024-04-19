@@ -527,7 +527,7 @@ func main() {
 		dbcon.DeleteAllDocuments(timelineDB, c)
 	})
 
-	router.GET("/GetTimelineData", func(c *gin.Context) {
+	router.POST("/GetTimelineData", func(c *gin.Context) {
 		// dbcon.DeleteAllDocuments(scansHelper, c)
 		dbcon.GetTimelineData(timelineDB, c)
 	})

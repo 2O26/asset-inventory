@@ -8,10 +8,18 @@ import { RiRadioButtonLine } from "react-icons/ri";
 import { FaChromecast } from "react-icons/fa6";
 import { BsPcDisplay } from "react-icons/bs";
 import { IoIosLaptop } from "react-icons/io";
+import { GiWifiRouter } from "react-icons/gi";
+import { BiSolidNetworkChart } from "react-icons/bi";
+
 
 export const LaptopIcon = ({ size = 20 }) => {
     return (
         <IoIosLaptop size={size} />
+    )
+}
+export const SubnetIcon = ({ size = 20 }) => {
+    return (
+        <BiSolidNetworkChart size={size} />
     )
 }
 
@@ -48,6 +56,11 @@ export const ApplicationIcon = ({ size = 20 }) => {
 export const IoTIcon = ({ size = 17 }) => {
     return (
         <FaChromecast size={size} />
+    )
+}
+export const RouterIcon = ({ size = 17 }) => {
+    return (
+        <GiWifiRouter size={size} />
     )
 }
 
