@@ -23,7 +23,7 @@ const server = app.listen(route, () => console.log(`Server listening on port: ${
 
 app.get("/getIPranges", async (req, res) => {
     try {
-        const response = await axios.get('http://authhandler:3003/getUID', {
+        const response = await axios.get('http://authhandler:3003/getRoles', {
             headers: {
                 'Authorization': req.headers.authorization
             }
@@ -35,7 +35,13 @@ app.get("/getIPranges", async (req, res) => {
         const configHandler = new ConfigHandler();
         await configHandler.connect();
         const ipranges = await configHandler.getIPranges()
-        res.json({ ipranges: ipranges })
+
+        if (response.data.isAdmin) {
+            res.json({ ipranges: ipranges });
+        } else {
+            let filteredRanges = ipranges.filter(range => response.data.roles.includes(range));
+            res.json({ ipranges: filteredRanges });
+        }
 
     } catch (error) {
         res.status(500).send('Error fetching ip ranges');
