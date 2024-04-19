@@ -107,7 +107,7 @@ class ConfigHandler {
         }
     }
 
-    async getOSSAPIkey2() {
+    async getDocLink() {
         const apikey = await OSSAPIKEYSchema2.find().exec();
         if (apikey.length !== 0) {
             return apikey[0].apikey;
@@ -123,7 +123,7 @@ class ConfigHandler {
         }
     }
 
-    async updateOSSAPIkey2(oldapikey, updatedapikey) {
+    async updateDocLink(oldapikey, updatedapikey) {
         // See if setting exists
         // if not, create settings
         // Update setting with given OSS API key

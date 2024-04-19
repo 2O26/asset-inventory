@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { UpdateAPIOSSkey2, GetOSSAPIkey2 } from '../../Services/ApiService';
+import { UpdateLinkDoc, getDocLink } from '../../Services/ApiService';
 
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
 
@@ -11,7 +11,7 @@ export default function CVEScanSettings() {
     const [addAPIKeyFail, setAddAPIKeyFail] = useState(false);
 
     const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
-        mutationFn: () => UpdateAPIOSSkey2(apikey), // Directly pass the LogIn function
+        mutationFn: () => UpdateLinkDoc(apikey), // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
             if (data.success === "success") {
@@ -34,7 +34,7 @@ export default function CVEScanSettings() {
 
     const { data: apiData, isLoading: isLoading, isError: isErrorKey, error: keyerror, refetch: refetchAPIkey } = useQuery({
         queryKey: ['API key2'],
-        queryFn: GetOSSAPIkey2,
+        queryFn: getDocLink,
         enabled: true
     });
 

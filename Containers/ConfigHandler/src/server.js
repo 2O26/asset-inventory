@@ -282,7 +282,7 @@ app.get("/getDocLink", async (req, res) => {
         }
         const configHandler = new ConfigHandler();
         await configHandler.connect();
-        const apikey = await configHandler.getOSSAPIkey2()
+        const apikey = await configHandler.getDocLink()
         res.json({ apikey: apikey })
     } catch (error) {
         res.status(500).send('Error fetching Doc Link');
@@ -301,8 +301,8 @@ app.post("/updateDocLink", async (req, res) => {
         }
         const configHandler = new ConfigHandler();
         await configHandler.connect();
-        const oldOSSapikey = await configHandler.getOSSAPIkey2();
-        await configHandler.updateOSSAPIkey2(oldOSSapikey, req.body.apikey)
+        const oldOSSapikey = await configHandler.getDocLink();
+        await configHandler.updateDocLink(oldOSSapikey, req.body.apikey)
         res.json({ responseFromServer: "Succeeded to update Doc Link!!", success: "success" });
 
     } catch (error) {

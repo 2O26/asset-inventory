@@ -466,7 +466,7 @@ export const GetOSSAPIkey = async () => {
     }
 }
 
-export const UpdateAPIOSSkey2 = async (apikey) => { //The code for Updating/getting OSS API keys is reused identically but at different URLs for the Documentation Link feature.
+export const UpdateLinkDoc = async (apikey) => { //The code for Updating/getting OSS API keys is reused identically but at different URLs for the Documentation Link feature.
     try {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
@@ -489,7 +489,7 @@ export const UpdateAPIOSSkey2 = async (apikey) => { //The code for Updating/gett
     }
 }
 
-export const GetOSSAPIkey2 = async () => {
+export const getDocLink = async () => {
     try {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
