@@ -362,7 +362,6 @@ export const UploadCycloneDX = async (data) => {
     }
 }
 
-
 export const SaveUserSetting = async (data) => {
     try {
         if (UserService.tokenExpired()) {
@@ -423,9 +422,17 @@ export const GetCDXfiles = async (assetID) => {
 
 export const UpdateAPIOSSkey = async (apikey) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
         const response = await fetch('http://localhost:3001/updateOSSAPIkey', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
             body: JSON.stringify({ apikey: apikey })
         });
         const resData = await response.json();
@@ -438,7 +445,18 @@ export const UpdateAPIOSSkey = async (apikey) => {
 
 export const GetOSSAPIkey = async () => {
     try {
-        const response = await fetch('http://localhost:3001/getOSSAPIkey');
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
+        const response = await fetch('http://localhost:3001/getOSSAPIkey', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
         const resData = await response.json();
         return resData;
 

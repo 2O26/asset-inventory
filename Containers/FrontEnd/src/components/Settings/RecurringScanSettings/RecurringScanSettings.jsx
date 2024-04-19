@@ -31,6 +31,7 @@ export default function RecurringScanSettings() {
                 setRecurringFail(false);
                 setRecurringSuccess(true);
                 refetchRecurring();
+                console.log(data.recurring)
                 // console.log("IP range added sucessfully:", data);
             }
             else {
