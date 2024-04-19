@@ -95,6 +95,7 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 		DateUpdated: currentScan.DateUpdated,
 		State:       make(map[string]Asset),
 	}
+
 	// Get the subnet of the current scan
 	var currentSubnet string
 	for _, asset := range currentScan.State {
@@ -105,13 +106,15 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 	// Loop through assets in the previous scan
 	for oldAssetID, prevAsset := range previousScan.State {
 		found := false
-		for _, asset := range currentScan.State {
+		for assetID, asset := range currentScan.State {
 			if prevAsset.IPv4Addr == asset.IPv4Addr {
 				// IP address exists in the current scan, update the asset
-				if prevAsset.ScanType == "extensive" && asset.ScanType == "simple" {
-					asset.OpenPorts = prevAsset.OpenPorts // Preserve ports from advanced scan
+				if len(asset.OpenPorts) == 0 {
+					asset.OpenPorts = prevAsset.OpenPorts
 				}
+
 				updatedScan.State[oldAssetID] = asset
+				currentScan.State[assetID] = asset // Update the asset in currentScan's map as well
 				found = true
 				break
 			}
