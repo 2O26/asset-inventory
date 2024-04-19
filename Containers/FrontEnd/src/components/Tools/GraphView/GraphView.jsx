@@ -188,7 +188,7 @@ export default function GraphView({ width = '100vw', height = '90vh', selectedAs
         return <div className='errorMessage'>No existing assets</div>;
     }
 
-    const parsedState = ParseState(data, selectedAsset);
+    const parsedState = ParseState(data);
 
     // const parsedState = ParseState(jsonData, selectedAsset);
 

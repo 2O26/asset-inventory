@@ -1,4 +1,4 @@
-export function ParseState(jsonData, selectedNode = null) {
+export function ParseState(jsonData) {
     const nodes = [];
     const edges = [];
 
@@ -9,15 +9,10 @@ export function ParseState(jsonData, selectedNode = null) {
         const nodeName = asset.properties.Name;
         const nodeType = asset.properties.Type[0]
         const nodeStatus = asset.plugins?.netscan?.status
-        let isSelected = false
-
-        if (selectedNode === assetId) {
-            isSelected = true
-        }
 
         nodes.push({
             id: nodeId,
-            data: { label: nodeName, type: nodeType, selected: isSelected, status: nodeStatus },
+            data: { label: nodeName, type: nodeType, status: nodeStatus },
             position: { x: 0, y: 0 }, // Assuming initial position
             type: 'turbo'
         });

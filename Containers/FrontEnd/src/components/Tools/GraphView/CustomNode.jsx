@@ -17,11 +17,13 @@ export const CustomNodeComponent = ({ data }) => {
                     {iconTypeMap[data.type]}
                 </div>
             </div>
-            {/* <div className={`${data.selected && "selected-view"} wrapper gradient `}> */}
             <div className={`wrapper gradient `}>
                 <div className="inner">
                     <div className="body">
-                        {data.status && statusMap[data.status]}
+                        <div style={{ marginRight: "0.25rem" }}>
+
+                            {data.status && statusMap[data.status]}
+                        </div>
                         <div>
                             <div className="title">{data.label}</div>
                             {data.type && <div className="subline">{data.type}</div>}

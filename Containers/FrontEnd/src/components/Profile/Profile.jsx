@@ -18,7 +18,7 @@ export default function Profile() {
                 <a>Email: {UserService.getEmail()}</a>
                 <a>Access Rights: {
                     UserService.getRoles().map((key) =>
-                        (containsNumber(key) || key === "admin") && <p key={key} className='access-rights'>{key}</p>
+                        (containsNumber(key) || key === "admin" || key === "manage-assets") && <p key={key} className='access-rights'>{key}</p>
                     )
                 }</a>
 

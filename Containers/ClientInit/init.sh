@@ -80,3 +80,19 @@ elif [ "$CREATE_USER_RESPONSE" = "409" ]; then
 else
   echo "Failed to create user, server responded with HTTP status $CREATE_USER_RESPONSE."
 fi
+
+ROLE_DATA='{"name":"manage-assets", "description": "Can manage assets (remove and edit assets)"}'
+
+CREATE_ROLE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$KEYCLOAK_URL/admin/realms/$REALM_NAME/roles" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d "$ROLE_DATA")
+
+# # Check if the user was created successfully
+if [ "$CREATE_ROLE_RESPONSE" = "201" ]; then
+  echo "Role successfully created."
+elif [ "$CREATE_ROLE_RESPONSE" = "409" ]; then
+  echo "Role already created."
+else
+  echo "Failed to create role, server responded with HTTP status $CREATE_ROLE_RESPONSE."
+fi
