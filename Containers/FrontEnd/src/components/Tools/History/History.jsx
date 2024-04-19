@@ -52,6 +52,7 @@ export default function History({ width = "80vw", height = "84vh", isDashboard =
     if (isLoading) return <LoadingSpinner />;
     if (isError) return <div className='errorMessage'> {error.message}</div>;
     if (isAssetView && !historyData) return <div className='asset-info-container'> <div className='errorMessage'> This asset has no hisotry</div></div>;
+    if (!historyData) return <div className='errorMessage'> No hisotry</div>;
 
 
 
