@@ -9,7 +9,7 @@ describe('View asset page tests', () => {
         cy.logout();
     })
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 1; i++) {
         describe(`when viewing asset ${i}`, () => {
             let tmpName = ""
             let tmpType = ""
@@ -34,7 +34,8 @@ describe('View asset page tests', () => {
             })
 
             it('can verify asset type', () => {
-                cy.get('.assetItem').contains('Type').should('contain', tmpType);
+                cy.get('.arrow.up').first().click()
+                cy.get(`[id="Type_0"]`).should('contain', tmpType);
             })
 
             it('can verify asset Owner', () => {

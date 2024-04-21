@@ -28,7 +28,7 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                                     {expandedLists[key] && (
                                         <ul>
                                             {value.map((item, index) => (
-                                                <li key={index} style={{ width: "fit-content", minWidth: "40%" }}> {index + 1} : {item}</li>
+                                                <li key={index} id={`${key}_${index}`} style={{ width: "fit-content", minWidth: "40%" }}> {index + 1} : {item}</li>
                                             ))}
                                         </ul>
                                     )}
