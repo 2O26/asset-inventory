@@ -307,41 +307,101 @@ func performAdvancedScan(target string) (dbcon.Scan, error) {
 	}
 	fmt.Println("Scan object created")
 
-	for ip := cloneIP(networkAddress); subnet.Contains(ip); inc(ip) {
-		var openPorts []int
+	// Create channels for tasks and results
+	tasks := make(chan net.IP, 256)
+	results := make(chan dbcon.Asset, 256)
 
-		// Check if IP address is up and discover open ports
-		for _, port := range ports {
-			address := fmt.Sprintf("%s:%d", ip.String(), port)
-			conn, err := net.DialTimeout("tcp", address, time.Second*20)
-			println("Connection: ", conn, " Error: ", err) // Added println
-			if err != nil {
-				fmt.Printf("Port %d is closed or filtered\n", port)
-				continue
+	// Create a WaitGroup to wait for all workers to finish
+	var wg sync.WaitGroup
+
+	// Start workers
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for ip := range tasks {
+				asset, err := scanIP(ip, target)
+				if err != nil {
+					log.Printf("Failed to scan IP %s: %v", ip, err)
+					continue
+				}
+				results <- asset
 			}
-			conn.Close()
-			fmt.Printf("Port %d is open\n", port)
+		}()
+	}
 
-			// Add the open port to the openPorts slice
-			openPorts = append(openPorts, port)
+	// Send tasks
+	go func() {
+		ip := cloneIP(networkAddress)
+		for subnet.Contains(ip) {
+			tasks <- cloneIP(ip) // clone the IP before sending it as a task
+			inc(ip)
 		}
+		close(tasks)
+	}()
 
-		// Create an asset if any open ports were found
-		if len(openPorts) > 0 {
-			asset, err := createAsset("up", ip.String(), target)
-			if err != nil {
-				fmt.Printf("Failed to create asset for IP %s: %v\n", ip.String(), err)
-				continue
-			}
+	// Wait for all workers to finish and close the results channel
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
 
-			// Add the open ports to the asset's OpenPorts field
-			asset.OpenPorts = openPorts
-
-			scan.State[asset.UID] = asset
-		}
+	// Collect results
+	for asset := range results {
+		scan.State[asset.UID] = asset
 	}
 
 	return scan, nil
+}
+
+func scanIP(ip net.IP, target string) (dbcon.Asset, error) {
+	var openPorts []int
+	var wg sync.WaitGroup
+	portChan := make(chan int, len(ports))
+
+	// Check if IP address is up and discover open ports
+	for _, port := range ports {
+		wg.Add(1)
+		go func(port int) {
+			defer wg.Done()
+			address := fmt.Sprintf("%s:%d", ip.String(), port)
+			conn, err := net.DialTimeout("tcp", address, time.Second*10)
+			if err != nil {
+				fmt.Printf("Port %d is closed or filtered\n", port)
+				return
+			}
+			conn.Close()
+			fmt.Printf("Port %d is open\n", port)
+			portChan <- port
+		}(port)
+	}
+
+	// Wait for all port scans to finish and close the channel
+	go func() {
+		wg.Wait()
+		close(portChan)
+	}()
+
+	// Collect open ports
+	for port := range portChan {
+		openPorts = append(openPorts, port)
+	}
+
+	// Create an asset if any open ports were found
+	if len(openPorts) > 0 {
+		asset, err := createAsset("up", ip.String(), target)
+		if err != nil {
+			fmt.Printf("Failed to create asset for IP %s: %v\n", ip.String(), err)
+			return dbcon.Asset{}, err
+		}
+
+		// Add the open ports to the asset's OpenPorts field
+		asset.OpenPorts = openPorts
+
+		return asset, nil
+	}
+
+	return dbcon.Asset{}, fmt.Errorf("No open ports found on IP %s", ip)
 }
 
 func createAsset(status string, ip string, target string) (dbcon.Asset, error) {
