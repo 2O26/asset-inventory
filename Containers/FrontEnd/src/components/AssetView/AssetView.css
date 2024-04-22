@@ -1,9 +1,33 @@
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url("../../fonts/JetBrainsMono[wght].ttf") format('truetype');
+    font-weight: normal;
+}
+@font-face {
+    font-family: 'Ysabeau Office';
+    src: url("../../fonts/YsabeauOffice-VariableFont_wght.ttf") format('truetype');
+    font-weight: 700;
+}
+
 .asset-view-container,
-.asset-info-container,
-.assetItem {
+
+.asset-info-container {
+    text-align: left;
+    font-family: "JetBrains Mono", monospace;
+}
+.asset-item {
     text-align: left;
     /* Ensures everything is aligned to the left */
 }
+.asset-name {
+    font-family: "Ysabeau Office";
+}
+
+.asset-item-list {
+    /* applies font on list entry */
+    font-family: "JetBrains Mono", monospace;
+}
+
 
 .react-flow {
     flex: 1;
@@ -150,8 +174,10 @@
     border-top: none;
 }
 
+
 /* Style for asset cells */
 .assetItem {
+    font-family: "JetBrains Mono", monospace;
     flex: 1;
     padding: 5px;
     display: block;
@@ -180,6 +206,7 @@
 }
 
 .key-value {
+    font-family: "JetBrains Mono", monospace;
     display: inline-block;
     /* Ensure the key-value text is inline */
     margin-right: 8px;
