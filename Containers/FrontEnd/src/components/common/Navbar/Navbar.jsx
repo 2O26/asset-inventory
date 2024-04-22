@@ -26,7 +26,8 @@ export default function Navbar({ toggleTheme }) {
           <Link to="/about">About</Link>
         </li>
         <li>
-          <Link to="/help">Help</Link>
+          <Link onClick={() => window.open("http://localhost:6880/home/", "_blank")}>
+            Help</Link>
         </li>
       </ul>
       <div className='logo'>
