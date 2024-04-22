@@ -1,3 +1,14 @@
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url("../../../fonts/JetBrainsMono[wght].ttf") format('truetype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "Inter";
+    src: url("../../../fonts/Inter-VariableFont_slnt,wght.ttf") format('truetype');
+}
+
 .history-container {
     padding: 1rem;
     border-radius: 0.5rem;
@@ -17,4 +28,18 @@
     gap: 1rem;
     margin: 1rem 0;
     color: var(--text-color);
+}
+
+.history-content span {
+    font-size: 14px;
+    font-family: "JetBrains Mono", monospace;
+}
+
+.history-content h2 {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+}
+
+.history-content ul {
+    font-family: "JetBrains Mono", monospace;
 }

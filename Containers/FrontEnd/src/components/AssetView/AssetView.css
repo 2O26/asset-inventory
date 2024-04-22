@@ -6,7 +6,12 @@
 @font-face {
     font-family: 'Ysabeau Office';
     src: url("../../fonts/YsabeauOffice-VariableFont_wght.ttf") format('truetype');
-    font-weight: 700;
+    font-weight: bold;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url("../../fonts/Inter-VariableFont_slnt,wght.ttf") format('truetype');
+    font-weight: 500;
 }
 
 .asset-view-container,
@@ -20,7 +25,7 @@
     /* Ensures everything is aligned to the left */
 }
 .asset-name {
-    font-family: "Ysabeau Office";
+    font-family: "Ysabeau Office", sans-serif;
 }
 
 .asset-item-list {
@@ -145,6 +150,7 @@
 
 /* Modifications for the button container */
 .button-container {
+    font-family: "Inter", sans-serif;
     display: flex;
     /* Use Flexbox for button layout */
     justify-content: space-between;
@@ -172,6 +178,11 @@
     overflow-y: auto;
     margin-top: -21px;
     border-top: none;
+}
+
+.asset-info-container p {
+    font-size: 14px;
+    font-family: "Inter", "sans-serif";
 }
 
 
@@ -213,14 +224,31 @@
     /* Adjust spacing between key-value and arrow */
 }
 
+.asset-info-container .inputLabel {
+    font-family: "Inter", "sans-serif";
+    font-size: 16px;
+}
+
+.asset-info-container h1 {
+    font-family: "Ysabeau Office", sans-serif;
+    font-size: 30px;
+    margin-bottom: 0.5rem;
+}
+
+.asset-info-container h3{
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+}
+
 .asset-info-container .inputFields {
+    font-family: "JetBrains Mono", monospace;
     background-color: var(--background-color);
     color: var(--text-color);
     margin: 0.5rem 0rem;
     border: none;
     min-width: 16rem;
     height: 40px;
-    font-size: 20px;
+    font-size: 16px;
     text-indent: 10px;
     border-radius: 5px;
     border-top-style: hidden;
@@ -259,6 +287,11 @@
     margin-top: 0.3rem;
     border-radius: 0.25rem;
     align-items: center;
+}
+
+.relation a {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
 }
 
 .addRelation-container {
