@@ -10,6 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type AuthResponse struct {
+	Authenticated   bool     `json:"authenticated"`
+	Roles           []string `json:"roles"`
+	IsAdmin         bool     `json:"isAdmin"`
+	CanManageAssets bool     `json:"canManageAssets"`
+}
+
 type Asset struct {
 	Name        string   `json:"Name"`
 	Owner       string   `json:"Owner"`
@@ -175,7 +182,7 @@ func insertPluginData(inAssets map[string]FrontAsset, plugins map[string]PluginS
 	}
 }
 
-func NeedToKnow(inState FrontState, roles []string, subnets []string) FrontState {
+func NeedToKnow(inState FrontState, auth AuthResponse, subnets []string) FrontState {
 	// Function will be primarily used to filter out data that the user does not have access to
 	var alteredState FrontState
 	alteredState.Assets = make(map[string]FrontAsset)
@@ -185,13 +192,26 @@ func NeedToKnow(inState FrontState, roles []string, subnets []string) FrontState
 
 	//make a map that contains all roles and specified subnets
 	rolesAndSubnets := make(map[string]bool)
-	for _, role := range roles {
-		rolesAndSubnets[role] = true
-	}
-	for _, subnet := range subnets {
-		rolesAndSubnets[subnet] = true
-	}
 
+	if subnets != nil {
+		// subnet has been sent. Only subnets that exists in auth.Roles will be added
+		for _, subnet := range subnets {
+			match := false
+			for role := range rolesAndSubnets {
+				if role == subnet {
+					match = true
+				}
+			}
+			if match {
+				rolesAndSubnets[subnet] = true
+			}
+
+		}
+	} else {
+		for _, role := range auth.Roles {
+			rolesAndSubnets[role] = true
+		}
+	}
 	//find assets that user can view, and add them to the state
 	//the code below only accounts for assets from the network scan, as roles aren't set for ordinary assets yet
 	for assetID, asset := range inState.Assets {
