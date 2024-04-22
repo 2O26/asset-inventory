@@ -126,18 +126,14 @@ services:
     depends_on:
       - keycloak
 
-  dokuwiki:
-    image: lscr.io/linuxserver/dokuwiki:latest
-    container_name: dokuwiki
-    environment:
-      - PUID=1000 # User ID
-      - PGID=1000 # Group ID
-      - TZ=Etc/UTC # Timezone
-    volumes:
-      - ./Containers/dokuwiki/config:/config # Configurations
+  mkdocs:
+    container_name: mkdocs
+    image: squidfunk/mkdocs-material
+    restart: always
     ports:
-      - 6880:80 # HTTP port
-    restart: unless-stopped
+      - "6880:8000"
+    volumes:
+      - "./Containers/docs:/docs:ro"
 
 volumes:
   configstorage:

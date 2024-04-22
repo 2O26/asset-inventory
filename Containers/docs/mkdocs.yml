@@ -1,0 +1,45 @@
+site_name: Asset Inventory
+site_url: http://192.168.1.12:6880/
+
+# Documentation sources and build directories
+docs_dir: docs
+site_dir: /site
+
+# Theme configuration
+theme:
+  name: material
+  palette:
+    scheme: slate   # A dark theme suitable for low-light environments
+
+# Repository link configuration (adjust with your actual repository URL)
+repo_url: https://github.com/assetinventory-org/asset-inventory
+edit_uri: blob/main/docs/  # Adjust according to your repository's structure
+
+# Navigation structure
+nav:
+  - Home: home.md
+  - Getting Started: intro.md
+  - API Documentation:
+      - AssetHandler: API_assethandler.md
+      - ConfigHandler: API_confighandler.md
+      - NetworkScan: API_networkscan.md
+
+# Markdown Extensions to enhance documentation
+markdown_extensions:
+  - toc:
+      permalink: true  # Adds permalinks to headings
+  - admonition  # Enables support for block-styled side content
+  - codehilite:  # Syntax highlighting for code blocks
+      guess_lang: false
+
+# Plugins to extend MkDocs functionality
+plugins:
+  - search  # Enables full-text search capabilities
+  - minify:
+      minify_html: true  # Minifies HTML to reduce page load time
+
+# Additional theme customization
+extra:
+  feature_flags:
+    tabs: true  # Enables tabbed content, useful for multiple languages or platforms
+    use_directory_urls: true  
