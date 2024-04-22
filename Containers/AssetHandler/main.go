@@ -23,13 +23,6 @@ type StateResponse struct {
 	State   jsonhandler.FrontState `json:"state"`
 }
 
-type authResponse struct {
-	Authenticated   bool     `json:"authenticated"`
-	Roles           []string `json:"roles"`
-	IsAdmin         bool     `json:"isAdmin"`
-	CanManageAssets bool     `json:"canManageAssets"`
-}
-
 type networkResponse struct {
 	StateID     string
 	DateCreated string
@@ -88,9 +81,10 @@ func getNetScanStatus() json.RawMessage {
 
 }
 
-func authorizeUser(c *gin.Context) authResponse {
+func authorizeUser(c *gin.Context) jsonhandler.AuthResponse {
 
-	emptyAuth := authResponse{
+
+emptyAuth := jsonhandler.AuthResponse{
 		Authenticated:   false,
 		Roles:           nil,
 		IsAdmin:         false,
@@ -122,7 +116,7 @@ func authorizeUser(c *gin.Context) authResponse {
 
 	defer resp.Body.Close()
 
-	var auth authResponse
+	var auth jsonhandler.AuthResponse
 	fmt.Println("Response Status:", resp.StatusCode)
 	err = json.NewDecoder(resp.Body).Decode(&auth)
 	if err != nil {
@@ -142,6 +136,11 @@ func getLatestState(c *gin.Context) {
 	// Add assets from network scan
 	if auth.Authenticated {
 
+		subnets, ok := c.GetPostFormArray("subnets")
+		if !ok {
+			log.Printf("Failed to get subnets")
+			subnets = nil
+		}
 		getNetworkScan()
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)
@@ -182,8 +181,8 @@ func getLatestState(c *gin.Context) {
 		log.Println(string(currentStateJSON))
 
 		// Will now remove any data that a user cannot access.
-		if auth.IsAdmin == false {
-			currentState = jsonhandler.NeedToKnow(currentState, auth.Roles)
+		if auth.IsAdmin == false || subnets != nil {
+			currentState = jsonhandler.NeedToKnow(currentState, auth, subnets)
 		}
 
 		response := StateResponse{Message: "Authentication success.", State: currentState}
