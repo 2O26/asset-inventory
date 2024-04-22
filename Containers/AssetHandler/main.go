@@ -24,9 +24,10 @@ type StateResponse struct {
 }
 
 type authResponse struct {
-	Authenticated bool     `json:"authenticated"`
-	Roles         []string `json:"roles"`
-	IsAdmin       bool     `json:"isAdmin"`
+	Authenticated   bool     `json:"authenticated"`
+	Roles           []string `json:"roles"`
+	IsAdmin         bool     `json:"isAdmin"`
+	CanManageAssets bool     `json:"canManageAssets"`
 }
 
 type networkResponse struct {
@@ -90,9 +91,10 @@ func getNetScanStatus() json.RawMessage {
 func authorizeUser(c *gin.Context) authResponse {
 
 	emptyAuth := authResponse{
-		Authenticated: false,
-		Roles:         nil,
-		IsAdmin:       false,
+		Authenticated:   false,
+		Roles:           nil,
+		IsAdmin:         false,
+		CanManageAssets: false,
 	}
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
@@ -498,7 +500,7 @@ func main() {
 	router.POST("/assetHandler", func(c *gin.Context) {
 		auth := authorizeUser(c)
 		if auth.Authenticated {
-			if auth.IsAdmin {
+			if auth.IsAdmin || auth.CanManageAssets {
 				dbcon.ManageAssetsAndRelations(scansHelper, timelineDB, c)
 			} else {
 				log.Println("User with insufficient privileges tried to access /assetHandler.")
