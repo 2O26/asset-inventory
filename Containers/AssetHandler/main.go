@@ -142,6 +142,12 @@ func getLatestState(c *gin.Context) {
 	// Add assets from network scan
 	if auth.Authenticated {
 
+		subnets, ok := c.GetPostFormArray("subnets")
+		if !ok {
+			log.Printf("Failed to get subnets: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get subnets"})
+			subnets = nil
+		}
 		getNetworkScan()
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)
@@ -182,8 +188,8 @@ func getLatestState(c *gin.Context) {
 		log.Println(string(currentStateJSON))
 
 		// Will now remove any data that a user cannot access.
-		if auth.IsAdmin == false {
-			currentState = jsonhandler.NeedToKnow(currentState, auth.Roles)
+		if auth.IsAdmin == false || subnets != nil {
+			currentState = jsonhandler.NeedToKnow(currentState, auth.Roles, subnets)
 		}
 
 		response := StateResponse{Message: "Authentication success.", State: currentState}

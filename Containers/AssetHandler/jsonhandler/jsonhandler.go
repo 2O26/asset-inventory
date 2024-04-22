@@ -175,13 +175,22 @@ func insertPluginData(inAssets map[string]FrontAsset, plugins map[string]PluginS
 	}
 }
 
-func NeedToKnow(inState FrontState, roles []string) FrontState {
+func NeedToKnow(inState FrontState, roles []string, subnets []string) FrontState {
 	// Function will be primarily used to filter out data that the user does not have access to
 	var alteredState FrontState
 	alteredState.Assets = make(map[string]FrontAsset)
 	alteredState.Relations = make(map[string]Relation)
 	alteredState.PluginList = inState.PluginList
 	alteredState.MostRecentUpdate = inState.MostRecentUpdate
+
+	//make a map that contains all roles and specified subnets
+	rolesAndSubnets := make(map[string]bool)
+	for _, role := range roles {
+		rolesAndSubnets[role] = true
+	}
+	for _, subnet := range subnets {
+		rolesAndSubnets[subnet] = true
+	}
 
 	//find assets that user can view, and add them to the state
 	//the code below only accounts for assets from the network scan, as roles aren't set for ordinary assets yet
@@ -194,7 +203,7 @@ func NeedToKnow(inState FrontState, roles []string) FrontState {
 			if err != nil {
 				continue //ADD ERROR HERE
 			}
-			for _, role := range roles {
+			for role := range rolesAndSubnets {
 				fmt.Println("ASSET NAME", asset.Name)
 				if netProps.Subnet == role {
 					// user can view asset, add it to alteredState
@@ -204,12 +213,12 @@ func NeedToKnow(inState FrontState, roles []string) FrontState {
 		} else {
 			// asset does not have netscan data, and since all users have access to manually added assets
 			// we add them. Edge case being the subnet assets
-			if len(roles) <= 0 {
+			if len(rolesAndSubnets) <= 0 {
 				if asset.Type[0] != "Subnet" {
 					alteredState.Assets[assetID] = asset
 				}
 			} else {
-				for _, role := range roles {
+				for role := range rolesAndSubnets {
 					if asset.Type[0] != "Subnet" {
 						//Not a subnet asset, add it
 						alteredState.Assets[assetID] = asset
