@@ -24,35 +24,30 @@ export const AssetHandlerStatus = async () => {
     return return_data;
 };
 
-export const LogIn = async (userData) => {
-    console.log("Email: ", userData.email, ", Password: ", userData.password);
-
-    // Simulate an API call
-    const response = await new Promise((resolve) => {
-        setTimeout(() => resolve({ "success": true }), 1000); // Simulate async operation
-    });
-
-    return response; // No need to call .json() on a plain object
-};
-
-export const GetState = async () => {
-
-    if (UserService.tokenExpired()) {
-        await UserService.updateToken()
-    }
-    const authToken = await UserService.getToken();
-    const response = await fetch('http://localhost:8080/getLatestState', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${authToken}`
+export const GetState = async (ipRanges = []) => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
         }
-    });
+        const authToken = await UserService.getToken();
 
-    if (!response.ok) {
-        throw new Error('Network response was not ok, could not fetch state');
+        const bodyData = (ipRanges.length === 0) ? '{}' : JSON.stringify({ "subnets": ipRanges });
+
+        const response = await fetch('http://localhost:8080/getLatestState', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: bodyData
+        });
+
+        const return_data = await response.json();
+
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch asset data ');
     }
-    const return_data = await response.json();
-    return return_data;
 };
 
 export const StartNetScan = async (scanSettings) => {
@@ -78,11 +73,6 @@ export const CreateRealmRole = async (IPRange) => {
         }
 
         const authToken = await UserService.getToken()
-
-        if (UserService.tokenExpired()) {
-            await UserService.updateToken()
-        }
-
 
         const response = await fetch("http://localhost:8085/admin/realms/master/roles", {
             method: 'POST',
