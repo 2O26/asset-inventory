@@ -43,7 +43,7 @@ var ( // Mock data
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 2,
-				Hostname:    "Desktop-123",
+				IP:          "Desktop-123",
 			},
 			existingAssetID_2: {
 				Name:        "Chromecast",
@@ -52,7 +52,7 @@ var ( // Mock data
 				DateCreated: "2024-02-10 20:04:20",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 1,
-				Hostname:    "LivingRoom",
+				IP:          "LivingRoom",
 			},
 			existingAssetID_3: {
 				Name:        "Password Vault",
@@ -61,7 +61,7 @@ var ( // Mock data
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 4,
-				Hostname:    "Vault-123",
+				IP:          "Vault-123",
 			},
 			existingAssetID_4: {
 				Name:        "Smart Thermostat",
@@ -70,7 +70,7 @@ var ( // Mock data
 				DateCreated: "2024-03-01 12:15:00",
 				DateUpdated: "2024-03-18 09:50:00",
 				Criticality: 2,
-				Hostname:    "Thermostat-1",
+				IP:          "Thermostat-1",
 			},
 			existingAssetID_5: {
 				Name:        "Work Laptop",
@@ -79,7 +79,7 @@ var ( // Mock data
 				DateCreated: "2024-02-25 08:30:00",
 				DateUpdated: "2024-03-18 10:00:00",
 				Criticality: 3,
-				Hostname:    "Work-Laptop-56",
+				IP:          "Work-Laptop-56",
 			},
 		},
 		Plugins: map[string]jsonhandler.Plugin{
@@ -349,7 +349,7 @@ func TestManageAssetsAndRelations(t *testing.T) {
 				Owner:       "UID",
 				Type:        []string{"IoT", "Sensor"},
 				Criticality: 3,
-				Hostname:    "NewAsset1",
+				IP:          "NewAsset1",
 			},
 		},
 	}
@@ -360,7 +360,7 @@ func TestManageAssetsAndRelations(t *testing.T) {
 				Owner:       "UID  1122",
 				Type:        []string{"IoT ", "Sensor"},
 				Criticality: 3,
-				Hostname:    "NewAsset-_1",
+				IP:          "NewAsset-_1",
 			},
 		},
 	}
@@ -378,7 +378,7 @@ func TestManageAssetsAndRelations(t *testing.T) {
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-03-25 10:00:00",
 				Criticality: 3,
-				Hostname:    "Desktop-123",
+				IP:          "Desktop-123",
 			},
 			"65f8671cfe55e5c76465d65325": {
 				Name:        "Updated PC-A",
@@ -387,7 +387,7 @@ func TestManageAssetsAndRelations(t *testing.T) {
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-03-25 10:00:00",
 				Criticality: 3,
-				Hostname:    "Desktop-123",
+				IP:          "Desktop-123",
 			},
 			"": {
 				Name:        "Updated PC-A",
@@ -396,7 +396,7 @@ func TestManageAssetsAndRelations(t *testing.T) {
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-03-25 10:00:00",
 				Criticality: 3,
-				Hostname:    "Desktop-123",
+				IP:          "Desktop-123",
 			},
 		},
 	}
@@ -543,7 +543,7 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
             "Owner": "UID",
             "Type": ["IoT", "Sensor"],
             "Criticality": "this should be an integer", // Intentionally incorrect type
-            "Hostname": "NewAsset-1"
+            "IP": "NewAsset-1"
         }]
     }`
 	addAssetRequest := AssetRequest{
@@ -553,7 +553,7 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 				Owner:       "UID",
 				Type:        []string{"IoT"},
 				Criticality: 3,
-				Hostname:    "NewAsset1",
+				IP:          "NewAsset1",
 			},
 		},
 	}
@@ -570,7 +570,7 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-03-25 10:00:00",
 				Criticality: 3,
-				Hostname:    "Desktop-123",
+				IP:          "Desktop-123",
 			},
 		},
 	}
