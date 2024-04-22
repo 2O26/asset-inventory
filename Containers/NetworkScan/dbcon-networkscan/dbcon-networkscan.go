@@ -2,6 +2,7 @@ package dbcon_networkscan
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -327,6 +328,36 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 // 	AddScan(db, scan2)
 
 // }
+
+func DeleteAsset(db DatabaseHelper, assetIDs []string) error {
+	//will delete asset by adding a new state without the asset in question
+
+	var scan Scan
+	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&scan)
+	if err != nil {
+		log.Printf("Failed to retrieve the latest scan: %v\n", err)
+		if err == mongo.ErrNoDocuments {
+			return fmt.Errorf("no scans found")
+		} else {
+			return fmt.Errorf("error while retrieving the latest scan")
+		}
+	}
+	for ID := range scan.State {
+		for _, assetID := range assetIDs {
+			if ID == assetID {
+				delete(scan.State, ID)
+			}
+		}
+	}
+	scan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+	status, err := db.InsertOne(context.TODO(), scan)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	} else {
+		log.Println("Asset deleted successfully", status)
+		return nil
+	}
+}
 
 func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {
 	results, err := db.Find(context.TODO(), bson.D{})

@@ -220,7 +220,7 @@ func getNetworkScan() {
 			Owner:       "",
 			Type:        []string{},
 			Criticality: 0,
-			Hostname:    netassets.State[assetIDs[i-1]].IPv4Addr,
+			IP:          netassets.State[assetIDs[i-1]].IPv4Addr,
 		}
 		addAsset = append(addAsset, asset)
 		fmt.Println("Asset: ", asset)
@@ -283,7 +283,6 @@ func addSubnetAssets(netassets networkResponse) []string {
 			Owner:       "netscan",
 			Type:        []string{"Subnet"},
 			Criticality: 0,
-			Hostname:    subnet,
 		}
 		addAsset = append(addAsset, asset)
 	}
@@ -323,7 +322,7 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 	// dbcon.Addrelations will check if they already exist
 	for subnet, _ := range subnets {
 		for assetID, asset := range latestScan.Assets {
-			if subnet == asset.Hostname && asset.Type[0] == "Subnet" {
+			if subnet == asset.Name && asset.Type[0] == "Subnet" {
 				//we have found the subnet asset. Add it to subnets
 				subnetAssets[assetID] = asset
 			}
@@ -333,7 +332,7 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 
 	for subnetAssetID, subnetAsset := range subnetAssets {
 		for netAssetID, netAsset := range netassets.State {
-			if netAsset.Subnet == subnetAsset.Hostname {
+			if netAsset.Subnet == subnetAsset.Name {
 				//have match, now make relation
 				relation := jsonhandler.Relation{
 					From:        subnetAssetID,
@@ -377,7 +376,6 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 2,
-				Hostname:    "Desktop-123",
 			},
 			"65f8671cfe55e5c76465d841": {
 				Name:        "Chromecast",
@@ -386,7 +384,6 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				DateCreated: "2024-02-10 20:04:20",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 1,
-				Hostname:    "LivingRoom",
 			},
 			"65f8671cfe55e5c76465d842": {
 				Name:        "Password Vault",
@@ -395,7 +392,6 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				DateCreated: "2024-02-14 23:00:00",
 				DateUpdated: "2024-02-14 23:00:30",
 				Criticality: 4,
-				Hostname:    "Vault-123",
 			},
 			"65f8671cfe55e5c76465d843": {
 				Name:        "Smart Thermostat",
@@ -404,7 +400,6 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				DateCreated: "2024-03-01 12:15:00",
 				DateUpdated: "2024-03-18 09:50:00",
 				Criticality: 2,
-				Hostname:    "Thermostat-1",
 			},
 			"65f8671cfe55e5c76465d844": {
 				Name:        "Work Laptop",
@@ -413,7 +408,6 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				DateCreated: "2024-02-25 08:30:00",
 				DateUpdated: "2024-03-18 10:00:00",
 				Criticality: 3,
-				Hostname:    "Work-Laptop-56",
 			},
 		},
 		Plugins: map[string]jsonhandler.Plugin{

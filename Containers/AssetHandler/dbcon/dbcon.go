@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 
@@ -460,9 +462,9 @@ func AddAssets(req AssetRequest, assetIDS []string) (string, []string) {
 			// Check if an asset with the same name already exists
 			exists := false
 			for _, existingAsset := range latestScan.Assets {
-				if existingAsset.Hostname == newAsset.Hostname {
+				if existingAsset.IP == newAsset.IP {
 					exists = true
-					log.Printf("Asset with hostname %s already exists in the latest scan.\n", newAsset.Hostname)
+					log.Printf("Asset with IP %s already exists in the latest scan.\n", newAsset.IP)
 					break
 				}
 			}
@@ -606,6 +608,7 @@ func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 
 // Removing assets and their related relations
 func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHelper, messages, errors []string) ([]string, []string, []string, []RelationChang) {
+	delFromNetscan := url.Values{}
 	changes := []string{}
 	changes2 := []RelationChang{}
 	if len(req.RemoveAsset) > 0 && req.RemoveAsset != nil {
@@ -618,6 +621,11 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			}
 			if _, exists := latestScan.Assets[assetID]; exists {
 				delete(latestScan.Assets, assetID)
+				// need to remove netscan data too
+				if _, exists := latestScan.PluginStates["netscan"].State[assetID]; exists {
+					delete(latestScan.PluginStates, assetID)
+					delFromNetscan.Add("assetID", assetID)
+				}
 				changes = append(changes, assetID)
 			} else if !exists {
 				log.Printf("Cannot remove asset, asset with ID %s not found.\n", assetID)
@@ -642,7 +650,17 @@ func removeAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 			log.Printf("Asset and related relations removed successfully from the latest scan.\n")
 			messages = append(messages, "Asset and related relations removed successfully from the latest scan")
 		}
+
+		//  remove assets from network if they exist
+		if len(delFromNetscan) > 0 {
+			path := "http://networkscan:8081/deleteAsset"
+			delReq, _ := http.NewRequest("POST", path, strings.NewReader(delFromNetscan.Encode()))
+			delReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			delReq.Header.Add("Content-Length", strconv.Itoa(len(delFromNetscan.Encode())))
+			http.DefaultClient.Do(delReq)
+		}
 	}
+
 	return messages, errors, changes, changes2
 }
 

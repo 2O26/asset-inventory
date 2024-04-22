@@ -172,10 +172,31 @@ func main() {
 	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
 		dbcon.DeleteAllDocuments(scansHelper, c)
 	})
+
+	router.POST("/deleteAsset", func(c *gin.Context) {
+		deleteAsset(scansHelper, c)
+	})
+
 	log.Println("Server starting on port 8081...")
 	if err := router.Run(":8081"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+func deleteAsset(db dbcon.DatabaseHelper, c *gin.Context) {
+	assetIDs := c.PostFormArray("assetID")
+	err := dbcon.DeleteAsset(db, assetIDs)
+	if err != nil {
+		log.Println("Failed to remove netscan asset with ID(s)", assetIDs, "from database. Error:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to remove netscan asset from database.",
+		})
+		return
+	}
+	log.Println("Asset(s) with ID(s) ", assetIDs, "removed.")
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Netscan asset removed."),
+	})
 }
 
 // OBS!!! THIS IS CURRENTLY NOT IN USE WE NEED TO CONNECT THE CODE

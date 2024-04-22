@@ -17,7 +17,7 @@ type Asset struct {
 	DateCreated string   `json:"Created at"`
 	DateUpdated string   `json:"Updated at"`
 	Criticality int      `json:"Criticality"`
-	Hostname    string   `json:"Hostname"`
+	IP          string   `json:"IP"`
 }
 
 type networkAsset struct {
