@@ -8,6 +8,7 @@ import './CycloneDXuploader.css';
 export const CycloneDXuploader = ({ assetID }) => {
 
     const queryClient = useQueryClient();
+    const supportedFileTypes = ['JSON', 'XML']
 
     const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
         mutationFn: UploadCycloneDX,
@@ -36,16 +37,17 @@ export const CycloneDXuploader = ({ assetID }) => {
 
     return (
         <div>
-            <h3>Upload CycloneDX File</h3>
+            <h3 style={{ marginBottom: "1rem" }}>Upload CycloneDX File</h3>
+            <p>Drag and drop your file here or click to select a file.</p>
+            <p style={{ marginTop: "0.5rem" }}>Supported formats: {supportedFileTypes.join(", ")}</p>
             <div className="container">
                 <FileUploader
                     handleChange={handleFileChange}
                     name="file"
-                    types={['JSON', 'XML']}
+                    types={supportedFileTypes}
                     className="custom-file-uploader" />
             </div>
-            <p>Drag and drop your file here or click to select a file.</p>
-            <p style={{ marginTop: "0.5rem" }}>Supported formats: JSON</p>
+            <p>NOTE: Uploding a new file will overwrite an already existing file.</p>
         </div>
     );
 };

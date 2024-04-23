@@ -14,6 +14,7 @@ import { GetState } from "../Services/ApiService";
 import { useQuery } from "@tanstack/react-query"
 import RenderOnRole from '../ProtectedRoutes/RenderOnRole.jsx';
 import IssueBoard from './IssueBoard/IssueBoard';
+import SBOMLibrarySearch from './SBOMLibrarySearch/SBOMLibrarySearch.jsx';
 
 export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = {}) => (
     {
@@ -28,6 +29,10 @@ export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = 
         "History": {
             "icon": <HistoryIcon size={size} />,
             "component": <History width={width} height={height} isDashboard={true} />,
+        },
+        "SBOMSearch": {
+            "icon": <SBOMSearch size={size} />,
+            "component": <SBOMLibrarySearch width={width} height={height} isDashboard={true} />,
         }
     }
 );

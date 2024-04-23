@@ -32,7 +32,7 @@ export function SearchBar({ onSearch }) {
     );
 }
 
-export default function SBOMLibrarySearch() {
+export default function SBOMLibrarySearch({ width, height, isDashboard = false }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredLibraries, setFilteredLibraries] = useState([]);
     const [visibilityStates, setVisibilityStates] = useState({});
@@ -121,63 +121,73 @@ export default function SBOMLibrarySearch() {
     }
 
     return (
-        <div>
-            <h3 style={{ color: "var(--text-color)", marginTop: "4rem" }}>Global library search</h3>
-            <button className='standard-button' onClick={() => handleClick()}> Console all libraries</button>
-            <div>
-                <hr />
+        <div className='center-flex-column' style={{ margin: (isDashboard) ? "0 0" : "2rem 0" }} >
+            <div className="SBOM-container" style={{ width: isDashboard ? width : "80vw", height: isDashboard && height }}>
+                {!isDashboard && <h1 style={{ color: "var(--text-color)", marginTop: "1rem 0" }}>Global library search</h1>}
+                {/* <button className='standard-button' onClick={() => handleClick()}> Console all libraries</button> */}
                 <div>
-                    <div>
-                        <SearchBar onSearch={setSearchTerm} />
-                        <button className='standard-button' onClick={() => setOnlyVulnerable(!onlyVulnerable)}> Only show vulnerable toggle</button>
-                    </div>
-                    {filteredLibraries && (
-                        <div className='center-flex-column'>
-                            {Object.entries(filteredLibraries).map(([key, library], index) => {
-                                return (
-                                    <div key={index} className='json-tree-container'>
-                                        <div
-                                            className={visibilityStates[index] ? "drop-down-header show-content" : "drop-down-header"}
-                                            onClick={() => toggleVisibility(index)}
-                                            style={{ cursor: 'pointer' }}>
-                                            <div />
-                                            <strong>{library.name} @ {library.version}</strong>
-                                            <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                                                {library.CVE[0] && (
-                                                    <div style={{ marginRight: "0.2rem" }}>
-                                                        <StatusIcon size={15} color={getColor(library.CVE[0].cvssScore)} />
-                                                    </div>
-                                                )}
-                                                <button className='arrow-container'>
-                                                    {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        {visibilityStates[index] && (
-                                            <div className='settings-container'>
-                                                <p> Library name: {library.name} </p>
-                                                <p> Purl: {library.purl} </p>
-                                                <p> Version: {library.version} </p>
-                                                <p> Library exists in the SBOM files for the following assets: </p>
-                                                {library.assetids.map((id, idx) => (
-                                                    <li key={idx}>{id}</li>
-                                                ))}
-                                                {library.CVE[0] && (
-                                                    <div>
-                                                        <p>CVE: {library.CVE[0].cve}</p>
-                                                        <p>CVE score: {library.CVE[0].cvssScore}</p>
-                                                        <p>Description: {library.CVE[0].description}</p>
-                                                    </div>
-                                                )}
-                                                <button className='standard-button' onClick={() => console.log(library)}> Console info</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )
-                            })}
-
+                    {/* <hr /> */}
+                    <div className='SBOM-search-container'>
+                        <div className='SBOM-top-row'>
+                            <SearchBar onSearch={setSearchTerm} />
+                            <label className='range-checkbox-label' style={{ marginRight: "auto" }}>
+                                <p className='text-desc'>Show only vulnerable libraries</p>
+                                <input
+                                    type="checkbox"
+                                    value="all"
+                                    checked={onlyVulnerable}
+                                    onChange={() => setOnlyVulnerable(!onlyVulnerable)}
+                                />
+                            </label>
                         </div>
-                    )}
+                        {filteredLibraries && (
+                            <div className='center-flex-column'>
+                                {Object.entries(filteredLibraries).map(([key, library], index) => {
+                                    return (
+                                        <div key={index} className='json-tree-container'>
+                                            <div
+                                                className={visibilityStates[index] ? "drop-down-header show-content" : "drop-down-header"}
+                                                onClick={() => toggleVisibility(index)}
+                                                style={{ cursor: 'pointer' }}>
+                                                <div />
+                                                <strong>{library.name} @ {library.version}</strong>
+                                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                                    {library.CVE[0] && (
+                                                        <div style={{ marginRight: "0.2rem" }}>
+                                                            <StatusIcon size={15} color={getColor(library.CVE[0].cvssScore)} />
+                                                        </div>
+                                                    )}
+                                                    <button className='arrow-container'>
+                                                        {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {visibilityStates[index] && (
+                                                <div className='settings-container'>
+                                                    <p> Library name: {library.name} </p>
+                                                    <p> Purl: {library.purl} </p>
+                                                    <p> Version: {library.version} </p>
+                                                    <p> Library exists in the SBOM files for the following assets: </p>
+                                                    {library.assetids.map((id, idx) => (
+                                                        <li key={idx}>{id}</li>
+                                                    ))}
+                                                    {library.CVE[0] && (
+                                                        <div>
+                                                            <p>CVE: {library.CVE[0].cve}</p>
+                                                            <p>CVE score: {library.CVE[0].cvssScore}</p>
+                                                            <p>Description: {library.CVE[0].description}</p>
+                                                        </div>
+                                                    )}
+                                                    <button className='standard-button' onClick={() => console.log(library)}> Console info</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

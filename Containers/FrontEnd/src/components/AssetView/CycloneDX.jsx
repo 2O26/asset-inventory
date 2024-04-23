@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { CycloneDXuploader } from './CycloneDXuploader';
 import './CycloneDX.css'
-import { CycloneDXIcon } from '../common/Icons/Icons';
+import { CycloneDXIcon, RemoveIcon } from '../common/Icons/Icons';
 import Modal from 'react-modal';
-import { GetCDXfiles } from '../Services/ApiService';
+import { GetCDXfiles, RemoveCDXfile } from '../Services/ApiService';
 import { JSONTree } from 'react-json-tree';
 import { CDXMetadata } from './CDXtabs/CDXMetadata';
 import { CDXLibraries } from './CDXtabs/CDXLibraries';
 import { CDXFramework } from './CDXtabs/CDXFramework';
 import { CDXCVE } from './CDXtabs/CDXCVE';
+import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 
 
 const theme = {
@@ -40,6 +41,17 @@ export default function CycloneDX({ assetID }) {
         enabled: true
     });
 
+    const { mutate, isPending, error: removeError } = useMutation({
+        mutationFn: RemoveCDXfile, // Directly pass the LogIn function
+        onSuccess: () => {
+            refetchCyclone()
+        },
+        onError: (error) => {
+            refetchCyclone()
+            console.error("Remove CDX file error:", error.message);
+        }
+    });
+
     const [fileFocus, setFileFocus] = useState('');
     const [open, setOpen] = useState(false);
 
@@ -52,10 +64,17 @@ export default function CycloneDX({ assetID }) {
         setSelectedView(view);
     }
 
+    const handleRemove = () => {
+        if (window.confirm("Are you sure you want to remove this Cyclone DX file?")) {
+            mutate(assetID);
+        }
+    }
+
     return (
         <div className='asset-info-container' >
             <CycloneDXuploader assetID={assetID} />
             <hr />
+            {loadingCyclone && <LoadingSpinner />}
             {(cycloneData && !cycloneData.error) &&
                 <div >
                     <h3>Files</h3>
@@ -64,7 +83,12 @@ export default function CycloneDX({ assetID }) {
                             <CycloneDXIcon />
                             <div className='cdxFileTest'>Uploaded SBOM file</div>
                         </div>
+                        <div onClick={() => handleRemove()}>
+                            <RemoveIcon color={"var(--error-color)"} />
+                        </div>
                     </div>
+                    {isPending && <LoadingSpinner />}
+                    {removeError && <div className='errorMessage'>{removeError.message}</div>}
                 </div>
             }
             <Modal
