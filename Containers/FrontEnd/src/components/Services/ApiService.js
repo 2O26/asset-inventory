@@ -31,14 +31,17 @@ export const GetState = async (ipRanges = []) => {
         }
         const authToken = await UserService.getToken();
 
-        const bodyData = (ipRanges.length === 0) ? '{}' : JSON.stringify({ "subnets": ipRanges });
+        const formData = new FormData();
+        for (let i = 0; i < ipRanges.length; i++){
+            formData.append("subnets", ipRanges[i])
+        }
 
         const response = await fetch('http://localhost:8080/getLatestState', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${authToken}`
             },
-            body: bodyData
+            body: formData
         });
 
         const return_data = await response.json();

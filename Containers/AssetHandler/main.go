@@ -83,8 +83,7 @@ func getNetScanStatus() json.RawMessage {
 
 func authorizeUser(c *gin.Context) jsonhandler.AuthResponse {
 
-
-emptyAuth := jsonhandler.AuthResponse{
+	emptyAuth := jsonhandler.AuthResponse{
 		Authenticated:   false,
 		Roles:           nil,
 		IsAdmin:         false,
@@ -141,6 +140,7 @@ func getLatestState(c *gin.Context) {
 			log.Printf("Failed to get subnets")
 			subnets = nil
 		}
+		fmt.Println("SUBNETS IN REQUEST:", subnets)
 		getNetworkScan()
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)

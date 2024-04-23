@@ -202,7 +202,7 @@ func NeedToKnow(inState FrontState, auth AuthResponse, subnets []string) FrontSt
 					match = true
 				}
 			}
-			if match {
+			if match || auth.IsAdmin {
 				rolesAndSubnets[subnet] = true
 			}
 
@@ -223,11 +223,13 @@ func NeedToKnow(inState FrontState, auth AuthResponse, subnets []string) FrontSt
 			if err != nil {
 				continue //ADD ERROR HERE
 			}
-			for role := range rolesAndSubnets {
-				fmt.Println("ASSET NAME", asset.Name)
-				if netProps.Subnet == role {
-					// user can view asset, add it to alteredState
-					alteredState.Assets[assetID] = asset
+			if len(rolesAndSubnets) > 0 {
+				for role := range rolesAndSubnets {
+					fmt.Println("ASSET NAME", asset.Name)
+					if netProps.Subnet == role {
+						// user can view asset, add it to alteredState
+						alteredState.Assets[assetID] = asset
+					}
 				}
 			}
 		} else {
