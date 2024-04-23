@@ -108,6 +108,7 @@
 }
 
 .react-flow__node-turbo .body {
+    text-align: left;
     display: flex;
 }
 

@@ -421,6 +421,26 @@ export const GetCDXfiles = async (assetID) => {
     }
 }
 
+export const RemoveCDXfile = async (assetID) => {
+    try {
+        const formData = new FormData();
+        formData.append('assetID', assetID)
+
+        console.log("formdata: ", formData)
+        const response = await fetch('http://localhost:8082/removeCycloneDX', {
+            method: 'POST',
+            body: formData
+        })
+
+        const return_data = await response.json();
+        console.log(return_data)
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not remove CycloneDX file');
+    }
+}
+
 export const UpdateAPIOSSkey = async (apikey) => {
     try {
         if (UserService.tokenExpired()) {
