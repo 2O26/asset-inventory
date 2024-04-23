@@ -141,7 +141,7 @@ export default function SBOMLibrarySearch() {
                                             onClick={() => toggleVisibility(index)}
                                             style={{ cursor: 'pointer' }}>
                                             <div />
-                                            <strong>{library.name}</strong>
+                                            <strong>{library.name} @ {library.version}</strong>
                                             <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                                                 {library.CVE[0] && (
                                                     <div style={{ marginRight: "0.2rem" }}>

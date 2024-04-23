@@ -90,9 +90,9 @@ describe('Asset List page tests', () => {
             cy.get('.asset-list-container').should('not.contain', 'Another Asset');
         });
     });
-    describe('searching for an asset "Test PC"', () => {    
+    describe('searching for an asset "Test PC"', () => {
         beforeEach('asset search', () => {
-            
+
             // Add the asset "Test PC"
             cy.contains('Add Asset').click();
             cy.get('input.inputFields[name="asset-name"]').type(tmpAssetData.name);
@@ -100,24 +100,24 @@ describe('Asset List page tests', () => {
             cy.get('input.inputFields[name="asset-type"]').type(tmpAssetData.type);
             cy.get('input.inputFields[name="asset-owner"]').type(tmpAssetData.owner);
             cy.get('.AuthBtnContainer').find('button.standard-button').contains('Add').click();
-    
+
             // Search for "Test PC"
             cy.get('.SearchBar input').type('Test PC');
         });
-    
+
         it('should only display the asset "Test PC"', () => {
             // Ensure that only "Test PC" is displayed in the list
             cy.get('.asset-list-container').should('contain', 'Test PC');
             cy.get('.asset-list-container').should('not.contain', 'Another Asset');
         });
-    
+
         afterEach('removing the asset "Test PC"', () => { //Cleanup
-             cy.get('.assetCell').contains(tmpAssetData.name).parents('.assetRow').find('input[type="checkbox"]').click();
+            cy.get('.assetCell').contains(tmpAssetData.name).parents('.assetRow').find('input[type="checkbox"]').click();
             cy.get('.standard-button').contains('Remove Asset').click();
             cy.get('button').filter((index, element) => element.textContent.trim() === 'Remove').click();
         });
     });
-    
 
-    
+
+
 })

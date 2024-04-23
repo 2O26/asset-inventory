@@ -285,6 +285,7 @@ func addSubnetAssets(netassets networkResponse) []string {
 			Owner:       "netscan",
 			Type:        []string{"Subnet"},
 			Criticality: 0,
+			IP:          subnet,
 		}
 		addAsset = append(addAsset, asset)
 	}
@@ -324,7 +325,7 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 	// dbcon.Addrelations will check if they already exist
 	for subnet, _ := range subnets {
 		for assetID, asset := range latestScan.Assets {
-			if subnet == asset.Name && asset.Type[0] == "Subnet" {
+			if subnet == asset.IP && asset.Type[0] == "Subnet" {
 				//we have found the subnet asset. Add it to subnets
 				subnetAssets[assetID] = asset
 			}
@@ -334,7 +335,7 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 
 	for subnetAssetID, subnetAsset := range subnetAssets {
 		for netAssetID, netAsset := range netassets.State {
-			if netAsset.Subnet == subnetAsset.Name {
+			if netAsset.Subnet == subnetAsset.IP {
 				//have match, now make relation
 				relation := jsonhandler.Relation{
 					From:        subnetAssetID,

@@ -126,6 +126,15 @@ services:
     depends_on:
       - keycloak
 
+  mkdocs:
+    container_name: mkdocs
+    image: squidfunk/mkdocs-material
+    restart: always
+    ports:
+      - "6880:8000"
+    volumes:
+      - "./Containers/docs:/docs:ro"
+
 volumes:
   configstorage:
   configdbconfig:

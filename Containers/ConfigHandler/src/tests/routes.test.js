@@ -15,8 +15,10 @@
 const request = require('supertest');
 const express = require('express');
 const axios = require('axios');
+const cron = require('node-cron');
 
-const { app, server, cronTask } = require('../server.js');
+
+const { app, server, CronTask } = require('../server.js');
 const { IPRangechecker, RecurringScanFormat } = require('../formatchecker.js');
 
 /*
@@ -79,30 +81,53 @@ jest.mock('../formatchecker.js', () => ({
     //////////////////
 */
 
+beforeAll((done) => {
+    // Start the server before all tests run
+
+    CronTask.start();
+    mockConnect.mockReset();
+    mockGetIPranges.mockReset();
+    mockAddIPrange.mockReset();
+    mockIPRangechecker.mockReset();
+    mockRemoveIPrange.mockReset();
+
+    mockGetRecurringScans.mockReset();
+    mockAddRecurringScan.mockReset();
+    mockRecurringScanFormat.mockReset();
+    mockRemoveRecurringScan.mockReset();
+
+    mockGetUserSettings.mockReset();
+    mockUpdateUserSettings.mockReset();
+
+    mockGetOSSAPIkey.mockReset();
+    mockUpdateOSSAPIkey.mockReset();
+
+    done();
+});
+
+afterAll((done) => {
+    if (server && server.listening) {
+        server.close(() => {
+            console.log('Server closed!');
+            if (CronTask && CronTask.stop) {
+                CronTask.stop();
+            }
+            done(); // Call `done` here to ensure it's called after server is closed and cronTask is stopped
+        });
+    } else {
+        if (CronTask && CronTask.stop) {
+            CronTask.stop();
+        }
+        done(); // Call `done` if server is not running or not defined
+    }
+});
 
 afterEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks(); // Resets usage data and implementations
 });
 
 describe('GET /getIPranges', () => {
-
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockGetIPranges.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).get('/getIPranges').set('Authorization', 'Bearer fake_token');
@@ -110,8 +135,8 @@ describe('GET /getIPranges', () => {
         expect(response.text).toBe('Invalid token');
     });
 
-    test('responds with IP ranges when the user is authenticated and data is fetched successfully', async () => {
-        axios.get.mockResolvedValue({ data: { authenticated: true } }); // Mock axios for successful authentication
+    test('responds with all IP ranges when the user is authenticated and admin', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } }); // Mock axios for successful authentication
         const ConfigHandler = require('../DatabaseConn/configdbconn');
         const configHandler = new ConfigHandler();
 
@@ -125,6 +150,23 @@ describe('GET /getIPranges', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({ ipranges: ['192.168.1.0/24', '172.16.0.0/12'] });
+    });
+
+    test('responds with subset of IP ranges when the user is authenticated but not admin', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, roles: ['192.168.1.0/24'] } }); // Mock axios for successful authentication
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+
+        // Assume successful fetch from database
+        mockConnect.mockResolvedValue(true);
+        configHandler.getIPranges.mockResolvedValue(['192.168.1.0/24', '172.16.0.0/12']);
+
+        const response = await request(app)
+            .get('/getIPranges')
+            .set('Authorization', 'Bearer valid_token');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ ipranges: ['192.168.1.0/24'] });
     });
 
     test('responds with 500 Internal Server Error if there is an error fetching the IP ranges', async () => {
@@ -145,24 +187,6 @@ describe('GET /getIPranges', () => {
 });
 
 describe('POST /addIPranges', () => {
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockAddIPrange.mockReset();
-        mockIPRangechecker.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).post('/addIPranges').set('Authorization', 'Bearer fake_token');
@@ -260,23 +284,6 @@ describe('POST /addIPranges', () => {
 })
 
 describe('POST /removeIPrange', () => {
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockRemoveIPrange.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).post('/removeIPrange').set('Authorization', 'Bearer fake_token');
@@ -343,24 +350,6 @@ describe('POST /removeIPrange', () => {
 })
 
 describe('GET /getRecurring', () => {
-
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockGetRecurringScans.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).get('/getRecurring').set('Authorization', 'Bearer fake_token');
@@ -419,24 +408,6 @@ describe('GET /getRecurring', () => {
 });
 
 describe('POST /addRecurring', () => {
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockAddRecurringScan.mockReset();
-        mockRecurringScanFormat.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).post('/addRecurring').set('Authorization', 'Bearer fake_token');
@@ -530,23 +501,6 @@ describe('POST /addRecurring', () => {
 })
 
 describe('POST /removeRecurring', () => {
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockRemoveRecurringScan.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).post("/removeRecurring").set('Authorization', 'Bearer fake_token');
@@ -613,24 +567,6 @@ describe('POST /removeRecurring', () => {
 })
 
 describe('GET /getUserConfigurations', () => {
-
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockGetUserSettings.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).get('/getUserConfigurations').set('Authorization', 'Bearer fake_token');
@@ -717,24 +653,6 @@ describe('GET /getUserConfigurations', () => {
 });
 
 describe('POST /UpdateUserConfig', () => {
-
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockUpdateUserSettings.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).post('/UpdateUserConfig').set('Authorization', 'Bearer fake_token');
@@ -785,24 +703,6 @@ describe('POST /UpdateUserConfig', () => {
 });
 
 describe('GET /getOSSAPIkey', () => {
-
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockGetOSSAPIkey.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).get('/getOSSAPIkey').set('Authorization', 'Bearer fake_token');
@@ -864,24 +764,6 @@ describe('GET /getOSSAPIkey', () => {
 });
 
 describe('POST /updateOSSAPIkey', () => {
-
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-        mockUpdateOSSAPIkey.mockReset();
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
         const response = await request(app).post("/updateOSSAPIkey").set('Authorization', 'Bearer fake_token');
@@ -927,48 +809,6 @@ describe('POST /updateOSSAPIkey', () => {
 
 });
 
-describe('cronTask: Performing regular scans', () => {
-
-    beforeAll((done) => {
-        cronTask.start(); // Start cron job if it's not already started
-        mockConnect.mockReset();
-
-        /*
-            Mocks specifically made for this subsuite
-        */
-        jest.mock('node-cron', () => ({
-            schedule: jest.fn((timing, callback) => callback()),
-        }));
-
-        jest.mock('node-fetch', () => require('fetch-mock-jest'));
-        const fetchMock = require('node-fetch');
-
-        done();
-    });
-
-    afterAll((done) => {
-        // Stop any cron jobs if they are started in your server
-        cronTask.stop();
-        // Close your server here to clean up any open connections.
-        server.close(() => {
-            done();
-        });
-        jest.restoreAllMocks();
-    });
-
-    test('should handle database connection failure gracefully', async () => {
-        // const ConfigHandler = require('../DatabaseConn/configdbconn.js');
-        // const configHandler = new ConfigHandler();
-        // configHandler.connect.mockResolvedValue();
-
-
-        // configHandler.connect.mockRejectedValue(new Error('Connection failed'));
-
-        // await expect(performScheduledTasks()).resolves.not.toThrow();
-        // expect(response.body).toEqual({ responseFromServer: "Succeeded to update OSS API key!!", success: "success" });
-        // expect(configHandler.updateOSSAPIkey).toHaveBeenCalledWith('old_key', newAPIKey);
-    });
-});
 
 
 

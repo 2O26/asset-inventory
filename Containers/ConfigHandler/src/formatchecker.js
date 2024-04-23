@@ -73,4 +73,4 @@ function RecurringScanFormat(recurring) {
     return false;
 }
 
-module.exports = { IPRangechecker, RecurringScanFormat };
+module.exports = { IPRangechecker, RecurringScanFormat, validPlugin, cronFormat, isValidIpRange, isValidSubnet, isValidIp, convertIpToNumber };

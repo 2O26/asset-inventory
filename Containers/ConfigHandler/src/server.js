@@ -276,23 +276,19 @@ app.post("/updateOSSAPIkey", async (req, res) => {
     }
 });
 
-const cronTask = cron.schedule('* * * * *', async () => {
+const CronTask = cron.schedule('* * * * *', async () => {
     /*
         Every minute fetch from the database and see if any matching cron jobs
     */
 
     try {
         const recurringScans = await ConnectToDatabaseAndFetchRecurringScans();
-        const scanSettings = { cmdSelection: 'simple', IpRange: {} };
-        const IpToScanWplugin = PrepareIpToScan(Plugins, scanSettings, recurringScans);
+        const IpToScanWplugin = PrepareIpToScan(Plugins, recurringScans);
         const result = await PerformRecurringScan(IpToScanWplugin);
 
     } catch (err) {
         console.error("Failed to run cron scan. Err: ", err);
     }
-
-
-    console.log('running a task every minute');
 });
 
-module.exports = { app, server, cronTask };
+module.exports = { app, server, CronTask };

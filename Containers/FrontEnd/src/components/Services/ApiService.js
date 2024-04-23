@@ -62,6 +62,7 @@ export const StartNetScan = async (scanSettings) => {
         });
 
         const resData = await response.json();
+
         return resData;
     } catch (err) {
         console.error(err);

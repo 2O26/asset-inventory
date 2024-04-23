@@ -133,7 +133,7 @@ export const CDXCVE = ({ assetID }) => {
                                             style={{ cursor: 'pointer' }}>
                                             {/* Assuming the 'name' property exists within the vulnerability details object */}
                                             <div />
-                                            <strong>{filteredLibraries[key].name}</strong>
+                                            <strong>{filteredLibraries[key].name} @ {filteredLibraries[key].version}</strong>
                                             <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                                                 <div style={{ marginRight: "0.2rem" }}>
                                                     <StatusIcon size={15} color={getColor(filteredLibraries[key].CVE[0].cvssScore)} />
