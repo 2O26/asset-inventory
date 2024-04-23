@@ -6,6 +6,7 @@ const dbName = 'configurations';
 var IPRangeSchema = require('../Schemas/IPRangeSchema');
 var RecurringScanSchema = require('../Schemas/RecurringScanSchema');
 var OSSAPIKEYSchema = require('../Schemas/OSSAPIKEYSchema');
+var TrelloKeysSchema = require('../Schemas/TrelloKeysSchema');
 
 class ConfigHandler {
     constructor() { }
@@ -102,6 +103,38 @@ class ConfigHandler {
             const result = await OSSAPIKEYSchema.findOneAndUpdate({ apikey: updatedapikey });
         } catch (err) {
             console.log("Error updating OSS API key");
+        }
+    }
+
+    async getTrelloKeys() {
+        const trelloKeys = await TrelloKeysSchema.find().exec();
+        if (trelloKeys.length !== 0) {
+          return {
+            apiKey: trelloKeys[0].apiKey,
+            token: trelloKeys[0].token,
+            boardId: trelloKeys[0].boardId
+          };
+        } else {
+          const newTrelloKeys = {
+            apiKey: "",
+            token: "",
+            boardId: ""
+          };
+          const newTrelloKeysConfig = new TrelloKeysSchema(newTrelloKeys);
+          try {
+            await newTrelloKeysConfig.save();
+          } catch (err) {
+            console.log('Error while adding Trello keys:', err.message);
+          }
+          return newTrelloKeys;
+        }
+      }
+    
+      async updateTrelloKeys(updatedTrelloKeys) {
+        try {
+          await TrelloKeysSchema.findOneAndUpdate({}, updatedTrelloKeys, { upsert: true });
+        } catch (err) {
+          console.log("Error updating Trello keys", err);
         }
     }
 }
