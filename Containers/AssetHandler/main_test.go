@@ -279,7 +279,7 @@ func TestGetLatestState(t *testing.T) {
 }
 
 func TestAddSubnetAssets(t *testing.T) {
-
+	
 }
 
 func TestAddSubnetRelations(t *testing.T) {

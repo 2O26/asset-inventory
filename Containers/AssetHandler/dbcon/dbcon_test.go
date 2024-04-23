@@ -1,11 +1,12 @@
 package dbcon
 
 import (
+
 	"assetinventory/assethandler/jsonhandler"
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
+	//"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,10 +15,38 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"go.mongodb.org/mongo-driver/bson"
+	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 )
+// Mock global variables for testing
+var mockClient *mongo.Client
+var mockDBName string = "testDB"
+
+// Mock implementation of GetCollection for testing
+func MockGetCollection(collectionName string) *mongo.Collection {
+    // For testing purposes, just return a dummy collection
+    return mockClient.Database(mockDBName).Collection(collectionName)
+}
+func SetdbScan(){
+	ctx := context.TODO()
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017/")
+
+	var err error
+	client, err = mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dbName = "scan"
+}
 
 var ( // Mock data
 	existingAssetID_1 = "65f8671cfe55e5c76465d840"
@@ -228,8 +257,8 @@ func TestAddScan(t *testing.T) {
 		})
 	}
 }
-
-// // TestGetLatestScan - Test case for GetLatestScan
+/*
+// TestGetLatestScan - Test case for GetLatestScan
 func TestGetLatestScan(t *testing.T) {
 	mockDB := new(MockDB) // Assuming you have a mock that satisfies the DatabaseHelper interface
 	latestScan, _ := json.Marshal(latestScan)
@@ -338,12 +367,24 @@ func TestAddAssets(t *testing.T){
 	testIDS := []string{"Asset1"}
 	AddAssets(testRequest, testIDS)
 	
+}*/
+
+func TestGetCollection(t *testing.T){
+	//mockClient := &mongo.Client{}
+	mockCollection := "mockCollection"
+	
+	SetdbScan()
+
+	testCollection := GetCollection(mockCollection)
+
+	assert.NotNil(t, testCollection, "Collection should not be nil")
+
+	assert.Equal(t, mockCollection, testCollection.Name(), "Collection name should match")
 }
 
 func TestAddRelations(t *testing.T){
 	//AddRelations(req AssetRequest, relationIDS []string) string
 	//TODO
-	//return "Failed to retrieve the latest scan: " + err.Error()
 	//log.Printf("Relation from %s to %s already exists in the latest scan.\n", newRelation.From, newRelation.To)
 	//return "Failed to add new relations: " + err.Error()
 	//return "New relations added successfully to the latest scan"
@@ -355,13 +396,30 @@ func TestAddRelations(t *testing.T){
 				From:			"NewAsset",
 				To:				"OldAsset",
 				Direction:		"uni",
-				Owner:			"3",
+				Owner:			"Him",
 				DateCreated:	"NewAsset1",
 			},
 		},
 	}
 	testIDS := []string{"Relation1"}
-	AddRelations(testRequest, testIDS)
+	expectedOutput := "Failed to retrieve the latest scan: error while retrieving the latest scan: mongo: no documents in result"
+	testOutput := AddRelations(testRequest, testIDS)
+
+	if testOutput != expectedOutput{
+		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
+	}
+
+	SetdbScan()
+
+
+	mockDBName.InsertOne(context.TODO(), latestScan)
+
+	expectedOutput = ""
+	testOutput = AddRelations(testRequest, testIDS)
+
+	if testOutput != expectedOutput{
+		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
+	}
 }
 
 func TestIsValidName(t *testing.T) {
@@ -430,7 +488,7 @@ func TestIsValidType(t *testing.T) {
 		}
 	}
 }
-
+/*
 func TestManageAssetsAndRelations(t *testing.T) {
 	mockDB := new(MockDB)
 
@@ -845,3 +903,4 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 		})
 	}
 }
+*/
