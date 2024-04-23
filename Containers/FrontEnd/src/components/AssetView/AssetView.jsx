@@ -11,7 +11,7 @@ import { LeftArrow, RightArrow } from '../common/Icons/Icons';
 import { CSSTransition } from 'react-transition-group';
 import CycloneDX from './CycloneDX';
 import History from '../Tools/History/History';
-
+import TrelloTab from './TrelloTab';
 
 export default function AssetView() {
     let { assetID } = useParams();
@@ -111,6 +111,12 @@ export default function AssetView() {
                         >
                             C-DX
                         </button>
+                        <button
+                            className={`tab-button ${selectedView === 'Trello' ? 'active-button' : ''}`}
+                            onClick={() => handleButtonClick('Trello')}
+                        >
+                            Issue Board
+                        </button>
                     </div>
                     {/* Conditionally render content based on selectedView */}
                     {selectedView === 'Information' && (
@@ -126,6 +132,9 @@ export default function AssetView() {
                     }
                     {selectedView === 'CycloneDx' && (
                         <CycloneDX assetID={assetID} ></CycloneDX>)
+                    }
+                    {selectedView === 'Trello' && (
+                        <TrelloTab assetID={assetID} ></TrelloTab>)
                     }
 
 

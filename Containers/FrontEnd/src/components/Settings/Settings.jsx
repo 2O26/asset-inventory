@@ -4,13 +4,15 @@ import DasboardSettings from './DasboardSettings/DashboardSettings';
 import RecurringScanSettings from './RecurringScanSettings/RecurringScanSettings';
 import RenderOnRole from '../ProtectedRoutes/RenderOnRole';
 import CVEScanSettings from './CVEScanner/CVEScannerSettings';
+import TrelloSettings from './TrelloSettings/TrelloSettings';
 import './Settings.css'
 
 const settingsDict = {
     "Dashboard Settings": <DasboardSettings />,
     "Network Scan Settings": <RenderOnRole roles={['admin']}><SetNetworkScanSettings /></RenderOnRole>,
     "Recurring Scan Settings": <RenderOnRole roles={['admin']}>< RecurringScanSettings /></RenderOnRole>,
-    "CVE Scan Settings": <RenderOnRole roles={['admin']}>< CVEScanSettings /></RenderOnRole>
+    "CVE Scan Settings": <RenderOnRole roles={['admin']}>< CVEScanSettings /></RenderOnRole>,
+    "Issue Board Settings": <RenderOnRole roles={['admin']}><TrelloSettings /></RenderOnRole>
 };
 
 export default function Settings() {

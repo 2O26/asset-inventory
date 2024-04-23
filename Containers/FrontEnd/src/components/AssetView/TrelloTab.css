@@ -1,0 +1,152 @@
+.trello-tab-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  margin: 2rem;
+  padding: 2rem;
+  width: 25vw;
+  height: 100%;
+  color: var(--text-color);
+  border-radius: 0 0 0.5rem 0.5rem;
+  background-color: var(--main-color);
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  margin-top: -21px;
+  border-top: none;
+}
+
+.trello-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.trello-list-header h3 {
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.trello-card-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.trello-card-item {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.trello-card-item .card-name {
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.trello-card-item .card-description {
+  color: #777;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.trello-create-list-button,
+.add-card-button {
+  display: block;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #0079bf;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  text-align: center;
+  user-select: none;
+  text-decoration: none;
+  margin: 1rem auto;
+  transition: background-color 0.3s ease;
+}
+
+.trello-create-list-button:hover,
+.add-card-button:hover {
+  background-color: #026aa7;
+}
+
+.remove-list-button {
+  background-color: transparent;
+  color: #d9534f;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  position: absolute;
+  top: 10px;
+  right: 30px;
+}
+
+
+.remove-list-button:hover {
+  color: #c9302c;
+}
+
+.trello-create-list-button:active {
+  box-shadow: 0 1px 0 0 #3a3a3a inset;
+}
+
+.card-description-input {
+  width: 100%;
+  min-height: 200px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: var(--background-color);
+  color: var(--text-color);
+  resize: vertical;
+}
+
+.remove-card-button {
+  background-color: transparent;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 16px;
+}
+
+.remove-card-button:before {
+  content: "\1F5D1";
+}
+
+.remove-card-button:hover {
+  color: #c9302c;
+}
+
+.spinner-container {
+  display: flex;                        
+  justify-content: center;              
+  align-items: center;                  
+  height: 100%;                         
+  width: 100%;                          
+}
+
+.spinner {
+  border: 6px solid rgba(0,0,0,0.1);  
+  width: 60px;                         
+  height: 60px;                        
+  border-radius: 50%;                  
+  border-left-color: #09f;            
+  animation: spin 1s linear infinite;  
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }       
+  100% { transform: rotate(360deg); }   
+}
