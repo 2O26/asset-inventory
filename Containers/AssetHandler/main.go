@@ -138,7 +138,6 @@ func getLatestState(c *gin.Context) {
 		subnets, ok := c.GetPostFormArray("subnets")
 		if !ok {
 			log.Printf("Failed to get subnets")
-			subnets = nil
 		}
 		fmt.Println("SUBNETS IN REQUEST:", subnets)
 		getNetworkScan()
@@ -181,8 +180,10 @@ func getLatestState(c *gin.Context) {
 		log.Println(string(currentStateJSON))
 
 		// Will now remove any data that a user cannot access.
-		if auth.IsAdmin == false || subnets != nil {
-			currentState = jsonhandler.NeedToKnow(currentState, auth, subnets)
+		if len(subnets) > 0 {
+			currentState = jsonhandler.FilterBySubnets(currentState, auth, subnets)
+		} else if auth.IsAdmin == false {
+			currentState = jsonhandler.NeedToKnow(currentState, auth)
 		}
 
 		response := StateResponse{Message: "Authentication success.", State: currentState}

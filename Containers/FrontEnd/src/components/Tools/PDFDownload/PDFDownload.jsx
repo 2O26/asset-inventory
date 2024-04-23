@@ -157,13 +157,22 @@ export default function PDFDownload() {
                     <div className='IPField'>
                         <p className='text-desc'>Please select an IP range or subnet:</p>
                         {isError && <div className='errorMessage'>{error.message}</div>}
-                        {isLoading && <LoadingSpinner />}
+                        {isLoading && <LoadingSpinner/>}
                         <label className='range-checkbox-label'>
                             <p className='text-desc'>All</p>
                             <input
                                 type="checkbox"
                                 value="all"
                                 checked={IPRanges.length === 0}
+                                onChange={changeScanRange}
+                            />
+                        </label>
+                        <label className='range-checkbox-label'>
+                            <p className='text-desc'>Manually added assets</p>
+                            <input
+                                type="checkbox"
+                                value="manual-assets"
+                                checked={IPRanges.includes("manual-assets") && !IPRanges.includes("all")}
                                 onChange={changeScanRange}
                             />
                         </label>
@@ -182,7 +191,7 @@ export default function PDFDownload() {
                     <button className='standard-button' type="submit">
                         Generate PDF
                     </button>
-                    {isPending && <LoadingSpinner />}
+                    {isPending && <LoadingSpinner/>}
                 </form>
             </div>
         </div>
