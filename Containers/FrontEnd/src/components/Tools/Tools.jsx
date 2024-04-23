@@ -14,7 +14,6 @@ import { GetState } from "../Services/ApiService";
 import { useQuery } from "@tanstack/react-query"
 import RenderOnRole from '../ProtectedRoutes/RenderOnRole.jsx';
 import IssueBoard from './IssueBoard/IssueBoard';
-import { FaTrello } from 'react-icons/fa'; 
 
 export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = {}) => (
     {
@@ -29,10 +28,6 @@ export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = 
         "History": {
             "icon": <HistoryIcon size={size} />,
             "component": <History width={width} height={height} isDashboard={true} />,
-        },
-        "Issue Board": {
-            "icon": <FaTrello size={size} />,
-            "component": <IssueBoard width={width} height={height} isDashboard={true} />
         }
     }
 );

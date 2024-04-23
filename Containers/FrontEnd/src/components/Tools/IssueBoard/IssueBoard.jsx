@@ -5,7 +5,6 @@ import { GetTrelloKeys } from '../../Services/ApiService';
 
 const IssueBoard = () => {
   const [boardId, setBoardId] = useState('');
-
   const { data: trelloKeysData, isLoading, isError, error } = useQuery({
     queryKey: ['Trello keys'],
     queryFn: GetTrelloKeys,
@@ -20,7 +19,11 @@ const IssueBoard = () => {
 
   const handleOpenTrelloBoard = () => {
     const trelloBoardUrl = `https://trello.com/b/${boardId}`;
-    window.open(trelloBoardUrl, '_blank');
+    if (boardId) {
+      window.open(trelloBoardUrl, '_blank');
+    } else {
+      window.alert('Error fetching Trello Board ID');
+    }
   };
 
   return (
