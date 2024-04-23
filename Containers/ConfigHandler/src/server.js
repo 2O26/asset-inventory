@@ -283,8 +283,7 @@ const CronTask = cron.schedule('* * * * *', async () => {
 
     try {
         const recurringScans = await ConnectToDatabaseAndFetchRecurringScans();
-        const scanSettings = { cmdSelection: 'simple', IpRange: {} };
-        const IpToScanWplugin = PrepareIpToScan(Plugins, scanSettings, recurringScans);
+        const IpToScanWplugin = PrepareIpToScan(Plugins, recurringScans);
         const result = await PerformRecurringScan(IpToScanWplugin);
 
     } catch (err) {

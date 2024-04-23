@@ -1,5 +1,6 @@
 const ConfigHandler = require("./DatabaseConn/configdbconn");
 const Plugins = require('./Plugins.js');
+const { IsCronDue } = require("./IsCronDue.js");
 
 async function ConnectToDatabaseAndFetchRecurringScans() {
     const configHandler = new ConfigHandler();
@@ -13,20 +14,19 @@ async function ConnectToDatabaseAndFetchRecurringScans() {
     }
 }
 
-function PrepareIpToScan(plugins, scanSettings, recurringScans) {
+function PrepareIpToScan(plugins, recurringScans) {
     let IpToScanWplugin = {};
-
     Object.keys(plugins).forEach(pluginName => {
-        IpToScanWplugin[pluginName] = { ...scanSettings }; // Use spread operator for deep copy
+        IpToScanWplugin[pluginName] = { cmdSelection: 'simple', IpRanges: [] }; // Use spread operator for deep copy
     });
 
     recurringScans.forEach(recurring => {
+        // IpToScanWplugin[recurring.plugin]['IpRanges'] = []
         if (IsCronDue(recurring.time)) {
-            IpToScanWplugin[recurring.plugin]['IpRanges'] = []
+
             IpToScanWplugin[recurring.plugin]['IpRanges'].push(recurring.IpRange);
         }
     });
-
     return IpToScanWplugin;
 }
 
@@ -45,27 +45,5 @@ async function PerformRecurringScan(IpToScanWplugin) {
     const results = await Promise.all(promises);
     return results.find(result => result);
 }
-
-function IsCronDue(cronSchedule) {
-    try {
-        const now = new Date();
-        const [minute, hour, dayOfMonth, month, dayOfWeek] = cronSchedule.split(' ').map(s => s.trim());
-
-        // Cron months start from 1 (January) to 12 (December), JavaScript months from 0 to 11
-        const matchesMonth = month === '*' || parseInt(month) === now.getMonth() + 1;
-        const matchesDayOfMonth = dayOfMonth === '*' || parseInt(dayOfMonth) === now.getDate();
-        // Day of week in both cron and JavaScript is 0 (Sunday) to 6 (Saturday)
-        const matchesDayOfWeek = dayOfWeek === '*' || parseInt(dayOfWeek) === now.getDay();
-        const matchesHour = hour === '*' || parseInt(hour) === now.getHours();
-        const matchesMinute = minute === '*' || parseInt(minute) === now.getMinutes();
-
-        return matchesMonth && matchesDayOfMonth && matchesDayOfWeek && matchesHour && matchesMinute;
-    } catch (err) {
-        console.error('Error parsing cron expression:', err.message);
-        return false;
-    }
-}
-
-
 
 module.exports = { ConnectToDatabaseAndFetchRecurringScans, PrepareIpToScan, PerformRecurringScan };

@@ -10,6 +10,13 @@ jest.mock("../DatabaseConn/configdbconn", () => {
     });
 });
 
+const mockIsCronDue = jest.fn();
+
+jest.mock('../IsCronDue', () => ({
+    IsCronDue: mockIsCronDue
+}));
+const { IsCronDue } = require('../IsCronDue');
+
 global.fetch = jest.fn(() =>
     Promise.resolve({
         json: () => Promise.resolve({ success: true })
@@ -47,16 +54,71 @@ describe('ConnectToDatabaseAndFetchRecurringScans', () => {
 });
 
 
-// describe('PrepareIpToScan', () => {
-//     it('prepares IPs and plugins correctly', () => {
-//         const plugins = { examplePlugin: {} };
-//         const scanSettings = {};
-//         const recurringScans = [{ plugin: 'Network Scan', IpRange: "192.168.0.1/24", time: "* * * * *" }];
+describe('PrepareIpToScan', () => {
+    beforeEach(() => {
+        mockIsCronDue.mockReset();
+    })
 
-//         const result = PrepareIpToScan(plugins, scanSettings, recurringScans);
-//         // expect(result).toHaveProperty('examplePlugin.IpRange.192.168.0.1/24');
-//     });
-// });
+    // Test to ensure it creates an IpToScanWplugin object with plugins but no IP ranges
+    it('should create an IpToScanWplugin object with plugin configurations and no IP ranges if NO cron is due', () => {
+        IsCronDue.mockReturnValue(false);
+        const recurringScans = [
+            {
+                plugin: 'Network Scan',
+                time: '* * * * *',
+                IpRange: '127.0.0.1/32',
+            },
+            {
+                plugin: 'Network Scan',
+                time: '* * * * 1',
+                IpRange: '192.168.1.0/24',
+            }
+        ]
+        const expectedOutput = {
+            'Network Scan': { cmdSelection: 'simple', IpRanges: [] }
+        }
+
+        const result = PrepareIpToScan(Plugins, recurringScans);
+
+        expect(result).toEqual(expectedOutput);
+    });
+
+    // Test to ensure it includes the IP range for a plugin if the cron is due
+    it('Should include the IP range for the plugin if the cron jobs are due', () => {
+        IsCronDue.mockReturnValue(true);
+
+        const recurringScans = [
+            {
+                plugin: 'Network Scan',
+                time: '* * * * *',
+                IpRange: '127.0.0.1/32',
+            },
+            {
+                plugin: 'Network Scan',
+                time: '* * * * 1',
+                IpRange: '192.168.1.0/24',
+            }
+        ]
+        const expectedOutput = {
+            'Network Scan': { cmdSelection: 'simple', IpRanges: ['127.0.0.1/32', '192.168.1.0/24'] }
+        }
+        const result = PrepareIpToScan(Plugins, recurringScans);
+
+        expect(result).toEqual(expectedOutput);
+    });
+
+    it('Should return empty list of IpRanges if recurring scans field is empty', () => {
+        IsCronDue.mockReturnValue(true);
+
+        const recurringScans = []
+        const expectedOutput = {
+            'Network Scan': { cmdSelection: 'simple', IpRanges: [] }
+        }
+        const result = PrepareIpToScan(Plugins, recurringScans);
+
+        expect(result).toEqual(expectedOutput);
+    });
+});
 
 describe('PerformRecurringScan', () => {
     beforeEach(() => {
