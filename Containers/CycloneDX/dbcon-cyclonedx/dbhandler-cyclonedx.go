@@ -102,3 +102,7 @@ func (m *MockDB) ReplaceOne(ctx context.Context, filter interface{}, replacement
 	args := m.Called(ctx, filter, replacement)
 	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
 }
+func (m *MockDB) Connect(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
+	args := m.Called(ctx, opts)
+	return args.Get(0).(*mongo.Client), args.Error(1)
+}

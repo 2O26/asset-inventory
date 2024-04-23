@@ -15,6 +15,27 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+func TestSetupDatabase(t *testing.T) {
+	mockDB := new(MockDB)
+	ctx := context.TODO()
+	uri := "mongodb://localhost:27017/"
+	dbName := "test_db"
+
+	// Set up expectations for the mock
+	mockDB.On("Connect", ctx, mock.Anything).Return(&mongo.Client{}, nil)
+
+	// Call the SetupDatabase function with the mock
+	_, err := mockDB.Connect(ctx, nil)
+	assert.NoError(t, err)
+	err = SetupDatabase(uri, dbName)
+	if err != nil {
+		t.Errorf("SetupDatabase failed: %v", err)
+	}
+
+	// Assert that the expectations were met and no error occurred
+	assert.NoError(t, err)
+	mockDB.AssertExpectations(t)
+}
 func TestSaveCycloneDX(t *testing.T) {
 	// Sample SBOM data and asset ID
 	sbomData := []byte(`{
@@ -188,8 +209,18 @@ func TestRemoveCycloneDX(t *testing.T) {
 func TestGetCycloneDXFile(t *testing.T) {
 	// Create a mock database helper
 	mockDB := new(MockDB)
-	// sbomData := []byte(`{
-	//   "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json"}`)
+	assetID := "sampleAssetID"
+	sbomData := []byte(`{
+	  "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json"}`)
+	expectedDoc := CycloneDXDocument{
+		ID:               assetID,
+		SBOMData:         sbomData,
+		MostRecentUpdate: time.Now(),
+	}
+	expectedDoc2 := bson.M{
+		"_id":              1,
+		"sbomData":         "invalid data",
+		"mostRecentUpdate": time.Now()}
 	recorder := httptest.NewRecorder()
 
 	// Define test cases
@@ -202,7 +233,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 		{
 			name:         "Success",
 			queryParam:   "sampleAssetID",
-			expectedCode: http.StatusNotFound,
+			expectedCode: http.StatusOK,
 		},
 		{
 			name:          "MissingAssetID",
@@ -216,6 +247,18 @@ func TestGetCycloneDXFile(t *testing.T) {
 			expectedCode:  http.StatusNotFound,
 			expectedError: "CycloneDX file not found for asset ID: nonExistentAssetID",
 		},
+		{
+			name:          "ErrorFindingFile",
+			queryParam:    "sampleAssetID",
+			expectedCode:  http.StatusInternalServerError,
+			expectedError: "failed to find CycloneDX file in database: error finding file",
+		},
+		{
+			name:          "ErrorDecodingDocument",
+			queryParam:    "sampleAssetID",
+			expectedCode:  http.StatusInternalServerError,
+			expectedError: "failed to decode CycloneDX file data: error decoding key _id: cannot decode 32-bit integer into a string type",
+		},
 	}
 
 	// Iterate over test cases
@@ -225,24 +268,23 @@ func TestGetCycloneDXFile(t *testing.T) {
 			recorder = httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(recorder)
 			c.Request, _ = http.NewRequest(http.MethodGet, "/getCycloneDXFile?assetID="+tc.queryParam, nil)
-			// if tc.name == "Success" {
-			// 	mockDB := new(MockDB)
-			// 	mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.SingleResult{}, nil)
-			// 	GetCycloneDXFile(mockDB, c)
-			// 	if recorder.Code != tc.expectedCode {
-			// 		t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
-			// 	}
+			if tc.name == "Success" {
+				mockDB := new(MockDB)
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc, nil, nil))
+				GetCycloneDXFile(mockDB, c)
+				if recorder.Code != tc.expectedCode {
+					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
+				}
 
-			// 	// Assert the response body
-			// 	if tc.expectedError != "" {
-			// 		expectedBody := `{"error":"` + tc.expectedError + `"}`
-			// 		if recorder.Body.String() != expectedBody {
-			// 			t.Errorf("unexpected response body: got %s, want %s", recorder.Body.String(), expectedBody)
-			// 		}
-			// 	}
-			// }
+				// Assert the response body
+				if tc.expectedError != "" {
+					expectedBody := `{"error":"` + tc.expectedError + `"}`
+					if recorder.Body.String() != expectedBody {
+						t.Errorf("unexpected response body: got %s, want %s", recorder.Body.String(), expectedBody)
+					}
+				}
+			}
 			if tc.name == "MissingAssetID" {
-				// mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.SingleResult{}, nil)
 				GetCycloneDXFile(mockDB, c)
 				if recorder.Code != tc.expectedCode {
@@ -258,8 +300,39 @@ func TestGetCycloneDXFile(t *testing.T) {
 				}
 			}
 			if tc.name == "FileNotFound" {
-				// mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, mock.Anything).Return(nil, mongo.ErrNoDocuments)
+				GetCycloneDXFile(mockDB, c)
+				if recorder.Code != tc.expectedCode {
+					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
+				}
+
+				// Assert the response body
+				if tc.expectedError != "" {
+					expectedBody := `{"error":"` + tc.expectedError + `"}`
+					if recorder.Body.String() != expectedBody {
+						t.Errorf("unexpected response body: got %s, want %s", recorder.Body.String(), expectedBody)
+					}
+				}
+			}
+			if tc.name == "ErrorFindingFile" {
+				mockDB := new(MockDB)
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc, errors.New("error finding file"), nil))
+				GetCycloneDXFile(mockDB, c)
+				if recorder.Code != tc.expectedCode {
+					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
+				}
+
+				// Assert the response body
+				if tc.expectedError != "" {
+					expectedBody := `{"error":"` + tc.expectedError + `"}`
+					if recorder.Body.String() != expectedBody {
+						t.Errorf("unexpected response body: got %s, want %s", recorder.Body.String(), expectedBody)
+					}
+				}
+			}
+			if tc.name == "ErrorDecodingDocument" {
+				mockDB := new(MockDB)
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc2, nil, nil))
 				GetCycloneDXFile(mockDB, c)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)

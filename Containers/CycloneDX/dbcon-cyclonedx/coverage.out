@@ -20,14 +20,14 @@ assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:87.37,89.3 1 1
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:90.2,90.12 1 1
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:94.58,98.40 2 1
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:98.40,100.3 1 1
-assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:100.8,103.3 2 1
+assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:100.8,103.3 2 0
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:106.2,110.37 3 1
-assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:110.37,111.34 1 1
-assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:111.34,116.4 2 1
+assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:110.37,111.34 1 0
+assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:111.34,116.4 2 0
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:117.3,120.9 2 0
-assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:124.2,125.44 2 0
+assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:124.2,125.44 2 1
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:125.44,130.3 2 0
-assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:132.2,132.57 1 0
+assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:132.2,132.57 1 1
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:135.59,137.16 2 0
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:137.16,141.3 3 0
 assetinventory/cyclonedx/dbcon-cyclonedx/dbcon-cyclonedx.go:143.2,143.40 1 0
@@ -56,3 +56,4 @@ assetinventory/cyclonedx/dbcon-cyclonedx/dbhandler-cyclonedx.go:86.118,89.2 2 0
 assetinventory/cyclonedx/dbcon-cyclonedx/dbhandler-cyclonedx.go:92.98,95.2 2 1
 assetinventory/cyclonedx/dbcon-cyclonedx/dbhandler-cyclonedx.go:96.120,99.2 2 1
 assetinventory/cyclonedx/dbcon-cyclonedx/dbhandler-cyclonedx.go:101.124,104.2 2 1
+assetinventory/cyclonedx/dbcon-cyclonedx/dbhandler-cyclonedx.go:105.102,108.2 2 0
