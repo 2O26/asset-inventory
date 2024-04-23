@@ -3,9 +3,14 @@ const Plugins = require('./Plugins.js');
 
 async function ConnectToDatabaseAndFetchRecurringScans() {
     const configHandler = new ConfigHandler();
-    await configHandler.connect();
-    const result = await configHandler.getRecurringScans();
-    return result;
+    try {
+        await configHandler.connect();
+        const result = await configHandler.getRecurringScans();
+        return result;
+    } catch (error) {
+        console.error('Error connecting to database or fetching recurring scans:', error);
+        throw error;
+    }
 }
 
 function PrepareIpToScan(plugins, scanSettings, recurringScans) {
@@ -17,10 +22,8 @@ function PrepareIpToScan(plugins, scanSettings, recurringScans) {
 
     recurringScans.forEach(recurring => {
         if (IsCronDue(recurring.time)) {
-            IpToScanWplugin[recurring.plugin]['IpRange'] = {
-                ...IpToScanWplugin[recurring.plugin]['IpRange'],
-                [recurring.IpRange]: true
-            };
+            IpToScanWplugin[recurring.plugin]['IpRanges'] = []
+            IpToScanWplugin[recurring.plugin]['IpRanges'].push(recurring.IpRange);
         }
     });
 
@@ -28,24 +31,19 @@ function PrepareIpToScan(plugins, scanSettings, recurringScans) {
 }
 
 async function PerformRecurringScan(IpToScanWplugin) {
-    Object.keys(IpToScanWplugin).forEach(async pluginType => {
-        if (Object.keys(IpToScanWplugin[pluginType]['IpRange']).length !== 0) {
-            try {
-                const response = await fetch(
-                    Plugins[pluginType], {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(IpToScanWplugin[pluginType])
-                });
-
-                const resData = await response.json();
-                return resData;
-            } catch (err) {
-                console.error(err);
-                throw new Error('Network response was not ok, could not fetch state');
-            }
+    const promises = [];
+    for (const pluginType of Object.keys(IpToScanWplugin)) {
+        if (Object.keys(IpToScanWplugin[pluginType]['IpRanges']).length !== 0) {
+            const promise = fetch(Plugins[pluginType], {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(IpToScanWplugin[pluginType])
+            }).then(response => response.json());
+            promises.push(promise);
         }
-    });
+    }
+    const results = await Promise.all(promises);
+    return results.find(result => result);
 }
 
 function IsCronDue(cronSchedule) {

@@ -276,7 +276,7 @@ app.post("/updateOSSAPIkey", async (req, res) => {
     }
 });
 
-const cronTask = cron.schedule('* * * * *', async () => {
+const CronTask = cron.schedule('* * * * *', async () => {
     /*
         Every minute fetch from the database and see if any matching cron jobs
     */
@@ -290,9 +290,6 @@ const cronTask = cron.schedule('* * * * *', async () => {
     } catch (err) {
         console.error("Failed to run cron scan. Err: ", err);
     }
-
-
-    console.log('running a task every minute');
 });
 
-module.exports = { app, server, cronTask };
+module.exports = { app, server, CronTask };
