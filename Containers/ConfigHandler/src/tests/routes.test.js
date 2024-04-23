@@ -110,8 +110,8 @@ describe('GET /getIPranges', () => {
         expect(response.text).toBe('Invalid token');
     });
 
-    test('responds with IP ranges when the user is authenticated and data is fetched successfully', async () => {
-        axios.get.mockResolvedValue({ data: { authenticated: true } }); // Mock axios for successful authentication
+    test('responds with all IP ranges when the user is authenticated and admin', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } }); // Mock axios for successful authentication
         const ConfigHandler = require('../DatabaseConn/configdbconn');
         const configHandler = new ConfigHandler();
 
@@ -125,6 +125,23 @@ describe('GET /getIPranges', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({ ipranges: ['192.168.1.0/24', '172.16.0.0/12'] });
+    });
+
+    test('responds with subset of IP ranges when the user is authenticated but not admin', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, roles: ['192.168.1.0/24'] } }); // Mock axios for successful authentication
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+
+        // Assume successful fetch from database
+        mockConnect.mockResolvedValue(true);
+        configHandler.getIPranges.mockResolvedValue(['192.168.1.0/24', '172.16.0.0/12']);
+
+        const response = await request(app)
+            .get('/getIPranges')
+            .set('Authorization', 'Bearer valid_token');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ ipranges: ['192.168.1.0/24'] });
     });
 
     test('responds with 500 Internal Server Error if there is an error fetching the IP ranges', async () => {
