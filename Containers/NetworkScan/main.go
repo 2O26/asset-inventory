@@ -145,6 +145,7 @@ func ping(addr string) (bool, error) {
 
 	return false, nil
 }
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
