@@ -106,7 +106,7 @@ export const CDXLibraries = (components) => {
                                 className={visibilityStates[index] ? "drop-down-header show-content" : "drop-down-header"}
                                 onClick={() => toggleVisibility(index)}
                                 style={{ cursor: 'pointer' }}>
-                                <strong>{component.name}</strong>
+                                <strong>{component.name} @ {component.version} </strong>
                                 <button className='arrow-container'>
                                     {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
                                 </button>
