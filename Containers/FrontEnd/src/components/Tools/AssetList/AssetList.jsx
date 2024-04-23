@@ -120,7 +120,7 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
                 </div>
                 <hr />
                 {filteredAssets.map(([key, value]) => (
-                    <div key={key} className='assetRow'>
+                    <div key={key} className='assetRow' id={key}>
                         {(!isNarrowView && !isDashboard) && (
                             <div className='assetCell'>
                                 <input

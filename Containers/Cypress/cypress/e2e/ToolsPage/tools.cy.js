@@ -23,4 +23,20 @@ describe('Tools page tests', () => {
     it('can verify Graph View button', () => {
         cy.get('.tools-container').should('contain', ' Graph View')
     })
+
+    it('can verify History button', () => {
+        cy.get('.tools-container').should('contain', ' History')
+    })
+
+    it('can verify  Global SBOM library search button', () => {
+        cy.get('.tools-container').should('contain', ' Global SBOM library search')
+    })
+
+    it('can verify  Download PDF button', () => {
+        cy.get('.tools-container').should('contain', ' Download PDF')
+    })
+
+    it('can verify  Admin Console button', () => {
+        cy.get('.tools-container').should('contain', ' Admin Console')
+    })
 })

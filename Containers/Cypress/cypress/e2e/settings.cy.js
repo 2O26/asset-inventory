@@ -103,7 +103,7 @@ describe('Settings Page Tests', () => {
     });
 
     describe('Check if Recurring Scan Settings are functional.', () => {
-        it.only('Check if the recurring scan job has been added correctly.', () => {
+        it('Check if the recurring scan job has been added correctly.', () => {
             cy.contains('Network Scan Settings').click()
             cy.get('.standard-button').contains(' Add IP range').click()
             cy.get('input[name="IPrangeInput"]').clear().type('192.168.1.0/24');
