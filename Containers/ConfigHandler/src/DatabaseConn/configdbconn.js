@@ -6,9 +6,25 @@ const dbName = 'configurations';
 var IPRangeSchema = require('../Schemas/IPRangeSchema');
 var RecurringScanSchema = require('../Schemas/RecurringScanSchema');
 var OSSAPIKEYSchema = require('../Schemas/OSSAPIKEYSchema');
+var DocLinkSchema = require('../Schemas/DocLinkSchema');
 
 class ConfigHandler {
     constructor() { }
+
+    async setDocLink(docLink, assetID) { //Create new schema where assetID and relevant DocLink is stored.
+        const newDocLink = new DocLinkSchema({docLink: docLink, assetID: assetID});
+        try {
+            await newDocLink.save();
+        } catch (err) {
+            console.log('Error while updating Doc Link:', err.message);
+        }
+    }
+
+    async getDocLink(assetID) { 
+        const docLink = await DocLinkSchema.find().exec(); //I'm not sure what this does.
+        //I think I need to use the assetID parameter somehow to find the docLinkSchema with the corresponding assetID.
+        return docLink 
+    }
 
     async connect() {
         let connection = `mongodb://${dbServer}/${dbName}`;

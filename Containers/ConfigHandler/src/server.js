@@ -21,6 +21,36 @@ app.use(cors())
 
 const server = app.listen(route, () => console.log(`Server listening on port: ${route}`));
 
+//Doc Link functions, based off of UserConfig functions.
+app.post("/setDocLink", async (req, res) => {
+        try {
+    {/**
+    const response = await axios.get('http://authhandler:3003/getRoles', {
+        headers: {
+            'Authorization': req.headers.authorization
+        }
+    });
+    if (!response.data.authenticated) {
+        return res.status(401).send('Invalid token');
+    }
+    if (!response.data.isAdmin) {
+        return res.status(401).send('Unauthorized');
+    }
+    
+    */}
+    
+    const configHandler = new ConfigHandler();
+    await configHandler.connect();
+    const response = await configHandler.setDocLink(req.body.setDocLink);
+    res.json({ responseFromServer: "Succeeded to add Doc Link!!", success: "success", range: req.body.setDocLink });
+
+
+    } catch (error) {
+        console.error('Error while adding doc link:', error);
+        res.status(500).send('Error adding doc link');
+    }
+});
+
 app.get("/getIPranges", async (req, res) => {
     try {
         const response = await axios.get('http://authhandler:3003/getRoles', {

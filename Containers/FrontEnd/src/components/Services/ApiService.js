@@ -1,6 +1,50 @@
 // ApiServices.js
 import UserService from './UserService';
 
+export const SetDocLink = async (docLink, assetID) => { //This code mostly based off of UploadCycloneDX
+    const URL = 'http://localhost:3004/setDocLink?assetID=';
+
+    try {
+        const response = await fetch(URL + assetID, {
+            method: 'POST',
+            body: docLink,
+        });
+
+        if (response.ok) {
+            const docLink = await response.json();
+            alert('Doc Link set successfully');
+            return docLink;
+        } else {
+            // Handle server errors or invalid responses
+            const docLink = await response.json();
+            alert('Failed to set doc link');
+            return docLink;
+        }
+    } catch (error) {
+        alert('Error setting doc link: ' + error.message);
+    }
+}
+
+export const GetDocLink = async (assetID) => {
+    const URL = 'http://localhost:3004/setDocLink?assetID=';
+
+    try {
+        const response = await fetch(URL + assetID, {
+            method: 'GET'
+        });
+
+        if (response.ok) {
+            const docLink = await response.json();
+            return docLink;
+        } else {
+            // Handle server errors or invalid responses
+            const errorResponse = await response.json();
+            throw new Error(`Failed to get doc link: ${errorResponse.message}`);
+        }
+    } catch (error) {
+        throw new Error(`Error getting doc link: ${error.message}`);
+    }
+};
 
 export const AssetHandlerStatus = async () => {
     // assethandler status check
