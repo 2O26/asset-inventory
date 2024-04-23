@@ -22,6 +22,7 @@ nav:
   - API Documentation:
       - AssetHandler: API_assethandler.md
       - ConfigHandler: API_confighandler.md
+      - CycloneDX: API_cyclonedx.md
       - NetworkScan: API_networkscan.md
 
 # Markdown Extensions to enhance documentation

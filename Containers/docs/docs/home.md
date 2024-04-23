@@ -1,4 +1,4 @@
-# Home
+# Home (TEMPLATE)
 ## What You Will Find in This Documentation:
 
 -   Getting Started: Quick start guide to help you set up and begin using the Asset Inventory system.
