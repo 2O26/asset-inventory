@@ -1,3 +1,30 @@
+@font-face {
+    font-family: 'Inter';
+    src: url("../../fonts/Inter-VariableFont_slnt,wght.ttf") format('truetype');
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url("../../fonts/JetBrainsMono[wght].ttf") format('truetype');
+}
+
+@font-face {
+    font-family: 'JetBrains Mono Italic';
+    src: url("../../fonts/JetBrainsMono-Italic[wght].ttf") format('truetype');
+}
+
+@font-face {
+    font-family: 'Ysabeau Office';
+    src: url("../../fonts/YsabeauOffice-VariableFont_wght.ttf") format('truetype');
+}
+
+:root {
+    --inter : 'Inter', sans-serif;
+    --ysabeau-office : 'Ysabeau Office', sans-serif;
+    --jetbrains-mono : 'JetBrains Mono', monospace;
+    --jetbrains-mono-italic : 'JetBrains Mono Italic', monospace;
+}
+
 .errorMessage,
 .successMessage {
     text-align: center;

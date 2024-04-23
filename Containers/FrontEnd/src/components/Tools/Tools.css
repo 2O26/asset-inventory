@@ -50,11 +50,10 @@
   margin: 1rem;
   width: 15rem;
   height: 11rem;
-  /* font-family: 'Roboto', sans-serif; */
-  font-family: inherit;
   font-size: 20px;
   /* text-transform: uppercase; */
   letter-spacing: 2.5px;
+  font-family: var(--inter);
   font-weight: 600;
   color: var(--text-color);
   background-color: var(--main-color);

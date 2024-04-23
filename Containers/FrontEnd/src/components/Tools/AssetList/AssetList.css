@@ -47,6 +47,7 @@
     border: none;
     background: transparent;
     color: var(--text-color);
+    font-size: 15px;
 }
 
 .SearchBar:hover {
@@ -65,8 +66,9 @@
 
 .headerCell {
     flex: 1;
-    font-weight: bold;
+    font-weight: 500;
     padding: 5px;
+    font-kerning: none;
 }
 
 /* Style for asset rows */
@@ -89,6 +91,8 @@
     flex: 1;
     padding: 5px;
     /* Add any additional styling as needed */
+    font-family: var(--jetbrains-mono);
+    font-size: 15px;
 }
 
 input[type='checkbox'] {
