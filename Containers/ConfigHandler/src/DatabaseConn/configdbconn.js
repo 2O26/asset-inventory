@@ -108,7 +108,7 @@ class ConfigHandler {
 
     async getTrelloKeys() {
         const trelloKeys = await TrelloKeysSchema.find().exec();
-        if (trelloKeys.length !== 0) {
+        if (trelloKeys.length === 3) { 
           return {
             apiKey: trelloKeys[0].apiKey,
             token: trelloKeys[0].token,
