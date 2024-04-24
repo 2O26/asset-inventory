@@ -22,13 +22,13 @@ describe('Testing PDF download Page', () => {
     })
 
     it('chekcbox "All" value should be checked ', () => {
-        cy.get(`input[type="checkbox"][name="rangetype"][value="${ipRange}"]`).should('not.be.checked')
-        cy.get(`input[type="checkbox"][name="rangetype"][value="All"]`).should('be.checked')
+        cy.get(`input[type="checkbox"][value="${ipRange}"]`).should('not.be.checked')
+        cy.get(`input[type="checkbox"][value="all"]`).should('be.checked')
     })
 
     it('if ip range is pressed, all should be unchecked ', () => {
-        cy.get(`input[type="checkbox"][name="rangetype"][value="${ipRange}"]`).click()
-        cy.get(`input[type="checkbox"][name="rangetype"][value="All"]`).should('not.be.checked')
+        cy.get(`input[type="checkbox"][value="${ipRange}"]`).click()
+        cy.get(`input[type="checkbox"][value="all"]`).should('not.be.checked')
     })
 
     it('can download when "All" is checked" ', () => {
@@ -37,7 +37,7 @@ describe('Testing PDF download Page', () => {
     })
 
     it('can download specific ip range is checked" ', () => {
-        cy.get(`input[type="checkbox"][name="rangetype"][value="${ipRange}"]`).click()
+        cy.get(`input[type="checkbox"][value="${ipRange}"]`).click()
         cy.get('.standard-button').click()
         cy.get('@downloadStub').should('have.been.calledOnceWith', 'pdf_from_json.pdf');
     })
