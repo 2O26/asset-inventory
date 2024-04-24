@@ -3,13 +3,8 @@ const axios = require('axios');
 const CVEscanSave = require("../DatabaseConn/CVEconn");
 
 
-async function getAPIkey(authToken) {
-    const response = await fetch('http://localhost:3001/getOSSAPIkey', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${authToken}`
-        }
-    });
+async function getAPIkey() {
+    const url = 'http://confighandler:3001/getOSSAPIkeyInternal';
     try {
         const apikeyResponse = await axios.get(url);
         if (apikeyResponse.status !== 200) {
@@ -107,9 +102,7 @@ async function CVEcheckAll(authToken) {
             return {}
         }
         console.log("API KEY: ", apikey);
-
         const purl_list = await getAllPurls();
-
         const OSSresponses = await processPurlsInBatches(purl_list, apikey, 128);
         // Reduce to an array of library objects that contain CVEs
         const componentsWithVulnerabilities = OSSresponses.flatMap(subArray =>
