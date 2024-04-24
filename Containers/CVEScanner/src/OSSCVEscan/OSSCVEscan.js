@@ -126,18 +126,14 @@ async function CVEcheck(assetID, authToken) {
         Mother function to check libraries associated with a specific asset for CVEs
     */
     try {
-        console.log("!!! getAPIkey starts")
         const apikey = await getAPIkey(authToken);
-        console.log("!!! getAPIkey ends")
         if (apikey === "") {
             console.log("Erronous api key or could not fetch it from settings")
             return {}
         }
         console.log("API KEY: ", apikey);
         const purl_list = await getPurlsOfAssetID(assetID);
-        console.log("!!! ProcessPurlsInBatches starts")
         const OSSresponses = await processPurlsInBatches(purl_list, apikey, 128);
-        console.log("!!! ProcessPurlsInBatches exists")
         // Reduce to an array of library objects that contain CVEs
         const componentsWithVulnerabilities = OSSresponses.flatMap(subArray =>
             subArray.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
