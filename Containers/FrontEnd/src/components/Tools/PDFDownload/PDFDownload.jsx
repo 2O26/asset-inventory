@@ -1,5 +1,10 @@
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import { GetIPranges, GetState } from "../../Services/ApiService";
+import { useQuery, useMutation } from "@tanstack/react-query"
+import { useState } from "react";
+import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
+import '../NetworkScan/NetworkScan.css'
 
 // Set the fonts to use
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
@@ -9,6 +14,11 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
  * @param {Object} jsonData - The JSON data to convert into a PDF document.
  */
 function generatePdfFromJson(jsonData) {
+
+    if (!jsonData) {
+        console.error('No data provided to generate PDF');
+        return;
+    }
 
     const tocItems = [];
 
@@ -96,18 +106,94 @@ function generatePdfFromJson(jsonData) {
     pdfMake.createPdf(docDefinition).download('pdf_from_json.pdf');
 }
 
-export default async function PDFDownload(jsonData) {
-    // const queryClient = new QueryClient({})
+export default function PDFDownload() {
+    const [IPRanges, setIPRanges] = useState([]);
 
-    // try {
-    //     const data = await queryClient.fetchQuery({
-    //         queryKey: ['getState'],
-    //         queryFn: async () => GetState
-    //     });
-    //     console.log(data)
-    // } catch (error) {
-    //     console.log(error)
-    // }
-    console.log(jsonData)
-    generatePdfFromJson(jsonData);
+    const { data, isLoading } = useQuery({
+        queryKey: ['IPranges'],
+        queryFn: GetIPranges,
+        enabled: true
+    });
+
+    const { mutate, isPending, isError, error } = useMutation({
+        mutationFn: GetState,
+        onSuccess: (jsonData) => {
+            generatePdfFromJson(jsonData.state);
+        },
+        onError: (err) => {
+            console.error(err)
+        }
+    });
+
+    const changeScanRange = (event) => {
+        const { value, checked } = event.target;
+
+        setIPRanges(prev => {
+            if (value === "all") {
+                // Toggle "All" independently
+                return [];
+            } else {
+                if (checked) {
+                    // Add the value if it's not already included and remove "all" if it's there
+                    return prev.includes("all") ? [value] : [...prev, value];
+                } else {
+                    // Remove the value and keep "all" out if it's currently included
+                    return prev.filter(range => range !== value);
+                }
+            }
+        });
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        console.log("Ranges:", IPRanges)
+        mutate(IPRanges)
+    }
+
+    return (
+        <div className="page-container">
+            <div className="scan-form-container">
+                <form onSubmit={handleSubmit}>
+                    <div className='IPField'>
+                        <p className='text-desc'>Please select an IP range or subnet:</p>
+                        {isError && <div className='errorMessage'>{error.message}</div>}
+                        {isLoading && <LoadingSpinner/>}
+                        <label className='range-checkbox-label'>
+                            <p className='text-desc'>All</p>
+                            <input
+                                type="checkbox"
+                                value="all"
+                                checked={IPRanges.length === 0}
+                                onChange={changeScanRange}
+                            />
+                        </label>
+                        <label className='range-checkbox-label'>
+                            <p className='text-desc'>Manually added assets</p>
+                            <input
+                                type="checkbox"
+                                value="manual-assets"
+                                checked={IPRanges.includes("manual-assets") && !IPRanges.includes("all")}
+                                onChange={changeScanRange}
+                            />
+                        </label>
+                        {data?.ipranges?.map((iprange, index) => (
+                            <label className='range-checkbox-label' key={index}>
+                                <p className='text-desc'>{iprange}</p>
+                                <input
+                                    type="checkbox"
+                                    value={iprange}
+                                    checked={IPRanges.includes(iprange) && !IPRanges.includes("all")}
+                                    onChange={changeScanRange}
+                                />
+                            </label>
+                        ))}
+                    </div>
+                    <button className='standard-button' type="submit">
+                        Generate PDF
+                    </button>
+                    {isPending && <LoadingSpinner/>}
+                </form>
+            </div>
+        </div>
+    );
 }
