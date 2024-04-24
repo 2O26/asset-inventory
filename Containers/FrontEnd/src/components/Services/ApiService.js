@@ -27,16 +27,18 @@ export const SetDocLink = async (docLink, assetID) => { //This code mostly based
     }
 }
 
+//curl "http://localhost:3001/getDocLink?assetID=123"
 export const GetDocLink = async (assetID) => {
-    const URL = 'http://localhost:3001/setDocLink?assetID=';
+    const URL = 'http://localhost:3001/getDocLink?assetID=';
 
     try {
         const response = await fetch(URL + assetID, {
-            method: 'GET'
+            method: 'GET',
+            body: assetID
         });
 
         if (response.ok) {
-            const docLink = await response.json();
+            const docLink = await response.json();  
             return docLink;
         } else {
             // Handle server errors or invalid responses

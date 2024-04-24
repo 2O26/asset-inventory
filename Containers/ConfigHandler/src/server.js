@@ -67,6 +67,7 @@ app.get("/getDocLink", async (req, res) => {
         const configHandler = new ConfigHandler();
         await configHandler.connect();
         const docLink = await configHandler.getDoclink()
+        res.json({ responseFromServer: "Succeeded to get Doc Link!!", success: "success", range: req.body.setDocLink });
 
     } catch (error) {
         res.status(500).send('Error fetching doc link');
