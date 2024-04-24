@@ -123,8 +123,6 @@ app.post("/getVulnerableAssetAll", async (req, res) => {
                 console.log("Could not get libraries: ", err)
                 res.json({ success: false, libraries: {} });
             });
-
-
     } catch (error) {
         console.error('Error while processing request:', error);
         res.status(500).send('An error occurred while processing your request.');
@@ -168,7 +166,7 @@ app.post("/librarySort", async (req, res) => {
 
         try {
             await LibraryDBupdate(assetID, res);
-            checkIfVulnerabilities(assetID, req.headers.authorization);  // Only runs if the update is successful
+            await checkIfVulnerabilities(assetID);  // Only runs if the update is successful
         } catch (error) {
             console.error("Error during library update or vulnerability check: ", error);
         }
@@ -198,13 +196,13 @@ app.post("/recheckVulnerabilitiesAll", async (req, res) => {
     res.json({ Success: true });
 })
 
-async function checkIfVulnerabilities(assetID, authToken) {
+async function checkIfVulnerabilities(assetID) {
     /*
         - [x] For every library + version combo that contains assetID
             - run function that invokes an external API call to check for CVEs
         - [x] Save result to database
     */
-    const purlsWithVulnerbilities = await CVEcheck(assetID, authToken);
+    const purlsWithVulnerbilities = await CVEcheck(assetID);
     const cveSave = new CVEscanSave();
     cveSave.connect()
         .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))
