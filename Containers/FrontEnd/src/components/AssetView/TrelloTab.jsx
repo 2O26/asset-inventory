@@ -2,6 +2,7 @@ import './TrelloTab.css'
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GetTrelloKeys } from '../Services/ApiService';
+import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 
 export default function TrelloTab({ assetID }) {
   const [trelloList, setTrelloList] = useState(null);
@@ -237,104 +238,102 @@ export default function TrelloTab({ assetID }) {
           onClick={() => editingCardName !== card.id && handleEditCardName(card)}
         >
           {editingCardName === card.id ?
-          (
-            <input
-              type="text"
-              value={currentCardName}
-              onChange={handleCardNameChange}
-              onBlur={() => handleSaveCardName(card.id)}
-              onKeyPress={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  handleSaveCardName(card.id);
-                }
+            (
+              <input
+                type="text"
+                value={currentCardName}
+                onChange={handleCardNameChange}
+                onBlur={() => handleSaveCardName(card.id)}
+                onKeyPress={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleSaveCardName(card.id);
+                  }
+                }}
+                autoFocus
+              />
+            ) : (
+              card.name || 'New Card (click to rename)'
+            )}
+        </div>
+        <div
+          className={`card-description ${activeCardId === card.id ? 'active' : ''}`}
+          onClick={() => setActiveCardId(card.id)}
+        >
+          {activeCardId === card.id ? (
+            <textarea
+              value={cardDescription}
+              onChange={handleCardDescriptionChange}
+              onBlur={() => {
+                handleSaveCardDescription(card.id);
+                setActiveCardId(null);
               }}
-              autoFocus
             />
           ) : (
-            card.name || 'New Card (click to rename)'
+            card.desc || 'Click here to add a description...'
           )}
-                  </div>
-                  <div
-                    className={`card-description ${activeCardId === card.id ? 'active' : ''}`}
-                    onClick={() => setActiveCardId(card.id)}
-                  >
-                    {activeCardId === card.id ? (
-                      <textarea
-                        value={cardDescription}
-                        onChange={handleCardDescriptionChange}
-                        onBlur={() => {
-                          handleSaveCardDescription(card.id);
-                          setActiveCardId(null);
-                        }}
-                      />
-                    ) : (
-                      card.desc || 'Click here to add a description...'
-                    )}
-                  </div>
-                  <button className="remove-card-button" onClick={() => handleRemoveCard(card.id)} title="Remove Card"></button>
-                </div>
-              );
-            };
-          
-            const renderTrelloContent = () => {
-              if (!trelloKeys || !trelloKeys.boardId || !trelloKeys.apiKey || !trelloKeys.token) {
-                return (
-                  <div className="trello-create-list-button">
-                    Trello settings not configured. Please set the Trello board ID, API key, and token in the Settings page.
-                  </div>
-                );
-              }
-          
-              if (connectionStatus === 'failed') {
-                return (
-                  <div className="trello-create-list-button">
-                    Trello settings are incorrect. Please check the Trello board ID, API key, and token in the Settings page.
-                  </div>
-                );
-              }
-          
-              if (!trelloList) {
-                return (
-                  <div className="trello-create-list-button" onClick={handleCreateList}>
-                    Create Trello List for Asset ID: {assetID}
-                  </div>
-                );
-              }
-          
-              return (
-                <>
-                  <div className="trello-list-header">
-                    <h3>Asset ID: {assetID}</h3>
-                    <div className="header-buttons">
-                      <button className="add-card-button" onClick={() => handleAddCardToList(trelloList.id)}>
-                        Add Card
-                      </button>
-                      <button className="remove-list-button" onClick={handleRemoveList}>
-                        Remove List
-                      </button>
-                    </div>
-                  </div>
-                  <ul className="trello-card-list">
-                    {trelloCards.map((card) => (
-                      <li key={card.id} className="trello-card-item">
-                        {renderCardEditElements(card)}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              );
-            };
-          
-            return (
-              <div className="trello-tab-container">
-                {isLoading ? (
-                  <div className="spinner-container">  {}
-                    <div className="spinner"></div>
-                  </div>
-                ) : (
-                  renderTrelloContent()
-                )}
-              </div>
-            );
-          }
+        </div>
+        <button className="remove-card-button" onClick={() => handleRemoveCard(card.id)} title="Remove Card"></button>
+      </div>
+    );
+  };
+
+  const renderTrelloContent = () => {
+    if (!trelloKeys || !trelloKeys.boardId || !trelloKeys.apiKey || !trelloKeys.token) {
+      return (
+        <div className="trello-create-list-button">
+          Trello settings not configured. Please set the Trello board ID, API key, and token in the Settings page.
+        </div>
+      );
+    }
+
+    if (connectionStatus === 'failed') {
+      return (
+        <div className="trello-create-list-button">
+          Trello settings are incorrect. Please check the Trello board ID, API key, and token in the Settings page.
+        </div>
+      );
+    }
+
+    if (!trelloList) {
+      return (
+        <div className="trello-create-list-button" onClick={handleCreateList}>
+          Create Trello List for Asset ID: {assetID}
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="trello-list-header">
+          <h3>Asset ID: {assetID}</h3>
+          <div className="header-buttons">
+            <button className="add-card-button" onClick={() => handleAddCardToList(trelloList.id)}>
+              Add Card
+            </button>
+            <button className="remove-list-button" onClick={handleRemoveList}>
+              Remove List
+            </button>
+          </div>
+        </div>
+        <ul className="trello-card-list">
+          {trelloCards.map((card) => (
+            <li key={card.id} className="trello-card-item">
+              {renderCardEditElements(card)}
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  };
+
+  return (
+    <div className="trello-tab-container">
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        renderTrelloContent()
+      )}
+    </div>
+  );
+}
