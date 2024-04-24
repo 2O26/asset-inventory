@@ -7,7 +7,7 @@ export default function DocLink({ assetID }) {
     const handleSetLink = async () => {
         try {
             await SetDocLink(inputLink, assetID);
-            alert('Doc Link set successfully');x    
+            alert('Doc Link set successfully');
             setInputLink(''); // Clear the input field after setting the link
         } catch (error) {
             alert('Failed to set doc link: ' + error.message);

@@ -51,7 +51,7 @@ app.post("/setDocLink", async (req, res) => {
     }
 });
 
-app.get("/getDocLink", async (req, res) => {
+app.post("/getDocLink", async (req, res) => {
     try {
         {/**
         const response = await axios.get('http://authhandler:3003/getRoles', {
@@ -66,8 +66,8 @@ app.get("/getDocLink", async (req, res) => {
 
         const configHandler = new ConfigHandler();
         await configHandler.connect();
-        const docLink = await configHandler.getDoclink()
-        res.json({ responseFromServer: "Succeeded to get Doc Link!!", success: "success", range: req.body.setDocLink });
+        const docLink = await configHandler.getDoclink(req.body.assetID)
+        res.json({ responseFromServer: "Succeeded to get Doc Link!!", success: "success", docLink: docLink });
 
     } catch (error) {
         res.status(500).send('Error fetching doc link');
