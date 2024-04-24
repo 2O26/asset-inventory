@@ -51,6 +51,28 @@ app.post("/setDocLink", async (req, res) => {
     }
 });
 
+app.get("/getDocLink", async (req, res) => {
+    try {
+        {/**
+        const response = await axios.get('http://authhandler:3003/getRoles', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+    */}
+
+        const configHandler = new ConfigHandler();
+        await configHandler.connect();
+        const docLink = await configHandler.getDoclink()
+
+    } catch (error) {
+        res.status(500).send('Error fetching doc link');
+    }
+});
+
 app.get("/getIPranges", async (req, res) => {
     try {
         const response = await axios.get('http://authhandler:3003/getRoles', {

@@ -1,8 +1,10 @@
 // ApiServices.js
 import UserService from './UserService';
 
+//Curling this with the following command worked
+//curl -X POST -d "https://example.com/document" "http://localhost:3001/setDocLink?assetID=123"
 export const SetDocLink = async (docLink, assetID) => { //This code mostly based off of UploadCycloneDX
-    const URL = 'http://localhost:3004/setDocLink?assetID=';
+    const URL = 'http://localhost:3001/setDocLink?assetID=';
 
     try {
         const response = await fetch(URL + assetID, {
@@ -26,7 +28,7 @@ export const SetDocLink = async (docLink, assetID) => { //This code mostly based
 }
 
 export const GetDocLink = async (assetID) => {
-    const URL = 'http://localhost:3004/setDocLink?assetID=';
+    const URL = 'http://localhost:3001/setDocLink?assetID=';
 
     try {
         const response = await fetch(URL + assetID, {

@@ -20,10 +20,9 @@ class ConfigHandler {
         }
     }
 
-    async getDocLink(assetID) { 
-        const docLink = await DocLinkSchema.find().exec(); //I'm not sure what this does.
-        //I think I need to use the assetID parameter somehow to find the docLinkSchema with the corresponding assetID.
-        return docLink 
+    async getDoclink(assetID) {
+        const docLinkData = await DocLinkSchema.find({ assetID: assetID }).exec();
+        return docLinkData.docLink;
     }
 
     async connect() {
