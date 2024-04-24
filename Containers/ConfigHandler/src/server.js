@@ -255,6 +255,17 @@ app.get("/getOSSAPIkey", async (req, res) => {
     }
 })
 
+app.get("/getOSSAPIkeyInternal", async (req, res) => {
+    try {
+        const configHandler = new ConfigHandler();
+        await configHandler.connect();
+        const apikey = await configHandler.getOSSAPIkey()
+        res.json({ apikey: apikey })
+    } catch (error) {
+        res.status(500).send('Error fetching OSS API key');
+    }
+})
+
 app.post("/updateOSSAPIkey", async (req, res) => {
     try {
         const response = await axios.get('http://authhandler:3003/getUID', {
@@ -293,32 +304,32 @@ const CronTask = cron.schedule('* * * * *', async () => {
 
 app.get("/getTrelloKeys", async (req, res) => {
     try {
-      const response = await axios.get('http://authhandler:3003/getUID', { headers: { 'Authorization': req.headers.authorization } });
-      if (!response.data.authenticated) {
-        return res.status(401).send('Invalid token');
-      }
-      const configHandler = new ConfigHandler();
-      await configHandler.connect();
-      const trelloKeys = await configHandler.getTrelloKeys();
-      res.json(trelloKeys);
+        const response = await axios.get('http://authhandler:3003/getUID', { headers: { 'Authorization': req.headers.authorization } });
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+        const configHandler = new ConfigHandler();
+        await configHandler.connect();
+        const trelloKeys = await configHandler.getTrelloKeys();
+        res.json(trelloKeys);
     } catch (error) {
-      res.status(500).send('Error fetching Trello keys');
+        res.status(500).send('Error fetching Trello keys');
     }
-  });
-  
-  app.post("/updateTrelloKeys", async (req, res) => {
+});
+
+app.post("/updateTrelloKeys", async (req, res) => {
     try {
-      const response = await axios.get('http://authhandler:3003/getUID', { headers: { 'Authorization': req.headers.authorization } });
-      if (!response.data.authenticated) {
-        return res.status(401).send('Invalid token');
-      }
-      const configHandler = new ConfigHandler();
-      await configHandler.connect();
-      await configHandler.updateTrelloKeys(req.body);
-      res.json({ responseFromServer: "Succeeded to update Trello keys!", success: "success" });
+        const response = await axios.get('http://authhandler:3003/getUID', { headers: { 'Authorization': req.headers.authorization } });
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+        const configHandler = new ConfigHandler();
+        await configHandler.connect();
+        await configHandler.updateTrelloKeys(req.body);
+        res.json({ responseFromServer: "Succeeded to update Trello keys!", success: "success" });
     } catch (error) {
-      res.status(500).send('Error updating Trello keys');
+        res.status(500).send('Error updating Trello keys');
     }
-  });
+});
 
 module.exports = { app, server, CronTask };
