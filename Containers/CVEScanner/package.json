@@ -1,9 +1,9 @@
 {
-    "name": "svescanner",
+    "name": "cvescanner",
     "version": "1.0.0",
     "description": "Cve scanner. Checks if libraries have any CVE:s with score above 7.",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest --coverage --detectOpenHandles",
         "dev": "nodemon src/server.js",
         "start": "nodemon src/server.js"
     },
@@ -17,6 +17,10 @@
         "jsonwebtoken": "^9.0.2",
         "jwks-rsa": "^3.1.0",
         "node-fetch": "^3.3.2",
-        "axios": "^1.6.8"
+        "axios": "^1.6.8",
+        "supertest": "^6.3.4"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
     }
 }

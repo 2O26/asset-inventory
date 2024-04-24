@@ -107,34 +107,38 @@ class ConfigHandler {
     }
 
     async getTrelloKeys() {
-        const trelloKeys = await TrelloKeysSchema.find().exec();
-        if (trelloKeys.length === 3) { 
-          return {
-            apiKey: trelloKeys[0].apiKey,
-            token: trelloKeys[0].token,
-            boardId: trelloKeys[0].boardId
-          };
-        } else {
-          const newTrelloKeys = {
+        let trelloKeys;
+        try {
+            trelloKeys = await TrelloKeysSchema.find().exec();
+        } catch (err) {
+            console.log('Error while fetching Trello keys:', err.message);
+            throw err;  // Rethrow or handle as needed
+        }
+
+        const defaultKeys = {
             apiKey: "",
             token: "",
             boardId: ""
-          };
-          const newTrelloKeysConfig = new TrelloKeysSchema(newTrelloKeys);
-          try {
-            await newTrelloKeysConfig.save();
-          } catch (err) {
-            console.log('Error while adding Trello keys:', err.message);
-          }
-          return newTrelloKeys;
+        };
+
+        if (trelloKeys.length === 0 || (trelloKeys[0] && Object.keys(trelloKeys[0]).length !== 3)) {
+            try {
+                const newTrelloKeysConfig = new TrelloKeysSchema(defaultKeys);
+                await newTrelloKeysConfig.save();
+                return defaultKeys;
+            } catch (err) {
+                console.log('Error while adding Trello keys:', err.message);
+                throw err;  // Rethrow or handle as needed
+            }
         }
-      }
-    
-      async updateTrelloKeys(updatedTrelloKeys) {
+        return trelloKeys[0];
+    }
+
+    async updateTrelloKeys(updatedTrelloKeys) {
         try {
-          await TrelloKeysSchema.findOneAndUpdate({}, updatedTrelloKeys, { upsert: true });
+            await TrelloKeysSchema.findOneAndUpdate({}, updatedTrelloKeys, { upsert: true });
         } catch (err) {
-          console.log("Error updating Trello keys", err);
+            console.log("Error updating Trello keys", err);
         }
     }
 }
