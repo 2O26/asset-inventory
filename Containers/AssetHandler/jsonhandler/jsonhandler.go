@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -25,6 +26,7 @@ type Asset struct {
 	DateUpdated string   `json:"Updated at"`
 	Criticality int      `json:"Criticality"`
 	IP          string   `json:"IP"`
+	Hostname    string   `json:"Hostname"`
 }
 
 type networkAsset struct {
@@ -95,7 +97,7 @@ func BackToFront(assetState json.RawMessage, plugins map[string]json.RawMessage)
 	out.Relations = in.Relations
 	copyAssets(in.Assets, outAssets) //written by Gemini
 	// Check if the pluginList is already populated
-	for pluginName, _ := range in.Plugins {
+	for pluginName := range in.Plugins {
 		found := false
 		for _, existingPlugin := range out.PluginList {
 			if pluginName == existingPlugin {

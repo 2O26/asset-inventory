@@ -2,6 +2,7 @@ package dbcon_networkscan
 
 import (
 	"context"
+
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -78,13 +79,26 @@ func (m *MockDB) InsertOne(ctx context.Context, document interface{}) (*mongo.In
 	args := m.Called(ctx, document)
 	return args.Get(0).(*mongo.InsertOneResult), args.Error(1)
 }
+
 func (m *MockDB) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error) {
 	args := m.Called(ctx, filter, update)
 	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
 }
 
-// Add mock implementation for DeleteOne
 func (m *MockDB) DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
 	args := m.Called(ctx, filter)
 	return args.Get(0).(*mongo.DeleteResult), args.Error(1)
+}
+
+func (m *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
+	args := m.Called(ctx, filter, opts)
+	return args.Get(0).(*mongo.SingleResult)
+}
+func (m *MockDB) Connect(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
+	args := m.Called(ctx, opts)
+	return args.Get(0).(*mongo.Client), args.Error(1)
+}
+func (m *MockDB) Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection {
+	args := m.Called(name, opts)
+	return args.Get(0).(*mongo.Collection)
 }
