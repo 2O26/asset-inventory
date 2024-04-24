@@ -41,8 +41,8 @@ app.post("/setDocLink", async (req, res) => {
     
     const configHandler = new ConfigHandler();
     await configHandler.connect();
-    const response = await configHandler.setDocLink(req.body.setDocLink);
-    res.json({ responseFromServer: "Succeeded to add Doc Link!!", success: "success", range: req.body.setDocLink });
+    const response = await configHandler.setDocLink(req.body.docLink, req.body.assetID);
+    res.json({ responseFromServer: "Succeeded to add Doc Link!!", success: "success", range: req.body.DocLink});
 
 
     } catch (error) {

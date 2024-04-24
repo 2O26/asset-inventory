@@ -4,18 +4,18 @@ import UserService from './UserService';
 //Curling this with the following command worked
 //curl -X POST -d "https://example.com/document" "http://localhost:3001/setDocLink?assetID=123"
 export const SetDocLink = async (docLink, assetID) => { //This code mostly based off of UploadCycloneDX
-    const URL = 'http://localhost:3001/setDocLink?assetID=';
+    const URL = 'http://localhost:3001/setDocLink';
 
     try {
-        const response = await fetch(URL + assetID, {
+        const response = await fetch(URL, {
             method: 'POST',
-            body: docLink,
+            body: JSON.stringify({"docLink": docLink, "assetID": assetID})
         });
 
         if (response.ok) {
             const docLink = await response.json();
             alert('Doc Link set successfully');
-            return docLink;
+            return docLink; //This function doesn't need to return anything I think?
         } else {
             // Handle server errors or invalid responses
             const docLink = await response.json();
@@ -34,7 +34,7 @@ export const GetDocLink = async (assetID) => {
     try {
         const response = await fetch(URL + assetID, {
             method: 'GET',
-            body: assetID
+            body: JSON.stringify({"assetID": assetID})
         });
 
         if (response.ok) {

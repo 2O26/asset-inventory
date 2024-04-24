@@ -11,6 +11,7 @@ import { LeftArrow, RightArrow } from '../common/Icons/Icons';
 import { CSSTransition } from 'react-transition-group';
 import CycloneDX from './CycloneDX';
 import History from '../Tools/History/History';
+import DocLink from './DocLink';
 
 
 export default function AssetView() {
@@ -111,6 +112,12 @@ export default function AssetView() {
                         >
                             C-DX
                         </button>
+                        <button
+                            className={`tab-button ${selectedView === 'DocLink' ? 'active-button' : ''}`}
+                            onClick={() => handleButtonClick('DocLink')}
+                        >
+                            Documentation
+                        </button>
                     </div>
                     {/* Conditionally render content based on selectedView */}
                     {selectedView === 'Information' && (
@@ -126,6 +133,9 @@ export default function AssetView() {
                     }
                     {selectedView === 'CycloneDx' && (
                         <CycloneDX assetID={assetID} ></CycloneDX>)
+                    }
+                    {selectedView === 'DocLink' && (
+                        <DocLink assetID={assetID} ></DocLink>)
                     }
 
 
