@@ -15,10 +15,32 @@
     font-family: var(--jetbrains-mono);
 }
 
+.slide-enter {
+    width: 0;
+    white-space: nowrap;
+}
+
+.slide-enter-active {
+    width: 30%;
+}
+
+.slide-enter-done {
+    width: 30%;
+}
+
+.slide-exit {
+    width: 30%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.slide-exit-active {
+    width: 0;
+    overflow: hidden;
+}
 
 .react-flow {
     flex: 1;
-    transition: flex 0.5s ease-in-out;
 }
 
 .toggle-button {
@@ -52,23 +74,8 @@
 }
 
 
-.slide-enter {
-    transform: translateX(100%);
-}
 
-.slide-enter-active {
-    transform: translateX(0%);
-    transition: transform 500ms ease-in-out;
-}
 
-.slide-exit {
-    transform: translateX(0%);
-}
-
-.slide-exit-active {
-    transform: translateX(100%);
-    transition: transform 500ms ease-in-out;
-}
 
 
 
@@ -117,26 +124,30 @@
     display: flex;
     height: 100%;
     width: 100%;
+    overflow: hidden;
 }
 
 .asset-view-container {
     display: flex;
-    flex-direction: row;
-    /* transition: all 0.5s ease-in-out; */
     flex: 1;
+    flex-direction: row;
     margin: 0.5rem;
+    width: 100%;
 }
 
 
 /* Modifications for the button-plus-info container */
 .button-plus-info {
     display: flex;
+    transition: all 250ms ease-in-out;
     /* Use Flexbox for layout */
     flex-direction: column;
     margin: 0.5rem;
     margin-left: 0;
     border-radius: 0.25rem;
+    overflow: hidden;
 }
+
 
 /* Modifications for the button container */
 .button-container {
@@ -159,7 +170,7 @@
     position: relative;
     z-index: 1;
     padding: 2rem;
-    width: 25vw;
+    width: 100%;
     height: 100%;
     color: var(--text-color);
     border-radius: 0 0 0.5rem 0.5rem;

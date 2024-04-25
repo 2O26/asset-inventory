@@ -57,34 +57,32 @@ export default function History({ width = "80vw", height = "84vh", isDashboard =
 
 
     return (
-        <div className='center-flex-column' style={{ margin: (isDashboard) ? "0 0" : "1.5rem 0" }}>
-            <div className={isAssetView ? 'asset-info-container' : 'history-container'} style={{ width: width, height: height }}>
-                <div className='history-content'>
-                    {Object.values(historyData).map((value, index) => {
-                        const date = new Date(value.timestamp)
-                        const formattedDate = date.toLocaleString(countryCode, options);
-                        return (
-                            <div key={index}>
-                                <h2 style={{ marginBottom: "1rem" }}>{formattedDate}</h2>
-                                {
-                                    Object.entries(value.change).map(([key, val], index) => {
-                                        console.log("val2: ", val)
-                                        return (
-                                            val && (
-                                                <div key={index} style={{ marginLeft: "3rem" }}>
-                                                    <h3>{key}</h3>
-                                                    <JSONTree data={val} theme={theme} hideRoot />
-                                                </div>
-                                            )
+        <div className={isAssetView ? 'asset-info-container' : 'history-container'} style={{ width: width, height: height }}>
+            <div className='history-content'>
+                {Object.values(historyData).map((value, index) => {
+                    const date = new Date(value.timestamp)
+                    const formattedDate = date.toLocaleString(countryCode, options);
+                    return (
+                        <div key={index}>
+                            <h2 style={{ marginBottom: "1rem" }}>{formattedDate}</h2>
+                            {
+                                Object.entries(value.change).map(([key, val], index) => {
+                                    console.log("val2: ", val)
+                                    return (
+                                        val && (
+                                            <div key={index} style={{ marginLeft: "3rem" }}>
+                                                <h3>{key}</h3>
+                                                <JSONTree data={val} theme={theme} hideRoot />
+                                            </div>
                                         )
-                                    })
-                                }
-                            </div>
-                        )
-                    })
-                    }
-                </div>
+                                    )
+                                })
+                            }
+                        </div>
+                    )
+                })
+                }
             </div>
-        </div >
+        </div>
     )
 }

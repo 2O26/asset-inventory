@@ -210,6 +210,11 @@
     color:  rgba(255, 255, 255, 0.0);
 }
 
+.react-flow__minimap {
+    border-radius: 0.25rem;
+}
+
+
 .dark .react-flow__minimap {
     background-color: var(--selected-node);
 }

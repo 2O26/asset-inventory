@@ -328,7 +328,7 @@ export default function TrelloTab({ assetID }) {
   };
 
   return (
-    <div className="trello-tab-container">
+    <div className="asset-info-container">
       {isLoading ? (
         <LoadingSpinner />
       ) : (
