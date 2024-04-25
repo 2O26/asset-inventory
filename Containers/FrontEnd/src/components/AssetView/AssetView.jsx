@@ -69,7 +69,7 @@ export default function AssetView() {
 
 
     return (
-        <div className='asset-view-container'>
+        <div className='asset-view'>
 
             <GraphView selectedAsset={assetID} />
 
@@ -120,7 +120,7 @@ export default function AssetView() {
                     </div>
                     {/* Conditionally render content based on selectedView */}
                     {selectedView === 'Information' && (
-                        <div>
+                        <div className="asset-info">
                             <AssetInfo data={data} assetID={assetID} showPluginInfo={true} ></AssetInfo>
                         </div>)
                     }

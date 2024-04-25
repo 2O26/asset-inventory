@@ -24,14 +24,17 @@
 .toggle-button {
     color: var(--text-color);
     /* Keeps the color for the icon */
-    background: none;
+    background: var(--main-color);
     /* Removes the background */
     border: none;
+    border-radius: 0.25rem;
     /* Removes the border */
     padding: 0;
     /* Removes padding, adjust as necessary */
     cursor: pointer;
     /* Optional: Changes cursor on hover to indicate it's clickable */
+    margin: 0.5rem;
+    margin-left: 0;
 }
 
 /* If your button still has some default browser styling, you might also need */
@@ -110,27 +113,29 @@
     /* box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15); */
 }
 
+.asset-view {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
 .asset-view-container {
-    width: 100vw;
-    padding: 0.5rem;
     display: flex;
     flex-direction: row;
     /* transition: all 0.5s ease-in-out; */
     flex: 1;
-    overflow-y: auto;
+    margin: 0.5rem;
 }
+
 
 /* Modifications for the button-plus-info container */
 .button-plus-info {
     display: flex;
     /* Use Flexbox for layout */
     flex-direction: column;
-    /* Arrange elements vertically */
-    align-items: center;
-    /* Center the elements horizontally */
-    max-width: 50%;
-    /* Make it occupy full width */
-    height: 100%;
+    margin: 0.5rem;
+    margin-left: 0;
+    border-radius: 0.25rem;
 }
 
 /* Modifications for the button container */
@@ -139,11 +144,13 @@
     /* Use Flexbox for button layout */
     justify-content: space-between;
     /* Distribute buttons with equal spacing */
-    margin-bottom: 20px;
     /* Add spacing below buttons */
-    width: 25vw;
     gap: 0px;
-    margin-top: 20px;
+}
+
+.asset-info{
+    display: flex;
+    width: 100%;
 }
 
 .asset-info-container {
@@ -151,7 +158,6 @@
     flex-direction: column;
     position: relative;
     z-index: 1;
-    margin: 2rem;
     padding: 2rem;
     width: 25vw;
     height: 100%;
@@ -160,8 +166,8 @@
     background-color: var(--main-color);
     box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);
     overflow-y: auto;
-    margin-top: -21px;
     border-top: none;
+    margin: 0;
 }
 
 .asset-info-container p {
