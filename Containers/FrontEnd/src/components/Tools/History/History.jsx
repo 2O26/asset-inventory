@@ -43,7 +43,6 @@ export default function History({ width = "80vw", height = "84vh", isDashboard =
         queryFn: () => GetHistory(assetID),
         enabled: true
     });
-    console.log("data: ", historyData)
 
     useEffect(() => {
         refetch()
@@ -68,7 +67,6 @@ export default function History({ width = "80vw", height = "84vh", isDashboard =
                                 <h2 style={{ marginBottom: "1rem" }}>{formattedDate}</h2>
                                 {
                                     Object.entries(value.change).map(([key, val], index) => {
-                                        console.log("val2: ", val)
                                         return (
                                             val && (
                                                 <div key={index} style={{ marginLeft: "3rem" }}>

@@ -192,7 +192,6 @@ export default function GraphView({ width = '100vw', height = '90vh', selectedAs
 
     // const parsedState = ParseState(jsonData, selectedAsset);
 
-
     return (
         <div style={{ width: width, height: height }}>
             {parsedState ?
