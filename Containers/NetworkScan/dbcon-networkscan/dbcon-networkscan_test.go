@@ -2,12 +2,49 @@ package dbcon_networkscan
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var testScan = Scan{
+	StateID:     "",
+	DateCreated: "2024-04-25 11:33:31",
+	DateUpdated: "2024-04-25 11:33:36",
+	State: map[string]Asset{
+		"47716233453240327": {
+			IPv4Addr:  "192.168.1.12",
+			OpenPorts: []int{},
+			ScanType:  "simple",
+			Status:    "up",
+			Subnet:    "192.168.1.0/24",
+			UID:       "47716233453240327",
+		},
+		"47716233537126407": {
+			IPv4Addr:  "192.168.1.115",
+			OpenPorts: []int{},
+			ScanType:  "simple",
+			Status:    "up",
+			Subnet:    "192.168.1.0/24",
+			UID:       "47716233537126407",
+		},
+		"47716234560536583": {
+			IPv4Addr:  "192.168.1.58",
+			OpenPorts: []int{},
+			ScanType:  "simple",
+			Status:    "up",
+			Subnet:    "192.168.1.0/24",
+			UID:       "47716234560536583",
+		},
+	},
+}
 
 func TestSetupDatabase(t *testing.T) {
 	mockDB := new(MockDB)
@@ -32,37 +69,6 @@ func TestSetupDatabase(t *testing.T) {
 }
 
 func TestDeleteAsset(t *testing.T) {
-	testScan := Scan{
-		StateID:     "",
-		DateCreated: "2024-04-25 11:33:31",
-		DateUpdated: "2024-04-25 11:33:36",
-		State: map[string]Asset{
-			"47716233453240327": {
-				IPv4Addr:  "192.168.1.12",
-				OpenPorts: []int{},
-				ScanType:  "simple",
-				Status:    "up",
-				Subnet:    "192.168.1.0/24",
-				UID:       "47716233453240327",
-			},
-			"47716233537126407": {
-				IPv4Addr:  "192.168.1.115",
-				OpenPorts: []int{},
-				ScanType:  "simple",
-				Status:    "up",
-				Subnet:    "192.168.1.0/24",
-				UID:       "47716233537126407",
-			},
-			"47716234560536583": {
-				IPv4Addr:  "192.168.1.58",
-				OpenPorts: []int{},
-				ScanType:  "simple",
-				Status:    "up",
-				Subnet:    "192.168.1.0/24",
-				UID:       "47716234560536583",
-			},
-		},
-	}
 
 	testCases := []struct {
 		name         string
@@ -108,4 +114,24 @@ func TestDeleteAsset(t *testing.T) {
 			mockDB.AssertExpectations(t)
 		})
 	}
+}
+
+// TODO: More cases
+func TestGetLatestScan(t *testing.T) {
+	mockDB := new(MockDB)
+	mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan, nil, nil))
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	GetLatestScan(mockDB, c)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	expectedBody := testScan
+	var actualBody Scan
+	err := json.Unmarshal(w.Body.Bytes(), &actualBody)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedBody, actualBody)
+
+	mockDB.AssertExpectations(t)
 }
