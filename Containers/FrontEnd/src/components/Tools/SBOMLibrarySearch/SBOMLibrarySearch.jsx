@@ -37,6 +37,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
     const [filteredLibraries, setFilteredLibraries] = useState([]);
     const [visibilityStates, setVisibilityStates] = useState({});
     const [onlyVulnerable, setOnlyVulnerable] = useState(false);
+    const [vulnerableCVECount, setVulnerableCVECount] = useState(0);
 
     const { data: libraryData, isLoading: libraryLoading, isError: isErrorLibrary, error: libraryError, refetch: refetchLibraries } = useQuery({
         queryKey: ['SBOM libraries'],
@@ -84,22 +85,25 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
     }
 
 
-
     useEffect(() => {
         if (libraryData && libraryData.libraries) {
+            let count = 0; // Initialize a counter for vulnerable components
             const newFilteredComponents = libraryData.libraries.filter(component => {
-                // Check if the component matches the search term
                 const matchesSearch = searchTerm === '' || component.name.toLowerCase().includes(searchTerm.toLowerCase());
 
-                // Further filter by vulnerability if onlyVulnerable is true
+                // Check if the component is vulnerable
+                const hasVulnerability = component.CVE && component.CVE[0];
+                if (hasVulnerability) {
+                    count++;
+                }
                 if (onlyVulnerable) {
-                    const hasVulnerability = component.CVE && component.CVE[0];
                     return hasVulnerability && matchesSearch;
                 } else {
                     return matchesSearch;
                 }
             });
             setFilteredLibraries(newFilteredComponents);
+            setVulnerableCVECount(count); // Update the state with the count of vulnerable components
         }
     }, [libraryData, searchTerm, onlyVulnerable]);
 
@@ -130,6 +134,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                     <div className='SBOM-search-container'>
                         <div className='SBOM-top-row'>
                             <SearchBar onSearch={setSearchTerm} />
+                            <p style={{ textAlign: "left", width: "100%", marginLeft: "4.5rem", marginBottom: "1.5rem", color: "red" }} className='text-desc'>Vulnerable libraries: {vulnerableCVECount}</p>
                             <label className='range-checkbox-label' style={{ marginRight: "auto" }}>
                                 <p className='text-desc'>Show only vulnerable libraries</p>
                                 <input
