@@ -31,39 +31,81 @@ func TestSetupDatabase(t *testing.T) {
 	mockDB.AssertExpectations(t)
 }
 
-// func TestDeleteAsset(t *testing.T) {
-// 	mockDB := new(MockDB)
-// 	ctx := context.TODO()
+func TestDeleteAsset(t *testing.T) {
+	testScan := Scan{
+		StateID:     "",
+		DateCreated: "2024-04-25 11:33:31",
+		DateUpdated: "2024-04-25 11:33:36",
+		State: map[string]Asset{
+			"47716233453240327": {
+				IPv4Addr:  "192.168.1.12",
+				OpenPorts: []int{},
+				ScanType:  "simple",
+				Status:    "up",
+				Subnet:    "192.168.1.0/24",
+				UID:       "47716233453240327",
+			},
+			"47716233537126407": {
+				IPv4Addr:  "192.168.1.115",
+				OpenPorts: []int{},
+				ScanType:  "simple",
+				Status:    "up",
+				Subnet:    "192.168.1.0/24",
+				UID:       "47716233537126407",
+			},
+			"47716234560536583": {
+				IPv4Addr:  "192.168.1.58",
+				OpenPorts: []int{},
+				ScanType:  "simple",
+				Status:    "up",
+				Subnet:    "192.168.1.0/24",
+				UID:       "47716234560536583",
+			},
+		},
+	}
 
-// 	// Correcting the mock setup for FindOne to use the right options type
-// 	findOneOptions := options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})
-// 	mockDB.On("FindOne", ctx, bson.D{}, findOneOptions).Return(mock.Anything, nil).Once()
+	testCases := []struct {
+		name         string
+		assetIDs     []string
+		mockSetup    func(*MockDB)
+		expectError  bool
+		errorMessage string
+	}{
+		{
+			name:     "Asset Not Found",
+			assetIDs: []string{"nonexistentID"},
+			mockSetup: func(db *MockDB) {
+				db.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan, nil, nil))
+				db.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
+			},
+			expectError: false,
+		},
+		{
+			name:     "Asset Deleted Successfully",
+			assetIDs: []string{"47716233453240327"},
+			mockSetup: func(db *MockDB) {
+				db.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan, nil, nil))
+				db.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{InsertedID: "mockID"}, nil)
+			},
+			expectError: false,
+		},
+	}
 
-// 	// Simulate a scenario where the FindOne method successfully retrieves a scan
-// 	sampleScan := Scan{
-// 		StateID: "scanExample",
-// 		State: map[string]Asset{
-// 			"asset1": {UID: "asset1"},
-// 			"asset2": {UID: "asset2"},
-// 			"asset3": {UID: "asset3"}, // This asset should remain after others are deleted
-// 		},
-// 	}
-// 	mockDB.On("FindOne", ctx, bson.D{}, findOneOptions).Return(sampleScan, nil)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			mockDB := new(MockDB)
+			tc.mockSetup(mockDB)
 
-// 	// Simulating the InsertOne call which should happen after deletion
-// 	mockDB.On("InsertOne", ctx, mock.AnythingOfType("Scan")).Return(nil).Once()
+			err := DeleteAsset(mockDB, tc.assetIDs)
 
-// 	assetIDs := []string{"asset1", "asset2"}
-// 	err := DeleteAsset(mockDB, assetIDs)
-// 	assert.NoError(t, err)
+			if tc.expectError {
+				assert.Error(t, err)
+				assert.Equal(t, tc.errorMessage, err.Error())
+			} else {
+				assert.NoError(t, err)
+			}
 
-// 	// Assertions to check if the unwanted assets were deleted
-// 	_, ok1 := sampleScan.State["asset1"]
-// 	_, ok2 := sampleScan.State["asset2"]
-// 	assert.False(t, ok1)
-// 	assert.False(t, ok2)
-// 	assert.Contains(t, sampleScan.State, "asset3")
-
-// 	// Assert all expectations were met
-// 	mockDB.AssertExpectations(t)
-// }
+			mockDB.AssertExpectations(t)
+		})
+	}
+}
