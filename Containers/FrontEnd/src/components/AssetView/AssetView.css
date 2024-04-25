@@ -1,5 +1,3 @@
-.asset-view-container,
-
 .asset-info-container {
     text-align: left;
     font-family: var(--jetbrains-mono);
@@ -9,7 +7,7 @@
     /* Ensures everything is aligned to the left */
 }
 .asset-name {
-    font-family: var(--ysabeau-office);
+    font-family: var(--gidole);
 }
 
 .asset-item-list {
@@ -114,10 +112,12 @@
 
 .asset-view-container {
     width: 100vw;
-    height: 90vh;
+    padding: 0.5rem;
     display: flex;
     flex-direction: row;
     /* transition: all 0.5s ease-in-out; */
+    flex: 1;
+    overflow-y: auto;
 }
 
 /* Modifications for the button-plus-info container */
@@ -130,6 +130,7 @@
     /* Center the elements horizontally */
     max-width: 50%;
     /* Make it occupy full width */
+    height: 100%;
 }
 
 /* Modifications for the button container */
@@ -211,8 +212,11 @@
 }
 
 .asset-info-container h1 {
-    font-family: "Ysabeau Office", sans-serif;
+    font-family: var(--gidole);
+    font-kerning: none;
+    letter-spacing: 0.5px;
     font-size: 30px;
+    font-weight: bolder;
     margin-bottom: 0.5rem;
 }
 

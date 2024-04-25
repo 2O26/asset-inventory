@@ -18,11 +18,23 @@
     src: url("../../fonts/YsabeauOffice-VariableFont_wght.ttf") format('truetype');
 }
 
+@font-face {
+    font-family: 'Gidole';
+    src: url("../../fonts/Gidole-Regular.ttf") format('truetype');
+}
+
+#root {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 :root {
     --inter : 'Inter', sans-serif;
     --ysabeau-office : 'Ysabeau Office', sans-serif;
     --jetbrains-mono : 'JetBrains Mono', monospace;
     --jetbrains-mono-italic : 'JetBrains Mono Italic', monospace;
+    --gidole : 'Gidole', sans-serif;
 }
 
 .errorMessage,

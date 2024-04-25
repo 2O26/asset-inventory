@@ -108,6 +108,7 @@ function App() {
         <Route path="/tools/pdf-download" element={<PDFDownload />} />
         {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
       </Routes>
+
     </BrowserRouter>
   );
 }
