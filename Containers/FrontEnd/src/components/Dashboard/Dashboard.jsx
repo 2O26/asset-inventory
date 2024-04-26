@@ -25,6 +25,11 @@ export default function Dashboard() {
         enabled: true
     });
 
+    const combinedTools = tools75by50.map((key, index) => ({
+        tool75: key,
+        tool25: tools25by50[index],
+    }));
+
     useEffect(() => {
         if (userSettingData) {
             setTools25by50(userSettingData.userSettings[0].rightDash);
@@ -33,23 +38,24 @@ export default function Dashboard() {
     }, [userSettingData])
 
     return (
-        <div className='dashboard-container' >
-            <div className='container-75-50'>
-                {tools75by50.map((key, index) => (
-                    <div key={index} className='item-75-50'>
-                        <h3 className='item-header-ds'>{dashboardTools({ size: 24 })[key].icon} {key} </h3>
-                        {dashboardTools({ width: "68vw", height: "60vh" })[key].component}
+        <div className='dashboard-container'>
+            {combinedTools.map((item, index) => (
+                <div key={index} className="container-50-height">
+                    <div className="dashboard-tool-container-75">
+                        <h3 className='item-header-ds'>
+                            {dashboardTools({size: 24})[item.tool75].icon} {item.tool75}
+                        </h3>
+                        {dashboardTools({width: "68vw", height: "60vh"})[item.tool75].component}
                     </div>
-                ))}
-            </div>
-            <div className='container-25-50'>
-                {tools25by50.map((key, index) => (
-                    <div key={index} className='item-25-50'>
-                        <h3 className='item-header-ds' >{dashboardTools({ size: 24 })[key].icon} {key} </h3>
-                        {dashboardTools({ width: "26vw", height: "60vh" })[key].component}
+                    <div className="dashboard-tool-container-25">
+                        <h3 className='item-header-ds'>
+                            {dashboardTools({size: 24})[item.tool25].icon} {item.tool25}
+                        </h3>
+                        {dashboardTools({width: "26vw", height: "60vh"})[item.tool25].component}
                     </div>
-                ))}
-            </div>
+
+                </div>
+            ))}
         </div>
     )
 }

@@ -16,7 +16,7 @@ COPY ./bom.xml ./bom.xml
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
 
 # Build step 3: Deploy the compiled binaries to a barebone container
-FROM alpine:latest
+FROM debian
 RUN apk --no-cache add ca-certificates
 WORKDIR /app/
 COPY ./bom.json ./bom.json
