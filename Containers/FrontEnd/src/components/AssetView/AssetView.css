@@ -15,6 +15,11 @@
     font-family: var(--jetbrains-mono);
 }
 
+
+.slide-appear {
+    width: 30%;
+}
+
 .slide-enter {
     width: 0;
     white-space: nowrap;

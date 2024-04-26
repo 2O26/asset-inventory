@@ -83,6 +83,7 @@ export default function AssetView() {
             </button>
             <CSSTransition
                 in={isExpanded}
+                appear={isExpanded}
                 timeout={250} // Match the duration of your CSS transition
                 classNames="slide"
                 unmountOnExit
