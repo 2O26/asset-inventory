@@ -50,6 +50,7 @@ export default function Dashboard() {
                             {dashboardTools()[item.tool75].component}
                         </div>
                     </div>
+                    {item.tool25 ?
                     <div className="dashboard-tool-container-25">
                         <h3 className='item-header-ds'>
                             {dashboardTools({size: 24})[item.tool25].icon} {item.tool25}
@@ -58,6 +59,7 @@ export default function Dashboard() {
                             {dashboardTools()[item.tool25].component}
                         </div>
                     </div>
+                        : null}
                 </div>
             ))}
         </div>

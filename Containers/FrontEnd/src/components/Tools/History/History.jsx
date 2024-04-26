@@ -36,7 +36,7 @@ const options = {
 
 const countryCode = 'en-SE'
 
-export default function History({ width = "80vw", height = "84vh", isDashboard = false, isAssetView = false, assetID = null }) {
+export default function History({ width, height , isDashboard = false, isAssetView = false, assetID = null }) {
 
     const { data: historyData, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['getHistory'],
@@ -52,12 +52,12 @@ export default function History({ width = "80vw", height = "84vh", isDashboard =
     if (isLoading) return <LoadingSpinner />;
     if (isError) return <div className='errorMessage'> {error.message}</div>;
     if (isAssetView && !historyData) return <div className='asset-info-container'> <div className='errorMessage'> This asset has no hisotry</div></div>;
-    if (!historyData) return <div className='errorMessage'> No hisotry</div>;
+    if (!historyData) return <div className='errorMessage'> No history</div>;
 
 
 
     return (
-        <div className={isAssetView ? 'asset-info-container' : 'history-container'} style={{ width: width, height: height }}>
+        <div className={isAssetView ? 'asset-info-container' : 'page-container'} style={{ width: width, height: height }}>
             <div className='history-content'>
                 {Object.values(historyData).map((value, index) => {
                     const date = new Date(value.timestamp)

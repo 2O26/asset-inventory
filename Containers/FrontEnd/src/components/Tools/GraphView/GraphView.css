@@ -115,8 +115,7 @@
 }
 
 .react-flow__node-turbo .title {
-    font-family: var(--gidole);
-    font-weight: bold;
+    font-weight: 600;
     font-kerning: none;
     letter-spacing: 0.5px;
     font-size: 16px;

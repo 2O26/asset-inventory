@@ -6,9 +6,6 @@
     text-align: left;
     /* Ensures everything is aligned to the left */
 }
-.asset-name {
-    font-family: var(--gidole);
-}
 
 .asset-item-list {
     /* applies font on list entry */
@@ -234,7 +231,6 @@
 }
 
 .asset-info-container h1 {
-    font-family: var(--gidole);
     font-kerning: none;
     letter-spacing: 0.5px;
     font-size: 30px;

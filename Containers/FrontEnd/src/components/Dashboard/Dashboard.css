@@ -21,7 +21,6 @@
     border-radius: 0.25rem;
     height: 100%;
     width: 100%;
-    margin-right: 0.5rem;
     overflow: auto;
 }
 
@@ -34,6 +33,7 @@
     height: 100%;
     width: 100%;
     overflow: auto;
+    margin-left: 0.5rem;
 }
 .tool-component{
     flex: 1;
