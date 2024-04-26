@@ -28,6 +28,15 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+}
+
+/*This ensures that the taskbar is always at the top*/
+.page-content{
+    align-items: flex-start;
+    overflow: auto;
+    display: flex;
+    flex: 1;
 }
 
 :root {
@@ -176,4 +185,20 @@ hr {
     bottom: auto;
     margin-right: -50%;
     transform: translate(-50%, -50%);
+}
+
+.SearchBar {
+    margin: 0.5rem;
+    width: 600px;
+    height: 60px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: var(--main-color);
+    border: 1px solid var(--text-color);
+    /* Changed border to a solid color */
+    border-radius: 30px;
+    display: flex;
+    /* Added */
+    align-items: center;
+    /* Added */
 }

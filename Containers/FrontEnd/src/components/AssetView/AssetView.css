@@ -56,12 +56,11 @@
     border: none;
     border-radius: 0.25rem;
     /* Removes the border */
-    padding: 0;
+    margin: 0.5rem;
+    margin-left: 0;
     /* Removes padding, adjust as necessary */
     cursor: pointer;
     /* Optional: Changes cursor on hover to indicate it's clickable */
-    margin: 0.5rem;
-    margin-left: 0;
 }
 
 /* If your button still has some default browser styling, you might also need */
@@ -133,21 +132,22 @@
 }
 
 .asset-view-container {
+    padding: 0.5rem;
     display: flex;
     flex: 1;
-    flex-direction: row;
-    margin: 0.5rem;
+    flex-direction: column;
+    height: 100%;
 }
 
 
 /* Modifications for the button-plus-info container */
 .button-plus-info {
+    margin: 0.5rem;
+    margin-left: 0;
     display: flex;
     transition: all 250ms ease-in-out;
     /* Use Flexbox for layout */
     flex-direction: column;
-    margin: 0.5rem;
-    margin-left: 0;
     border-radius: 0.25rem;
     overflow: hidden;
 }
@@ -170,6 +170,7 @@
 
 .asset-info-container {
     display: flex;
+    flex: 1;
     flex-direction: column;
     position: relative;
     z-index: 1;

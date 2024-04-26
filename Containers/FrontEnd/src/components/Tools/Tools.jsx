@@ -13,7 +13,7 @@ import RenderOnRole from '../ProtectedRoutes/RenderOnRole.jsx';
 import IssueBoard from './IssueBoard/IssueBoard';
 import SBOMLibrarySearch from './SBOMLibrarySearch/SBOMLibrarySearch.jsx';
 
-export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = {}) => (
+export const dashboardTools = ({ size = 60, width = "100%", height = "100%" } = {}) => (
     {
         "Asset List": {
             "icon": <AssetListIcon size={size} />,

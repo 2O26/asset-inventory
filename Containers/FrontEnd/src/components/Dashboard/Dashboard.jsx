@@ -3,6 +3,7 @@ import './Dashboard.css'
 import { dashboardTools } from '../Tools/Tools.jsx'
 import { SaveUserSetting, GetUserSettings } from '../Services/ApiService.js';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import {components} from "react-select";
 
 export default function Dashboard() {
     const [tools25by50, setTools25by50] = useState(["Asset List", "Graph View", "Asset List"]);
@@ -45,15 +46,18 @@ export default function Dashboard() {
                         <h3 className='item-header-ds'>
                             {dashboardTools({size: 24})[item.tool75].icon} {item.tool75}
                         </h3>
-                        {dashboardTools({width: "68vw", height: "60vh"})[item.tool75].component}
+                        <div className="tool-component">
+                            {dashboardTools()[item.tool75].component}
+                        </div>
                     </div>
                     <div className="dashboard-tool-container-25">
                         <h3 className='item-header-ds'>
                             {dashboardTools({size: 24})[item.tool25].icon} {item.tool25}
                         </h3>
-                        {dashboardTools({width: "26vw", height: "60vh"})[item.tool25].component}
+                        <div className="tool-component">
+                            {dashboardTools()[item.tool25].component}
+                        </div>
                     </div>
-
                 </div>
             ))}
         </div>

@@ -108,39 +108,41 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
     if (isError) return <div className='errorMessage'>{error.message}</div>;
 
     return (
+
         <div className='page-container'>
             {!isDashboard && <div><SearchBar onSearch={setSearchTerm} /></div>}
-            <div className='asset-list-container' style={{ width: width, height: height }}>
-                <div className='headerRow'>
-                    {data && getColumnHeaders(data, isNarrowView, isDashboard).map(header => (
-                        <div key={header} className={`headerCell ${header === 'Select' ? 'checkbox-header' : ''}`}>
-                            {header}
-                        </div>
-                    ))}
-                </div>
-                <hr />
-                {filteredAssets.map(([key, value]) => (
-                    <div key={key} className='assetRow' id={key}>
-                        {(!isNarrowView && !isDashboard) && (
-                            <div className='assetCell'>
-                                <input
-                                    type="checkbox"
-                                    checked={checkedItems[key] || false}
-                                    onChange={() => handleCheckboxChange(key)}
-                                />
-                            </div>
-                        )}
-                        {Object.keys(value.properties).filter(header => !isNarrowView || NarrowList.includes(header)).map((header, headerIndex) => (
-                            <div
-                                key={headerIndex}
-                                className='assetCell'
-                                onClick={() => handleClick(key)}
-                            >
-                                {header === "Type" ? value.properties[header][0] : value.properties[header]}
+
+                <div className='asset-list-container' style={{ width: width, height: height }}>
+                    <div className='headerRow'>
+                        {data && getColumnHeaders(data, isNarrowView, isDashboard).map(header => (
+                            <div key={header} className={`headerCell ${header === 'Select' ? 'checkbox-header' : ''}`}>
+                                {header}
                             </div>
                         ))}
                     </div>
-                ))}
+                    <hr />
+                    {filteredAssets.map(([key, value]) => (
+                        <div key={key} className='assetRow' id={key}>
+                            {(!isNarrowView && !isDashboard) && (
+                                <div className='assetCell'>
+                                    <input
+                                        type="checkbox"
+                                        checked={checkedItems[key] || false}
+                                        onChange={() => handleCheckboxChange(key)}
+                                    />
+                                </div>
+                            )}
+                            {Object.keys(value.properties).filter(header => !isNarrowView || NarrowList.includes(header)).map((header, headerIndex) => (
+                                <div
+                                    key={headerIndex}
+                                    className='assetCell'
+                                    onClick={() => handleClick(key)}
+                                >
+                                    {header === "Type" ? value.properties[header][0] : value.properties[header]}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
             </div>
             {!isDashboard &&
                 <div className='actions-container'>

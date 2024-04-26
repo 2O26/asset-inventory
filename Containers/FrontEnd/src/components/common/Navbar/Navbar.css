@@ -8,6 +8,8 @@
     padding: 0.5rem;
     box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);
     justify-content: space-between;
+    /*taskbar will be shown above all else*/
+    z-index: 10;
 }
 
 .taskbar {
