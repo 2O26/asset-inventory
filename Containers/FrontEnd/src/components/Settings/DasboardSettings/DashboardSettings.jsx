@@ -85,7 +85,7 @@ export default function DashboardSettings() {
         <div className='center-flex-column'>
             <div className='dashboard-settings-container'>
                 <div className='pligin-dasb-lst'>
-                    <h3> Left Side 4:1</h3>
+                    <h3>Main</h3>
                     {Object.entries(leftLst).map(([key, value], index) => (
                         <div key={index} className='pligin-list-row'>
                             <div>{key}</div>
@@ -95,22 +95,20 @@ export default function DashboardSettings() {
                                 onChange={(e) => handleLeftInputChange(key, e.target.value)}
                                 placeholder='0'
                                 min={0}
-                                max={Object.keys(leftLst).length}
                             />
                         </div>
                     ))}
                 </div>
                 <div className='pligin-dasb-lst'>
-                    <h3> Right Side 1:3</h3>
+                    <h3>Secondary</h3>
                     {Object.entries(rightLst).map(([key, value], index) => (
                         <div key={index} className='pligin-list-row'>
                             <div>{key}</div>
                             <input className='input-nr'
-                                type="number"
-                                value={value}
-                                onChange={(e) => handleRightInputChange(key, e.target.value)}
-                                min={0}
-                                max={Object.keys(rightLst).length}
+                                   type="number"
+                                   value={value}
+                                   onChange={(e) => handleRightInputChange(key, e.target.value)}
+                                   min={0}
                             />
                         </div>
                     ))}
@@ -121,7 +119,7 @@ export default function DashboardSettings() {
                 <p>1+: will display in decending order</p>
 
             </div>
-            {isPending && <LoadingSpinner />}
+            {isPending && <LoadingSpinner/>}
             {isError && <div className='errorMessage'>{error.message}</div>}
             {showButtons &&
                 <div className='standard-button-container'>

@@ -36,7 +36,7 @@ const options = {
 
 const countryCode = 'en-SE'
 
-export default function History({ width = "80vw", height = "84vh", isDashboard = false, isAssetView = false, assetID = null }) {
+export default function History({ width, height , isDashboard = false, isAssetView = false, assetID = null }) {
 
     const { data: historyData, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['getHistory'],
@@ -51,38 +51,42 @@ export default function History({ width = "80vw", height = "84vh", isDashboard =
     if (isLoading) return <LoadingSpinner />;
     if (isError) return <div className='errorMessage'> {error.message}</div>;
     if (isAssetView && !historyData) return <div className='asset-info-container'> <div className='errorMessage'> This asset has no hisotry</div></div>;
-    if (!historyData) return <div className='errorMessage'> No hisotry</div>;
-
-
+    if (!historyData) return <div className='errorMessage'> No history</div>;
+    let divName = 'history-container'
+    if (isAssetView) {
+        divName = 'asset-info-container'
+    } else if (isDashboard) {
+        divName = 'page-container'
+    }
 
     return (
-        <div className='center-flex-column' style={{ margin: (isDashboard) ? "0 0" : "1.5rem 0" }}>
-            <div className={isAssetView ? 'asset-info-container' : 'history-container'} style={{ width: width, height: height }}>
-                <div className='history-content'>
-                    {Object.values(historyData).map((value, index) => {
-                        const date = new Date(value.timestamp)
-                        const formattedDate = date.toLocaleString(countryCode, options);
-                        return (
-                            <div key={index}>
-                                <h2 style={{ marginBottom: "1rem" }}>{formattedDate}</h2>
-                                {
-                                    Object.entries(value.change).map(([key, val], index) => {
-                                        return (
-                                            val && (
-                                                <div key={index} style={{ marginLeft: "3rem" }}>
-                                                    <h3>{key}</h3>
-                                                    <JSONTree data={val} theme={theme} hideRoot />
-                                                </div>
-                                            )
+        <div className={divName} style={{ width: width, height: height }}>
+            <div className={isDashboard ? "history-content-dashboard" : "history-content"}>
+                {Object.values(historyData).map((value, index) => {
+                    const date = new Date(value.timestamp)
+                    const formattedDate = date.toLocaleString(countryCode, options);
+                    return (
+                        <div key={index}>
+                            <h2 style={{ marginBottom: "1rem" }}>{formattedDate}</h2>
+                            {
+                                Object.entries(value.change).map(([key, val], index) => {
+                                    console.log("val2: ", val)
+                                    return (
+                                        val && (
+                                            <div key={index} style={{ marginLeft: "3rem" }}>
+                                                <h3>{key}</h3>
+                                                <JSONTree data={val} theme={theme} hideRoot />
+                                            </div>
+
                                         )
-                                    })
-                                }
-                            </div>
-                        )
-                    })
-                    }
-                </div>
+                                    )
+                                })
+                            }
+                        </div>
+                    )
+                })
+                }
             </div>
-        </div >
+        </div>
     )
 }

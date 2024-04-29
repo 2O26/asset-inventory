@@ -13,7 +13,7 @@ import RenderOnRole from '../ProtectedRoutes/RenderOnRole.jsx';
 import IssueBoard from './IssueBoard/IssueBoard';
 import SBOMLibrarySearch from './SBOMLibrarySearch/SBOMLibrarySearch.jsx';
 
-export const dashboardTools = ({ size = 60, width = "100%", height = "50vh" } = {}) => (
+export const dashboardTools = ({ size = 60, width = "100%", height = "100%" } = {}) => (
     {
         "Asset List": {
             "icon": <AssetListIcon size={size} />,
@@ -45,34 +45,34 @@ export default function Tools() {
                 <div className="view-tool-objects">
                     <button className='button-tool' onClick={() => navigate("/tools/asset-list")}>
                         <AssetListIcon size={60} />
-                        <div> Asset List</div>
+                        <div className='tool-lable'> Asset List</div>
                     </button>
                     <button className='button-tool' onClick={() => navigate("/tools/graph-view")}>
                         <GraphIcon size={60} />
-                        <div> Graph View</div>
+                        <div className='tool-lable'> Graph View</div>
                     </button>
                     <button className='button-tool' onClick={() => navigate("/tools/history")}>
                         <HistoryIcon size={60} />
-                        <div> History </div>
+                        <div className='tool-lable'> History </div>
                     </button>
                     <button className='button-tool' onClick={() => navigate("/tools/SBOMLibrarySearch")}>
                         <SBOMSearch size={60} />
-                        <div> Global SBOM library search</div>
+                        <div className='tool-lable'> Global SBOM library search</div>
                     </button>
                     <button className='button-tool' onClick={() => navigate("/tools/pdf-download")}>
                         <PDFIcon size={60} />
-                        <div> Download PDF</div>
+                        <div className='tool-lable'> Download PDF</div>
                     </button>
                     <RenderOnRole roles={['admin']}>
                         <button className='button-tool' onClick={() => RedirectToLogServer()}>
                             <LogsIcon size={60} />
-                            <div> View Logs</div>
+                            <div className='tool-lable'> View Logs</div>
                         </button>
                     </RenderOnRole>
                     <RenderOnRole roles={['admin']}>
                         <button className='button-tool' onClick={() => window.open("http://localhost:8085", "_blank")}>
                             <AdminConsoleIcon size={60} />
-                            <div> Admin Console</div>
+                            <div className='tool-lable'> Admin Console</div>
                         </button>
                     </RenderOnRole>
                     <IssueBoard />
@@ -86,7 +86,7 @@ export default function Tools() {
                 <div className="scan-tool-objects">
                     <button className='button-tool' onClick={() => navigate("/tools/network-scan")}>
                         <IpScannerIcon size={55} />
-                        <div> Network Scanner</div>
+                        <div className='tool-lable'> Network Scanner</div>
                     </button>
                     {/* <button className='button-tool' onClick={() => navigate("/tools/mac-scan")}>
                         <MacScannerIcon size={65} />

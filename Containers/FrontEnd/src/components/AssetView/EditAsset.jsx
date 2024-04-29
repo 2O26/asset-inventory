@@ -105,6 +105,7 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
 
     return (
         <div className='asset-info-container'>
+            <div className="inputLabel">Asset ID</div>
             <h1 style={{ marginBottom: "1rem" }}>{assetID}</h1>
             <form onSubmit={handleSubmit}>
 
@@ -188,20 +189,38 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
                                             {key === "from" || key === "to" ? (
                                                 <Select
                                                     // // If you want to style the select box here is wher you edit: https://react-select.com/styles
-                                                    // styles={{
-                                                    //     control: (baseStyles, state) => ({
-                                                    //         ...baseStyles,
-                                                    //         marginTop: "0.5rem",
-                                                    //         borderStyle: 'none',
-                                                    //         background: 'var(--background-color)',
-                                                    //     }),
-                                                    //     option: (baseStyles, state) => ({
-                                                    //         ...baseStyles,
-                                                    //         backgroundColor: 'var(--background-color)',
-                                                    //         color: 'var(--text-color)',
-                                                    //         cursor: 'pointer',
-                                                    //     })
-                                                    // }}
+                                                    styles={{
+                                                        control: (baseStyles, state) => ({
+                                                            ...baseStyles,
+                                                            marginTop: "0.5rem",
+                                                            borderStyle: 'none',
+                                                            background: 'var(--background-color)',
+                                                            fontFamily: 'Jetbrains Mono',
+                                                        }),
+                                                        option: (baseStyles, state) => ({
+                                                            ...baseStyles,
+                                                            backgroundColor: 'var(--background-color)',
+                                                            color: 'var(--text-color)',
+                                                            cursor: 'pointer',
+                                                            fontFamily: "Jetbrains Mono"
+                                                        }),
+                                                        placeholder: (baseStyles, state) => ({
+                                                            ...baseStyles,
+                                                            backgroundColor: 'var(--background-color)',
+                                                            color: 'var(--text-color)',
+                                                            cursor: 'pointer',
+                                                            fontFamily: "Jetbrains Mono"
+                                                        }),
+                                                        singleValue: (baseStyles, state) => ({
+                                                            ...baseStyles,
+                                                            backgroundColor: 'var(--background-color)',
+                                                            color: 'var(--text-color)',
+                                                            cursor: 'pointer',
+                                                            fontFamily: "Jetbrains Mono"
+                                                        }),
+
+
+                                                    }}
                                                     value={assetIDs.find(option => option.value === value)}
                                                     onChange={(option) => setNewRelationData({ ...newRelationData, [key]: option.value })}
                                                     options={assetIDs.map(id => ({ value: id, label: id }))}

@@ -37,3 +37,33 @@
     width: 20vw;
     font-weight: 600;
 }
+
+.info-content {
+    display: none;
+    /* Style your tooltip */
+    position: absolute;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+
+}
+
+.info-icon-container:hover .info-content {
+    display: block;
+    background-color: var(--main-color);
+    box-shadow: var(--box-shadow);
+    border: 0;
+}
+
+.infoBox {
+
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--main-color);
+    /* borderRadius: '4px'; */
+    padding: 4rem;
+    /* marginTop: '8px';
+    zIndex: 1; */
+
+}

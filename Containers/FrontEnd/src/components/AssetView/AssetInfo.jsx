@@ -28,14 +28,14 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                                     {expandedLists[key] && (
                                         <ul>
                                             {value.map((item, index) => (
-                                                <li key={index} id={`${key}_${index}`} style={{ width: "fit-content", minWidth: "40%" }}> {index + 1} : {item}</li>
+                                                <li className="asset-item-list" key={index} id={`${key}_${index}`} style={{ width: "fit-content", minWidth: "40%" }}> {index + 1} : {item}</li>
                                             ))}
                                         </ul>
                                     )}
                                 </>
                             </div>) :
                             (
-                                index === 0 ? <h1 key={key} name="asset-name">{value}</h1> :
+                                index === 0 ? <h1 key={key} className="asset-name">{value}</h1> :
                                     (
                                         <div key={key} className='assetItem'>
                                             {key}: {value}
@@ -69,7 +69,7 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                                             )}
                                         </>
                                     ) : (
-                                        <span>{value}</span>
+                                        <span className="key-value">{value}</span>
                                     )}
                                 </div>
                             );

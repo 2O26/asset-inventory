@@ -125,17 +125,17 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
     }
 
     return (
-        <div className='center-flex-column' style={{ margin: (isDashboard) ? "0 0" : "2rem 0" }} >
-            <div className="SBOM-container" style={{ width: isDashboard ? width : "80vw", height: isDashboard && height }}>
+        <div className='page-container'>
+            <div className="SBOM-container">
                 {!isDashboard && <h1 style={{ color: "var(--text-color)", marginTop: "1rem 0" }}>Global library search</h1>}
                 {/* <button className='standard-button' onClick={() => handleClick()}> Console all libraries</button> */}
                 <div>
                     {/* <hr /> */}
                     <div className='SBOM-search-container'>
                         <div className='SBOM-top-row'>
-                            <SearchBar onSearch={setSearchTerm} />
-                            <p style={{ textAlign: "left", width: "100%", marginLeft: "4.5rem", marginBottom: "1.5rem", color: "red" }} className='text-desc'>Vulnerable libraries: {vulnerableCVECount}</p>
-                            <label className='range-checkbox-label' style={{ marginRight: "auto" }}>
+                            <p className='vulncount'>Vulnerable libraries: {vulnerableCVECount}</p>
+                            <SearchBar onSearch={setSearchTerm}/>
+                            <label className='range-checkbox-label' style={{marginRight: "auto", marginTop: "0.5rem"}}>
                                 <p className='text-desc'>Show only vulnerable libraries</p>
                                 <input
                                     type="checkbox"

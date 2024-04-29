@@ -93,21 +93,25 @@ function App() {
     <BrowserRouter>
       <Navbar toggleTheme={toggleTheme} />
 
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/help" element={<Help />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/tools" element={<Tools />} />
-        <Route path="/asset-view/:assetID" element={<AssetView />} />
-        <Route path="/tools/asset-list" element={<AssetList />} />
-        <Route path="/tools/graph-view" element={<GraphView />} />
-        <Route path="/tools/network-scan" element={<NetworkScan />} />
-        <Route path="/tools/history" element={<History />} />
-        <Route path="/tools/SBOMLibrarySearch" element={<SBOMLibrarySearch />} />
-        <Route path="/tools/pdf-download" element={<PDFDownload />} />
-        {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
-      </Routes>
+      <div className="page-content">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/tools" element={<Tools />} />
+          <Route path="/asset-view/:assetID" element={<AssetView />} />
+          <Route path="/tools/asset-list" element={<AssetList />} />
+          <Route path="/tools/graph-view" element={<GraphView />} />
+          <Route path="/tools/network-scan" element={<NetworkScan />} />
+          <Route path="/tools/history" element={<History />} />
+          <Route path="/tools/SBOMLibrarySearch" element={<SBOMLibrarySearch />} />
+          <Route path="/tools/pdf-download" element={<PDFDownload />} />
+          {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
+        </Routes>
+      </div>
+
+
     </BrowserRouter>
   );
 }
