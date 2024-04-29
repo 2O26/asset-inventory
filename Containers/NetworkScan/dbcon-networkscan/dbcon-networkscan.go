@@ -111,9 +111,7 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 		for assetID, asset := range currentScan.State {
 			if prevAsset.IPv4Addr == asset.IPv4Addr {
 				// IP address exists in the current scan, update the asset
-				if asset.ScanType == "extensive" {
-					// Use new ports when extensive scan
-				} else {
+				if asset.ScanType != "extensive" {
 					// Preserve ports if simple scan
 					asset.OpenPorts = prevAsset.OpenPorts
 				}
@@ -159,7 +157,7 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 	return updatedScan
 }
 
-func AddScan(db DatabaseHelper, scan Scan) {
+func AddScan(db DatabaseHelper, scan Scan) error {
 	var previousScan Scan
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
 	if err != nil {
@@ -168,25 +166,23 @@ func AddScan(db DatabaseHelper, scan Scan) {
 			scan.DateUpdated = time.Now().Format(time.RFC3339)
 			result, err := db.InsertOne(context.TODO(), scan)
 			if err != nil {
-				log.Fatalf("Could not insert scan: %s", err)
+				return fmt.Errorf("could not insert scan: %v", err)
 			}
 			log.Printf("OK!, %v", result)
-			return
+			return nil
 		}
-		log.Printf("Failed to retrieve the latest scan: %v", err)
-		return
+		return fmt.Errorf("failed to retrieve the latest scan: %v", err)
 	}
 
 	updatedScan := compareScanStates(scan, previousScan)
 	updatedScan.DateUpdated = time.Now().Format(time.RFC3339)
 	result, err := db.InsertOne(context.TODO(), updatedScan)
-
 	if err != nil {
-		log.Fatalf("Could not insert scan: %s", err)
+		return fmt.Errorf("could not insert scan: %v", err)
 	}
 	log.Printf("OK!, %v", result)
+	return nil
 }
-
 func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 	var scan Scan
 	// Find the latest scan based on the mostRecentUpdate field
@@ -204,131 +200,6 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 
 	c.JSON(http.StatusOK, scan)
 }
-
-// func test() {
-// 	scan1 := Scan{
-// 		StateID:     "",
-// 		DateCreated: "2024-04-03 17:28:24",
-// 		DateUpdated: "2024-04-03 17:36:34",
-// 		State: map[string]Asset{
-// 			"3403275042825": {
-// 				Status:    "down",
-// 				IPv4Addr:  "192.168.39.1",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3816296546313": {
-// 				Status:    "down",
-// 				IPv4Addr:  "192.168.39.125",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3823024209929": {
-// 				Status:    "down",
-// 				IPv4Addr:  "192.168.39.128",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3840002752521": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.134",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3864480710665": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.142",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3873372635145": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.145",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3947225939977": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.168",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3950581383177": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.170",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"3950698823689": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.171",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"4011650449417": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.190",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 			"4011784667145": {
-// 				Status:    "up",
-// 				IPv4Addr:  "192.168.39.191",
-// 				Subnet:    "192.168.39.0/24",
-// 				OpenPorts: []int{},
-// 			},
-// 		},
-// 	}
-
-// scan2 := Scan{
-// 	StateID:     "",
-// 	DateCreated: "2024-04-03 17:28:24",
-// 	DateUpdated: "2024-04-03 19:36:34",
-// 	State: map[string]Asset{
-// 		"3403275042825": {
-// 			Status:    "up",
-// 			IPv4Addr:  "192.168.39.1",
-// 			Subnet:    "192.168.39.0/24",
-// 			OpenPorts: []int{},
-// 		},
-// 		"3816296546313": {
-// 			Status:    "up",
-// 			IPv4Addr:  "192.168.39.102",
-// 			Subnet:    "192.168.39.0/24",
-// 			OpenPorts: []int{},
-// 		},
-// 		"3823024209929": {
-// 			Status:    "up",
-// 			IPv4Addr:  "192.168.39.118",
-// 			Subnet:    "192.168.39.0/24",
-// 			OpenPorts: []int{},
-// 		},
-// 		"3816296526313": {
-// 			Status:    "up",
-// 			IPv4Addr:  "192.168.39.100",
-// 			Subnet:    "192.168.39.0/24",
-// 			OpenPorts: []int{},
-// 		},
-// 		"3823024209924": {
-// 			Status:    "up",
-// 			IPv4Addr:  "192.168.39.216",
-// 			Subnet:    "192.168.39.0/24",
-// 			OpenPorts: []int{},
-// 		},
-// 		"3823024201924": {
-// 			Status:    "up",
-// 			IPv4Addr:  "192.168.39.125",
-// 			Subnet:    "192.168.39.0/24",
-// 			OpenPorts: []int{},
-// 		},
-// 	},
-// }
-// 	db := &MongoDBHelper{Collection: GetCollection("scans")}
-// 	AddScan(db, scan1)
-// 	time.Sleep(2 * time.Second)
-// 	AddScan(db, scan2)
-
-// }
 
 func DeleteAsset(db DatabaseHelper, assetIDs []string) error {
 	//will delete asset by adding a new state without the asset in question
