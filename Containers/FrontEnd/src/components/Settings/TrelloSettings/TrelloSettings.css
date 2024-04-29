@@ -1,9 +1,8 @@
-
 .trello-settings {
   border-radius: 0.5rem;
   background-color: var(--main-color);
   padding: 1rem;
-  margin-top: -1rem; 
+  margin-top: -1rem;
   width: 100%;
 }
 
@@ -30,7 +29,7 @@
 .form-group input {
   flex-grow: 1;
   padding: 10px;
-  border-radius: 0.5rem;
+  border-radius: 0.2rem;
   border: 0;
   box-sizing: border-box;
 }
@@ -38,8 +37,8 @@
 .button-group {
   display: flex;
   justify-content: center;
-  margin-top: 2rem; 
-  }
+  margin-top: 2rem;
+}
 
 .save-btn,
 .check-btn {
@@ -51,7 +50,7 @@
 }
 
 .save-btn {
-  background-color: var(--button-color); 
+  background-color: var(--button-color);
   color: var(--button-text-color);
 }
 
@@ -64,7 +63,8 @@
   background-color: var(--button-hover-color);
 }
 
-.save-btn:hover, .check-btn:hover {
+.save-btn:hover,
+.check-btn:hover {
   opacity: 0.9;
   background-color: #4888ee;
   color: #ffffff;
@@ -96,5 +96,5 @@
     margin: 0.5rem 0;
   }
 
-  
+
 }

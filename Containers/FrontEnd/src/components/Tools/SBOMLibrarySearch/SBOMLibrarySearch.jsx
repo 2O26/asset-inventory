@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { GetAllSBOMLibraries } from '../../Services/ApiService';
 import "./SBOMLibrarySearch.css";
-import { SearchIcon } from '../../common/Icons/Icons';
-import { StatusIcon } from '../../common/Icons/Icons';
+import { SearchIcon, StatusIcon } from '../../common/Icons/Icons';
+import { GetState } from '../../Services/ApiService';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
+import { useNavigate } from 'react-router-dom';
 
 export function SearchBar({ onSearch }) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +39,13 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
     const [visibilityStates, setVisibilityStates] = useState({});
     const [onlyVulnerable, setOnlyVulnerable] = useState(false);
     const [vulnerableCVECount, setVulnerableCVECount] = useState(0);
+    const navigate = useNavigate();
+
+    const { data: stateData } = useQuery({
+        queryKey: ['getState'],
+        queryFn: GetState,
+        enabled: true
+    });
 
     const { data: libraryData, isLoading: libraryLoading, isError: isErrorLibrary, error: libraryError, refetch: refetchLibraries } = useQuery({
         queryKey: ['SBOM libraries'],
@@ -123,6 +131,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                 Error loading data: {libraryError.message}. Could not fetch the libraries?
             </div>)
     }
+    console.log("stateData: ", stateData)
 
     return (
         <div className='page-container'>
@@ -134,8 +143,8 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                     <div className='SBOM-search-container'>
                         <div className='SBOM-top-row'>
                             <p className='vulncount'>Vulnerable libraries: {vulnerableCVECount}</p>
-                            <SearchBar onSearch={setSearchTerm}/>
-                            <label className='range-checkbox-label' style={{marginRight: "auto", marginTop: "0.5rem"}}>
+                            <SearchBar onSearch={setSearchTerm} />
+                            <label className='range-checkbox-label' style={{ marginRight: "auto", marginTop: "0.5rem" }}>
                                 <p className='text-desc'>Show only vulnerable libraries</p>
                                 <input
                                     type="checkbox"
@@ -173,9 +182,14 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                                                     <p> Purl: {library.purl} </p>
                                                     <p> Version: {library.version} </p>
                                                     <p> Library exists in the SBOM files for the following assets: </p>
-                                                    {library.assetids.map((id, idx) => (
-                                                        <li key={idx}>{id}</li>
-                                                    ))}
+                                                    <div className='cve-asset-container' >
+                                                        {library.assetids.map((id, idx) => (
+                                                            <div key={idx} className='cve-asset-item' onClick={() => navigate(`/asset-view/${id}`)}>
+                                                                <p>Name: {stateData?.state?.assets && stateData.state.assets[id].properties.Name}</p>
+                                                                <p>ID: {id}</p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                     {library.CVE[0] && (
                                                         <div>
                                                             <p>CVE: {library.CVE[0].cve}</p>
@@ -183,9 +197,9 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                                                             <p>Description: {library.CVE[0].description}</p>
                                                         </div>
                                                     )}
-                                                    <button className='standard-button' onClick={() => console.log(library)}> Console info</button>
                                                 </div>
-                                            )}
+                                            )
+                                            }
                                         </div>
                                     )
                                 })}
@@ -195,7 +209,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 
