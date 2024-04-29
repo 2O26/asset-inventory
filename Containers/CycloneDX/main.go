@@ -127,7 +127,7 @@ func uploadCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
 		return
 	}
 
-	resp, err := http.Post("http://cvescanner:3002/librarySort", "application/json", bytes.NewBuffer(reqBytes))
+	resp, err := http.Post("http://cvescanner:3002/libraryDBupdate", "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		fmt.Println("Error making POST request:", err)
 		return

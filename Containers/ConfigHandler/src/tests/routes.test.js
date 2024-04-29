@@ -13,10 +13,7 @@
 */
 
 const request = require('supertest');
-const express = require('express');
 const axios = require('axios');
-const cron = require('node-cron');
-
 
 const { app, server, CronTask } = require('../server.js');
 const { IPRangechecker, RecurringScanFormat } = require('../formatchecker.js');
@@ -81,35 +78,14 @@ jest.mock('../formatchecker.js', () => ({
 
 
 /*
-      //////////////////
-     /// Test suite ///
-    //////////////////
+      //////////////////////////
+     /////// Test suite ///////
+    //////////////////////////
 */
 
 beforeAll((done) => {
     // Start the server before all tests run
-
     CronTask.start();
-    mockConnect.mockReset();
-    mockGetIPranges.mockReset();
-    mockAddIPrange.mockReset();
-    mockIPRangechecker.mockReset();
-    mockRemoveIPrange.mockReset();
-
-    mockGetRecurringScans.mockReset();
-    mockAddRecurringScan.mockReset();
-    mockRecurringScanFormat.mockReset();
-    mockRemoveRecurringScan.mockReset();
-
-    mockGetUserSettings.mockReset();
-    mockUpdateUserSettings.mockReset();
-
-    mockGetOSSAPIkey.mockReset();
-    mockUpdateOSSAPIkey.mockReset();
-
-    mockUpdateOSSAPIkey.mockReset();
-    mockGetTrelloKeys.mockReset();
-
     done();
 });
 

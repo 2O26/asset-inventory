@@ -32,7 +32,7 @@ export const GetState = async (ipRanges = []) => {
         const authToken = await UserService.getToken();
 
         const formData = new FormData();
-        for (let i = 0; i < ipRanges.length; i++){
+        for (let i = 0; i < ipRanges.length; i++) {
             formData.append("subnets", ipRanges[i])
         }
 
@@ -582,42 +582,42 @@ export const GetHistory = async (assetID) => {
 
 export const UpdateTrelloKeys = async (trelloKeys) => {
     try {
-      if (UserService.tokenExpired()) {
-        await UserService.updateToken();
-      }
-      const authToken = await UserService.getToken();
-      const response = await fetch('http://localhost:3001/updateTrelloKeys', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify(trelloKeys)
-      });
-      const resData = await response.json();
-      return resData;
-    } catch (err) {
-      console.error(err);
-      throw new Error('Network response was not ok, could not update Trello keys');
-    }
-  }
-  
-  export const GetTrelloKeys = async () => {
-    try {
-      if (UserService.tokenExpired()) {
-        await UserService.updateToken();
-      }
-      const authToken = await UserService.getToken();
-      const response = await fetch('http://localhost:3001/getTrelloKeys', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${authToken}`
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken();
         }
-      });
-      const resData = await response.json();
-      return resData;
+        const authToken = await UserService.getToken();
+        const response = await fetch('http://localhost:3001/updateTrelloKeys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(trelloKeys)
+        });
+        const resData = await response.json();
+        return resData;
     } catch (err) {
-      console.error(err);
-      throw new Error('Could not fetch Trello keys');
+        console.error(err);
+        throw new Error('Network response was not ok, could not update Trello keys');
     }
-  }
+}
+
+export const GetTrelloKeys = async () => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken();
+        }
+        const authToken = await UserService.getToken();
+        const response = await fetch('http://localhost:3001/getTrelloKeys', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch Trello keys');
+    }
+}

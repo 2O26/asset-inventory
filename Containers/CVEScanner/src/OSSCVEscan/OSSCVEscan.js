@@ -150,4 +150,29 @@ async function CVEcheck(assetID, authToken) {
     }
 }
 
-module.exports = { CVEcheck, CVEcheckAll };
+async function CheckIfVulnerabilities(assetID) {
+    /*
+        - [x] For every library + version combo that contains assetID
+            - run function that invokes an external API call to check for CVEs
+        - [x] Save result to database
+    */
+    const purlsWithVulnerbilities = await CVEcheck(assetID);
+    const cveSave = new CVEscanSave();
+    cveSave.connect()
+        .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))
+        .catch((err) => {
+            console.log("Could not save purl CVE data: ", err)
+        });
+}
+
+async function CheckIfSBOMVulnsAll() {
+    const purlsWithVulnerbilities = await CVEcheckAll();
+    const cveSave = new CVEscanSave();
+    cveSave.connect()
+        .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))
+        .catch((err) => {
+            console.log("Could not save purl CVE data: ", err)
+        });
+}
+
+module.exports = { CheckIfVulnerabilities, CheckIfSBOMVulnsAll };
