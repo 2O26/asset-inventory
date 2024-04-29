@@ -48,7 +48,7 @@
 .toggle-button {
     color: var(--text-color);
     /* Keeps the color for the icon */
-    background: var(--main-color);
+    background: var(--graph-bg);
     /* Removes the background */
     border: none;
     border-radius: 0.5rem;
@@ -58,6 +58,11 @@
     /* Removes padding, adjust as necessary */
     cursor: pointer;
     /* Optional: Changes cursor on hover to indicate it's clickable */
+}
+
+.toggle-button:hover {
+    transition: ease-in-out 100ms;
+    background: var(--main-color);
 }
 
 /* If your button still has some default browser styling, you might also need */

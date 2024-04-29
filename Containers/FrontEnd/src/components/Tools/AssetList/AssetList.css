@@ -40,13 +40,6 @@
     font-size: 15px;
 }
 
-.SearchBar:hover {
-    backdrop-filter: brightness(85%);
-}
-
-
-
-
 /* Style for column headers */
 .headerRow {
     display: flex;

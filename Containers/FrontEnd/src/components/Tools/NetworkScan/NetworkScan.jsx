@@ -88,7 +88,7 @@ export default function NetworkScanPage() {
     return (
         <div className="page-container">
             <div className="scan-form-container">
-                <h1 style={{ color: "var(--text-color)", marginTop: "0.5rem", marginBottom: "0.5rem" }}> Network Scan Config</h1>
+                <h1>Network Scan Config</h1>
                 <form onSubmit={attemptToScan}>
                     <div className='cmd-selection'>
                         <p className='text-desc'> Please select a scan type: </p>

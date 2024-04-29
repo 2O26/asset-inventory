@@ -21,7 +21,6 @@
     width: 100%;
     display: flex;
     justify-content: left;
-    align-items: left;
     flex-direction: column;
     text-align: left;
     background-color: var(--secondary-color);
@@ -30,6 +29,10 @@
     margin-top: -2rem;
 
 }
+.settings-container p {
+    margin-right: auto;
+}
+
 
 .drop-down-header.show-content {
     border-radius: 0.5rem 0.5rem 0 0;

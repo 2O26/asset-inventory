@@ -133,9 +133,9 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                     {/* <hr /> */}
                     <div className='SBOM-search-container'>
                         <div className='SBOM-top-row'>
-                            <SearchBar onSearch={setSearchTerm} />
-                            <p className='text-desc'>Vulnerable libraries: {vulnerableCVECount}</p>
-                            <label className='range-checkbox-label' style={{ marginRight: "auto" }}>
+                            <p className='vulncount'>Vulnerable libraries: {vulnerableCVECount}</p>
+                            <SearchBar onSearch={setSearchTerm}/>
+                            <label className='range-checkbox-label' style={{marginRight: "auto", marginTop: "0.5rem"}}>
                                 <p className='text-desc'>Show only vulnerable libraries</p>
                                 <input
                                     type="checkbox"

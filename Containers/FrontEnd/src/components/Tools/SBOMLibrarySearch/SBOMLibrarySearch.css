@@ -19,6 +19,14 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    gap: 0.5rem;
+}
+
+.vulncount{
+    color: var(--text-color);
+    font-weight: 600;
+    color: red;
+    text-shadow: var(--box-shadow);
 }
 
 .SBOM-top-row .top-row-child {
@@ -77,21 +85,7 @@
 
 /* Searchbar */
 
-.SearchBar {
-    margin: 2rem 0;
-    width: 500px;
-    height: 60px;
-    padding: 10px;
-    font-size: 16px;
-    background-color: var(--main-color);
-    border: 1px solid var(--text-color);
-    /* Changed border to a solid color */
-    border-radius: 30px;
-    display: flex;
-    /* Added */
-    align-items: center;
-    /* Added */
-}
+
 
 .searchIconWrapper {
     margin-right: -5px;
@@ -113,9 +107,7 @@
     color: var(--text-color);
 }
 
-.SearchBar:hover {
-    backdrop-filter: brightness(85%);
-}
+
 
 .json-tree-container {
     width: 100%
