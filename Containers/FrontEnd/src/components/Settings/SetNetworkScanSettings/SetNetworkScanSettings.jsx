@@ -3,7 +3,7 @@ import './SetNetworkScanSettings.css'
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
 import { AddIPranges, CreateRealmRole, DeleteRealmRole, GetIPranges, RmIPrange } from '../../Services/ApiService';
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { RemoveIcon } from "../../common/Icons/Icons";
+import { CheckIcon, CrossIcon, RemoveIcon } from "../../common/Icons/Icons";
 
 
 export default function SetNetworkScanSettings() {
@@ -111,7 +111,12 @@ export default function SetNetworkScanSettings() {
 
 
     const handleChange = (event) => {
-        setIPRange(event.target.value);
+        if (data.ipranges.includes(event.target.value)) {
+            setAddIPRangeFail(true)
+        } else {
+            setIPRange(event.target.value);
+        }
+
     };
 
     const expandIPrange = (event) => {
@@ -188,12 +193,13 @@ export default function SetNetworkScanSettings() {
                             {isPendingMutAdd && <LoadingSpinner />}
                             {addIPRangeSuccess &&
                                 <div>
-                                    <p className='successText'>Successfully added IP range: {rangeFromAdd} ✅</p>
+                                    <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully added IP range: {rangeFromAdd} </p>
                                 </div>
                             }
                             {addIPRangeFail &&
                                 <div>
-                                    <p className='successText'> Failed to add IP range: {rangeFromAdd}. Wrong format. ❌</p>
+                                    <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to add IP range: {rangeFromAdd} </p>
+
                                 </div>
                             }
                             {isErrorMutRm && <div className='errorMessage'>{errorMutRm.message}</div>}

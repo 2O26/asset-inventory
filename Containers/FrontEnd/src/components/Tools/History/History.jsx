@@ -43,7 +43,6 @@ export default function History({ width, height , isDashboard = false, isAssetVi
         queryFn: () => GetHistory(assetID),
         enabled: true
     });
-    console.log("data: ", historyData)
 
     useEffect(() => {
         refetch()
@@ -59,8 +58,6 @@ export default function History({ width, height , isDashboard = false, isAssetVi
     } else if (isDashboard) {
         divName = 'page-container'
     }
-
-
 
     return (
         <div className={divName} style={{ width: width, height: height }}>
@@ -80,6 +77,7 @@ export default function History({ width, height , isDashboard = false, isAssetVi
                                                 <h3>{key}</h3>
                                                 <JSONTree data={val} theme={theme} hideRoot />
                                             </div>
+
                                         )
                                     )
                                 })

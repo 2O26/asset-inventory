@@ -39,9 +39,42 @@
     box-shadow: var(--box-shadow);
 }
 
+.info-text {
+    padding: 0.5rem;
+    visibility: hidden;
+    width: 18rem;
+    text-wrap: wrap;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    text-align: center;
+    border-radius: 0.2rem;
+    padding: 0.2rem;
 
-.info-container:hover .info-text,
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    bottom: 22%;
+    left: 50%;
+    margin-left: 1.6rem;
+    /* margin-left: -60px; */
+    /* Use half of the width value to align it center */
+
+    /* Fade in tooltip - animations */
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+    box-shadow: var(--box-shadow);
+}
+
+
+.info-container:hover .info-text {
+    visibility: visible;
+    opacity: 1;
+    width: 18rem;
+    text-wrap: wrap;
+}
+
 .info-container:hover .info-component {
+    padding: 0.5rem;
     visibility: visible;
     opacity: 1;
 }

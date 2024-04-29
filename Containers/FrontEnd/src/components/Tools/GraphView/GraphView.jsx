@@ -192,7 +192,6 @@ export default function GraphView({ width , height, selectedAsset = null, isDash
 
     // const parsedState = ParseState(jsonData, selectedAsset);
 
-
     return (
         <div className="asset-view-container" style={{ width: width, height: height }}>
             {parsedState ?
