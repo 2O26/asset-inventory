@@ -18,7 +18,7 @@
     background-color: var(--graph-bg);
     color: var(--text-color);
     box-shadow: var(--box-shadow);
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
 }
 
 .react-flow__node-turbo {

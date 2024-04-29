@@ -19,13 +19,6 @@ body {
 
 }
 
-.page-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 @media (max-width: 1000px) {
 
   /* For smaller screens, adjust the font size */

@@ -53,12 +53,18 @@ export default function History({ width, height , isDashboard = false, isAssetVi
     if (isError) return <div className='errorMessage'> {error.message}</div>;
     if (isAssetView && !historyData) return <div className='asset-info-container'> <div className='errorMessage'> This asset has no hisotry</div></div>;
     if (!historyData) return <div className='errorMessage'> No history</div>;
+    let divName = 'history-container'
+    if (isAssetView) {
+        divName = 'asset-info-container'
+    } else if (isDashboard) {
+        divName = 'page-container'
+    }
 
 
 
     return (
-        <div className={isAssetView ? 'asset-info-container' : 'page-container'} style={{ width: width, height: height }}>
-            <div className='history-content'>
+        <div className={divName} style={{ width: width, height: height }}>
+            <div className={isDashboard ? "history-content-dashboard" : "history-content"}>
                 {Object.values(historyData).map((value, index) => {
                     const date = new Date(value.timestamp)
                     const formattedDate = date.toLocaleString(countryCode, options);

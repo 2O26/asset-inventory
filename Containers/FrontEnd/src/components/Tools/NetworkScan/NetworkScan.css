@@ -17,13 +17,6 @@
 
 }
 
-.page-container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
 .start-scan-btn {
     color: var(--text-color);
 }

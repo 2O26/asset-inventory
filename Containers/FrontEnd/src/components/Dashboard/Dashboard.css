@@ -1,6 +1,9 @@
 .dashboard-container {
+    display: grid;
     padding: 0.5rem;
     width: 100%;
+    max-width: 120rem;
+    gap: 0.5rem;
 }
 
 .container-50-height{
@@ -9,8 +12,8 @@
     flex: 1;
     flex-direction: row;
     width: 100%;
-    margin-bottom: 0.5rem;
-    height: 65vh;
+    height: 45rem;
+    gap: 0.5rem;
 }
 
 .dashboard-tool-container-75{
@@ -18,7 +21,7 @@
     flex-direction: column;
     flex: 2;
     background: var(--main-color);
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     height: 100%;
     width: 100%;
     overflow: auto;
@@ -29,13 +32,13 @@
     flex-direction: column;
     flex: 1;
     background: var(--main-color);
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     height: 100%;
     width: 100%;
     overflow: auto;
-    margin-left: 0.5rem;
 }
 .tool-component{
+    display: flex;
     flex: 1;
     flex-direction: row;
     width: 100%;
