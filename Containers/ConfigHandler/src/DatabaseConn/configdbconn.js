@@ -11,18 +11,23 @@ var DocLinkSchema = require('../Schemas/DocLinkSchema');
 class ConfigHandler {
     constructor() { }
 
-    async setDocLink(docLink, assetID) { //Create new schema where assetID and relevant DocLink is stored.
-        const newDocLink = new DocLinkSchema({docLink: docLink, assetID: assetID});
+    async setDocLink(userDocLink, userAssetID) { //Create new schema where assetID and relevant DocLink is stored.
+        console.log("###Begin configdbconn setDocLink");
+        const newDocLink = new DocLinkSchema({docLink: userDocLink, assetID: userAssetID});
         try {
             await newDocLink.save();
         } catch (err) {
             console.log('Error while updating Doc Link:', err.message);
         }
+        console.log("###End configdbconn setDocLink");
     }
 
-    async getDoclink(assetID) {
-        const docLinkData = await DocLinkSchema.find({ assetID: assetID }).exec();
-        return docLinkData.docLink;
+    async getDoclink(userAssetID) { //Problem is here, maybe?
+        console.log("###Begin configdbconn getDocLink");
+        const docLinkData = await DocLinkSchema.find({ assetID: userAssetID }).exec();
+        console.log("###End configdbconn getDocLink");
+        return docLinkData;
+        //return docLinkData.docLink;
     }
 
     async connect() {

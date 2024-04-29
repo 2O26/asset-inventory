@@ -23,6 +23,7 @@ const server = app.listen(route, () => console.log(`Server listening on port: ${
 
 //Doc Link functions, based off of UserConfig functions.
 app.post("/setDocLink", async (req, res) => {
+    console.log("###Begin Server.js setDocLink");
         try {
     {/**
     const response = await axios.get('http://authhandler:3003/getRoles', {
@@ -38,7 +39,6 @@ app.post("/setDocLink", async (req, res) => {
     }
     
     */}
-    
     const configHandler = new ConfigHandler();
     await configHandler.connect();
     const response = await configHandler.setDocLink(req.body.docLink, req.body.assetID);
@@ -49,9 +49,12 @@ app.post("/setDocLink", async (req, res) => {
         console.error('Error while adding doc link:', error);
         res.status(500).send('Error adding doc link');
     }
+    console.log("###End Server.js setDocLink");
+
 });
 
 app.post("/getDocLink", async (req, res) => {
+    console.log("###Begin Server.js getDocLink");
     try {
         {/**
         const response = await axios.get('http://authhandler:3003/getRoles', {
@@ -63,15 +66,16 @@ app.post("/getDocLink", async (req, res) => {
             return res.status(401).send('Invalid token');
         }
     */}
-
         const configHandler = new ConfigHandler();
         await configHandler.connect();
-        const docLink = await configHandler.getDoclink(req.body.assetID)
-        res.json({ responseFromServer: "Succeeded to get Doc Link!!", success: "success", docLink: docLink });
+        const docLink = await configHandler.getDoclink(req.body.assetID) //Problem is here.
+        console.log(docLink);
+        res.json({ responseFromServer: "Succeeded to get Doc Link!!", success: "success", docLink: docLink }); //Problem is here.
 
     } catch (error) {
         res.status(500).send('Error fetching doc link');
     }
+    console.log("###End Server.js setDocLink");
 });
 
 app.get("/getIPranges", async (req, res) => {
