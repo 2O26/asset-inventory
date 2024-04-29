@@ -47,7 +47,12 @@
 } */
 
 .button-tool {
-
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-wrap: wrap;
+  gap: 0.5rem;
   width: 15rem;
   font-family: var(--gidole);
 
@@ -90,4 +95,8 @@
 .tools-container hr {
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+.tool-lable {
+  max-width: 90%;
 }
