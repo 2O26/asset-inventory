@@ -1,4 +1,4 @@
-describe('Testing hepl button', () => {
+describe('Testing help button', () => {
     beforeEach('loggin in and create ip range', () => {
         cy.login();
     })

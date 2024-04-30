@@ -21,69 +21,30 @@ describe('Settings Page Tests', () => {
     })
 
     describe('Check if Dashboard Settings functional', () => {
-        it('Verify that the number of left side asset lists is one in Dashboard, as specified in the settings.', () => {
+        it('Asset list + Graph View, as specified in the settings.', () => {
             cy.contains('Dashboard Settings').click()
-            cy.contains('h3', 'Left Side').parent().contains('Asset List').next('input').clear().type('1');
+            cy.contains('h3', 'Main').parent().contains('Asset List').next('input').clear().type('1');
+            cy.contains('h3', 'Main').parent().contains('Graph View').next('input').clear();
+            cy.contains('h3', 'Secondary').parent().contains('Asset List').next('input').clear();
+            cy.contains('h3', 'Secondary').parent().contains('Graph View').next('input').clear().type('1');
             cy.get('.standard-button').contains('Save').click();
             cy.contains('Dashboard').click();
-            cy.get('.container-75-50').find('h3.item-header-ds:contains("Asset List")').should('exist');
+            cy.get('.dashboard-tool-container-75').find('h3.item-header-ds:contains("Asset List")').should('exist');
+            cy.get('.dashboard-tool-container-25').find('h3.item-header-ds:contains("Graph View"):last').should('exist');
         });
 
-        it('Verify that the number of left side asset lists is zero in Dashboard, as specified in the settings.', () => {
+        it('Graph View + Asset list, as specified in the settings.', () => {
             cy.contains('Dashboard Settings').click();
-            cy.contains('h3', 'Left Side').parent().contains('Asset List').next('input').clear().type('0');
+            cy.contains('h3', 'Main').parent().contains('Asset List').next('input').clear();
+            cy.contains('h3', 'Main').parent().contains('Graph View').next('input').clear().type('1');
+            cy.contains('h3', 'Secondary').parent().contains('Asset List').next('input').clear().type('1');
+            cy.contains('h3', 'Secondary').parent().contains('Graph View').next('input').clear();
             cy.get('.standard-button').contains('Save').click();
             cy.contains('Dashboard').click();
-            cy.get('.container-75-50').find('h3.item-header-ds:contains("Asset List"):last').should('not.exist');
+            cy.get('.dashboard-tool-container-75').find('h3.item-header-ds:contains("Graph View")').should('exist');
+            cy.get('.dashboard-tool-container-25').find('h3.item-header-ds:contains("Asset List"):last').should('exist');
         });
 
-        it('Verify that the number of left side Graph Views is zero in Dashboard, as specified in the settings.', () => {
-            cy.contains('Dashboard Settings').click();
-            cy.contains('h3', 'Left Side').parent().contains('Graph View').next('input').clear().type('0');
-            cy.get('.standard-button').contains('Save').click();
-            cy.contains('Dashboard').click();
-            cy.get('.container-75-50').find('h3.item-header-ds:contains("Graph View"):last').should('not.exist');
-        });
-
-        it('Verify that the number of left side Graph Views is one in Dashboard, as specified in the settings.', () => {
-            cy.contains('Dashboard Settings').click()
-            cy.contains('h3', 'Left Side').parent().contains('Graph View').next('input').clear().type('1');
-            cy.get('.standard-button').contains('Save').click();
-            cy.contains('Dashboard').click();
-            cy.get('.container-75-50').find('h3.item-header-ds:contains("Graph View")').should('exist');
-        });
-
-        it('Verify that the number of right side asset lists is zero in Dashboard, as specified in the settings.', () => {
-            cy.contains('Dashboard Settings').click()
-            cy.contains('h3', 'Right Side').parent().contains('Asset List').next('input').clear().type('0');
-            cy.get('.standard-button').contains('Save').click();
-            cy.contains('Dashboard').click();
-            cy.get('.container-25-50').find('h3.item-header-ds:contains("Asset List")').should('not.exist');
-        });
-
-        it('Verify that the number of right side asset lists is one in Dashboard, as specified in the settings.', () => {
-            cy.contains('Dashboard Settings').click();
-            cy.contains('h3', 'Right Side').parent().contains('Asset List').next('input').clear().type('1');
-            cy.get('.standard-button').contains('Save').click();
-            cy.contains('Dashboard').click();
-            cy.get('.container-25-50').find('h3.item-header-ds:contains("Asset List"):last').should('exist');
-        });
-
-        it('Verify that the number of right side Graph Views is one in Dashboard, as specified in the settings.', () => {
-            cy.contains('Dashboard Settings').click();
-            cy.contains('h3', 'Right Side').parent().contains('Graph View').next('input').clear().type('1');
-            cy.get('.standard-button').contains('Save').click();
-            cy.contains('Dashboard').click();
-            cy.get('.container-25-50').find('h3.item-header-ds:contains("Graph View"):last').should('exist');
-        });
-
-        it('Verify that the number of right side Graph Views is zero in Dashboard, as specified in the settings.', () => {
-            cy.contains('Dashboard Settings').click()
-            cy.contains('h3', 'Right Side').parent().contains('Graph View').next('input').clear().type('0');
-            cy.get('.standard-button').contains('Save').click();
-            cy.contains('Dashboard').click();
-            cy.get('.container-25-50').find('h3.item-header-ds:contains("Graph View")').should('not.exist');
-        });
     })
 
     describe('Check if Network Scan Settings are functional.', () => {
@@ -119,8 +80,6 @@ describe('Settings Page Tests', () => {
             cy.contains('.span-text', '192.168.1.0/24').siblings('button[aria-label="Remove"]').click();
         });
     })
-
-    describe('Check if CVE Scan Settings are functional.', () => { })
 
 });
 
