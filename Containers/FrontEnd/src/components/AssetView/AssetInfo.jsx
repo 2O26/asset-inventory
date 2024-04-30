@@ -47,7 +47,9 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                             (
                                 index === 0 ? <h1 key={key} className="asset-name">{value}</h1> :
                                     (
-                                        <div className="assetItem">{key}: {isDate(value) ? toLocalTime(value) : value}</div>
+                                        <div className="assetItem">
+                                            {key}: {isDate(value) ? toLocalTime(value) : value}
+                                        </div>
                                     )
                             )
                     )
@@ -78,7 +80,7 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                                         </>
                                     ) : (
                                         <span className="key-value">
-                                            {key === "Last Discovered at" ? toLocalTime(value) : value}
+                                            {isDate(value) ? toLocalTime(value) : value}
                                         </span>
                                     )}
                                 </div>
