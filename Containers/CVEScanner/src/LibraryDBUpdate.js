@@ -46,29 +46,23 @@ async function updateLibDB(cveSave, assetID, cycloneDXjson, previousState) {
     await cveSave.savePartialLibraries(newLibrariesMap); // Save partial to database
 }
 
-function LibraryDBupdate(assetID, res) {
-    return new Promise((resolve, reject) => {
-        const cveSave = new CVEscanSave();
-        cveSave.connect()
-            .then(() => cveSave.getAllLibraries())
-            .then(async previousState => {
-                const cycloneDXjson = await fetchCycloneDX(assetID);
-                if (cycloneDXjson === "failure") {
-                    res.json({ success: false, message: "Failure to fetch SBOM data" });
-                    reject("Failed to fetch SBOM data");
-                } else {
-                    await removeExisting(cveSave, assetID);
-                    await updateLibDB(cveSave, assetID, cycloneDXjson, previousState);
-                    resolve("Update successful");
-                }
-            }).catch(err => {
-                console.log("Could not get previous state of libraries: ", err);
-                res.json({ success: false });
-                reject(err);
-            });
+async function LibraryDBupdate(assetID) {
+    const cveSave = new CVEscanSave();
+    await cveSave.connect();
+
+    const previousState = await cveSave.getAllLibraries().catch(err => {
+        console.error("Could not get previous state of libraries:", err);
+        throw new Error("Database connection failed");
     });
+
+    const cycloneDXjson = await fetchCycloneDX(assetID);
+    if (cycloneDXjson === "failure") {
+        throw new Error("Failed to fetch SBOM data");
+    }
+
+    await removeExisting(cveSave, assetID);
+    await updateLibDB(cveSave, assetID, cycloneDXjson, previousState);
+    return "Update successful";
 }
-
-
 
 module.exports = { LibraryDBupdate };

@@ -418,15 +418,35 @@ export const RemoveCDXfile = async (assetID) => {
     try {
         const formData = new FormData();
         formData.append('assetID', assetID)
-
-        console.log("formdata: ", formData)
         const response = await fetch('http://localhost:8082/removeCycloneDX', {
             method: 'POST',
             body: formData
         })
+        const return_data = await response.json();
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not remove CycloneDX file');
+    }
+}
+
+export const RemoveLibsGivenSBOMRemoval = async (assetID) => {
+    try {
+        const response = await fetch('http://localhost:3002/removeAssetidLibs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ assetID: assetID })
+        })
+        if (!response.ok) {
+            // Handle HTTP errors, e.g., response status 404, 500, etc.
+            const errorText = await response.text();
+            console.error('HTTP Error:', response.status, errorText);
+            throw new Error(`HTTP Error ${response.status}: ${errorText}`);
+        }
 
         const return_data = await response.json();
-        console.log(return_data)
         return return_data;
     } catch (err) {
         console.error(err);
@@ -519,6 +539,7 @@ export const GetVulnerbleComponents = async (assetID) => {
             },
             body: JSON.stringify({ "assetID": assetID })
         });
+
         const return_data = await response.json();
         return return_data;
     } catch (err) {
@@ -536,12 +557,11 @@ export const GetVulnerbleComponentsAll = async (assetID) => {
         const authToken = await UserService.getToken()
 
         const response = await fetch('http://localhost:3002/getVulnerableAssetAll', {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
                 'Authorization': `Bearer ${authToken}`,
-            },
-            body: JSON.stringify({ "assetID": assetID })
+            }
         });
         const return_data = await response.json();
 

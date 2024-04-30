@@ -42,7 +42,7 @@ class CVEscanSave {
         return libraries
     }
 
-    async getVulnerableAllLibraries(assetid) {
+    async getVulnerableAllLibraries() {
         var query = {
             $or: [
                 { "CVE.title": { $exists: true, $ne: "" } },

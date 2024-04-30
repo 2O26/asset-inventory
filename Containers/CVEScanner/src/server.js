@@ -1,7 +1,6 @@
 const express = require("express");
 const axios = require('axios');
 
-
 const { CheckIfVulnerabilities, CheckIfSBOMVulnsAll } = require("./OSSCVEscan/OSSCVEscan");
 const { LibraryDBupdate } = require("./LibraryDBUpdate");
 const CVEscanSave = require("./DatabaseConn/CVEconn");
@@ -9,12 +8,8 @@ const CVEscanSave = require("./DatabaseConn/CVEconn");
 const app = express();
 app.use(express.json());
 const cors = require("cors");
-
-
 const route = 3002;
-
 app.use(cors())
-
 const server = app.listen(route, () => { console.log("Server listening on port: ", route) });
 
 app.get("/status", (req, res) => {
@@ -69,6 +64,11 @@ app.post("/getVulnerableAssetID", async (req, res) => {
         }
 
         const assetid = req.body.assetID;
+        // Check if assetID is provided and is not empty
+        if (!assetid || assetid.trim().length === 0) {
+            // If assetID is empty, throw an error that will be caught by the catch block
+            throw new Error("Asset ID is empty");
+        }
         const cveSave = new CVEscanSave();
         cveSave.connect();
         const libraries = await cveSave.getVulnerableAssetIDLibraries(assetid)
@@ -81,7 +81,7 @@ app.post("/getVulnerableAssetID", async (req, res) => {
 
 });
 
-app.post("/getVulnerableAssetAll", async (req, res) => {
+app.get("/getVulnerableAssetAll", async (req, res) => {
     /*
         Return object of all vulnerble libaries within the assets SBOM:s.
     */
@@ -96,8 +96,9 @@ app.post("/getVulnerableAssetAll", async (req, res) => {
         if (!authResponse.data.authenticated) {
             return res.status(401).send('Invalid token');
         }
+        const cveSave = new CVEscanSave();
         cveSave.connect();
-        const libraries = await cveSave.getVulnerableAllLibraries(assetid)
+        const libraries = await cveSave.getVulnerableAllLibraries();
         res.json({ success: true, cycloneDXvulns: libraries });
 
     } catch (error) {
@@ -110,27 +111,36 @@ app.post("/getVulnerableAssetAll", async (req, res) => {
 app.post("/libraryDBupdate", async (req, res) => {
     try {
         const assetID = req.body.assetID;
-
-        try {
-            await LibraryDBupdate(assetID, res);
-            await CheckIfVulnerabilities(assetID);  // Only runs if the update is successful
-        } catch (error) {
-            console.error("Error during library update or vulnerability check: ", error);
+        if (!assetID || assetID.trim().length === 0 || typeof assetID !== 'string') {
+            throw new Error("Asset ID is empty");
         }
-        res.json({ Success: true });
+        const updateMessage = await LibraryDBupdate(assetID);
+        await CheckIfVulnerabilities(assetID);
+        res.json({ success: true });
 
     } catch (error) {
         console.error('Error while processing request:', error);
         res.status(500).send('An error occurred while processing your request.');
     }
-
 });
 
-app.post("/removeAssetidLibs"), async (req, res) => {
-    if (req.body.assetID) {
-        removeExisting(req.body.assetID);
+app.post("/removeAssetidLibs", async (req, res) => {
+
+    try {
+
+        const assetID = req.body.assetID;
+        if (!assetID || assetID.trim().length === 0 || typeof assetID !== 'string') {
+            throw new Error("Asset ID is empty");
+        }
+        const cveSave = new CVEscanSave();
+        cveSave.connect();
+        await cveSave.removeExistingAssetIDOccurances(assetID);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error while processing request:', error);
+        res.status(500).send('An error occurred while processing your request.');
     }
-}
+});
 
 app.post("/recheckVulnerabilitiesAll", async (req, res) => {
     await CheckIfSBOMVulnsAll();
