@@ -1,4 +1,16 @@
 import React, { useState } from 'react'
+import {string} from "prop-types";
+
+export function checkIfDate(value) {
+    const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+    return isoPattern.test(value);
+}
+
+export function toLocalTime(utcDateString) {
+    const utcDate = new Date(Date.parse(utcDateString));
+    return utcDate.toLocaleString();
+}
+
 
 export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
     const [expandedLists, setExpandedLists] = useState({}); // To track which lists are expanded
@@ -21,7 +33,6 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                         isList ? (
                             <div key={key} className='assetItem'>
                                 <span className="key-value">{key}: </span>
-                                <>
                                     <button onClick={() => toggleListVisibility(key)} className='arrow-container'>
                                         {expandedLists[key] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
                                     </button>
@@ -32,14 +43,11 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                                             ))}
                                         </ul>
                                     )}
-                                </>
                             </div>) :
                             (
                                 index === 0 ? <h1 key={key} className="asset-name">{value}</h1> :
                                     (
-                                        <div key={key} className='assetItem'>
-                                            {key}: {value}
-                                        </div>
+                                        <div className="assetItem">{key}: {checkIfDate(value) ? toLocalTime(value) : value}</div>
                                     )
                             )
                     )
@@ -69,7 +77,9 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                                             )}
                                         </>
                                     ) : (
-                                        <span className="key-value">{value}</span>
+                                        <span className="key-value">
+                                            {key === "Last Discovered at" ? toLocalTime(value) : value}
+                                        </span>
                                     )}
                                 </div>
                             );

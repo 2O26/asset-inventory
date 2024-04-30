@@ -322,7 +322,7 @@ func addAssets(req AssetRequest, latestScan jsonhandler.BackState, db DatabaseHe
 			}
 			next := strconv.FormatUint(nextU, 10)
 			newAssetID := next
-			newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+			newAsset.DateCreated = time.Now().Format(time.RFC3339)
 			newAsset.DateUpdated = newAsset.DateCreated
 			latestScan.Assets[newAssetID] = newAsset
 			changes = append(changes, newAssetID)
@@ -363,7 +363,7 @@ func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugi
 
 	} else {
 		// Add the new plugin state
-		pluginState.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+		pluginState.DateCreated = time.Now().Format(time.RFC3339)
 		pluginState.DateUpdated = pluginState.DateCreated
 		latestScan.PluginStates[pluginState.StateID] = pluginState
 	}
@@ -477,7 +477,7 @@ func AddAssets(req AssetRequest, assetIDS []string) (string, []string) {
 		if len(newAssets) > 0 {
 			for i, newAsset := range newAssets {
 				// newAssetID := primitive.NewObjectID().Hex()
-				newAsset.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+				newAsset.DateCreated = time.Now().Format(time.RFC3339)
 				newAsset.DateUpdated = newAsset.DateCreated
 
 				latestScan.Assets[newAssetIDS[i]] = newAsset
@@ -542,7 +542,7 @@ func AddRelations(req AssetRequest, relationIDS []string) (string, []RelationCha
 		if len(newRelations) > 0 {
 			for i, newRelation := range newRelations {
 				// newAssetID := primitive.NewObjectID().Hex()
-				newRelation.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+				newRelation.DateCreated = time.Now().Format(time.RFC3339)
 				latestScan.Relations[newRelationIDS[i]] = newRelation
 				changes = append(changes, RelationChang{From: newRelation.From, To: newRelation.To})
 			}
@@ -578,7 +578,7 @@ func updateAssets(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				continue
 			}
 			if existingAsset, exists := latestScan.Assets[assetID]; exists {
-				updatedAsset.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+				updatedAsset.DateUpdated = time.Now().Format(time.RFC3339)
 				updatedAsset.DateCreated = existingAsset.DateCreated
 				latestScan.Assets[assetID] = updatedAsset
 				assetChange := AssetChanges{
@@ -699,7 +699,7 @@ func addRelations(req AssetRequest, latestScan jsonhandler.BackState, db Databas
 				}
 				next := strconv.FormatUint(nextU, 10)
 				newRelationID := next
-				newRelation.DateCreated = time.Now().Format("2006-01-02 15:04:05")
+				newRelation.DateCreated = time.Now().Format(time.RFC3339)
 				latestScan.Relations[newRelationID] = newRelation
 				existingRelations[key] = true // Update existingRelations to include this new relation
 				anyNewRelationsAdded = true

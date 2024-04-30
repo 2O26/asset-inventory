@@ -7,6 +7,7 @@ import { GetState } from '../../Services/ApiService';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import { SearchIcon } from '../../common/Icons/Icons';
+import {checkIfDate, toLocalTime} from "../../AssetView/AssetInfo";
 
 const NarrowList = ['Name', 'Owner', 'Type', 'Criticality']
 
@@ -24,6 +25,8 @@ const getColumnHeaders = (data, isNarrowView, isDashboard) => {
 
     return Array.from(columnHeaders);
 };
+
+
 
 export function SearchBar({ onSearch }) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -104,6 +107,18 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
         refetch();
     };
 
+    function processCellObject(header, value) {
+        let item = null;
+        if (header === "Type"){
+            return value.properties[header][0];
+        }
+        item = value.properties[header];
+        if (checkIfDate(item)){
+            return toLocalTime(item);
+        }
+        return item;
+    }
+
     if (isLoading) return <LoadingSpinner />;
     if (isError) return <div className='errorMessage'>{error.message}</div>;
 
@@ -138,7 +153,7 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
                                     className='assetCell'
                                     onClick={() => handleClick(key)}
                                 >
-                                    {header === "Type" ? value.properties[header][0] : value.properties[header]}
+                                    {processCellObject(header, value)}
                                 </div>
                             ))}
                         </div>
