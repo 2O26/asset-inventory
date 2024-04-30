@@ -31,10 +31,11 @@ type networkResponse struct {
 }
 
 type networkAsset struct {
-	Status    string `bson:"status" json:"status"`
-	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
-	Subnet    string `bson:"subnet" json:"subnet"`
-	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
+	Status         string `bson:"Status" json:"Status"`
+	IPv4Addr       string `bson:"IPv4 Address" json:"IPv4 Address"`
+	Subnet         string `bson:"Subnet" json:"Subnet"`
+	OpenPorts      []int  `bson:"Open Ports" json:"Open Ports"`
+	LastDiscovered string `bson:"Last Discovered at" json:"Last Discovered at"`
 }
 
 var flake, _ = sonyflake.New(sonyflake.Settings{
@@ -342,7 +343,7 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 					To:          netAssetID,
 					Direction:   "uni",
 					Owner:       "netscan",
-					DateCreated: time.Now().Format("2006-01-02 15:04:05"),
+					DateCreated: time.Now().Format(time.RFC3339),
 				}
 				addRelation = append(addRelation, relation)
 			}
@@ -376,40 +377,40 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				Name:        "PC-A",
 				Owner:       "UID_2332",
 				Type:        []string{"PC", "Windows"},
-				DateCreated: "2024-02-14 23:00:00",
-				DateUpdated: "2024-02-14 23:00:30",
+				DateCreated: "2024-02-14T23:00:00Z",
+				DateUpdated: "2024-02-14T23:00:30Z",
 				Criticality: 2,
 			},
 			"65f8671cfe55e5c76465d841": {
 				Name:        "Chromecast",
 				Owner:       "UID_2332",
 				Type:        []string{"IoT", "Media"},
-				DateCreated: "2024-02-10 20:04:20",
-				DateUpdated: "2024-02-14 23:00:30",
+				DateCreated: "2024-02-10T20:04:20Z",
+				DateUpdated: "2024-02-14T23:00:30Z",
 				Criticality: 1,
 			},
 			"65f8671cfe55e5c76465d842": {
 				Name:        "Password Vault",
 				Owner:       "UID_2332",
 				Type:        []string{"Server", "Database"},
-				DateCreated: "2024-02-14 23:00:00",
-				DateUpdated: "2024-02-14 23:00:30",
+				DateCreated: "2024-02-14T23:00:00Z",
+				DateUpdated: "2024-02-14T23:00:30Z",
 				Criticality: 4,
 			},
 			"65f8671cfe55e5c76465d843": {
 				Name:        "Smart Thermostat",
 				Owner:       "UID_2332",
 				Type:        []string{"IoT", "HVAC"},
-				DateCreated: "2024-03-01 12:15:00",
-				DateUpdated: "2024-03-18 09:50:00",
+				DateCreated: "2024-03-01T12:15:00Z",
+				DateUpdated: "2024-03-18T09:50:00Z",
 				Criticality: 2,
 			},
 			"65f8671cfe55e5c76465d844": {
 				Name:        "Work Laptop",
 				Owner:       "UID_6372",
 				Type:        []string{"Laptop", "Windows"},
-				DateCreated: "2024-02-25 08:30:00",
-				DateUpdated: "2024-03-18 10:00:00",
+				DateCreated: "2024-02-25T08:30:00Z",
+				DateUpdated: "2024-03-18T10:00:00Z",
 				Criticality: 3,
 			},
 		},
@@ -427,35 +428,35 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				To:          "65f8671cfe55e5c76465d841",
 				Direction:   "uni",
 				Owner:       "UID_2332",
-				DateCreated: "2024-02-14 23:35:53",
+				DateCreated: "2024-02-14T23:35:53Z",
 			},
 			"65f8671cfe55e5c76465d846": {
 				From:        "65f8671cfe55e5c76465d841",
 				To:          "65f8671cfe55e5c76465d842",
 				Direction:   "bi",
 				Owner:       "UID_6372",
-				DateCreated: "2024-01-22 07:32:32",
+				DateCreated: "2024-01-22T07:32:32Z",
 			},
 			"65f8671cfe55e5c76465d847": {
 				From:        "65f8671cfe55e5c76465d842",
 				To:          "65f8671cfe55e5c76465d843",
 				Direction:   "uni",
 				Owner:       "UID_2332",
-				DateCreated: "2024-03-01 12:30:00",
+				DateCreated: "2024-03-01T12:30:00Z",
 			},
 			"65f8671cfe55e5c76465d848": {
 				From:        "65f8671cfe55e5c76465d840",
 				To:          "65f8671cfe55e5c76465d844",
 				Direction:   "uni",
 				Owner:       "UID_6372",
-				DateCreated: "2024-03-05 14:20:00",
+				DateCreated: "2024-03-05T14:20:00Z",
 			},
 		},
 		PluginStates: map[string]jsonhandler.PluginState{
 			"IPscan": {
 				StateID:     "20240214-1300A",
-				DateCreated: "2024-02-14 13:00:00",
-				DateUpdated: "2024-02-14 13:30:00",
+				DateCreated: "2024-02-14T13:00:00",
+				DateUpdated: "2024-02-14Z13:30:00",
 				State: map[string]interface{}{
 					"65f8671cfe55e5c76465d840": map[string]interface{}{
 						"status":    "down",

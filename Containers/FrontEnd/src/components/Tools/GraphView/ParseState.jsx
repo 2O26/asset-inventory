@@ -8,7 +8,7 @@ export function ParseState(jsonData) {
         const nodeId = assetId;
         const nodeName = asset.properties.Name;
         const nodeType = asset.properties.Type[0]
-        const nodeStatus = asset.plugins?.netscan?.status
+        const nodeStatus = asset.plugins?.netscan?.Status
         const assetIP = asset.properties.IP
 
         nodes.push({

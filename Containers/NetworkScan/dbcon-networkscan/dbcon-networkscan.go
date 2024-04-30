@@ -21,12 +21,13 @@ type Scan struct {
 }
 
 type Asset struct {
-	UID       string `bson:"uid" json:"uid"`
-	Status    string `bson:"status" json:"status"`
-	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
-	Subnet    string `bson:"subnet" json:"subnet"`
-	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
-	ScanType  string `bson:"scanType" json:"scanType"`
+	UID            string `bson:"uid" json:"uid"`
+	Status         string `bson:"Status" json:"Status"`
+	IPv4Addr       string `bson:"ipv4Addr" json:"IPv4 Address"`
+	Subnet         string `bson:"subnet" json:"Subnet"`
+	OpenPorts      []int  `bson:"openPorts" json:"Open Ports"`
+	ScanType       string `bson:"scanType" json:"Scan Type"`
+	LastDiscovered string `bson:"lastDiscovered" json:"Last Discovered at"`
 }
 
 type Host struct {
@@ -164,7 +165,7 @@ func AddScan(db DatabaseHelper, scan Scan) {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			// Detta är den första skannen, infoga den direkt
-			scan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+			scan.DateUpdated = time.Now().Format(time.RFC3339)
 			result, err := db.InsertOne(context.TODO(), scan)
 			if err != nil {
 				log.Fatalf("Could not insert scan: %s", err)
@@ -177,7 +178,7 @@ func AddScan(db DatabaseHelper, scan Scan) {
 	}
 
 	updatedScan := compareScanStates(scan, previousScan)
-	updatedScan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+	updatedScan.DateUpdated = time.Now().Format(time.RFC3339)
 	result, err := db.InsertOne(context.TODO(), updatedScan)
 
 	if err != nil {
@@ -349,7 +350,7 @@ func DeleteAsset(db DatabaseHelper, assetIDs []string) error {
 			}
 		}
 	}
-	scan.DateUpdated = time.Now().Format("2006-01-02 15:04:05")
+	scan.DateUpdated = time.Now().Format(time.RFC3339)
 	status, err := db.InsertOne(context.TODO(), scan)
 	if err != nil {
 		return fmt.Errorf("%w", err)

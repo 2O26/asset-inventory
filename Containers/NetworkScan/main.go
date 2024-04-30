@@ -249,8 +249,8 @@ func performSimpleScan(target string) (dbcon.Scan, error) {
 	// Create a new scan
 	scan := dbcon.Scan{
 		StateID:     "", // Replace with actual state ID
-		DateCreated: time.Now().Format("2006-01-02 15:04:05"),
-		DateUpdated: time.Now().Format("2006-01-02 15:04:05"),
+		DateCreated: time.Now().Format(time.RFC3339),
+		DateUpdated: time.Now().Format(time.RFC3339),
 		State:       make(map[string]dbcon.Asset),
 	}
 	fmt.Println("Scan object created")
@@ -320,10 +320,15 @@ func performAdvancedScan(target string) (dbcon.Scan, error) {
 	}
 
 	// Create a new scan
+	nextU, err := flake.NextID()
+	if err != nil {
+		return dbcon.Scan{}, err
+	}
+	next := strconv.FormatUint(nextU, 10)
 	scan := dbcon.Scan{
-		StateID:     "", // Replace with actual state ID
-		DateCreated: time.Now().Format("2006-01-02 15:04:05"),
-		DateUpdated: time.Now().Format("2006-01-02 15:04:05"),
+		StateID:     next, // Replace with actual state ID
+		DateCreated: time.Now().Format(time.RFC3339),
+		DateUpdated: time.Now().Format(time.RFC3339),
 		State:       make(map[string]dbcon.Asset),
 	}
 	fmt.Println("Scan object created")
@@ -433,12 +438,13 @@ func createAsset(status string, ip string, target string, scanType string) (dbco
 	next := strconv.FormatUint(nextU, 10)
 
 	asset := dbcon.Asset{
-		UID:       next,
-		Status:    status,
-		IPv4Addr:  ip,
-		Subnet:    target,
-		OpenPorts: []int{},
-		ScanType:  scanType,
+		UID:            next,
+		Status:         status,
+		IPv4Addr:       ip,
+		Subnet:         target,
+		OpenPorts:      []int{},
+		ScanType:       scanType,
+		LastDiscovered: time.Now().Format(time.RFC3339),
 	}
 
 	return asset, nil
