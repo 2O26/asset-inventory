@@ -3,57 +3,44 @@ import UserService from './UserService';
 
 //Curling this with the following command worked
 //curl -X POST -d "https://example.com/document" "http://localhost:3001/setDocLink?assetID=123"
-export const SetDocLink = async (docLink, assetID) => { //This code mostly based off of UploadCycloneDX
-    const URL = 'http://localhost:3001/setDocLink';
-    console.log("##Begin ApiService.js SetDocLink");
-    console.log(docLink);
-    console.log(assetID);
-    
+export const SetDocLink = async (docLink, assetID) => {
     try {
-        const response = await fetch(URL, {
-            method: 'POST',
-            body: JSON.stringify({"docLink": docLink, "assetID": assetID})
-        });
-        //Network tab on browser reveals this works.
-
-        if (response.ok) {
-            const docLink = await response.json();
-            console.log('Doc Link set successfully');
-            console.log(docLink);
-            alert('Doc Link set successfully');
-            return docLink; //This function doesn't need to return anything I think?
-        } else {
-            // Handle server errors or invalid responses
-            console.log("Failed to set doc link");
-            //const docLink = await response.json();
-            alert('Failed to set doc link');
-            return docLink;
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
         }
-    } catch (error) {
-        alert('Error setting doc link: ' + error.message);
-        console.log('error');
-    }
-    console.log("##End ApiService.js SetDocLink");
+        const authToken = await UserService.getToken()
 
+        const response = await fetch('http://localhost:3001/setDocLink', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({ doclink: docLink, assetid: assetID })
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not add Doc Link');
+    }
 }
 
 //curl -X POST -d '{"assetID": "123"}' "http://localhost:3001/getDocLink"
 export const GetDocLink = async (assetID) => {
     console.log("##Begin ApiService.js GetDocLink");
-    const URL = 'http://localhost:3001/getDocLink';
-    console.log("ApiService - Getting Doc Link")
 
     try {
-        const response = await fetch(URL, {
+        const response = await fetch('http://localhost:3001/getDocLink', {
             method: 'POST',
-            body: JSON.stringify({"assetID": assetID})
+            body: JSON.stringify({assetID: assetID})
         }); 
         //Browser newtowrk tab reveals the assetID is sent properly.
 
         if (response.ok) {
             const docLink = await response.json(); 
             console.log("ApiService - Response was ok")
-            console.log(docLink) 
+            //console.log(docLink) 
             console.log("##End ApiService.js GetDocLink");
             return docLink;
         } else {
