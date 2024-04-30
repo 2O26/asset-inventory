@@ -7,7 +7,7 @@ import { GetState } from '../../Services/ApiService';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import { SearchIcon } from '../../common/Icons/Icons';
-import {checkIfDate, toLocalTime} from "../../AssetView/AssetInfo";
+import {isDate, toLocalTime} from "../../AssetView/AssetInfo";
 
 const NarrowList = ['Name', 'Owner', 'Type', 'Criticality']
 
@@ -113,7 +113,7 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
             return value.properties[header][0];
         }
         item = value.properties[header];
-        if (checkIfDate(item)){
+        if (isDate(item)){
             return toLocalTime(item);
         }
         return item;

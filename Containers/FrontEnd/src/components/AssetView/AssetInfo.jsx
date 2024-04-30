@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {string} from "prop-types";
 
-export function checkIfDate(value) {
+export function isDate(value) {
     const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
     return isoPattern.test(value);
 }
@@ -47,7 +47,7 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                             (
                                 index === 0 ? <h1 key={key} className="asset-name">{value}</h1> :
                                     (
-                                        <div className="assetItem">{key}: {checkIfDate(value) ? toLocalTime(value) : value}</div>
+                                        <div className="assetItem">{key}: {isDate(value) ? toLocalTime(value) : value}</div>
                                     )
                             )
                     )
