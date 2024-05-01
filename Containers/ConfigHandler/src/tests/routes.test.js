@@ -13,10 +13,7 @@
 */
 
 const request = require('supertest');
-const express = require('express');
 const axios = require('axios');
-const cron = require('node-cron');
-
 
 const { app, server, CronTask } = require('../server.js');
 const { IPRangechecker, RecurringScanFormat } = require('../formatchecker.js');
@@ -40,6 +37,9 @@ const mockAddRecurringScan = jest.fn();
 const mockRemoveRecurringScan = jest.fn();
 const mockUpdateUserSettings = jest.fn();
 const mockUpdateOSSAPIkey = jest.fn();
+const mockGetTrelloKeys = jest.fn()
+const mockUpdateTrelloKeys = jest.fn();
+
 
 jest.mock('axios');
 
@@ -55,6 +55,8 @@ jest.mock('../DatabaseConn/configdbconn', () => {
             addRecurringScan: mockAddRecurringScan,
             removeRecurringScan: mockRemoveRecurringScan,
             updateOSSAPIkey: mockUpdateOSSAPIkey,
+            getTrelloKeys: mockGetTrelloKeys,
+            updateTrelloKeys: mockUpdateTrelloKeys,
         };
     });
 });
@@ -76,32 +78,14 @@ jest.mock('../formatchecker.js', () => ({
 
 
 /*
-      //////////////////
-     /// Test suite ///
-    //////////////////
+      //////////////////////////
+     /////// Test suite ///////
+    //////////////////////////
 */
 
 beforeAll((done) => {
     // Start the server before all tests run
-
     CronTask.start();
-    mockConnect.mockReset();
-    mockGetIPranges.mockReset();
-    mockAddIPrange.mockReset();
-    mockIPRangechecker.mockReset();
-    mockRemoveIPrange.mockReset();
-
-    mockGetRecurringScans.mockReset();
-    mockAddRecurringScan.mockReset();
-    mockRecurringScanFormat.mockReset();
-    mockRemoveRecurringScan.mockReset();
-
-    mockGetUserSettings.mockReset();
-    mockUpdateUserSettings.mockReset();
-
-    mockGetOSSAPIkey.mockReset();
-    mockUpdateOSSAPIkey.mockReset();
-
     done();
 });
 
@@ -809,6 +793,109 @@ describe('POST /updateOSSAPIkey', () => {
 
 });
 
+describe('GET /getTrelloKeys', () => {
+
+    test('responds with 401 Unauthorized if the user is not authenticated', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: false } });
+        const response = await request(app).get('/getTrelloKeys').set('Authorization', 'Bearer fake_token');
+        expect(response.status).toBe(401);
+        expect(response.text).toBe('Invalid token');
+    });
+
+    test('responds with 500 Internal Server Error if there is an error fetching the Trello API information', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } }); // Mock axios for successful authentication
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+
+        // Simulate a failure in the database operation
+        configHandler.getTrelloKeys.mockRejectedValue(new Error('Database error'));
+
+        const response = await request(app)
+            .get('/getTrelloKeys')
+            .set('Authorization', 'Bearer valid_token');
+
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('Error fetching Trello keys');
+    });
+
+    test('GET /getTrelloKeys should return Trello keys on successful authentication and retrieval', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+
+        const trelloINFO = {
+            apiKey: 'mockAPIkeyFILLERFILLERFILLERFILL',
+            token: 'VERYLONGMOCKTOKENMADETOSIMULATETHEIMMENSELENGTHOFTHETOKENAAAAAAAAAAAAAAAAAAA',
+            boardId: 'https://trello.com/b/mocklink/'
+        }
+        mockGetTrelloKeys.mockResolvedValue(trelloINFO);
+
+        const response = await request(app)
+            .get('/getTrelloKeys')
+            .set('Authorization', 'Bearer valid-token');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(trelloINFO);
+        expect(mockConnect).toHaveBeenCalled();
+        expect(mockGetTrelloKeys).toHaveBeenCalled();
+    });
+});
 
 
+describe('POST /updateTrelloKeys', () => {
 
+    test('responds with 401 Unauthorized if the user is not authenticated', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: false } });
+        const response = await request(app).post('/updateTrelloKeys').set('Authorization', 'Bearer fake_token');
+        expect(response.status).toBe(401);
+        expect(response.text).toBe('Invalid token');
+    });
+
+    test('responds with 500 Internal Server Error if there is an error adding the Trello API information', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } }); // Mock axios for successful authentication
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+
+        // Simulate a failure in the database operation
+        configHandler.updateTrelloKeys.mockRejectedValue(new Error('Database error'));
+        const trelloINFO = {
+            apiKey: 'mockAPIkeyFILLERFILLERFILLERFILL',
+            token: 'VERYLONGMOCKTOKENMADETOSIMULATETHEIMMENSELENGTHOFTHETOKENAAAAAAAAAAAAAAAAAAA',
+            boardId: 'https://trello.com/b/mocklink/'
+        }
+
+        const response = await request(app)
+            .post('/updateTrelloKeys')
+            .set('Authorization', 'Bearer valid_token')
+            .send(trelloINFO);
+
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('Error updating Trello keys');
+    });
+
+    test('POST updateTrelloKeys should should update sucessfully', async () => {
+        // Mock the response for the authenticated user
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+
+        // Create an instance of ConfigHandler and mock the methods
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+        configHandler.updateTrelloKeys.mockResolvedValue();
+        configHandler.connect.mockResolvedValue();
+
+        const trelloINFO = {
+            apiKey: 'mockAPIkeyFILLERFILLERFILLERFILL',
+            token: 'VERYLONGMOCKTOKENMADETOSIMULATETHEIMMENSELENGTHOFTHETOKENAAAAAAAAAAAAAAAAAAA',
+            boardId: 'https://trello.com/b/mocklink/'
+        };
+
+        // Make the POST request using supertest
+        const response = await request(app)
+            .post('/updateTrelloKeys')
+            .set('Authorization', 'Bearer valid_token')
+            .send(trelloINFO);
+
+        // Assertions to verify the behavior
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ responseFromServer: "Succeeded to update Trello keys!", success: "success" });
+        expect(configHandler.updateTrelloKeys).toHaveBeenCalledWith(trelloINFO);
+    });
+});

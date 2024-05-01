@@ -9,6 +9,7 @@
     margin: 1rem;
     width: 140px;
     height: 45px;
+    padding-inline: 0.5rem;
     /* font-family: 'Roboto', sans-serif; */
     font-family: inherit;
     font-size: 11px;

@@ -35,7 +35,7 @@ Cypress.Commands.add('login', () => {
 });
 
 Cypress.Commands.add('logout', () => {
-    cy.contains('Log Out').click()
+    cy.contains('Sign Out').click()
 }
 )
 Cypress.Commands.add('addAsset', (name, criticality, type, owner) => {

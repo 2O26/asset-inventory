@@ -7,6 +7,7 @@ var IPRangeSchema = require('../Schemas/IPRangeSchema');
 var RecurringScanSchema = require('../Schemas/RecurringScanSchema');
 var OSSAPIKEYSchema = require('../Schemas/OSSAPIKEYSchema');
 var DocLinkSchema = require('../Schemas/DocLinkSchema');
+var TrelloKeysSchema = require('../Schemas/TrelloKeysSchema');
 
 class ConfigHandler {
     constructor() { }
@@ -125,6 +126,42 @@ class ConfigHandler {
             const result = await OSSAPIKEYSchema.findOneAndUpdate({ apikey: updatedapikey });
         } catch (err) {
             console.log("Error updating OSS API key");
+        }
+    }
+
+    async getTrelloKeys() {
+        let trelloKeys;
+        try {
+            trelloKeys = await TrelloKeysSchema.find().exec();
+        } catch (err) {
+            console.log('Error while fetching Trello keys:', err.message);
+            throw err;  // Rethrow or handle as needed
+        }
+
+        const defaultKeys = {
+            apiKey: "",
+            token: "",
+            boardId: ""
+        };
+
+        if (trelloKeys.length === 0 || (trelloKeys[0] && Object.keys(trelloKeys[0]).length !== 3)) {
+            try {
+                const newTrelloKeysConfig = new TrelloKeysSchema(defaultKeys);
+                await newTrelloKeysConfig.save();
+                return defaultKeys;
+            } catch (err) {
+                console.log('Error while adding Trello keys:', err.message);
+                throw err;  // Rethrow or handle as needed
+            }
+        }
+        return trelloKeys[0];
+    }
+
+    async updateTrelloKeys(updatedTrelloKeys) {
+        try {
+            await TrelloKeysSchema.findOneAndUpdate({}, updatedTrelloKeys, { upsert: true });
+        } catch (err) {
+            console.log("Error updating Trello keys", err);
         }
     }
 }

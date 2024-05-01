@@ -12,6 +12,8 @@ import GraphView from './components/Tools/GraphView/GraphView';
 import NetworkScan from './components/Tools/NetworkScan/NetworkScan';
 import History from './components/Tools/History/History';
 import SBOMLibrarySearch from './components/Tools/SBOMLibrarySearch/SBOMLibrarySearch';
+import PDFDownload from './components/Tools/PDFDownload/PDFDownload';
+
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { SaveUserSetting, GetUserSettings } from './components/Services/ApiService';
@@ -91,20 +93,25 @@ function App() {
     <BrowserRouter>
       <Navbar toggleTheme={toggleTheme} />
 
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/help" element={<Help />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/tools" element={<Tools />} />
-        <Route path="/asset-view/:assetID" element={<AssetView />} />
-        <Route path="/tools/asset-list" element={<AssetList />} />
-        <Route path="/tools/graph-view" element={<GraphView />} />
-        <Route path="/tools/network-scan" element={<NetworkScan />} />
-        <Route path="/tools/history" element={<History />} />
-        <Route path="/tools/SBOMLibrarySearch" element={<SBOMLibrarySearch />} />
-        {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
-      </Routes>
+      <div className="page-content">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/tools" element={<Tools />} />
+          <Route path="/asset-view/:assetID" element={<AssetView />} />
+          <Route path="/tools/asset-list" element={<AssetList />} />
+          <Route path="/tools/graph-view" element={<GraphView />} />
+          <Route path="/tools/network-scan" element={<NetworkScan />} />
+          <Route path="/tools/history" element={<History />} />
+          <Route path="/tools/SBOMLibrarySearch" element={<SBOMLibrarySearch />} />
+          <Route path="/tools/pdf-download" element={<PDFDownload />} />
+          {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
+        </Routes>
+      </div>
+
+
     </BrowserRouter>
   );
 }

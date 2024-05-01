@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import './NetworkScan.css';
-import { StartNetScan, GetIPranges } from '../../Services/ApiService';
+import { StartNetScan, GetIPranges, GetState } from '../../Services/ApiService';
 import { useQuery, useMutation } from '@tanstack/react-query';
 
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
+import { CheckIcon, CrossIcon, InfoIcon } from '../../common/Icons/Icons';
 
 export default function NetworkScanPage() {
     const [deployedNetscan, setDeployedNetscan] = useState(false);
     const [failedNetscan, setFailedNetscan] = useState(false);
+
+    const { refetch: getStateRefetch } = useQuery({
+        queryKey: ['getState'],
+        queryFn: GetState,
+        enabled: false
+    });
 
     const [scanSettings, setScanSettings] = useState({
         cmdSelection: '', // or null, if you prefer
@@ -26,6 +33,7 @@ export default function NetworkScanPage() {
             if (data.success) {
                 setDeployedNetscan(true);
                 setFailedNetscan(false)
+                getStateRefetch()
             } else {
                 // TODO: Error handle if erronous response
                 // - Error 1: Not responding
@@ -88,20 +96,15 @@ export default function NetworkScanPage() {
     return (
         <div className="page-container">
             <div className="scan-form-container">
-                <h1 style={{ color: "var(--text-color)", marginTop: "0.5rem", marginBottom: "0.5rem" }}> Network Scan Config</h1>
+                <h1>Network Scan Config</h1>
                 <form onSubmit={attemptToScan}>
                     <div className='cmd-selection'>
-                        <p className='text-desc'> Please select a scan type: </p>
+                        <p className='text-desc'> Scan type: </p>
 
                         <div className="radio-container">
                             <label className='cmd-radio-label'>
                                 <p className='text-desc'> Simple scan </p>
-                                <div className="info-icon-container">
-                                    <span className="info-icon">ℹ️</span>
-                                    <div className="info-content">
-                                        This scan retrieves the following info: IP, MAC, HOST name
-                                    </div>
-                                </div>
+                                <InfoIcon size={25} text={"This scan retrieves the following info: IP, Subnet, Status"} />
                                 <input
                                     type="radio"
                                     value="simple"
@@ -114,12 +117,7 @@ export default function NetworkScanPage() {
                         <div className="radio-container">
                             <label className='cmd-radio-label'>
                                 <p className='text-desc'> Extensive scan </p>
-                                <div className="info-icon-container">
-                                    <span className="info-icon">ℹ️</span>
-                                    <div className="info-content">
-                                        This scan retrieves the following info: IP, MAC, HOST name, Vulnerable services, CVEs associated to vulnerabilities
-                                    </div>
-                                </div>
+                                <InfoIcon size={25} text={"This scan retrieves the following info: IP, Subnet, Status, Open ports"} />
                                 <input
                                     type="radio"
                                     value="extensive"
@@ -133,7 +131,7 @@ export default function NetworkScanPage() {
                     </div>
 
                     <div className='IPField'>
-                        <p className='text-desc'> Please select an IP range or subnet to scan: </p>
+                        <p className='text-desc'> Subnet: </p>
                         {isLoading && <LoadingSpinner />}
                         {isError && <div className='errorMessage'>{error.message}</div>}
                         {data && Array.isArray(data.ipranges) && data.ipranges.map((iprange, index) => (
@@ -161,12 +159,12 @@ export default function NetworkScanPage() {
                         {isPending && <LoadingSpinner />}
                         {deployedNetscan &&
                             <div className='resultText'>
-                                <p className='successText'>Successfully started scanning IP range ✅</p>
+                                <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully scanned subnet </p>
                             </div>
                         }
                         {failedNetscan &&
                             <div className='resultText'>
-                                <p className='successText'> Failed to start scanning IP range. ❌</p>
+                                <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to scan subnet </p>
                             </div>
                         }
                     </div>

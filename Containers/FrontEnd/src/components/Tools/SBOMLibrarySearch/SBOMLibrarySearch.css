@@ -5,6 +5,7 @@
     overflow-y: auto;
     justify-content: center;
     box-shadow: var(--box-shadow);
+    width: 50vw;
 }
 
 .SBOM-search-container {
@@ -19,6 +20,14 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    gap: 0.5rem;
+}
+
+.vulncount {
+    color: var(--text-color);
+    font-weight: 600;
+    color: red;
+    text-shadow: var(--box-shadow);
 }
 
 .SBOM-top-row .top-row-child {
@@ -41,7 +50,7 @@
 }
 
 
-.settings-container {
+.cve-container {
     z-index: 0;
     border-radius: 0.5rem;
     box-shadow: var(--box-shadow);
@@ -55,6 +64,8 @@
     color: var(--text-color);
     padding: 3rem 1rem 1rem 1rem;
     margin-top: -2rem;
+    word-wrap: break-word;
+    overflow: auto;
 
 }
 
@@ -77,21 +88,7 @@
 
 /* Searchbar */
 
-.SearchBar {
-    margin: 2rem 0;
-    width: 500px;
-    height: 60px;
-    padding: 10px;
-    font-size: 16px;
-    background-color: var(--main-color);
-    border: 1px solid var(--text-color);
-    /* Changed border to a solid color */
-    border-radius: 30px;
-    display: flex;
-    /* Added */
-    align-items: center;
-    /* Added */
-}
+
 
 .searchIconWrapper {
     margin-right: -5px;
@@ -113,10 +110,27 @@
     color: var(--text-color);
 }
 
-.SearchBar:hover {
-    backdrop-filter: brightness(85%);
-}
+
 
 .json-tree-container {
     width: 100%
+}
+
+.cve-asset-container {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.cve-asset-item {
+    cursor: pointer;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    background-color: var(--secondary-color);
+    box-shadow: var(--box-shadow);
+}
+
+.cve-asset-item:hover {
+    filter: invert(15%);
 }

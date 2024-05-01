@@ -21,7 +21,7 @@
 .asset-form {
     text-align: left;
     display: flex;
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;

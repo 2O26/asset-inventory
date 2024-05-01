@@ -7,7 +7,7 @@ import Plugins from '../../Tools/Plugins';
 
 import './RecurringScanSettings.css'
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
-import { InfoIcon, RemoveIcon } from "../../common/Icons/Icons";
+import { CheckIcon, CrossIcon, InfoIcon, RemoveIcon } from "../../common/Icons/Icons";
 import CronMap from './CronMap'
 
 export default function RecurringScanSettings() {
@@ -216,12 +216,13 @@ export default function RecurringScanSettings() {
                                 {isPendingMutAdd && <LoadingSpinner />}
                                 {addRecurringSuccess &&
                                     <div>
-                                        <p className='successText'>Successfully added recurring scan ✅</p>
+                                        <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully added recurring scan </p>
                                     </div>
                                 }
                                 {addRecurringFail &&
                                     <div>
-                                        <p className='successText'> Failed to add recurring scan. Wrong format. ❌</p>
+                                        <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to add recurring scan. Wrong format. </p>
+
                                     </div>
                                 }
                                 {/* {isErrorMutRm && <div className='errorMessage'>{errorMutRm.message}</div>} */}

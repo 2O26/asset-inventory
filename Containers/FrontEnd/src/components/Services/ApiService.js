@@ -101,35 +101,33 @@ export const AssetHandlerStatus = async () => {
     return return_data;
 };
 
-export const LogIn = async (userData) => {
-    console.log("Email: ", userData.email, ", Password: ", userData.password);
-
-    // Simulate an API call
-    const response = await new Promise((resolve) => {
-        setTimeout(() => resolve({ "success": true }), 1000); // Simulate async operation
-    });
-
-    return response; // No need to call .json() on a plain object
-};
-
-export const GetState = async () => {
-
-    if (UserService.tokenExpired()) {
-        await UserService.updateToken()
-    }
-    const authToken = await UserService.getToken();
-    const response = await fetch('http://localhost:8080/getLatestState', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${authToken}`
+export const GetState = async (ipRanges = []) => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
         }
-    });
+        const authToken = await UserService.getToken();
 
-    if (!response.ok) {
-        throw new Error('Network response was not ok, could not fetch state');
+        const formData = new FormData();
+        for (let i = 0; i < ipRanges.length; i++) {
+            formData.append("subnets", ipRanges[i])
+        }
+
+        const response = await fetch('http://localhost:8080/getLatestState', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: formData
+        });
+
+        const return_data = await response.json();
+
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch asset data ');
     }
-    const return_data = await response.json();
-    return return_data;
 };
 
 export const StartNetScan = async (scanSettings) => {
@@ -156,11 +154,6 @@ export const CreateRealmRole = async (IPRange) => {
         }
 
         const authToken = await UserService.getToken()
-
-        if (UserService.tokenExpired()) {
-            await UserService.updateToken()
-        }
-
 
         const response = await fetch("http://localhost:8085/admin/realms/master/roles", {
             method: 'POST',
@@ -502,15 +495,35 @@ export const RemoveCDXfile = async (assetID) => {
     try {
         const formData = new FormData();
         formData.append('assetID', assetID)
-
-        console.log("formdata: ", formData)
         const response = await fetch('http://localhost:8082/removeCycloneDX', {
             method: 'POST',
             body: formData
         })
+        const return_data = await response.json();
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not remove CycloneDX file');
+    }
+}
+
+export const RemoveLibsGivenSBOMRemoval = async (assetID) => {
+    try {
+        const response = await fetch('http://localhost:3002/removeAssetidLibs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ assetID: assetID })
+        })
+        if (!response.ok) {
+            // Handle HTTP errors, e.g., response status 404, 500, etc.
+            const errorText = await response.text();
+            console.error('HTTP Error:', response.status, errorText);
+            throw new Error(`HTTP Error ${response.status}: ${errorText}`);
+        }
 
         const return_data = await response.json();
-        console.log(return_data)
         return return_data;
     } catch (err) {
         console.error(err);
@@ -603,6 +616,7 @@ export const GetVulnerbleComponents = async (assetID) => {
             },
             body: JSON.stringify({ "assetID": assetID })
         });
+
         const return_data = await response.json();
         return return_data;
     } catch (err) {
@@ -620,12 +634,11 @@ export const GetVulnerbleComponentsAll = async (assetID) => {
         const authToken = await UserService.getToken()
 
         const response = await fetch('http://localhost:3002/getVulnerableAssetAll', {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
                 'Authorization': `Bearer ${authToken}`,
-            },
-            body: JSON.stringify({ "assetID": assetID })
+            }
         });
         const return_data = await response.json();
 
@@ -661,5 +674,47 @@ export const GetHistory = async (assetID) => {
     } catch (err) {
         console.error(err);
         throw new Error('Could not fetch event history ');
+    }
+}
+
+export const UpdateTrelloKeys = async (trelloKeys) => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken();
+        }
+        const authToken = await UserService.getToken();
+        const response = await fetch('http://localhost:3001/updateTrelloKeys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(trelloKeys)
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not update Trello keys');
+    }
+}
+
+export const GetTrelloKeys = async () => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken();
+        }
+        const authToken = await UserService.getToken();
+        const response = await fetch('http://localhost:3001/getTrelloKeys', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch Trello keys');
     }
 }

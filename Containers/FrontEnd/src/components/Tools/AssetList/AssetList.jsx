@@ -7,6 +7,7 @@ import { GetState } from '../../Services/ApiService';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import { SearchIcon } from '../../common/Icons/Icons';
+import {isDate, toLocalTime} from "../../AssetView/AssetInfo";
 
 const NarrowList = ['Name', 'Owner', 'Type', 'Criticality']
 
@@ -24,6 +25,8 @@ const getColumnHeaders = (data, isNarrowView, isDashboard) => {
 
     return Array.from(columnHeaders);
 };
+
+
 
 export function SearchBar({ onSearch }) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -104,43 +107,57 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
         refetch();
     };
 
+    function processCellObject(header, value) {
+        let item = null;
+        if (header === "Type"){
+            return value.properties[header][0];
+        }
+        item = value.properties[header];
+        if (isDate(item)){
+            return toLocalTime(item);
+        }
+        return item;
+    }
+
     if (isLoading) return <LoadingSpinner />;
     if (isError) return <div className='errorMessage'>{error.message}</div>;
 
     return (
+
         <div className='page-container'>
             {!isDashboard && <div><SearchBar onSearch={setSearchTerm} /></div>}
-            <div className='asset-list-container' style={{ width: width, height: height }}>
-                <div className='headerRow'>
-                    {data && getColumnHeaders(data, isNarrowView, isDashboard).map(header => (
-                        <div key={header} className={`headerCell ${header === 'Select' ? 'checkbox-header' : ''}`}>
-                            {header}
-                        </div>
-                    ))}
-                </div>
-                <hr />
-                {filteredAssets.map(([key, value]) => (
-                    <div key={key} className='assetRow' id={key}>
-                        {(!isNarrowView && !isDashboard) && (
-                            <div className='assetCell'>
-                                <input
-                                    type="checkbox"
-                                    checked={checkedItems[key] || false}
-                                    onChange={() => handleCheckboxChange(key)}
-                                />
-                            </div>
-                        )}
-                        {Object.keys(value.properties).filter(header => !isNarrowView || NarrowList.includes(header)).map((header, headerIndex) => (
-                            <div
-                                key={headerIndex}
-                                className='assetCell'
-                                onClick={() => handleClick(key)}
-                            >
-                                {header === "Type" ? value.properties[header][0] : value.properties[header]}
+
+                <div className='asset-list-container' style={{ width: width, height: height }}>
+                    <div className='headerRow'>
+                        {data && getColumnHeaders(data, isNarrowView, isDashboard).map(header => (
+                            <div key={header} className={`headerCell ${header === 'Select' ? 'checkbox-header' : ''}`}>
+                                {header}
                             </div>
                         ))}
                     </div>
-                ))}
+                    <hr />
+                    {filteredAssets.map(([key, value]) => (
+                        <div key={key} className='assetRow' id={key}>
+                            {(!isNarrowView && !isDashboard) && (
+                                <div className='assetCell'>
+                                    <input
+                                        type="checkbox"
+                                        checked={checkedItems[key] || false}
+                                        onChange={() => handleCheckboxChange(key)}
+                                    />
+                                </div>
+                            )}
+                            {Object.keys(value.properties).filter(header => !isNarrowView || NarrowList.includes(header)).map((header, headerIndex) => (
+                                <div
+                                    key={headerIndex}
+                                    className='assetCell'
+                                    onClick={() => handleClick(key)}
+                                >
+                                    {processCellObject(header, value)}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
             </div>
             {!isDashboard &&
                 <div className='actions-container'>

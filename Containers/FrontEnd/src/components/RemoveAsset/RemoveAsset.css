@@ -18,79 +18,11 @@
     transform: translate(-50%, -50%);
 }
 
-.asset-form {
-    text-align: left;
-    display: flex;
-    border-radius: 1rem;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--main-color);
-    width: fit-content;
-    padding: 2rem 1rem;
-    color: var(--text-color);
-}
-
-
-.asset-form h2 {
-    color: var(--text-color);
-    padding-bottom: 1rem;
-}
-
-.asset-form label {
-    align-self: flex-start;
-    margin-left: 0.5rem;
-    display: block;
-    text-align: left;
-    text-indent: 10px;
-}
-
 .login-form {
     text-align: left;
-}
-
-.asset-form .inputFields {
-    margin: 0.5rem 0;
-    border: none;
-    min-width: 90%;
-    height: 40px;
-    font-size: 20px;
-    text-indent: 10px;
-    border-radius: 5px;
-    border-style: hidden;
-}
-
-
-.asset-form input {
-    background-color: var(--background-color);
-    color: var(--text-color);
-}
-
-.asset-form input:focus {
-    outline: none;
 }
 
 .AuthBtnContainer {
     display: flex;
     justify-content: center;
-}
-
-.asset-form .errorMessage,
-.asset-form .successMessage {
-    text-align: center;
-    color: rgb(0, 0, 0);
-    width: fit-content;
-    max-width: 14rem;
-    padding: 0.5rem;
-    border-radius: 0.3rem;
-    margin: auto;
-    margin-top: 0.5rem;
-}
-
-.asset-form .errorMessage {
-    background-color: rgb(255, 120, 120);
-}
-
-.asset-form .successMessage {
-    background-color: #2FDD92;
 }

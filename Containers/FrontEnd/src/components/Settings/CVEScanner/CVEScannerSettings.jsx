@@ -5,6 +5,7 @@ import { UpdateAPIOSSkey, GetOSSAPIkey } from '../../Services/ApiService';
 
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
 import "./CVEScannerSettings.css";
+import { CheckIcon, CrossIcon } from '../../common/Icons/Icons';
 
 export default function CVEScanSettings() {
     const [apikey, setapikey] = useState("");
@@ -95,12 +96,12 @@ export default function CVEScanSettings() {
                     {isPendingMutAdd && <LoadingSpinner />}
                     {addAPIKeySuccess &&
                         <div>
-                            <p className='successText'>Successfully updated API key ✅</p>
+                            <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully updated API key </p>
                         </div>
                     }
                     {addAPIKeyFail &&
                         <div>
-                            <p className='successText'> Failed to update API key. ❌</p>
+                            <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to update API key. </p>
                         </div>
                     }
 

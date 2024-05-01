@@ -12,7 +12,7 @@ import { CSSTransition } from 'react-transition-group';
 import CycloneDX from './CycloneDX';
 import History from '../Tools/History/History';
 import DocLink from './DocLink';
-
+import TrelloTab from './TrelloTab';
 
 export default function AssetView() {
     let { assetID } = useParams();
@@ -70,9 +70,11 @@ export default function AssetView() {
 
 
     return (
-        <div className='asset-view-container'>
+        <div className='asset-view'>
+
 
             <GraphView selectedAsset={assetID} />
+
 
             <button
                 className="toggle-button"
@@ -82,7 +84,8 @@ export default function AssetView() {
             </button>
             <CSSTransition
                 in={isExpanded}
-                timeout={500} // Match the duration of your CSS transition
+                appear={isExpanded}
+                timeout={250} // Match the duration of your CSS transition
                 classNames="slide"
                 unmountOnExit
             >
@@ -118,15 +121,19 @@ export default function AssetView() {
                         >
                             Documentation
                         </button>
+                        <button
+                            className={`tab-button ${selectedView === 'Trello' ? 'active-button' : ''}`}
+                            onClick={() => handleButtonClick('Trello')}
+                        >
+                            Issue Board
+                        </button>
                     </div>
                     {/* Conditionally render content based on selectedView */}
                     {selectedView === 'Information' && (
-                        <div>
-                            <AssetInfo data={data} assetID={assetID} showPluginInfo={true} ></AssetInfo>
-                        </div>)
+                        <AssetInfo data={data} assetID={assetID} showPluginInfo={true} ></AssetInfo>)
                     }
                     {selectedView === 'History' && (
-                        <History height='100%' width='25vw' assetID={assetID} isDashboard={true} isAssetView={true}></History>)
+                        <History height='100%' width='100%' assetID={assetID} isDashboard={false} isAssetView={true}></History>)
                     }
                     {selectedView === 'Edit' && (
                         <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch} assetIDs={assetIDs}></EditAsset>)
@@ -137,7 +144,9 @@ export default function AssetView() {
                     {selectedView === 'DocLink' && (
                         <DocLink assetID={assetID} ></DocLink>)
                     }
-
+                    {selectedView === 'Trello' && (
+                        <TrelloTab assetID={assetID} ></TrelloTab>)
+                    }
 
                 </div>
             </CSSTransition>

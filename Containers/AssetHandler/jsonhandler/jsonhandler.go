@@ -10,6 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type AuthResponse struct {
+	Authenticated   bool     `json:"authenticated"`
+	Roles           []string `json:"roles"`
+	IsAdmin         bool     `json:"isAdmin"`
+	CanManageAssets bool     `json:"canManageAssets"`
+}
+
 type Asset struct {
 	Name        string   `json:"Name"`
 	Owner       string   `json:"Owner"`
@@ -175,7 +182,7 @@ func insertPluginData(inAssets map[string]FrontAsset, plugins map[string]PluginS
 	}
 }
 
-func NeedToKnow(inState FrontState, roles []string) FrontState {
+func NeedToKnow(inState FrontState, auth AuthResponse) FrontState {
 	// Function will be primarily used to filter out data that the user does not have access to
 	var alteredState FrontState
 	alteredState.Assets = make(map[string]FrontAsset)
@@ -190,11 +197,10 @@ func NeedToKnow(inState FrontState, roles []string) FrontState {
 		if ok {
 			var netProps networkAsset
 			err := mapstructure.Decode(netscanData, &netProps)
-
 			if err != nil {
 				continue //ADD ERROR HERE
 			}
-			for _, role := range roles {
+			for _, role := range auth.Roles {
 				fmt.Println("ASSET NAME", asset.Name)
 				if netProps.Subnet == role {
 					// user can view asset, add it to alteredState
@@ -204,12 +210,12 @@ func NeedToKnow(inState FrontState, roles []string) FrontState {
 		} else {
 			// asset does not have netscan data, and since all users have access to manually added assets
 			// we add them. Edge case being the subnet assets
-			if len(roles) <= 0 {
+			if len(auth.Roles) <= 0 {
 				if asset.Type[0] != "Subnet" {
 					alteredState.Assets[assetID] = asset
 				}
 			} else {
-				for _, role := range roles {
+				for _, role := range auth.Roles {
 					if asset.Type[0] != "Subnet" {
 						//Not a subnet asset, add it
 						alteredState.Assets[assetID] = asset
@@ -220,7 +226,6 @@ func NeedToKnow(inState FrontState, roles []string) FrontState {
 			}
 		}
 	}
-
 	//also need to copy relations
 	for relationID, relation := range inState.Relations {
 		from := false
@@ -236,9 +241,89 @@ func NeedToKnow(inState FrontState, roles []string) FrontState {
 			alteredState.Relations[relationID] = relation
 		}
 	}
-
 	alteredStateJSON, _ := json.Marshal(alteredState)
+	fmt.Println("Altered state: ", string(alteredStateJSON))
+	return alteredState
+}
 
+// FilterBySubnets is a variant of NeedToKnow used when creating a PDF report of the inventory
+// This function filters out data based on subnets specified when requesting the report
+func FilterBySubnets(inState FrontState, auth AuthResponse, subnets []string) FrontState {
+	var alteredState FrontState
+	alteredState.Assets = make(map[string]FrontAsset)
+	alteredState.Assets = make(map[string]FrontAsset)
+	alteredState.Relations = make(map[string]Relation)
+	alteredState.PluginList = inState.PluginList
+	alteredState.MostRecentUpdate = inState.MostRecentUpdate
+	manualAssets := false // used to check if the user wants manually added assets in their report. Key is "manual-assets"
+	rolesAndSubnets := make(map[string]bool)
+
+	if auth.IsAdmin {
+		for _, subnet := range subnets {
+			if subnet == "manual-assets" {
+				manualAssets = true
+			}
+			rolesAndSubnets[subnet] = true
+		}
+	} else {
+		//user is not admin, need to check if user has access to requested subnets
+		for _, subnet := range subnets {
+			if subnet == "manual-assets" {
+				manualAssets = true
+			}
+			for _, role := range auth.Roles {
+				if subnet == role {
+					rolesAndSubnets[subnet] = true
+				}
+			}
+		}
+	}
+
+	for assetID, asset := range inState.Assets {
+		//check if netscan data exists
+		netscanData, ok := asset.Plugins["netscan"].(map[string]any)
+		if ok {
+			var netProps networkAsset
+			err := mapstructure.Decode(netscanData, &netProps)
+			if err != nil {
+				continue
+			}
+			for accessible := range rolesAndSubnets {
+				if netProps.Subnet == accessible {
+					//user can view, add to alteredState
+					alteredState.Assets[assetID] = asset
+				}
+			}
+		} else {
+			//asset does not have netscan data. adding accessible subnets and other manual assets if requested
+			for accessible := range rolesAndSubnets {
+				if accessible == asset.Name && asset.Type[0] == "Subnet" {
+					//accessible subnet found, add it
+					alteredState.Assets[assetID] = asset
+				}
+			}
+			if manualAssets && asset.Type[0] != "Subnet" {
+				alteredState.Assets[assetID] = asset
+			}
+		}
+	}
+
+	//copying relations
+	for relationID, relation := range inState.Relations {
+		from := false
+		to := false
+		for assetID := range alteredState.Assets {
+			if relation.From == assetID {
+				from = true
+			} else if relation.To == assetID {
+				to = true
+			}
+		}
+		if from && to {
+			alteredState.Relations[relationID] = relation
+		}
+	}
+	alteredStateJSON, _ := json.Marshal(alteredState)
 	fmt.Println("Altered state: ", string(alteredStateJSON))
 	return alteredState
 

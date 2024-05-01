@@ -175,7 +175,7 @@ function LayoutFlow({ initialNodes, initialEdges, selectedAsset, isDashboard }) 
     );
 }
 
-export default function GraphView({ width = '100vw', height = '90vh', selectedAsset = null, isDashboard = false }) {
+export default function GraphView({ width , height, selectedAsset = null, isDashboard = false }) {
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ['getState'],
         queryFn: GetState,
@@ -192,9 +192,8 @@ export default function GraphView({ width = '100vw', height = '90vh', selectedAs
 
     // const parsedState = ParseState(jsonData, selectedAsset);
 
-
     return (
-        <div style={{ width: width, height: height }}>
+        <div className="asset-view-container" style={{ width: width, height: height }}>
             {parsedState ?
                 <ReactFlowProvider>
                     <LayoutFlow initialNodes={parsedState.nodes} initialEdges={parsedState.edges} selectedAsset={selectedAsset} isDashboard={isDashboard} />
@@ -203,6 +202,5 @@ export default function GraphView({ width = '100vw', height = '90vh', selectedAs
                 <LoadingSpinner />
             }
         </div>
-
     )
 };

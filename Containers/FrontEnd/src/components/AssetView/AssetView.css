@@ -1,26 +1,68 @@
-.asset-view-container,
-.asset-info-container,
-.assetItem {
+.asset-info-container {
+    text-align: left;
+    font-family: var(--jetbrains-mono);
+}
+.asset-item {
     text-align: left;
     /* Ensures everything is aligned to the left */
 }
 
+.asset-item-list {
+    /* applies font on list entry */
+    font-family: var(--jetbrains-mono);
+}
+
+
+.slide-appear {
+    width: 30%;
+}
+
+.slide-enter {
+    width: 0;
+    white-space: nowrap;
+}
+
+.slide-enter-active {
+    width: 30%;
+}
+
+.slide-enter-done {
+    width: 30%;
+}
+
+.slide-exit {
+    width: 30%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.slide-exit-active {
+    width: 0;
+    overflow: hidden;
+}
+
 .react-flow {
     flex: 1;
-    transition: flex 0.5s ease-in-out;
 }
 
 .toggle-button {
     color: var(--text-color);
     /* Keeps the color for the icon */
-    background: none;
+    background: var(--graph-bg);
     /* Removes the background */
     border: none;
+    border-radius: 0.5rem;
     /* Removes the border */
-    padding: 0;
+    margin: 0.5rem;
+    margin-left: 0;
     /* Removes padding, adjust as necessary */
     cursor: pointer;
     /* Optional: Changes cursor on hover to indicate it's clickable */
+}
+
+.toggle-button:hover {
+    transition: ease-in-out 100ms;
+    background: var(--main-color);
 }
 
 /* If your button still has some default browser styling, you might also need */
@@ -31,30 +73,15 @@
 
 /* Ensure your icons (arrows) are properly sized */
 .toggle-button svg {
-    width: 24px;
+    width: 26px;
     /* Example size, adjust as needed */
     height: auto;
     /* Maintain aspect ratio */
 }
 
 
-.slide-enter {
-    transform: translateX(100%);
-}
 
-.slide-enter-active {
-    transform: translateX(0%);
-    transition: transform 500ms ease-in-out;
-}
 
-.slide-exit {
-    transform: translateX(0%);
-}
-
-.slide-exit-active {
-    transform: translateX(100%);
-    transition: transform 500ms ease-in-out;
-}
 
 
 
@@ -67,7 +94,7 @@
     background-color: var(--main-color);
     /* Initial button color */
     padding: 10px;
-    border-radius: 5px 5px 0 0;
+    border-radius: 0.5rem 0.5rem 0 0;
     cursor: pointer;
     font-family: inherit;
     font-size: 18px;
@@ -99,25 +126,34 @@
     /* box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15); */
 }
 
-.asset-view-container {
-    width: 100vw;
-    height: 90vh;
+.asset-view {
     display: flex;
-    flex-direction: row;
-    /* transition: all 0.5s ease-in-out; */
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
+
+.asset-view-container {
+    padding: 0.5rem;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: 100%;
+}
+
 
 /* Modifications for the button-plus-info container */
 .button-plus-info {
+    margin: 0.5rem;
+    margin-left: 0;
     display: flex;
+    transition: all 250ms ease-in-out;
     /* Use Flexbox for layout */
     flex-direction: column;
-    /* Arrange elements vertically */
-    align-items: center;
-    /* Center the elements horizontally */
-    max-width: 50%;
-    /* Make it occupy full width */
+    border-radius: 0.25rem;
+    overflow: hidden;
 }
+
 
 /* Modifications for the button container */
 .button-container {
@@ -125,33 +161,41 @@
     /* Use Flexbox for button layout */
     justify-content: space-between;
     /* Distribute buttons with equal spacing */
-    margin-bottom: 20px;
     /* Add spacing below buttons */
-    width: 25vw;
     gap: 0px;
-    margin-top: 20px;
+}
+
+.asset-info{
+    display: flex;
+    width: 100%;
 }
 
 .asset-info-container {
     display: flex;
+    flex: 1;
     flex-direction: column;
     position: relative;
     z-index: 1;
-    margin: 2rem;
     padding: 2rem;
-    width: 25vw;
+    width: 100%;
     height: 100%;
     color: var(--text-color);
     border-radius: 0 0 0.5rem 0.5rem;
     background-color: var(--main-color);
     box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);
     overflow-y: auto;
-    margin-top: -21px;
     border-top: none;
+    margin: 0;
 }
+
+.asset-info-container p {
+    font-size: 14px;
+}
+
 
 /* Style for asset cells */
 .assetItem {
+    font-family: var(--jetbrains-mono);
     flex: 1;
     padding: 5px;
     display: block;
@@ -180,20 +224,35 @@
 }
 
 .key-value {
+    font-family: var(--jetbrains-mono);
     display: inline-block;
     /* Ensure the key-value text is inline */
     margin-right: 8px;
     /* Adjust spacing between key-value and arrow */
 }
 
+.asset-info-container .inputLabel {
+    font-size: 16px;
+}
+
+.asset-info-container h1 {
+    font-kerning: none;
+    letter-spacing: 0.5px;
+    font-size: 30px;
+    font-weight: bolder;
+    margin-bottom: 0.5rem;
+}
+
+
 .asset-info-container .inputFields {
+    font-family: var(--jetbrains-mono);
     background-color: var(--background-color);
     color: var(--text-color);
     margin: 0.5rem 0rem;
     border: none;
     min-width: 16rem;
     height: 40px;
-    font-size: 20px;
+    font-size: 16px;
     text-indent: 10px;
     border-radius: 5px;
     border-top-style: hidden;
@@ -232,6 +291,11 @@
     margin-top: 0.3rem;
     border-radius: 0.25rem;
     align-items: center;
+}
+
+.relation a {
+    font-family: var(--jetbrains-mono);
+    font-size: 14px;
 }
 
 .addRelation-container {

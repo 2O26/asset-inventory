@@ -4,7 +4,7 @@ import { CycloneDXuploader } from './CycloneDXuploader';
 import './CycloneDX.css'
 import { CycloneDXIcon, RemoveIcon } from '../common/Icons/Icons';
 import Modal from 'react-modal';
-import { GetCDXfiles, RemoveCDXfile } from '../Services/ApiService';
+import { GetCDXfiles, RemoveCDXfile, RemoveLibsGivenSBOMRemoval } from '../Services/ApiService';
 import { JSONTree } from 'react-json-tree';
 import { CDXMetadata } from './CDXtabs/CDXMetadata';
 import { CDXLibraries } from './CDXtabs/CDXLibraries';
@@ -41,8 +41,19 @@ export default function CycloneDX({ assetID }) {
         enabled: true
     });
 
-    const { mutate, isPending, error: removeError } = useMutation({
-        mutationFn: RemoveCDXfile, // Directly pass the LogIn function
+    const { mutate: removeSBOMfilemutate, isPending: isPendingSBOMremoval, error: removeSBOMError } = useMutation({
+        mutationFn: () => RemoveCDXfile(assetID), // Directly pass the LogIn function
+        onSuccess: () => {
+            refetchCyclone()
+        },
+        onError: (error) => {
+            refetchCyclone()
+            console.error("Remove CDX file error:", error.message);
+        }
+    });
+
+    const { mutate: removeLibsmutate, isPending: isPendingLibRemoval, error: removeLibError } = useMutation({
+        mutationFn: () => RemoveLibsGivenSBOMRemoval(assetID), // Directly pass the LogIn function
         onSuccess: () => {
             refetchCyclone()
         },
@@ -66,7 +77,8 @@ export default function CycloneDX({ assetID }) {
 
     const handleRemove = () => {
         if (window.confirm("Are you sure you want to remove this Cyclone DX file?")) {
-            mutate(assetID);
+            removeSBOMfilemutate(assetID);
+            removeLibsmutate(assetID);
         }
     }
 
@@ -87,8 +99,8 @@ export default function CycloneDX({ assetID }) {
                             <RemoveIcon color={"var(--error-color)"} />
                         </div>
                     </div>
-                    {isPending && <LoadingSpinner />}
-                    {removeError && <div className='errorMessage'>{removeError.message}</div>}
+                    {isPendingSBOMremoval && <LoadingSpinner />}
+                    {removeSBOMError && <div className='errorMessage'>{removeSBOMError.message}</div>}
                 </div>
             }
             <Modal

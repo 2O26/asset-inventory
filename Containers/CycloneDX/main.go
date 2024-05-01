@@ -24,7 +24,7 @@ type LibraryCVEresp struct {
 	Success string `json:"response"`
 }
 
-func uploadCycloneDX(c *gin.Context) {
+func uploadCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
 	// Limit the size of the request body to 10MB
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 10<<20)
 
@@ -108,7 +108,7 @@ func uploadCycloneDX(c *gin.Context) {
 	fmt.Printf("Asset ID: %s\n", assetID)
 
 	// Save the SBOM data to the database
-	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
+	// db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
 	err = dbcon.SaveCycloneDX(db, sbomData, assetID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -127,7 +127,7 @@ func uploadCycloneDX(c *gin.Context) {
 		return
 	}
 
-	resp, err := http.Post("http://cvescanner:3002/librarySort", "application/json", bytes.NewBuffer(reqBytes))
+	resp, err := http.Post("http://cvescanner:3002/libraryDBupdate", "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		fmt.Println("Error making POST request:", err)
 		return
@@ -154,11 +154,11 @@ func uploadCycloneDX(c *gin.Context) {
 	})
 }
 
-func removeCycloneDX(c *gin.Context) {
+func removeCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
 	assetID := c.PostForm("assetID")
 	fmt.Printf("Asset ID: %s\n", assetID)
 
-	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
+	// db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
 	err := dbcon.RemoveCycloneDX(db, assetID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -198,9 +198,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not set up database: %v", err)
 	}
-	router.POST("/uploadCycloneDX", uploadCycloneDX)
-	router.POST("/removeCycloneDX", removeCycloneDX)
 	sbomHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
+	router.POST("/uploadCycloneDX", func(c *gin.Context) {
+		uploadCycloneDX(sbomHelper, c)
+	})
+	// router.POST("/uploadCycloneDX", uploadCycloneDX)
+
+	router.POST("/removeCycloneDX", func(c *gin.Context) {
+		removeCycloneDX(sbomHelper, c)
+	})
+	// router.POST("/removeCycloneDX", removeCycloneDX)
 
 	router.GET("/getCycloneDXFile", func(c *gin.Context) {
 		dbcon.GetCycloneDXFile(sbomHelper, c)
@@ -212,7 +219,7 @@ func main() {
 	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
 		dbcon.DeleteAllDocuments(sbomHelper, c)
 	})
-	//sbomHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
+
 	log.Println("Server starting on port 8082...")
 	if err := router.Run(":8082"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
