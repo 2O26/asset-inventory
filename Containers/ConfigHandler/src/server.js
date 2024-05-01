@@ -23,9 +23,9 @@ const server = app.listen(route, () => console.log(`Server listening on port: ${
 
 
 app.post("/setDocLink", async (req, res) => {
-    console.log("begin print req.body")
-    console.log(req.body)
-    console.log("finish print req.body")
+    //console.log("begin print req.body")
+    //console.log(req.body)
+    //console.log("finish print req.body")
         try {
         const response = await axios.get('http://authhandler:3003/getRoles', {
             headers: {
@@ -55,7 +55,7 @@ app.post("/setDocLink", async (req, res) => {
 });
 
 app.post("/getDocLink", async (req, res) => {
-    console.log("server.js - req.body:", req.body)
+    //console.log("server.js - req.body:", req.body)
     try {
         const response = await axios.get('http://authhandler:3003/getRoles', {
             headers: {
@@ -72,46 +72,10 @@ app.post("/getDocLink", async (req, res) => {
         res.json({ responseFromServer: "Server.js: Succeeded to fetch doc link", success: "success", assetid: req.body.assetid, doclink: doclink });
         return doclink;
 
-        {/**
-        if (response.data.isAdmin) {
-            res.json({ ipranges: ipranges });
-        } else {
-            let filteredRanges = ipranges.filter(range => response.data.roles.includes(range));
-            res.json({ ipranges: filteredRanges });
-        }
-    */}
-
     } catch (error) {
         res.status(500).send('Error fetching doc link');
     }
 });
-
-{/**
-app.post("/getDocLink", async (req, res) => {
-    console.log("###Begin Server.js getDocLink");
-    console.log(res)
-    console.log("Finish printing request body")
-    try {
-        const response = await axios.get('http://authhandler:3003/getRoles', {
-            headers: {
-                'Authorization': req.headers.authorization
-            }
-        });
-        if (!response.data.authenticated) {
-            return res.status(401).send('Invalid token');
-        }
-        const configHandler = new ConfigHandler();
-        await configHandler.connect();
-        const docLink = await configHandler.getDoclink(req.body.assetID) //Problem is here.
-        //console.log(docLink);
-        res.json({ responseFromServer: "Succeeded to get Doc Link!!", success: "success", docLink: req.body.DocLink }); //Problem is here.
-        
-    } catch (error) {
-        res.status(500).send('Error fetching doc link');
-    }
-    console.log("###End Server.js setDocLink");
-});
-*/}
 
 app.get("/getIPranges", async (req, res) => {
     try {

@@ -13,23 +13,23 @@ class ConfigHandler {
     constructor() { }
 
     async setDocLink(userDocLink, userAssetID) { //Create new schema where assetID and relevant DocLink is stored.
-        console.log("###Begin configdbconn setDocLink");
+        //console.log("###Begin configdbconn setDocLink");
         const newDocLink_instance = new DocLinkSchema({docLink: userDocLink, assetID: userAssetID});
         try {
             await newDocLink_instance.save();
         } catch (err) {
             console.log('Error while updating Doc Link:', err.message);
         }
-        console.log("###End configdbconn setDocLink");
+        //console.log("###End configdbconn setDocLink");
     }
 
     async getDoclink(userAssetID) { //Problem is here, maybe?
-        console.log("###Begin configdbconn getDocLink");
-        console.log(userAssetID)
+        //console.log("###Begin configdbconn getDocLink");
+        //console.log(userAssetID)
         const docLinkData = await DocLinkSchema.find({ assetID: userAssetID }).exec();
         const docLink = docLinkData[docLinkData.length-1].docLink; //-1 to get the most recent item
-        console.log(docLinkData)
-        console.log("###End configdbconn getDocLink");
+        //console.log(docLinkData)
+        //console.log("###End configdbconn getDocLink");
         return docLink;
         //return docLinkData.docLink;
     }

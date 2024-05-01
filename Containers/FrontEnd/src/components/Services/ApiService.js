@@ -1,8 +1,6 @@
 // ApiServices.js
 import UserService from './UserService';
 
-//Curling this with the following command worked
-//curl -X POST -d "https://example.com/document" "http://localhost:3001/setDocLink?assetID=123"
 export const SetDocLink = async (docLink, assetID) => {
     try {
         if (UserService.tokenExpired()) {
@@ -43,7 +41,7 @@ export const GetDocLink = async (assetID) => {
         });
 
         const return_data = await response.json();
-        console.log("getdoclink returns:", return_data.doclink)
+        //console.log("getdoclink returns:", return_data.doclink)
         return return_data.doclink;
     } catch (err) {
         console.error(err);
