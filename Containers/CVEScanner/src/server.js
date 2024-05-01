@@ -127,6 +127,14 @@ app.post("/libraryDBupdate", async (req, res) => {
 app.post("/removeAssetidLibs", async (req, res) => {
 
     try {
+        const authResponse = await axios.get('http://authhandler:3003/getUID', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+        if (!authResponse.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
 
         const assetID = req.body.assetID;
         if (!assetID || assetID.trim().length === 0 || typeof assetID !== 'string') {
@@ -142,9 +150,24 @@ app.post("/removeAssetidLibs", async (req, res) => {
     }
 });
 
-app.post("/recheckVulnerabilitiesAll", async (req, res) => {
-    await CheckIfSBOMVulnsAll();
-    res.json({ Success: true });
+app.get("/recheckVulnerabilitiesAll", async (req, res) => {
+    try {
+        const authResponse = await axios.get('http://authhandler:3003/getUID', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+        if (!authResponse.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
+
+        await CheckIfSBOMVulnsAll();
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('Error while processing request:', error);
+        res.status(500).send('An error occurred while processing your request.');
+    }
 })
 
 

@@ -22,8 +22,13 @@ class CVEscanSave {
 
 
     async getAllLibraries() {
-        const libraries = await LibrarySchema.find().exec();
-        return libraries;
+        try {
+            const libraries = await LibrarySchema.find().exec();
+            return libraries || [];  // Ensure an empty array if null/undefined is returned
+        } catch (err) {
+            console.error('Error fetching all libraries:', err);
+            return [];  // Return an empty array in case of error
+        }
     }
 
     async getVulnerableAssetIDLibraries(assetid) {

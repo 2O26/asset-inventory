@@ -15,6 +15,7 @@ const mockConnect = jest.fn();
 const mockGetAllLibraries = jest.fn();
 const mockGetVulnerableAssetIDLibraries = jest.fn();
 const mockGetVulnerableAllLibraries = jest.fn();
+const mockRemoveExistingAssetIDOccurances = jest.fn();
 
 jest.mock('axios');
 
@@ -24,6 +25,7 @@ jest.mock('../DatabaseConn/CVEconn', () => {
         getAllLibraries: mockGetAllLibraries,
         getVulnerableAssetIDLibraries: mockGetVulnerableAssetIDLibraries,
         getVulnerableAllLibraries: mockGetVulnerableAllLibraries,
+        removeExistingAssetIDOccurances: mockRemoveExistingAssetIDOccurances
     }));
 });
 
@@ -415,13 +417,107 @@ describe('POST /libraryDBupdate', () => {
 });
 
 describe('POST /removeAssetidLibs', () => {
+    test('responds with 401 Unauthorized if the user is not authenticated', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: false } });
+        const assetID = { assetID: "12345678910" }
+        const response = await request(app)
+            .post('/removeAssetidLibs')
+            .set('Authorization', 'Bearer fake_token')
+            .send(assetID);
+        expect(response.status).toBe(401);
+        expect(response.text).toBe('Invalid token');
+    });
 
+    test('responds with 401 Unauthorized if the Authorization header is missing', async () => {
+        const assetID = { assetID: "12345678910" }
+        const response = await request(app).post('/removeAssetidLibs').send(assetID);
+        expect(response.status).toBe(401);
+        expect(response.text).toBe('Invalid token');
+    });
+
+    test('responds with 500 Internal Server Error if there is an error fetching the library information', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } }); // Mock axios for successful authentication
+        const assetID = { assetID: "12345678910" }
+        // Simulate a failure in the database operation
+        mockRemoveExistingAssetIDOccurances.mockRejectedValue(new Error('Database error'));
+
+        const response = await request(app)
+            .post('/removeAssetidLibs')
+            .set('Authorization', 'Bearer valid_token')
+            .send(assetID);
+
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('An error occurred while processing your request.');
+    });
+
+    test('POST /removeAssetidLibs should return error if assetid is empty', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+        const assetID = { assetID: "" }
+        mockRemoveExistingAssetIDOccurances.mockResolvedValue();
+
+        const response = await request(app)
+            .post('/removeAssetidLibs')
+            .set('Authorization', 'Bearer valid-token')
+            .send(assetID);
+
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('An error occurred while processing your request.');
+    });
+
+    test('POST /removeAssetidLibs should return 200 if sucessful', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+        const assetID = { assetID: "12345678" }
+        mockRemoveExistingAssetIDOccurances.mockResolvedValue();
+
+        const response = await request(app)
+            .post('/removeAssetidLibs')
+            .set('Authorization', 'Bearer valid-token')
+            .send(assetID);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ success: true });
+    });
 
 });
 
 
-describe('POST /recheckVulnerabilitiesAll', () => {
+describe('GET /recheckVulnerabilitiesAll', () => {
+    test('responds with 401 Unauthorized if the user is not authenticated', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: false } });
+        const response = await request(app)
+            .get('/recheckVulnerabilitiesAll')
+            .set('Authorization', 'Bearer fake_token');
+        expect(response.status).toBe(401);
+        expect(response.text).toBe('Invalid token');
+    });
 
+    test('responds with 401 Unauthorized if the Authorization header is missing', async () => {
+        const response = await request(app)
+            .get('/recheckVulnerabilitiesAll')
+            .set('Authorization', 'Bearer fake_token');
+        expect(response.status).toBe(401);
+        expect(response.text).toBe('Invalid token');
+    });
+
+    test('should handle errors from /recheckVulnerabilitiesAll gracefully', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+        CheckIfSBOMVulnsAll.mockRejectedValue(new Error('Could not check vulnerablilities'));
+
+        const response = await request(app)
+            .get('/recheckVulnerabilitiesAll');
+        expect(response.statusCode).toBe(500);
+        expect(response.text).toContain('An error occurred while processing your request.');
+    });
+
+
+    test('should call /recheckVulnerabilitiesAll sucessfully given that user is authenticated and no errors occur ', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+        CheckIfSBOMVulnsAll.mockResolvedValue();
+        const response = await request(app)
+            .get('/recheckVulnerabilitiesAll');
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual({ success: true });
+    });
 
 });
 

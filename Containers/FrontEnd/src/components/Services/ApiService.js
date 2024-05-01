@@ -432,10 +432,16 @@ export const RemoveCDXfile = async (assetID) => {
 
 export const RemoveLibsGivenSBOMRemoval = async (assetID) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+        const authToken = UserService.getToken()
+
         const response = await fetch('http://localhost:3002/removeAssetidLibs', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({ assetID: assetID })
         })
@@ -569,6 +575,30 @@ export const GetVulnerbleComponentsAll = async (assetID) => {
     } catch (err) {
         console.error(err);
         throw new Error('Could not fetch CVE info');
+    }
+}
+
+export const RecheckVulnerbleComponentsAll = async () => {
+    try {
+
+        if (UserService.tokenExpired()) {
+            UserService.updateToken()
+        }
+        const authToken = UserService.getToken()
+
+        const response = await fetch('http://localhost:3002/recheckVulnerabilitiesAll', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json', // Assuming the data is JSON. Adjust if necessary.
+                'Authorization': `Bearer ${authToken}`,
+            }
+        });
+        const return_data = await response.json();
+
+        return return_data;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not recheck vulnerable libraries');
     }
 }
 
