@@ -26,7 +26,32 @@ export const SetDocLink = async (docLink, assetID) => {
     }
 }
 
-//curl -X POST -d '{"assetID": "123"}' "http://localhost:3001/getDocLink"
+export const GetDocLink = async (assetID) => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+        const authToken = await UserService.getToken()
+
+        const response = await fetch('http://localhost:3001/getDocLink', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({assetid: assetID})
+        });
+
+        const return_data = await response.json();
+        console.log("getdoclink returns:", return_data.doclink)
+        return return_data.doclink;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch Doc Link');
+    }
+}
+
+{/**
 export const GetDocLink = async (assetID) => {
     console.log("##Begin ApiService.js GetDocLink");
 
@@ -36,7 +61,7 @@ export const GetDocLink = async (assetID) => {
             body: JSON.stringify({assetID: assetID})
         }); 
         //Browser newtowrk tab reveals the assetID is sent properly.
-
+        
         if (response.ok) {
             const docLink = await response.json(); 
             console.log("ApiService - Response was ok")
@@ -52,6 +77,7 @@ export const GetDocLink = async (assetID) => {
         throw new Error(`Error getting doc link: ${error.message}`);
     }
 };
+*/}
 
 export const AssetHandlerStatus = async () => {
     // assethandler status check

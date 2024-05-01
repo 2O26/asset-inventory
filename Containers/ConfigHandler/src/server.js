@@ -54,43 +54,9 @@ app.post("/setDocLink", async (req, res) => {
     }
 });
 
-//Doc Link functions, based off of UserConfig functions.
-{/**
-app.post("/setDocLink", async (req, res) => {
-    console.log("begin print req.body")
-    console.log(req.body)
-    console.log("finish print req.body")
-
-    console.log("###Begin Server.js setDocLink");
-    const doclink = req.body.doclink;
-    const assetid = req.body.assetid;
-    console.log('Received docLink:', doclink);
-    console.log('Received assetID:', assetid);
-    
-    
-    try {
-        const configHandler = new ConfigHandler();
-        await configHandler.connect();
-        const response = await configHandler.setDocLink(req.body.doclink, req.body.assetid);
-        res.json({ responseFromServer: "Succeeded to add Doc Link!!", doclink: req.body.doclink});
-        
-        
-    } catch (error) {
-        console.error('Error while adding doc link:', error);
-        res.status(500).send('Error adding doc link');
-    }
-    
-    console.log("###End Server.js setDocLink");
-    
-});
-*/}
-
 app.post("/getDocLink", async (req, res) => {
-    console.log("###Begin Server.js getDocLink");
-    //console.log(res)
-    console.log("Finish printing request body")
+    console.log("server.js - req.body:", req.body)
     try {
-        {/**
         const response = await axios.get('http://authhandler:3003/getRoles', {
             headers: {
                 'Authorization': req.headers.authorization
@@ -99,18 +65,53 @@ app.post("/getDocLink", async (req, res) => {
         if (!response.data.authenticated) {
             return res.status(401).send('Invalid token');
         }
+
+        const configHandler = new ConfigHandler();
+        await configHandler.connect();
+        const doclink = await configHandler.getDoclink(req.body.assetid);
+        res.json({ responseFromServer: "Server.js: Succeeded to fetch doc link", success: "success", assetid: req.body.assetid, doclink: doclink });
+        return doclink;
+
+        {/**
+        if (response.data.isAdmin) {
+            res.json({ ipranges: ipranges });
+        } else {
+            let filteredRanges = ipranges.filter(range => response.data.roles.includes(range));
+            res.json({ ipranges: filteredRanges });
+        }
     */}
+
+    } catch (error) {
+        res.status(500).send('Error fetching doc link');
+    }
+});
+
+{/**
+app.post("/getDocLink", async (req, res) => {
+    console.log("###Begin Server.js getDocLink");
+    console.log(res)
+    console.log("Finish printing request body")
+    try {
+        const response = await axios.get('http://authhandler:3003/getRoles', {
+            headers: {
+                'Authorization': req.headers.authorization
+            }
+        });
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
         const configHandler = new ConfigHandler();
         await configHandler.connect();
         const docLink = await configHandler.getDoclink(req.body.assetID) //Problem is here.
         //console.log(docLink);
         res.json({ responseFromServer: "Succeeded to get Doc Link!!", success: "success", docLink: req.body.DocLink }); //Problem is here.
-
+        
     } catch (error) {
         res.status(500).send('Error fetching doc link');
     }
     console.log("###End Server.js setDocLink");
 });
+*/}
 
 app.get("/getIPranges", async (req, res) => {
     try {
