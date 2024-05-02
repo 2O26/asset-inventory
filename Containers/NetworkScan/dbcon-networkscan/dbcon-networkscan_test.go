@@ -96,18 +96,18 @@ func TestDeleteAsset(t *testing.T) {
 		{
 			name:     "Asset Deleted Successfully",
 			assetIDs: []string{"47716233453240327"},
-			mockSetup: func(db *MockDB) {
-				db.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
-				db.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{InsertedID: "mockID"}, nil)
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
+				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{InsertedID: "mockID"}, nil)
 			},
 			expectError: false,
 		},
 		{
 			name:     "No scan fund",
 			assetIDs: []string{"47716233453240327"},
-			mockSetup: func(db *MockDB) {
-				db.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
-				// db.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{InsertedID: "mockID"}, nil)
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
+				// mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{InsertedID: "mockID"}, nil)
 			},
 			expectError:  true,
 			errorMessage: "no scans found",
@@ -115,8 +115,8 @@ func TestDeleteAsset(t *testing.T) {
 		{
 			name:     "Error retrieving latest scan",
 			assetIDs: []string{"47716233453240327"},
-			mockSetup: func(db *MockDB) {
-				db.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("error while retrieving the latest scan"), nil))
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("error while retrieving the latest scan"), nil))
 			},
 			expectError:  true,
 			errorMessage: "error while retrieving the latest scan",
@@ -124,9 +124,9 @@ func TestDeleteAsset(t *testing.T) {
 		{
 			name:     "Error inserting the updated scan",
 			assetIDs: []string{"nonexistentID"},
-			mockSetup: func(db *MockDB) {
-				db.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
-				db.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("error while inserting the updated scan"))
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
+				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("error while inserting the updated scan"))
 			},
 			expectError:  true,
 			errorMessage: "error while inserting the updated scan",
@@ -169,16 +169,16 @@ func TestGetLatestScan(t *testing.T) {
 		},
 		{
 			name: "No Scan",
-			mockSetup: func(db *MockDB) {
-				db.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
 			},
 			expectedCode: http.StatusNotFound,
 			expectedBody: gin.H{"error": "No scans found"},
 		},
 		{
 			name: "No Scan",
-			mockSetup: func(db *MockDB) {
-				db.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("Error while retrieving the latest scan"), nil))
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("Error while retrieving the latest scan"), nil))
 			},
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: gin.H{"error": "Error while retrieving the latest scan"},

@@ -98,7 +98,8 @@ func (m *MockDB) Connect(ctx context.Context, opts ...*options.ClientOptions) (*
 	args := m.Called(ctx, opts)
 	return args.Get(0).(*mongo.Client), args.Error(1)
 }
-func (m *MockDB) Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection {
-	args := m.Called(name, opts)
-	return args.Get(0).(*mongo.Collection)
-}
+
+// func (m *MockDB) Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection {
+// 	args := m.Called(name, opts)
+// 	return args.Get(0).(*mongo.Collection)
+// }
