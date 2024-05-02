@@ -24,7 +24,7 @@ export const CustomNodeComponent = ({ data }) => {
 
                             {data.status && statusMap[data.status]}
                         </div>
-                        <div>
+                        <div >
                             <div className="title">{data.label}</div>
                             {data.id && <div className="subline">id: {data.id}</div>}
                             {data.type && <div className="subline">type: {data.type}</div>}

@@ -24,7 +24,7 @@
 .react-flow__node-turbo {
     border-radius: var(--node-border-radius);
     display: flex;
-    height: 70px;
+    min-height: 70px;
     min-width: 150px;
     font-weight: 500;
     letter-spacing: -0.2px;
@@ -88,7 +88,7 @@
 
 .react-flow__node-turbo .inner {
     background: var(--main-color);
-    padding: 16px 20px;
+    padding: 8px 16px;
     border-radius: var(--node-border-radius);
     display: flex;
     flex-direction: column;
@@ -206,7 +206,7 @@
 }
 
 .react-flow__attribution a {
-    color:  rgba(255, 255, 255, 0.0);
+    color: rgba(255, 255, 255, 0.0);
 }
 
 .react-flow__minimap {
