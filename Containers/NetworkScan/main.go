@@ -485,6 +485,13 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 		return
 	}
 
+	// Validate the first target format
+	if len(req.IPRanges) > 0 && !validNmapTarget(req.IPRanges[0]) {
+		log.Printf("Invalid target format: %s\n", req.IPRanges[0])
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid target format"})
+		return
+	}
+
 	log.Printf("Received request: %+v\n", req)
 
 	log.Printf("Starting to scan...\n")
