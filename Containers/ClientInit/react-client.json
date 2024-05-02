@@ -11,11 +11,13 @@
   "clientAuthenticatorType": "client-secret",
   "redirectUris": [
     "http://localhost:3000/*",
-    "http://frontenddev:3000/*"
+    "http://frontenddev:3000/*",
+    "http://localhost:80/*"
   ],
   "webOrigins": [
     "http://localhost:3000",
-    "http://frontenddev:3000"
+    "http://frontenddev:3000",
+    "http://localhost:80"
   ],
   "notBefore": 0,
   "bearerOnly": false,

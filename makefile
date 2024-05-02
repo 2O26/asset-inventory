@@ -1,6 +1,6 @@
 .PHONY: all assInvFront assetHandler networkScan fluentd elasticsearch kibana frontendDev cypresslocal dev run down clean cypress-test environment-test frontend-dev configHandler keycloakLocal cyclonedx cveScanner authHandler
 
-all: assInvFront assetHandler networkScan fluentd elasticsearch kibana cypresslocal configHandler keycloakLocal cyclonedx authHandler
+all: assetHandler networkScan frontendDev fluentd elasticsearch kibana cypresslocal configHandler keycloakLocal cyclonedx authHandler clientInit cveScanner
 
 all-dev: assetHandler networkScan frontendDev configHandler keycloakLocal cyclonedx clientInit cveScanner authHandler
 
@@ -56,8 +56,7 @@ test:
 	docker compose -f test-docker-compose.yaml up
 
 run:
-	docker compose -f docker-compose.yaml up --compatibility -d
-	open http://localhost:80/
+	docker compose -f docker-compose.yaml up
 
 down:
 	docker compose -f docker-compose.yaml down
