@@ -72,6 +72,7 @@ func TestCORSMiddleware(t *testing.T) {
 }
 
 func TestGetNetworkScan(t *testing.T) {
+	dbcon.SetupDatabase("mongodb://localhost:27017/","TestDB")
 	router1 := gin.Default()
 	router1.Use(CORSMiddleware())
 	//mockDB := new(mock.Mock)

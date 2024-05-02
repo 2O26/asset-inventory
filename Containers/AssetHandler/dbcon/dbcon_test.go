@@ -339,20 +339,26 @@ func TestGetLatestScan(t *testing.T) {
 			// }
 		})
 	}
+}*/
+
+func TestAddPluginData(t *testing.T){
+	//AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugin)
+
+	jsonhandler.Plugin{
+		"ipScan": {
+			PluginStateID: "20240214-1300A",
+		},
+	}
+
 }
 
 func TestAddAssets(t *testing.T){
 	//AddAssets(req AssetRequest, assetIDS []string) string 
 
 	//Tests todo:
-	// "No new assets to add"
-	// "No new assets to add, all assets already exist"
-	// "New assets added successfully to the latest scan"
 	// "Failed to add new assets: " + err.Error()
 
-
-
-	mockDB := new(MockDB)
+	SetupDatabase("mongodb://localhost:27017/","TestDB" )
 	testRequest := AssetRequest{
 		AddAsset: []jsonhandler.Asset{
 			{
@@ -365,9 +371,26 @@ func TestAddAssets(t *testing.T){
 		},
 	}
 	testIDS := []string{"Asset1"}
-	AddAssets(testRequest, testIDS)
+
+	expectedOutput := "No new assets to add"
+	testOutput := AddAssets(AssetRequest{}, testIDS)
+	if testOutput != expectedOutput{
+		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
+	}
 	
-}*/
+	expectedOutput = "New assets added successfully to the latest scan"
+	testOutput = AddAssets(testRequest, testIDS)
+	if testOutput != expectedOutput{
+		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
+	}
+
+	expectedOutput = "No new assets to add, all assets already exist"
+	testOutput = AddAssets(testRequest, testIDS)
+	if testOutput != expectedOutput{
+		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
+	}
+	defer client.Disconnect(context.Background())
+}
 
 func TestGetCollection(t *testing.T){
 	//mockClient := &mongo.Client{}
@@ -383,24 +406,31 @@ func TestGetCollection(t *testing.T){
 }
 
 func TestAddRelations(t *testing.T){
-	//AddRelations(req AssetRequest, relationIDS []string) string
-	//TODO
-	//log.Printf("Relation from %s to %s already exists in the latest scan.\n", newRelation.From, newRelation.To)
-	//return "Failed to add new relations: " + err.Error()
-	//return "New relations added successfully to the latest scan"
-	//return "No new relations to add, all relations already exist"
-	//return "No new relations to add"
+
 	testRequest := AssetRequest{
 		AddRelations: []jsonhandler.Relation{
 			{
-				From:			"NewAsset",
-				To:				"OldAsset",
+				From:			existingAssetID_1,
+				To:				existingAssetID_4,
 				Direction:		"uni",
 				Owner:			"Him",
-				DateCreated:	"NewAsset1",
+				DateCreated:	"2024-03-01 12:30:00",
 			},
 		},
 	}
+	testRequest2 := AssetRequest{
+		AddRelations: []jsonhandler.Relation{
+			{
+				From:			existingAssetID_1,
+				To:				existingAssetID_5,
+				Direction:		"uni",
+				Owner:			"Him",
+				DateCreated:	"2024-03-01 12:30:00",
+			},
+		},
+	}
+	testRequest3 := AssetRequest{}
+
 	testIDS := []string{"Relation1"}
 	expectedOutput := "Failed to retrieve the latest scan: error while retrieving the latest scan: mongo: no documents in result"
 	testOutput := AddRelations(testRequest, testIDS)
@@ -409,17 +439,38 @@ func TestAddRelations(t *testing.T){
 		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
 	}
 
-	SetdbScan()
+	//SetdbScan()
+	SetupDatabase("mongodb://localhost:27017/","TestDB" )
 
+	testDB := client.Database("TestDB")
+	testCollection := *testDB.Collection("scans")
 
-	mockDBName.InsertOne(context.TODO(), latestScan)
+	_ , err := testCollection.InsertOne(context.TODO(), latestScan)
+	if err != nil {
+        log.Fatal(err)
+    }
 
-	expectedOutput = ""
+	expectedOutput = "No new relations to add, all relations already exist"
 	testOutput = AddRelations(testRequest, testIDS)
 
 	if testOutput != expectedOutput{
 		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
 	}
+
+	expectedOutput = "New relations added successfully to the latest scan"
+	testOutput = AddRelations(testRequest2, testIDS)
+	
+	if testOutput != expectedOutput{
+		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
+	}
+
+	expectedOutput = "No new relations to add"
+	testOutput = AddRelations(testRequest3, testIDS)
+	
+	if testOutput != expectedOutput{
+		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
+	}
+	defer client.Disconnect(context.Background())
 }
 
 func TestIsValidName(t *testing.T) {
