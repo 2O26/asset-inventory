@@ -141,7 +141,7 @@ func getLatestState(c *gin.Context) {
 			log.Printf("Failed to get subnets")
 		}
 		fmt.Println("SUBNETS IN REQUEST:", subnets)
-		getNetworkScan()
+		getNetworkScan(c)
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)
 
@@ -192,12 +192,20 @@ func getLatestState(c *gin.Context) {
 	}
 }
 
-func getNetworkScan() {
+func getNetworkScan(c *gin.Context) {
 	fmt.Println("########Getting network scan##########")
 	url := "http://networkscan:8081/getLatestScan"
 	// GET request from netscan
-	response, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//add origin header and auth token
+	req.Header.Add("Authorization", c.GetHeader("Authorization"))
+	req.Header.Add("Origin", "http://assethandler:8000")
+	req.Header.Add("Content-Type", "application/json")
 
+	response, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}

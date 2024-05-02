@@ -137,7 +137,7 @@ func ping(addr string) (bool, error) {
 }
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") //Only the assethandler may access this container
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
@@ -163,7 +163,11 @@ func main() {
 		postNetScan(scansHelper, c)
 	})
 	router.GET("/getLatestScan", func(c *gin.Context) {
-		dbcon.GetLatestScan(scansHelper, c)
+		//Due to security concerns, this function will only be available to the assethandler
+		auth := dbcon.AuthorizeUser(c)
+		if auth.Authenticated {
+			dbcon.GetLatestScan(scansHelper, c, auth)
+		}
 	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
 		dbcon.PrintAllDocuments(scansHelper, c)
@@ -466,45 +470,66 @@ func inc(ip net.IP) {
 }
 
 func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
-	var req dbcon.ScanRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("Failed to bind JSON: %+v\n", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to bind JSON"})
-		return
-	}
+	auth := dbcon.AuthorizeUser(c)
 
-	log.Printf("Received request: %+v\n", req)
+	if auth.Authenticated && (auth.CanManageAssets || auth.IsAdmin) {
+		var req dbcon.ScanRequest
 
-	log.Printf("Starting to scan...\n")
-
-	// Perform the scan for each target in the request
-	for _, target := range req.IPRanges {
-
-		var err error
-
-		switch req.CmdSelection {
-		case "extensive":
-			scanResultGlobal, err = performAdvancedScan(target)
-		case "simple":
-			scanResultGlobal, err = performSimpleScan(target)
-		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "No valid scan selection provided"})
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Printf("Failed to bind JSON: %+v\n", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to bind JSON"})
 			return
 		}
 
-		if err != nil {
-			log.Printf("Failed to perform scan: %+v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to perform scan"})
-			return
+		log.Printf("Received request: %+v\n", req)
+
+		log.Printf("Starting to scan...\n")
+
+		// Check that requested ranges are accessible by user
+		// Any user can perform a scan
+		var accessibleIPRanges []string
+		if auth.IsAdmin {
+			accessibleIPRanges = req.IPRanges
+		} else {
+			for _, subnet := range req.IPRanges {
+				for _, role := range auth.Roles {
+					if subnet == role {
+						accessibleIPRanges = append(accessibleIPRanges, subnet)
+					}
+				}
+			}
 		}
 
-		printActiveIPs(scanResultGlobal) // Print the active IP addresses
+		// Perform the scan for each target in the request
+		for _, target := range accessibleIPRanges {
+
+			var err error
+
+			switch req.CmdSelection {
+			case "extensive":
+				scanResultGlobal, err = performAdvancedScan(target)
+			case "simple":
+				scanResultGlobal, err = performSimpleScan(target)
+			default:
+				c.JSON(http.StatusBadRequest, gin.H{"error": "No valid scan selection provided"})
+				return
+			}
+
+			if err != nil {
+				log.Printf("Failed to perform scan: %+v\n", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to perform scan"})
+				return
+			}
+
+			printActiveIPs(scanResultGlobal) // Print the active IP addresses
+		}
+
+		log.Printf("Finished postNetScan\n")
+
+		dbcon.AddScan(db, scanResultGlobal)
+
+		c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
 	}
 
-	log.Printf("Finished postNetScan\n")
-
-	dbcon.AddScan(db, scanResultGlobal)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
 }

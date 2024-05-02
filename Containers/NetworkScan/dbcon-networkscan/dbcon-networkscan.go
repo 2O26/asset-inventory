@@ -2,16 +2,24 @@ package dbcon_networkscan
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"net/http"
+	"net/netip"
+	"time"
 )
+
+type AuthResponse struct {
+	Authenticated   bool     `json:"authenticated"`
+	Roles           []string `json:"roles"`
+	IsAdmin         bool     `json:"isAdmin"`
+	CanManageAssets bool     `json:"canManageAssets"`
+}
 
 type Scan struct {
 	StateID     string
@@ -65,6 +73,51 @@ type OS struct {
 
 var client *mongo.Client
 var dbName string
+
+func AuthorizeUser(c *gin.Context) AuthResponse {
+
+	emptyAuth := AuthResponse{
+		Authenticated:   false,
+		Roles:           nil,
+		IsAdmin:         false,
+		CanManageAssets: false,
+	}
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized", "success": false})
+		return emptyAuth
+	}
+
+	// Perform authentication
+	authURL := "http://authhandler:3003/getRoles"
+	req, err := http.NewRequest("GET", authURL, nil)
+	if err != nil {
+		log.Printf("Failed to fetch authentication token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch authentication token"})
+		return emptyAuth
+	}
+	req.Header.Add("Authorization", authHeader)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Failed to connect to validation server: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to validation server"})
+		return emptyAuth
+	}
+
+	defer resp.Body.Close()
+
+	var auth AuthResponse
+	fmt.Println("Response Status:", resp.StatusCode)
+	err = json.NewDecoder(resp.Body).Decode(&auth)
+	if err != nil {
+		log.Printf("Failed to fetch authentication token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch authentication token"})
+		return emptyAuth
+	}
+
+	return auth
+}
 
 func SetupDatabase(uri string, databaseName string) error {
 	ctx := context.TODO()
@@ -187,7 +240,7 @@ func AddScan(db DatabaseHelper, scan Scan) {
 	log.Printf("OK!, %v", result)
 }
 
-func GetLatestScan(db DatabaseHelper, c *gin.Context) {
+func GetLatestScan(db DatabaseHelper, c *gin.Context, auth AuthResponse) {
 	var scan Scan
 	// Find the latest scan based on the mostRecentUpdate field
 	// Sorting by -1 to ensure the latest document is returned first mostRecentUpdate
@@ -202,7 +255,38 @@ func GetLatestScan(db DatabaseHelper, c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, scan)
+	if auth.IsAdmin {
+		c.JSON(http.StatusOK, scan)
+		return
+	} else {
+
+		updatedScan := Scan{
+			StateID:     scan.StateID,
+			DateCreated: scan.DateCreated,
+			DateUpdated: scan.DateUpdated,
+			State:       make(map[string]Asset),
+		}
+
+		for _, subnet := range auth.Roles {
+			network, err := netip.ParsePrefix(subnet)
+			if err != nil {
+				continue //have found non-subnet role
+			}
+			for assetID, asset := range scan.State {
+				assetIP, err := netip.ParseAddr(asset.IPv4Addr)
+				if err != nil {
+					panic(err)
+				}
+				if network.Contains(assetIP) {
+					updatedScan.State[assetID] = asset
+				}
+			}
+		}
+		fmt.Println("UPDATED SCAN FOR USER:", updatedScan)
+		c.JSON(http.StatusOK, updatedScan)
+		return
+	}
+
 }
 
 // func test() {
