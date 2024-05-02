@@ -24,6 +24,7 @@ nav:
       - ConfigHandler: API_confighandler.md
       - CycloneDX: API_cyclonedx.md
       - NetworkScan: API_networkscan.md
+      - CVEScanner:  API_CVE_scanner.md
 
 # Markdown Extensions to enhance documentation
 markdown_extensions:

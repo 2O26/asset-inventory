@@ -506,6 +506,25 @@ export const GetOSSAPIkey = async () => {
     }
 }
 
+export const CheckAPIOSSkey = async (apitoken) => {
+
+    try {
+        const response = await fetch('http://localhost:3002/checkAPIkey', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Basic ${apitoken}`
+            }
+        });
+        const resData = await response.json();
+        console.log("response data: ", resData)
+        return resData;
+
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not validate API key');
+    }
+}
+
 export const GetAllSBOMLibraries = async () => {
 
     try {

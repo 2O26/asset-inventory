@@ -1,36 +1,38 @@
 import React, { useState, useEffect } from 'react'
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { UpdateAPIOSSkey, GetOSSAPIkey } from '../../Services/ApiService';
+import { UpdateAPIOSSkey, GetOSSAPIkey, CheckAPIOSSkey } from '../../Services/ApiService';
 
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
 import "./CVEScannerSettings.css";
 import { CheckIcon, CrossIcon } from '../../common/Icons/Icons';
 
 export default function CVEScanSettings() {
-    const [apikey, setapikey] = useState("");
-    const [addAPIKeySuccess, setAddAPIKeySuccess] = useState(false);
-    const [addAPIKeyFail, setAddAPIKeyFail] = useState(false);
+    const [apiCredentials, setApiCredentials] = useState({ apikey: "", username: "" });
+    const [wrongFormat, setWrongFormat] = useState(false);
 
-    const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
-        mutationFn: () => UpdateAPIOSSkey(apikey), // Directly pass the LogIn function
+    const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, isSuccess: isSuccessMutAdd } = useMutation({
+        mutationFn: UpdateAPIOSSkey, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
             if (data.success === "success") {
                 refetchAPIkey();
-                setAddAPIKeySuccess(true);
-                setAddAPIKeyFail(false);
                 console.log("API key added sucessfully:", data);
             }
             else {
-                setAddAPIKeySuccess(false);
-                setAddAPIKeyFail(true);
                 console.log("Could not add API key. Error: ", data.success);
             }
         },
         onError: (error) => {
             // Optionally handle error state
             console.error("Add API key error: ", error);
+        }
+    });
+
+    const { mutate: mutateCheck, isPending: isPendingCheck, isSuccess: isSuccessCheck, isError: isErrorCheck, error: errorCheck } = useMutation({
+        mutationFn: CheckAPIOSSkey, // Directly pass the LogIn function
+        onError: (error) => {
+            console.error("API key check error: ", error);
         }
     });
 
@@ -42,20 +44,39 @@ export default function CVEScanSettings() {
 
     const addAPIkey = (event) => {
         event.preventDefault();
-        mutateAdd(apikey);
-        setAddAPIKeyFail(false);
-        setAddAPIKeySuccess(false);
+        mutateAdd(btoa(`${apiCredentials.username}:${apiCredentials.apikey}`));
     }
 
-    const handleChange = (event) => {
-        setapikey(event.target.value);
+    const handleChangeKey = (event) => {
+        const { value } = event.target;
+        // Regular expression to match only alphanumeric characters
+        setWrongFormat(false)
+        if (/^[a-zA-Z0-9]+$/.test(value) || value === "") {
+            setApiCredentials(prevCredentials => ({ ...prevCredentials, apikey: value }));
+        } else {
+            setWrongFormat(true)
+        }
+    };
+    const handleChangeUsername = (event) => {
+        const { value } = event.target;
+        setApiCredentials(prevCredentials => ({ ...prevCredentials, username: value }));
     };
 
-    useEffect(() => {
-        if (apiData) {
-            setapikey(apiData.apikey)
+    const handleCheck = () => {
+        if (apiCredentials.apikey && apiCredentials.username) {
+            console.log("check 1")
+            mutateCheck(btoa(`${apiCredentials.username}:${apiCredentials.apikey}`))
+        } else {
+            window.alert("Please fill in username and api token")
         }
-    }, [apiData]);
+    }
+
+    useEffect(() => {
+        if (apiData?.apikey) {
+            const tokenParts = atob(apiData.apikey).split(':')
+            setApiCredentials({ username: tokenParts[0], apikey: tokenParts[1] })
+        }
+    }, [apiData])
 
     if (isLoading) {
         return (
@@ -73,6 +94,7 @@ export default function CVEScanSettings() {
         )
     }
 
+
     // { isErrorMutRm && <div className='errorMessage'>{errorMutRm.message}</div> }
     // { isErrorMutAdd && <div className='errorMessage'>{errorMutAdd.message}</div> }
 
@@ -81,33 +103,68 @@ export default function CVEScanSettings() {
             <div>
                 <h3> Sonatype OSS index key: </h3>
             </div>
-            <hr />
-            <div>
+            <div style={{ marginTop: "2rem" }}>
                 <form onSubmit={addAPIkey}>
+                    <p> Base 64 API Token: {apiData?.apikey}</p>
+                    <p style={{ marginTop: "1rem" }}>Username:</p>
+                    <input
+                        type="username"
+                        id="username"
+                        name="username"
+                        value={apiCredentials.username} // Set the value of the input to the state
+                        onChange={handleChangeUsername} // Update the state when the input changes
+                        className='api-input'
+                    >
+                    </input>
+                    <p style={{ marginTop: "1rem" }}>Api Key:</p>
                     <input
                         type="API key"
                         id="OSSAPIKEY"
                         name="OSSAPIKEY"
-                        value={apikey} // Set the value of the input to the state
-                        onChange={handleChange} // Update the state when the input changes
+                        value={apiCredentials.apikey} // Set the value of the input to the state
+                        onChange={handleChangeKey} // Update the state when the input changes
                         className='api-input'
                     >
                     </input>
-                    {isPendingMutAdd && <LoadingSpinner />}
-                    {addAPIKeySuccess &&
-                        <div>
-                            <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully updated API key </p>
-                        </div>
-                    }
-                    {addAPIKeyFail &&
-                        <div>
-                            <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to update API key. </p>
-                        </div>
-                    }
+                    <div>
+
+                        {isPendingMutAdd && <LoadingSpinner />}
+                        {isSuccessMutAdd &&
+                            <div>
+                                <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully updated API key </p>
+                            </div>
+                        }
+                        {isErrorMutAdd &&
+                            <div>
+                                <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to update API key. </p>
+                            </div>
+                        }
+                        {wrongFormat &&
+                            <div>
+                                <p className='errorMessage'> Input only accepts letters and numbers</p>
+                            </div>
+
+                        }
+                        {isPendingCheck && <LoadingSpinner />}
+
+                        {isSuccessCheck &&
+                            <div>
+                                <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Token is authenticated! </p>
+                            </div>
+                        }
+                        {isErrorCheck &&
+                            <div>
+                                <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> {errorCheck.message} </p>
+                            </div>
+                        }
+                    </div>
 
                     <div className='buttonContainerNetScan'>
                         <button className='standard-button' type="submit">
-                            <div> Update API key </div>
+                            <div> Save </div>
+                        </button>
+                        <button className='standard-button' type="button" onClick={() => handleCheck()}>
+                            <div> Check Connection</div>
                         </button>
                     </div>
                 </form>

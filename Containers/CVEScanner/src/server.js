@@ -44,6 +44,37 @@ app.get("/getAllLibraries", async (req, res) => {
     }
 });
 
+app.get("/checkAPIkey", async (req, res) => {
+
+    console.log("checking API key!!!: ", req.headers.authorization);
+    try {
+        const apiResponse = await axios.get('https://ossindex.sonatype.org/api/v3/version', {
+            headers: {
+                'accept': 'application/json',
+                'Authorization': req.headers.authorization // Ensure this matches the format used in the curl command
+            }
+        });
+        res.json(apiResponse.data); // Send only the data part of the response
+    } catch (error) {
+        console.error('Error while processing request:', error);
+        if (error.response) {
+            // Handle the case where the server responds with a status outside the 2xx range
+            console.error('Response data:', error.response.data);
+            console.error('Status code:', error.response.status);
+            console.error('Headers:', error.response.headers);
+            res.status(error.response.status).send(error.response.data);
+        } else if (error.request) {
+            // The request was made but no response was received
+            console.error('Request data:', error.request);
+            res.status(500).send("No response received");
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.error('Error message:', error.message);
+            res.status(500).send(error.message);
+        }
+    }
+});
+
 app.post("/getVulnerableAssetID", async (req, res) => {
     /*
         Given an assetID go through each library that has vulnerbilities

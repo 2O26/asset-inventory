@@ -25,14 +25,24 @@ async function checkVulnerabilities(purl, apikey) {
     */
 
     const apiUrl = `https://ossindex.sonatype.org/api/v3/component-report`;
+    const apiAuthUrl = `https://ossindex.sonatype.org/api/v3/authorized/component-report`;
     const component = purl;
 
     try {
-        const response = await axios.post(apiUrl, { coordinates: component }, {
-            headers: { 'Authorization': `Bearer ${apikey}` },
-            timeout: 10000  // Timeout after 10 seconds
-        });
-        return response.data;
+        if (apikey != "") {
+            const response = await axios.post(apiAuthUrl, { coordinates: component }, {
+                headers: {
+                    authorization: `Basic ${apikey}`
+                },
+                timeout: 10000  // Timeout after 10 seconds
+            });
+            return response.data;
+        } else {
+            const response = await axios.post(apiUrl, { coordinates: component }, {
+                timeout: 10000  // Timeout after 10 seconds
+            });
+            return response.data;
+        }
     } catch (error) {
         console.error('Error fetching vulnerability data:', error.message);
         if (error.response) {
@@ -75,7 +85,7 @@ async function getPurlsOfAssetID(assetID) {
         });
 }
 
-async function processPurlsInBatches(purl_list, apikey, batchSize) {
+async function processPurlsInBatches(purl_list, batchSize, apikey) {
     /*
         Response data: { code: 400, message: 'Request for more than 128 components' }
         Thus we have to divide the libraries to batches of 128 and accumulate the results to an object
@@ -99,11 +109,9 @@ async function CVEcheckAll(authToken) {
         const apikey = await getAPIkey(authToken);
         if (apikey === "") {
             console.log("Erronous api key or could not fetch it from settings")
-            return {}
         }
-        console.log("API KEY: ", apikey);
         const purl_list = await getAllPurls();
-        const OSSresponses = await processPurlsInBatches(purl_list, apikey, 128);
+        const OSSresponses = await processPurlsInBatches(purl_list, 128, apikey);
         // Reduce to an array of library objects that contain CVEs
         const componentsWithVulnerabilities = OSSresponses.flatMap(subArray =>
             subArray.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
@@ -129,11 +137,9 @@ async function CVEcheck(assetID, authToken) {
         const apikey = await getAPIkey(authToken);
         if (apikey === "") {
             console.log("Erronous api key or could not fetch it from settings")
-            return {}
         }
-        console.log("API KEY: ", apikey);
         const purl_list = await getPurlsOfAssetID(assetID);
-        const OSSresponses = await processPurlsInBatches(purl_list, apikey, 128);
+        const OSSresponses = await processPurlsInBatches(purl_list, 128, apikey);
         // Reduce to an array of library objects that contain CVEs
         const componentsWithVulnerabilities = OSSresponses.flatMap(subArray =>
             subArray.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
