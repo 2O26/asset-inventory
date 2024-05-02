@@ -3,7 +3,7 @@ services:
   frontenddev:
     image: frontenddev
     ports:
-      - 80:80
+      - 3000:3000
     volumes:
       - ./Containers/FrontEnd/src:/app/src
     logging:
@@ -81,6 +81,14 @@ services:
     image: mongo
     restart: always
     command: --quiet --syslog
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224 # TODO: Use fluentd's DNS name.
+        tag: dbstorage.app
+    depends_on:
+      fluentd:
+        condition: service_healthy
     ports:
       - "27017:27017"
     expose:
