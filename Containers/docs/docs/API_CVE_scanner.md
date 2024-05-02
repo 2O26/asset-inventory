@@ -1,6 +1,6 @@
 
 
-<!-- ### /libraryDBupdate
+ ### /libraryDBupdate
 Launched from the cycloneDX backend when a new SBOM is added.
 - [x] Make a GET request to fetch the SBOM file of given asset
 - [x] If assetID exists on any libraries, remove the entries. Alternatively remove the entire entry
@@ -22,7 +22,7 @@ Launched from the cycloneDX backend when a new SBOM is added.
 POST request here to update the CVE database for the libraries
 
 - [x] For each library + version combo
-    - [x] Run function that invokes an external API call to check for CVEs -->
+    - [x] Run function that invokes an external API call to check for CVEs
 
 
 ### Authentication and sonatype OSS index rest api:
@@ -68,3 +68,10 @@ async function checkVulnerabilities(purl, apikey) {
 As shown above two different API calls are being used to connect with the Sonartype Rest API depending on if you have configured `api-token` and `username` or not.
 
 See documnetation at: https://ossindex.sonatype.org/rest 
+
+### How to find API token and username:
+1. Visit https://ossindex.sonatype.org/
+2. Create an account and sig in
+3. Navigate to your user settings: https://ossindex.sonatype.org/user/settings
+4. Under "Email Address" in the top middle section of the page, find your username.
+5. In the middle section at the bottom of the page find your API Token. 
