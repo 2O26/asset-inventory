@@ -23,31 +23,11 @@ const server = app.listen(route, () => console.log(`Server listening on port: ${
 
 
 app.post("/setDocLink", async (req, res) => {
-    //console.log("begin print req.body")
-    //console.log(req.body)
-    //console.log("finish print req.body")
         try {
-        const response = await axios.get('http://authhandler:3003/getRoles', {
-            headers: {
-                'Authorization': req.headers.authorization
-            }
-        });
-        if (!response.data.authenticated) {
-            return res.status(401).send('Invalid token');
-        }
-        if (!response.data.isAdmin) {
-            return res.status(401).send('Unauthorized');
-        }
-
-        if (1) {
             const configHandler = new ConfigHandler();
             await configHandler.connect();
             const response = await configHandler.setDocLink(req.body.doclink, req.body.assetid);
-            res.json({ responseFromServer: "Server.js: Succeeded to add doc link", success: "success", doclink: req.body.doclink });
-
-        } else {
-            res.json({ responseFromServer: "Server.js: Failed to add Doc Link", success: "failure", doclink: req.body.doclink });
-        }
+            res.json({ responseFromServer: "Server.js: Succeeded to add doc link", success: "success", doclink: req.body.doclink });        
     } catch (error) {
         console.error('Error while adding doc link:', error);
         res.status(500).send('Error adding doc link');
@@ -55,17 +35,7 @@ app.post("/setDocLink", async (req, res) => {
 });
 
 app.post("/getDocLink", async (req, res) => {
-    //console.log("server.js - req.body:", req.body)
     try {
-        const response = await axios.get('http://authhandler:3003/getRoles', {
-            headers: {
-                'Authorization': req.headers.authorization
-            }
-        });
-        if (!response.data.authenticated) {
-            return res.status(401).send('Invalid token');
-        }
-
         const configHandler = new ConfigHandler();
         await configHandler.connect();
         const doclink = await configHandler.getDoclink(req.body.assetid);

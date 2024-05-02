@@ -3,16 +3,10 @@ import UserService from './UserService';
 
 export const SetDocLink = async (docLink, assetID) => {
     try {
-        if (UserService.tokenExpired()) {
-            await UserService.updateToken()
-        }
-        const authToken = await UserService.getToken()
-
         const response = await fetch('http://localhost:3001/setDocLink', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`,
             },
             body: JSON.stringify({ doclink: docLink, assetid: assetID })
         });
@@ -26,16 +20,10 @@ export const SetDocLink = async (docLink, assetID) => {
 
 export const GetDocLink = async (assetID) => {
     try {
-        if (UserService.tokenExpired()) {
-            await UserService.updateToken()
-        }
-        const authToken = await UserService.getToken()
-
         const response = await fetch('http://localhost:3001/getDocLink', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`,
             },
             body: JSON.stringify({assetid: assetID})
         });
@@ -48,34 +36,6 @@ export const GetDocLink = async (assetID) => {
         throw new Error('Could not fetch Doc Link');
     }
 }
-
-{/**
-export const GetDocLink = async (assetID) => {
-    console.log("##Begin ApiService.js GetDocLink");
-
-    try {
-        const response = await fetch('http://localhost:3001/getDocLink', {
-            method: 'POST',
-            body: JSON.stringify({assetID: assetID})
-        }); 
-        //Browser newtowrk tab reveals the assetID is sent properly.
-        
-        if (response.ok) {
-            const docLink = await response.json(); 
-            console.log("ApiService - Response was ok")
-            //console.log(docLink) 
-            console.log("##End ApiService.js GetDocLink");
-            return docLink;
-        } else {
-            // Handle server errors or invalid responses
-            const errorResponse = await response.json();
-            throw new Error(`Failed to get doc link: ${errorResponse.message}`);
-        }
-    } catch (error) {
-        throw new Error(`Error getting doc link: ${error.message}`);
-    }
-};
-*/}
 
 export const AssetHandlerStatus = async () => {
     // assethandler status check
