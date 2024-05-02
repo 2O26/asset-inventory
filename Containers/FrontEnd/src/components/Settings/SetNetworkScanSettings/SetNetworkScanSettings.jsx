@@ -9,11 +9,10 @@ import { CheckIcon, CrossIcon, RemoveIcon } from "../../common/Icons/Icons";
 export default function SetNetworkScanSettings() {
     const [expandAddIPrange, setExpandAddIPrange] = useState(false);
     const [IPRange, setIPRange] = useState("");
-    const [addIPRangeSuccess, setAddIPRangeSuccess] = useState(false);
-    const [addIPRangeFail, setAddIPRangeFail] = useState(false);
     const [rangeFromAdd, setRangeFromAdd] = useState();
+    const [wrongFormat, setWrongFormat] = useState(false)
 
-    const { mutate: addRole, isSuccess: successAddRole, isError: errorAddRole } = useMutation({
+    const { mutate: addRole, isSuccess: successAddRole, isError: errorAddRole, reset: addRoleReset } = useMutation({
         mutationFn: CreateRealmRole, // Directly pass the LogIn function
         onSuccess: (response) => {
             if (response.ok) {
@@ -26,7 +25,7 @@ export default function SetNetworkScanSettings() {
         }
     });
 
-    const { mutate: rmRole, isSuccess: successRmRole, isError: errorRmRole } = useMutation({
+    const { mutate: rmRole, isSuccess: successRmRole, isError: errorRmRole, reset: rmRoleReset } = useMutation({
         mutationFn: DeleteRealmRole, // Directly pass the LogIn function
         onSuccess: (response) => {
             if (response.ok) {
@@ -39,24 +38,20 @@ export default function SetNetworkScanSettings() {
         }
     });
 
-    const { mutate: mutateAdd, isPending: isPendingMutAdd, isError: isErrorMutAdd, error: errorMutAdd } = useMutation({
+    const { mutate: mutateAdd, isPending: isPendingMutAdd, isSuccess: isSuccessMutAdd, isError: isErrorMutAdd, error: errorMutAdd, reset: addReset } = useMutation({
         mutationFn: AddIPranges, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
             if (data.success === "success") {
                 setRangeFromAdd(data.range); // If I want to use the data
-                setAddIPRangeFail(false);
-                setAddIPRangeSuccess(true);
                 addRole(data.range)
                 refetch();
                 // console.log("IP range added sucessfully:", data);
             } else if (data.success === "wrong format") {
-                setAddIPRangeSuccess(false);
-                setAddIPRangeFail(true);
+
                 // console.log("Could not add IP range sucessfully");
             }
             else {
-                setAddIPRangeSuccess(false);
                 console.log("Could not add IP range sucessfully. Error: ", data.success);
             }
         },
@@ -66,24 +61,19 @@ export default function SetNetworkScanSettings() {
         }
     });
 
-    const { mutate: mutateRm, isPending: isPendingMutRm, isError: isErrorMutRm, error: errorMutRm } = useMutation({
+    const { mutate: mutateRm, isPending: isPendingMutRm, isSuccess: isSuccessMutRm, isError: isErrorMutRm, error: errorMutRm, reset: rmReset } = useMutation({
         mutationFn: RmIPrange, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
             if (data.success === "success") {
                 setRangeFromAdd(data.range); // If I want to use the data
-                setAddIPRangeFail(false);
-                setAddIPRangeSuccess(true);
                 rmRole(data.range)
                 refetch();
                 // console.log("IP range added sucessfully:", data);
             } else if (data.success === "wrong format") {
-                setAddIPRangeSuccess(false);
-                setAddIPRangeFail(true);
                 // console.log("Could not add IP range sucessfully");
             }
             else {
-                setAddIPRangeSuccess(false);
                 console.log("Could not add IP range sucessfully. Error: ", data.success);
             }
         },
@@ -103,30 +93,30 @@ export default function SetNetworkScanSettings() {
     const addIPrange = (event) => {
         event.preventDefault();
         // console.log(IPRange);
+        resetMutateFn()
         mutateAdd(IPRange);
         setIPRange("");
-        setAddIPRangeSuccess(false);
-        setAddIPRangeFail(false);
     }
 
 
     const handleChange = (event) => {
-        if (data.ipranges.includes(event.target.value)) {
-            setAddIPRangeFail(true)
-        } else {
+        setWrongFormat(false)
+        if (!data.ipranges.includes(event.target.value)) {
             setIPRange(event.target.value);
+        } else {
+            setWrongFormat(true)
         }
 
     };
 
     const expandIPrange = (event) => {
+        resetMutateFn()
         setExpandAddIPrange(!expandAddIPrange);
-        setAddIPRangeSuccess(false);
-        setAddIPRangeFail(false);
         // console.log(data.ipranges)
     };
 
     const removeIpRange = (iprange) => {
+        resetMutateFn()
         mutateRm(iprange);
     };
 
@@ -135,6 +125,13 @@ export default function SetNetworkScanSettings() {
             removeIpRange(iprange);
         }
     };
+
+    const resetMutateFn = () => {
+        rmReset()
+        addReset()
+        rmRoleReset()
+        addRoleReset()
+    }
 
 
     return (
@@ -191,14 +188,19 @@ export default function SetNetworkScanSettings() {
                             >
                             </input>
                             {isPendingMutAdd && <LoadingSpinner />}
-                            {addIPRangeSuccess &&
+                            {isSuccessMutAdd &&
                                 <div>
                                     <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully added IP range: {rangeFromAdd} </p>
                                 </div>
                             }
-                            {addIPRangeFail &&
+                            {isSuccessMutRm &&
                                 <div>
-                                    <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to add IP range: {rangeFromAdd} </p>
+                                    <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully removed IP range: {rangeFromAdd} </p>
+                                </div>
+                            }
+                            {wrongFormat &&
+                                <div>
+                                    <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> IP range already excists </p>
 
                                 </div>
                             }
