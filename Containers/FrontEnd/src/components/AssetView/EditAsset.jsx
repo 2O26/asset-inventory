@@ -3,33 +3,34 @@ import { AddIcon, CheckIcon, ConnectionIcon, CrossIcon, LinkAddIcon, RemoveIcon 
 import { UpdateAsset } from '../Services/ApiService';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 import { useMutation } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
-import { GetState } from '../Services/ApiService'
 import Select from 'react-select';
 
 
 
 export default function EditAsset({ assetData, assetID, relationData, refetch, assetIDs }) {
-    const [errorMessage, setErrorMessage] = useState(null)
 
     // const dontDisplayList = ["Created at", "Updated at", "Hostname"];
     const dontDisplayList = ["Created at", "Updated at"];
+    const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "uni" };
+
     const [properties, setProperties] = useState({});
     const [relations, setRelations] = useState({});
     const [showButtons, setShowButtons] = useState(false);
     const [removedRelations, setRemovedRelations] = useState([]);
     const [addedRelations, setAddedRelations] = useState([]);
     const [showAddRelation, setShowAddRelation] = useState(false)
-
-    const emptyRelation = { "from": "", "to": "", "owner": "", "direction": "uni" };
     const [newRelationData, setNewRelationData] = useState(emptyRelation)
-    const { data, isLoading } = useQuery({
-        queryKey: ['getState'],
-        queryFn: GetState,
-        enabled: true
-    });
 
-    const { mutate, isPending, isError, error, isSuccess } = useMutation({
+    const options = assetIDs.map(id => ({
+        value: id,
+        label: `${assetData.state.assets[id].properties.Name}  ${id}`, // This combines the Name and ID
+        customLabel: <div>{assetData.state.assets[id].properties.Name} <br /> id: {id}</div>
+    }));
+
+    const formatOptionLabel = ({ customLabel }) => customLabel;
+
+
+    const { mutate, isPending, isError, error } = useMutation({
         mutationFn: UpdateAsset, // Directly pass the LogIn function
         onSuccess: (data) => {
             // Handle success logic here, no need for useEffect
@@ -49,7 +50,7 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
         // Initialize a local object to accumulate changes
         let mutationObject = {};
 
-        if (properties !== assetData.properties) {
+        if (properties !== assetData.state.assets[assetID].properties) {
             const formatedProperties = properties
             if (!Array.isArray(formatedProperties.Type)) {
                 formatedProperties.Type = properties.Type.split(',').map(item => item.trim())
@@ -73,7 +74,7 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
     };
 
     const handleReset = () => {
-        setProperties(assetData.properties);
+        setProperties(assetData.state.assets[assetID].properties);
         setRelations(relationData);
         setRemovedRelations([]);
         setNewRelationData(emptyRelation);
@@ -101,7 +102,6 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
     useEffect(() => {
         handleReset();
     }, [assetID, relationData])
-
 
     return (
         <div className='asset-info-container'>
@@ -223,11 +223,12 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
                                                     }}
                                                     value={assetIDs.find(option => option.value === value)}
                                                     onChange={(option) => setNewRelationData({ ...newRelationData, [key]: option.value })}
-                                                    options={assetIDs.map(id => ({ value: id, label: id }))}
+                                                    options={options}
                                                     placeholder="Select an Asset ID"
                                                     isSearchable={true}
                                                     id={key}
                                                     name={key}
+                                                    formatOptionLabel={formatOptionLabel}
                                                 />
                                             ) : (key === "direction" ? <select
                                                 className="inputFields"
@@ -277,7 +278,6 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
 
                 {isPending && <LoadingSpinner />}
                 {isError && <div className='errorMessage'>{error.message}</div>}
-                {errorMessage && <div className='errorMessage'>{errorMessage}</div>}
             </form>
         </div>
     )

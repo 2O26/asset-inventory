@@ -129,7 +129,7 @@ export default function AssetView() {
                         <History height='100%' width='100%' assetID={assetID} isDashboard={false} isAssetView={true}></History>)
                     }
                     {selectedView === 'Edit' && (
-                        <EditAsset assetData={data.state.assets[assetID]} assetID={assetID} relationData={filteredRelations} refetch={refetch} assetIDs={assetIDs}></EditAsset>)
+                        <EditAsset assetData={data} assetID={assetID} relationData={filteredRelations} refetch={refetch} assetIDs={assetIDs}></EditAsset>)
                     }
                     {selectedView === 'CycloneDx' && (
                         <CycloneDX assetID={assetID} ></CycloneDX>)
