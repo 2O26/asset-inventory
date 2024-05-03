@@ -46,7 +46,7 @@ func nextID() int {
 }
 
 // Create a map to store the unique ID and sequence number of each request
-var requests = make(map[int]chan bool)
+// var requests = make(map[int]chan bool)
 
 // ping sends an ICMP echo request (ping) to the specified IP address and waits for a response.
 // It returns a boolean value indicating whether the host is up (true) or down (false), and an error value.
@@ -195,7 +195,7 @@ func deleteAsset(db dbcon.DatabaseHelper, c *gin.Context) {
 	}
 	log.Println("Asset(s) with ID(s) ", assetIDs, "removed.")
 	c.JSON(http.StatusOK, gin.H{
-		"message": fmt.Sprintf("Netscan asset removed."),
+		"message": "Netscan asset removed.",
 	})
 }
 
@@ -427,7 +427,7 @@ func scanIP(ip net.IP, target string) (dbcon.Asset, error) {
 		return asset, nil
 	}
 
-	return dbcon.Asset{}, fmt.Errorf("No open ports found on IP %s", ip)
+	return dbcon.Asset{}, fmt.Errorf("no open ports found on IP %s", ip)
 }
 
 func createAsset(status string, ip string, target string, scanType string) (dbcon.Asset, error) {
