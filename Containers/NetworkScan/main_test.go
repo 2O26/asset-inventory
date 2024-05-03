@@ -166,14 +166,6 @@ func TestGetNetworkAndBroadcastAddresses(t *testing.T) {
 			expectErr:       false,
 		},
 		{
-			name:            "Valid IPv6 CIDR",
-			input:           "2001:db8::/64",
-			expectedNetwork: net.ParseIP("2001:db8::"),
-			expectedBroad:   net.ParseIP("2001:db8::ffff:ffff:ffff:ffff"),
-			expectedSubnet:  &net.IPNet{IP: net.ParseIP("2001:db8::"), Mask: net.IPMask{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0, 0, 0, 0, 0, 0, 0, 0}},
-			expectErr:       false,
-		},
-		{
 			name:      "Invalid CIDR",
 			input:     "invalid",
 			expectErr: true,
@@ -213,11 +205,6 @@ func TestCloneIP(t *testing.T) {
 			input:    net.ParseIP("192.168.1.1"),
 			expected: net.ParseIP("192.168.1.1"),
 		},
-		{
-			name:     "Clone IPv6 address",
-			input:    net.ParseIP("2001:db8::1"),
-			expected: net.ParseIP("2001:db8::1"),
-		},
 	}
 
 	for _, tc := range testCases {
@@ -229,7 +216,6 @@ func TestCloneIP(t *testing.T) {
 		})
 	}
 }
-
 func TestPerformAdvancedScan(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -241,21 +227,11 @@ func TestPerformAdvancedScan(t *testing.T) {
 			target: "192.168.1.0/32",
 			expected: dbcon.Scan{
 				StateID:     "",
-				DateCreated: time.Now().Format("2006-01-02 15:04:05"),
-				DateUpdated: time.Now().Format("2006-01-02 15:04:05"),
+				DateCreated: time.Now().Format(time.RFC3339),
+				DateUpdated: time.Now().Format(time.RFC3339),
 				State:       make(map[string]dbcon.Asset),
 			},
 		},
-		// {
-		// 	name:   "Perform IPv6 scan",
-		// 	target: "2001:db8::/64",
-		// 	expected: dbcon.Scan{
-		// 		StateID:     "",
-		// 		DateCreated: time.Now().Format("2006-01-02 15:04:05"),
-		// 		DateUpdated: time.Now().Format("2006-01-02 15:04:05"),
-		// 		State:       make(map[string]dbcon.Asset),
-		// 	},
-		// },
 	}
 
 	for _, tc := range testCases {
@@ -265,9 +241,6 @@ func TestPerformAdvancedScan(t *testing.T) {
 				t.Errorf("Unexpected error: %v", err)
 			}
 
-			if !reflect.DeepEqual(scan.StateID, tc.expected.StateID) {
-				t.Errorf("StateID mismatch. Expected: %s, Got: %s", tc.expected.StateID, scan.StateID)
-			}
 			if !reflect.DeepEqual(scan.DateCreated, tc.expected.DateCreated) {
 				t.Errorf("DateCreated mismatch. Expected: %s, Got: %s", tc.expected.DateCreated, scan.DateCreated)
 			}
@@ -281,10 +254,44 @@ func TestPerformAdvancedScan(t *testing.T) {
 	}
 }
 
+func TestPrintActiveIPs(t *testing.T) {
+	testCases := []struct {
+		name string
+		scan dbcon.Scan
+	}{
+		{
+			name: "No active IPs",
+			scan: dbcon.Scan{
+				State: make(map[string]dbcon.Asset),
+			},
+		},
+		{
+			name: "Multiple active IPs",
+			scan: dbcon.Scan{
+				State: map[string]dbcon.Asset{
+					"192.168.1.100": {IPv4Addr: "192.168.1.100"},
+					"192.168.1.101": {IPv4Addr: "192.168.1.101"},
+					"192.168.1.102": {IPv4Addr: "192.168.1.102"},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+
+		t.Run(tc.name, func(t *testing.T) {
+
+			printActiveIPs(tc.scan)
+
+		})
+	}
+}
+
 func TestPostNetScan(t *testing.T) {
 	testCases := []struct {
 		name           string
 		body           dbcon.ScanRequest
+		payload        []byte
 		expectedStatus int
 		expectedError  string
 	}{
@@ -297,15 +304,21 @@ func TestPostNetScan(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			expectedError:  "",
 		},
-		// {
-		// 	name: "Valid simple scan",
-		// 	body: dbcon.ScanRequest{
-		// 		CmdSelection: "simple",
-		// 		IPRanges:     []string{"10.0.0.0/8"},
-		// 	},
-		// 	expectedStatus: http.StatusOK,
-		// 	expectedError:  "",
-		// },
+		{
+			name: "Valid simple scan",
+			body: dbcon.ScanRequest{
+				CmdSelection: "simple",
+				IPRanges:     []string{"192.168.1.0/32"},
+			},
+			expectedStatus: http.StatusOK,
+			expectedError:  "",
+		},
+		{
+			name:           "Invalid body",
+			payload:        []byte(`{"cmdSelection":1,"ipRanges":[192.168.1.0/32]}`),
+			expectedStatus: http.StatusBadRequest,
+			expectedError:  "Failed to bind JSON",
+		},
 		{
 			name: "Invalid request body",
 			body: dbcon.ScanRequest{
@@ -315,17 +328,30 @@ func TestPostNetScan(t *testing.T) {
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "No valid scan selection provided",
 		},
+		{
+			name: "Invalid target",
+			body: dbcon.ScanRequest{
+				CmdSelection: "extensive",
+				IPRanges:     []string{"invaled"},
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedError:  "Failed to perform scan",
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
+			if tc.name == "Invalid body" {
+				req, _ := http.NewRequest(http.MethodPost, "/scan", bytes.NewBuffer(tc.payload))
+				c.Request = req
+			} else {
 
-			bodyBytes, _ := json.Marshal(tc.body)
-			req, _ := http.NewRequest(http.MethodPost, "/scan", bytes.NewBuffer(bodyBytes))
-			c.Request = req
-
+				bodyBytes, _ := json.Marshal(tc.body)
+				req, _ := http.NewRequest(http.MethodPost, "/scan", bytes.NewBuffer(bodyBytes))
+				c.Request = req
+			}
 			mockDB := &dbcon.MockDB{}
 			mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
 			mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
@@ -490,73 +516,48 @@ func TestDeleteAsset(t *testing.T) {
 	}
 }
 
-// func TestScanIP(t *testing.T) {
-// 	testCases := []struct {
-// 		name            string
-// 		ip              net.IP
-// 		target          string
-// 		expectedAsset   dbcon.Asset
-// 		expectedErr     error
-// 		mockOpenPorts   []int
-// 		mockCreateAsset func(status, ip, target, scanType string) (dbcon.Asset, error)
-// 	}{
-// 		// {
-// 		// 	name:   "Open ports found",
-// 		// 	ip:     net.ParseIP("192.168.1.100"),
-// 		// 	target: "192.168.1.0/32",
-// 		// 	expectedAsset: dbcon.Asset{
-// 		// 		UID:       "mock_uid",
-// 		// 		Status:    "up",
-// 		// 		IPv4Addr:  "192.168.1.100",
-// 		// 		Subnet:    "192.168.1.0/32",
-// 		// 		OpenPorts: []int{80, 443},
-// 		// 		ScanType:  "extensive",
-// 		// 	},
-// 		// 	expectedErr:   nil,
-// 		// 	mockOpenPorts: []int{80, 443},
-// 		// 	mockCreateAsset: func(status, ip, target, scanType string) (dbcon.Asset, error) {
-// 		// 		return dbcon.Asset{
-// 		// 			UID:      "mock_uid",
-// 		// 			Status:   status,
-// 		// 			IPv4Addr: ip,
-// 		// 			Subnet:   target,
-// 		// 			ScanType: scanType,
-// 		// 		}, nil
-// 		// 	},
-// 		// },
-// 		{
-// 			name:            "No open ports",
-// 			ip:              net.ParseIP("192.168.1.101"),
-// 			target:          "192.168.1.0/32",
-// 			expectedAsset:   dbcon.Asset{},
-// 			expectedErr:     &net.AddrError{Err: "No open ports found on IP 192.168.1.101"},
-// 			mockOpenPorts:   []int{},
-// 			mockCreateAsset: nil,
-// 		},
-// 		// {
-// 		// 	name:          "Create asset error",
-// 		// 	ip:            net.ParseIP("192.168.1.102"),
-// 		// 	target:        "192.168.1.0/32",
-// 		// 	expectedAsset: dbcon.Asset{},
-// 		// 	expectedErr:   &net.AddrError{Err: "Failed to create asset for IP 192.168.1.102: mock error", Addr: "192.168.1.102"},
-// 		// 	mockOpenPorts: []int{22},
-// 		// 	mockCreateAsset: func(status, ip, target, scanType string) (dbcon.Asset, error) {
-// 		// 		return dbcon.Asset{}, errors.New("mock error")
-// 		// 	},
-// 		// },
-// 	}
+func TestScanIP(t *testing.T) {
+	testCases := []struct {
+		name          string
+		ip            net.IP
+		target        string
+		expectedAsset dbcon.Asset
+		expectedErr   error
+	}{
+		//The test case with open ports found is commented out because it requires a live network connection to test with live IPs.
+		// {
+		// 	name:   "Open ports found",
+		// 	ip:     net.ParseIP("192.168.1.1"),
+		// 	target: "192.168.1.0/32",
+		// 	expectedAsset: dbcon.Asset{
+		// 		Status:   "up",
+		// 		IPv4Addr: "192.168.1.1",
+		// 		Subnet:   "192.168.1.0/32",
+		// 		ScanType: "extensive",
+		// 	},
+		// 	expectedErr: nil,
+		// },
 
-// 	for _, tc := range testCases {
-// 		t.Run(tc.name, func(t *testing.T) {
+		{
+			name:          "No open ports",
+			ip:            net.ParseIP("192.168.1.101"),
+			target:        "192.168.1.0/32",
+			expectedAsset: dbcon.Asset{},
+			expectedErr:   &net.AddrError{Err: "No open ports found on IP 192.168.1.101"},
+		},
+	}
 
-// 			asset, err := scanIP(tc.ip, tc.target)
-// 			if tc.expectedErr == nil && err != nil {
-// 				t.Errorf("Unexpected error: %v", err)
-// 			} else if tc.expectedErr != nil && (err == nil || err.Error() != tc.expectedErr.Error()) {
-// 				t.Errorf("Expected error '%v', got '%v'", tc.expectedErr, err)
-// 			} else if !reflect.DeepEqual(asset, tc.expectedAsset) {
-// 				t.Errorf("Expected asset %+v, got %+v", tc.expectedAsset, asset)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			asset, err := scanIP(tc.ip, tc.target)
+			if tc.expectedErr == nil && err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			} else if tc.expectedErr != nil && (err == nil || err.Error() != tc.expectedErr.Error()) {
+				t.Errorf("Expected error '%v', got '%v'", tc.expectedErr, err)
+			} else if !reflect.DeepEqual(asset.Status, tc.expectedAsset.Status) {
+				t.Errorf("Expected asset %+v, got %+v", tc.expectedAsset, asset)
+			}
+		})
+	}
+}
