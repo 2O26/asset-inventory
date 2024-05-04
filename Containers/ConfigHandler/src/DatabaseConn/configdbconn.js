@@ -26,6 +26,7 @@ class ConfigHandler {
         console.log("configdbconn.js, GetDocLink start: ", userAssetID);
         const docLinkData = await DocLinkSchema.find({ assetID: userAssetID }).exec();
         const docLink = docLinkData[docLinkData.length-1].docLink; //-1 to get the most recent item
+        console.log("configdbconn.js, GetDocLink end: ", docLink, userAssetID);
         return docLink;
     }
 

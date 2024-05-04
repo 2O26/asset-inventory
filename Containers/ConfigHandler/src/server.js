@@ -28,7 +28,7 @@ app.post("/setDocLink", async (req, res) => {
             const configHandler = new ConfigHandler();
             await configHandler.connect();
             const response = await configHandler.setDocLink(req.body.doclink, req.body.assetid);
-            res.json({ responseFromServer: "Server.js: Succeeded to add doc link", success: "success", doclink: req.body.doclink });        
+            res.json({ responseFromServer: "Server.js: Succeeded to add doc link", success: "success", doclink: req.body.doclink });     
     } catch (error) {
         console.error('Error while adding doc link:', error);
         res.status(500).send('Error adding doc link');
@@ -42,6 +42,7 @@ app.post("/getDocLink", async (req, res) => {
         await configHandler.connect();
         const doclink = await configHandler.getDoclink(req.body.assetid);
         res.json({ responseFromServer: "Server.js: Succeeded to fetch doc link", success: "success", assetid: req.body.assetid, doclink: doclink });
+        console.log("server.js, GetDocLink end: ", req.body.assetid, doclink);
         return doclink;
 
     } catch (error) {

@@ -1,7 +1,9 @@
 // ApiServices.js
 import UserService from './UserService';
 
-export const SetDocLink = async (docLink, assetID) => {
+export const SetDocLink = async (docLinkData) => {
+    const docLink = docLinkData.link;
+    const assetID = docLinkData.assetID;
     console.log("ApiService.js, SetDocLink start: ", docLink, assetID);
     try {
         const response = await fetch('http://localhost:3001/setDocLink', {
