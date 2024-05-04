@@ -13,6 +13,7 @@ class ConfigHandler {
     constructor() { }
 
     async setDocLink(userDocLink, userAssetID) { //Create new schema where assetID and relevant DocLink is stored.
+        console.log("configdbconn.js, SetDocLink start: ", userDocLink, userAssetID);
         const newDocLink_instance = new DocLinkSchema({docLink: userDocLink, assetID: userAssetID});
         try {
             await newDocLink_instance.save();
@@ -22,6 +23,7 @@ class ConfigHandler {
     }
 
     async getDoclink(userAssetID) { 
+        console.log("configdbconn.js, GetDocLink start: ", userAssetID);
         const docLinkData = await DocLinkSchema.find({ assetID: userAssetID }).exec();
         const docLink = docLinkData[docLinkData.length-1].docLink; //-1 to get the most recent item
         return docLink;

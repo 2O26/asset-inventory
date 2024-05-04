@@ -2,6 +2,7 @@
 import UserService from './UserService';
 
 export const SetDocLink = async (docLink, assetID) => {
+    console.log("ApiService.js, SetDocLink start: ", docLink, assetID);
     try {
         const response = await fetch('http://localhost:3001/setDocLink', {
             method: 'POST',
@@ -11,6 +12,7 @@ export const SetDocLink = async (docLink, assetID) => {
             body: JSON.stringify({ doclink: docLink, assetid: assetID })
         });
         const resData = await response.json();
+        console.log("ApiService.js, SetDocLink end: ", resData);
         return resData;
     } catch (err) {
         console.error(err);
@@ -19,6 +21,7 @@ export const SetDocLink = async (docLink, assetID) => {
 }
 
 export const GetDocLink = async (assetID) => {
+    console.log("ApiService.js, GetDocLink start: ", assetID);
     try {
         const response = await fetch('http://localhost:3001/getDocLink', {
             method: 'POST',
@@ -29,7 +32,7 @@ export const GetDocLink = async (assetID) => {
         });
 
         const return_data = await response.json();
-        //console.log("getdoclink returns:", return_data.doclink)
+        console.log("ApiService.js, GetDocLink end: ", return_data);
         return return_data.doclink;
     } catch (err) {
         console.error(err);

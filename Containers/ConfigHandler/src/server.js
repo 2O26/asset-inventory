@@ -23,6 +23,7 @@ const server = app.listen(route, () => console.log(`Server listening on port: ${
 
 
 app.post("/setDocLink", async (req, res) => {
+        console.log("server.js, SetDocLink start: ", req.body);
         try {
             const configHandler = new ConfigHandler();
             await configHandler.connect();
@@ -35,6 +36,7 @@ app.post("/setDocLink", async (req, res) => {
 });
 
 app.post("/getDocLink", async (req, res) => {
+    console.log("server.js, GetDocLink start: ", req.body);
     try {
         const configHandler = new ConfigHandler();
         await configHandler.connect();
