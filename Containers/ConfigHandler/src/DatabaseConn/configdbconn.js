@@ -12,28 +12,11 @@ var TrelloKeysSchema = require('../Schemas/TrelloKeysSchema');
 class ConfigHandler {
     constructor() { }
 
-    async setDocLink(userDocLink, userAssetID) { //Create new schema where assetID and relevant DocLink is stored.
-        console.log("configdbconn.js, SetDocLink start: ", userDocLink, userAssetID);
-        const newDocLink_instance = new DocLinkSchema({docLink: userDocLink, assetID: userAssetID});
-        try {
-            await newDocLink_instance.save();
-        } catch (err) {
-            console.log('Error while updating Doc Link:', err.message);
-        }
-    }
-
-    async getDoclink(userAssetID) { 
-        console.log("configdbconn.js, GetDocLink start: ", userAssetID);
-        const docLinkData = await DocLinkSchema.find({ assetID: userAssetID }).exec();
-        const docLink = docLinkData[docLinkData.length-1].docLink; //-1 to get the most recent item
-        console.log("configdbconn.js, GetDocLink end: ", docLink, userAssetID);
-        return docLink;
-    }
-
+    
     async connect() {
         let connection = `mongodb://${dbServer}/${dbName}`;
         return mongoose.connect(connection)
-            .then(() => {
+        .then(() => {
                 console.log('Connected to DB:', dbName);
             })
             .catch((err) => {
@@ -48,7 +31,7 @@ class ConfigHandler {
         const transformedIpRanges = ipRanges.map(elem => elem.IPRange);
         return transformedIpRanges;
     }
-
+    
     async addIPrange(IPrange) {
         const newRange_instance = new IPRangeSchema({ IPRange: IPrange });
         try {
@@ -57,7 +40,7 @@ class ConfigHandler {
             console.log('Error while inserting test text:', err.message);
         }
     }
-
+    
     async removeIPrange(IPrange) {
         try {
             await IPRangeSchema.findOneAndRemove({ IPRange: IPrange });
@@ -65,12 +48,12 @@ class ConfigHandler {
             console.log(`Error while removing IP range:`, err.message);
         }
     }
-
+    
     async getRecurringScans() {
         const recurringScans = await RecurringScanSchema.find().exec();
         return recurringScans;
     }
-
+    
     async addRecurringScan(recurringScan) {
         const newRange_instance = new RecurringScanSchema({ plugin: recurringScan.plugin, time: recurringScan.time, IpRange: recurringScan.IpRange });
         try {
@@ -87,7 +70,7 @@ class ConfigHandler {
             console.log(`Error while removing IP range:`, err.message);
         }
     }
-
+    
     async getOSSAPIkey() {
         const apikey = await OSSAPIKEYSchema.find().exec();
         if (apikey.length !== 0) {
@@ -124,7 +107,7 @@ class ConfigHandler {
             console.log("Error updating OSS API key");
         }
     }
-
+    
     async getTrelloKeys() {
         let trelloKeys;
         try {
@@ -133,13 +116,13 @@ class ConfigHandler {
             console.log('Error while fetching Trello keys:', err.message);
             throw err;  // Rethrow or handle as needed
         }
-
+        
         const defaultKeys = {
             apiKey: "",
             token: "",
             boardId: ""
         };
-
+        
         if (trelloKeys.length === 0 || (trelloKeys[0] && Object.keys(trelloKeys[0]).length !== 3)) {
             try {
                 const newTrelloKeysConfig = new TrelloKeysSchema(defaultKeys);
@@ -159,6 +142,21 @@ class ConfigHandler {
         } catch (err) {
             console.log("Error updating Trello keys", err);
         }
+    }
+    
+    async setDocLink(userDocLink, userAssetID) { //Create new schema where assetID and relevant DocLink is stored.
+        const newDocLink_instance = new DocLinkSchema({docLink: userDocLink, assetID: userAssetID});
+        try {
+            await newDocLink_instance.save();
+        } catch (err) {
+            console.log('Error while updating Doc Link:', err.message);
+        }
+    }
+    
+    async getDoclink(userAssetID) { 
+        const docLinkData = await DocLinkSchema.find({ assetID: userAssetID }).exec();
+        const docLink = docLinkData[docLinkData.length-1].docLink; //-1 to get the most recent item
+        return docLink;
     }
 }
 

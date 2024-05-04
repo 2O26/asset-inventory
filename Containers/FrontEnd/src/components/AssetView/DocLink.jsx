@@ -16,7 +16,6 @@ export default function DocLink({ assetID }) {
     const { mutate: setLink, isPending: isPendingSetLink } = useMutation({
         mutationFn: SetDocLink, 
         onSuccess: () => {
-            console.log("Doclink.jsx 1: ", docLinkData);
             window.alert("Succesfully added doc link");
             setInputLink(''); // Empty the input field
             refetchGetLink();
@@ -27,7 +26,6 @@ export default function DocLink({ assetID }) {
     });
 
     useEffect(() => {
-        console.log("DocLink.jsx useEffect 1: ", docLinkData);
     }, [docLinkData]);
 
     const handleSetLink = async (event) => {
@@ -37,7 +35,6 @@ export default function DocLink({ assetID }) {
             linkToSet = "https://" + inputLink;
         }
         setLink({ link: linkToSet, assetID });
-        console.log("DocLink.jsx 2", linkToSet, assetID);
     };
     
 

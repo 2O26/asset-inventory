@@ -22,33 +22,6 @@ app.use(cors())
 const server = app.listen(route, () => console.log(`Server listening on port: ${route}`));
 
 
-app.post("/setDocLink", async (req, res) => {
-        console.log("server.js, SetDocLink start: ", req.body);
-        try {
-            const configHandler = new ConfigHandler();
-            await configHandler.connect();
-            const response = await configHandler.setDocLink(req.body.doclink, req.body.assetid);
-            res.json({ responseFromServer: "Server.js: Succeeded to add doc link", success: "success", doclink: req.body.doclink });     
-    } catch (error) {
-        console.error('Error while adding doc link:', error);
-        res.status(500).send('Error adding doc link');
-    }
-});
-
-app.post("/getDocLink", async (req, res) => {
-    console.log("server.js, GetDocLink start: ", req.body);
-    try {
-        const configHandler = new ConfigHandler();
-        await configHandler.connect();
-        const doclink = await configHandler.getDoclink(req.body.assetid);
-        res.json({ responseFromServer: "Server.js: Succeeded to fetch doc link", success: "success", assetid: req.body.assetid, doclink: doclink });
-        console.log("server.js, GetDocLink end: ", req.body.assetid, doclink);
-        return doclink;
-
-    } catch (error) {
-        res.status(500).send('Error fetching doc link');
-    }
-});
 
 app.get("/getIPranges", async (req, res) => {
     try {
@@ -359,6 +332,31 @@ app.post("/updateTrelloKeys", async (req, res) => {
     } catch (error) {
         res.status(500).send('Error updating Trello keys');
     }
+});
+
+app.post("/setDocLink", async (req, res) => {
+    try {
+        const configHandler = new ConfigHandler();
+        await configHandler.connect();
+        const response = await configHandler.setDocLink(req.body.doclink, req.body.assetid);
+        res.json({ responseFromServer: "Server.js: Succeeded to add doc link", success: "success", doclink: req.body.doclink });     
+} catch (error) {
+    console.error('Error while adding doc link:', error);
+    res.status(500).send('Error adding doc link');
+}
+});
+
+app.post("/getDocLink", async (req, res) => {
+try {
+    const configHandler = new ConfigHandler();
+    await configHandler.connect();
+    const doclink = await configHandler.getDoclink(req.body.assetid);
+    res.json({ responseFromServer: "Server.js: Succeeded to fetch doc link", success: "success", assetid: req.body.assetid, doclink: doclink });
+    return doclink;
+
+} catch (error) {
+    res.status(500).send('Error fetching doc link');
+}
 });
 
 module.exports = { app, server, CronTask };
