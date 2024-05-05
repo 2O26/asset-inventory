@@ -124,6 +124,7 @@
 }
 
 .cve-asset-item {
+    width: fit-content;
     cursor: pointer;
     border-radius: 0.25rem;
     padding: 0.5rem;

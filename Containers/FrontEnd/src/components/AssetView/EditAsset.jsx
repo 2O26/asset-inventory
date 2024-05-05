@@ -155,9 +155,9 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
                         <div className="relations-container" >
                             {Object.entries(relations).map(([key, value]) => (
                                 <div key={key} className='relation'>
-                                    <a style={{ marginRight: "1rem" }}>{value.from}</a>
+                                    <a style={{ marginRight: "1rem" }}>{assetData.state.assets[value.from].properties.Name} <br />{value.from}</a>
                                     <ConnectionIcon size={19} color={"var(--text-hover)"} />
-                                    <a style={{ margin: "0rem 1rem" }}>{value.to}</a>
+                                    <a style={{ margin: "0rem 1rem" }}>{assetData.state.assets[value.to].properties.Name} <br />{value.to}</a>
                                     <div onClick={() => removeRelation(key)}>
                                         <RemoveIcon size={22} color={"var(--error-color)"} />
                                     </div>
@@ -166,9 +166,9 @@ export default function EditAsset({ assetData, assetID, relationData, refetch, a
                             ))}
                             {addedRelations.map((relation, index) => (
                                 <div key={index} className='relation'>
-                                    <a style={{ marginRight: "1rem" }}>{relation.from}</a>
+                                    <a style={{ marginRight: "1rem" }}> {assetData.state.assets[relation.from].properties.Name} <br />{relation.from} </a>
                                     <ConnectionIcon size={19} color={"var(--text-hover)"} />
-                                    <a style={{ margin: "0rem 1rem" }}>{relation.to}</a>
+                                    <a style={{ margin: "0rem 1rem" }}>{assetData.state.assets[relation.to].properties.Name} <br />{relation.to}</a>
                                     <LinkAddIcon size={22} color={"var(--success-color)"} />
                                 </div>
 

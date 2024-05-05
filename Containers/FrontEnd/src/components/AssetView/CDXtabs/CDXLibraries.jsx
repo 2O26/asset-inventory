@@ -91,15 +91,11 @@ export const CDXLibraries = (components) => {
 
     return (
         <div>
-            <div>
-                <div>
-                    <h1>Library list</h1>
-                </div>
-                <hr />
-
-                <hr />
+            <div className='cdx-tabs'>
+                <h1>Library list</h1>
+                <SearchBar onSearch={setSearchTerm} />
                 <div className='center-flex-column'>
-                    <SearchBar onSearch={setSearchTerm} />
+
                     {filteredAssets.map((component, index) => (
                         <div key={index} className="json-tree-container">
                             <div
@@ -112,7 +108,7 @@ export const CDXLibraries = (components) => {
                                 </button>
                             </div>
                             {visibilityStates[index] && (
-                                <div className='settings-container'>
+                                <div className='dropdown-container'>
                                     <p> Name: {component.name} </p>
                                     <p> Version: {component.version} </p>
                                     <p> Description: {component.description} </p>
@@ -122,8 +118,7 @@ export const CDXLibraries = (components) => {
                         </div>
                     ))}
                 </div>
-                <hr />
             </div>
-        </div>
+        </div >
     );
 };

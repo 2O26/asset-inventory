@@ -14,7 +14,7 @@
 }
 
 
-.settings-container {
+.dropdown-container {
     z-index: 0;
     border-radius: 0.5rem;
     box-shadow: var(--box-shadow);
@@ -27,11 +27,13 @@
     background-color: var(--main-color);
     padding: 3rem 1rem 1rem 1rem;
     margin-top: -2rem;
-
+    color: var(--text-color);
 }
 
-.settings-container p {
+.dropdown-container p {
     margin-right: auto;
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
 }
 
 
@@ -53,4 +55,25 @@
 
 .json-tree-container {
     width: 100%
+}
+
+.cdx-tabs {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.meta-base-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.meta-base-info-child {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem
 }

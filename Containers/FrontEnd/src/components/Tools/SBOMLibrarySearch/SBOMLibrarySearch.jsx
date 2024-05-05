@@ -177,7 +177,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                                                 </div>
                                             </div>
                                             {visibilityStates[index] && (
-                                                <div className='settings-container'>
+                                                <div className='dropdown-container'>
                                                     <p> Library name: {library.name} </p>
                                                     <p> Purl: {library.purl} </p>
                                                     <p> Version: {library.version} </p>
@@ -185,7 +185,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                                                     <div className='cve-asset-container' >
                                                         {library.assetids.map((id, idx) => (
                                                             <div key={idx} className='cve-asset-item' onClick={() => navigate(`/asset-view/${id}`)}>
-                                                                <p>Name: {stateData?.state?.assets && stateData.state.assets[id].properties.Name}</p>
+                                                                <p>Name: {stateData?.state?.assets && stateData.state.assets[id]?.properties.Name}</p>
                                                                 <p>ID: {id}</p>
                                                             </div>
                                                         ))}

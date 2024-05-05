@@ -114,53 +114,46 @@ export const CDXCVE = ({ assetID }) => {
     }
     return (
         <div>
-            <div>
-                <h3> SBOM library vulnerbilities</h3>
+            <div className='cdx-tabs'>
+                <h1> SBOM library vulnerbilities</h1>
+                <SearchBar onSearch={setSearchTerm} />
                 {filteredLibraries && (
-                    <button className='standard-button' onClick={() => consoleVulnerbleLibraries()}> Console vulns for asset</button>
-                )}
-                <hr />
-                <div>
-                    <SearchBar onSearch={setSearchTerm} />
-                    {filteredLibraries && (
-                        <div className='center-flex-column'>
-                            {Object.keys(filteredLibraries).map((key, index) => {
-                                return (
-                                    <div key={index} className='json-tree-container'>
-                                        <div
-                                            className={visibilityStates[index] ? "drop-down-header show-content" : "drop-down-header"}
-                                            onClick={() => toggleVisibility(index)}
-                                            style={{ cursor: 'pointer' }}>
-                                            {/* Assuming the 'name' property exists within the vulnerability details object */}
-                                            <div />
-                                            <strong>{filteredLibraries[key].name} @ {filteredLibraries[key].version}</strong>
-                                            <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                                                <div style={{ marginRight: "0.2rem" }}>
-                                                    <StatusIcon size={15} color={getColor(filteredLibraries[key].CVE[0].cvssScore)} />
-                                                </div>
-                                                <button className='arrow-container'>
-                                                    {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
-                                                </button>
+                    <div className='center-flex-column'>
+                        {Object.keys(filteredLibraries).map((key, index) => {
+                            return (
+                                <div key={index} className='json-tree-container'>
+                                    <div
+                                        className={visibilityStates[index] ? "drop-down-header show-content" : "drop-down-header"}
+                                        onClick={() => toggleVisibility(index)}
+                                        style={{ cursor: 'pointer' }}>
+                                        {/* Assuming the 'name' property exists within the vulnerability details object */}
+                                        <div />
+                                        <strong>{filteredLibraries[key].name} @ {filteredLibraries[key].version}</strong>
+                                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                                            <div style={{ marginRight: "0.2rem" }}>
+                                                <StatusIcon size={15} color={getColor(filteredLibraries[key].CVE[0].cvssScore)} />
                                             </div>
+                                            <button className='arrow-container'>
+                                                {visibilityStates[index] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
+                                            </button>
                                         </div>
-                                        {visibilityStates[index] && (
-                                            <div className='settings-container'>
-                                                {/* Here 'key' is used directly, as it is the unique identifier of the vulnerability */}
-                                                <p> Library name: {filteredLibraries[key].name} </p>
-                                                {/* Accessing the 'severity' property from the vulnerability details object */}
-                                                <p>CVE: {filteredLibraries[key].CVE[0].cve}</p>
-                                                <p>CVE score: {filteredLibraries[key].CVE[0].cvssScore}</p>
-                                                <p>Description: {filteredLibraries[key].CVE[0].description}</p>
-
-                                            </div>
-                                        )}
                                     </div>
-                                )
-                            })}
-                        </div>
-                    )}
-                </div>
+                                    {visibilityStates[index] && (
+                                        <div className='dropdown-container'>
+                                            {/* Here 'key' is used directly, as it is the unique identifier of the vulnerability */}
+                                            <p> Library name: {filteredLibraries[key].name} </p>
+                                            {/* Accessing the 'severity' property from the vulnerability details object */}
+                                            <p>CVE: {filteredLibraries[key].CVE[0].cve}</p>
+                                            <p>CVE score: {filteredLibraries[key].CVE[0].cvssScore}</p>
+                                            <p>Description: {filteredLibraries[key].CVE[0].description}</p>
 
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
             </div>
         </div>
     );

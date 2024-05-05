@@ -55,9 +55,18 @@ export const GetState = async (ipRanges = []) => {
 
 export const StartNetScan = async (scanSettings) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
         const response = await fetch('http://localhost:8081/startNetScan', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: JSON.stringify(scanSettings)
         });
 
@@ -334,8 +343,18 @@ export const UploadCycloneDX = async (data) => {
     const uploadURL = 'http://localhost:8082/uploadCycloneDX';
 
     try {
+
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
         const response = await fetch(uploadURL, {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: data,
         });
 
@@ -405,7 +424,17 @@ export const GetUserSettings = async () => {
 
 export const GetCDXfiles = async (assetID) => {
     try {
-        const response = await fetch('http://localhost:8082/getCycloneDXFile?assetID=' + assetID);
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
+        const response = await fetch('http://localhost:8082/getCycloneDXFile?assetID=' + assetID, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
+        });
         const return_data = await response.json();
         return return_data;
     } catch (err) {
@@ -416,10 +445,19 @@ export const GetCDXfiles = async (assetID) => {
 
 export const RemoveCDXfile = async (assetID) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = await UserService.getToken();
+
         const formData = new FormData();
         formData.append('assetID', assetID)
         const response = await fetch('http://localhost:8082/removeCycloneDX', {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: formData
         })
         const return_data = await response.json();

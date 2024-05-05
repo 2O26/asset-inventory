@@ -30,14 +30,14 @@
     margin-top: 1rem;
 }
 
-.settings-container input {
+/* .settings-container input {
     background-color: var(--background-color);
     color: var(--text-color);
 }
 
 .settings-container input:focus {
     outline: none;
-}
+} */
 
 .buttonContainerNetScan {
     display: flex;
