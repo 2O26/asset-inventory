@@ -2,6 +2,8 @@ package main
 
 import (
 	dbcon "assetinventory/networkscan/dbcon-networkscan"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -25,6 +27,8 @@ var ports = []int{1, 3, 4, 6, 7, 9, 13, 17, 19, 20, 21, 22, 23, 24, 25, 26, 30, 
 var flake, _ = sonyflake.New(sonyflake.Settings{
 	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
 })
+
+const UpdateAssetsURL = "http://assethandler:8080/updateNetscanAssets"
 
 func printActiveIPs(scan dbcon.Scan) { // This is a tmp function
 	fmt.Println("Active IP addresses:")
@@ -474,6 +478,7 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 	auth := dbcon.AuthorizeUser(c)
 
 	if auth.Authenticated && (auth.CanManageAssets || auth.IsAdmin) {
+		log.Println("USER AUTHORIZED")
 		var req dbcon.ScanRequest
 
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -527,9 +532,53 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 
 		log.Printf("Finished postNetScan\n")
 
-		dbcon.AddScan(db, scanResultGlobal)
+		updatedScan := dbcon.AddScan(db, scanResultGlobal)
+		fmt.Println("ADDED UPDATED SCAN TO DATABASE")
 
+		updateAssets(updatedScan, accessibleIPRanges)
+
+		// Return a success message to the caller
 		c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
+		log.Println("Scan performed and assets updated successfully")
+
+	} else {
+		log.Println("USER NOT AUTHORIZED")
 	}
+
+	return
+
+}
+
+func updateAssets(updatedScan dbcon.Scan, accessibleIPRanges []string) {
+	type request struct {
+		Scan    dbcon.Scan `json:"scan"`
+		Subnets []string   `json:"subnets"`
+	}
+
+	// Send a POST request to the assetHandler to update the netscan assets
+
+	// Send the scan state to the assethandler
+	requestData := request{
+		Scan:    updatedScan,
+		Subnets: accessibleIPRanges,
+	}
+	requestDataJSON, err := json.Marshal(requestData)
+	req, err := http.NewRequest("POST", UpdateAssetsURL, bytes.NewReader(requestDataJSON))
+	if err != nil {
+		log.Println("Failed to create request: ", err)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	do, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("Failed to send request", err)
+	}
+
+	if do.StatusCode != http.StatusOK {
+		log.Println("Failed to update assets")
+	}
+	return
 
 }

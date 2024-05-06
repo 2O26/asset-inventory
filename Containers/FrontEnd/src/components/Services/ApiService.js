@@ -59,7 +59,7 @@ export const StartNetScan = async (scanSettings) => {
             await UserService.updateToken()
         }
 
-        const authToken = await UserService.getToken();
+        const authToken = UserService.getToken();
 
         const response = await fetch('http://localhost:8081/startNetScan', {
             method: 'POST',
@@ -69,6 +69,9 @@ export const StartNetScan = async (scanSettings) => {
             },
             body: JSON.stringify(scanSettings)
         });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
 
         const resData = await response.json();
 

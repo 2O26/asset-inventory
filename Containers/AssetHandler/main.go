@@ -5,6 +5,7 @@ import (
 	"assetinventory/assethandler/jsonhandler"
 	"context"
 	"fmt"
+	"net/netip"
 	"strconv"
 	"time"
 
@@ -33,7 +34,6 @@ type networkResponse struct {
 type networkAsset struct {
 	Status         string `bson:"Status" json:"Status"`
 	IPv4Addr       string `bson:"IPv4 Address" json:"IPv4 Address"`
-	Subnet         string `bson:"Subnet" json:"Subnet"`
 	OpenPorts      []int  `bson:"Open Ports" json:"Open Ports"`
 	LastDiscovered string `bson:"Last Discovered at" json:"Last Discovered at"`
 }
@@ -55,31 +55,6 @@ func CORSMiddleware() gin.HandlerFunc {
 		}
 		c.Next()
 	}
-}
-
-func getNetScanStatus() json.RawMessage {
-	url := "http://networkscan:8081/status"
-
-	// GET request from netscan
-	response, err := http.Get(url)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer response.Body.Close() // Ensure the body is closed after reading
-
-	var netassets jsonhandler.PluginState
-	// Read the response body
-	json.NewDecoder(response.Body).Decode(&netassets) //puts the response into netassets
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	netassetsJSON, _ := json.Marshal(netassets)
-	log.Println("NetscanStatus Gave:", string(netassetsJSON))
-	return netassetsJSON
-
 }
 
 func authorizeUser(c *gin.Context) jsonhandler.AuthResponse {
@@ -141,7 +116,7 @@ func getLatestState(c *gin.Context) {
 			log.Printf("Failed to get subnets")
 		}
 		fmt.Println("SUBNETS IN REQUEST:", subnets)
-		getNetworkScan(c)
+
 		url := "http://localhost:8080/GetLatestScan"
 		resp, err := http.Get(url)
 
@@ -167,7 +142,7 @@ func getLatestState(c *gin.Context) {
 			return
 		}
 		pluginStates := make(map[string]json.RawMessage)
-		netassets := getNetScanStatus()
+		netassets := getNetworkScan(c)
 		pluginStates["netscan"] = netassets
 
 		currentStateJSON, err := jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil)
@@ -192,7 +167,7 @@ func getLatestState(c *gin.Context) {
 	}
 }
 
-func getNetworkScan(c *gin.Context) {
+func getNetworkScan(c *gin.Context) json.RawMessage {
 	fmt.Println("########Getting network scan##########")
 	url := "http://networkscan:8081/getLatestScan"
 	// GET request from netscan
@@ -200,9 +175,8 @@ func getNetworkScan(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//add origin header and auth token
+	//add auth token
 	req.Header.Add("Authorization", c.GetHeader("Authorization"))
-	req.Header.Add("Origin", "http://assethandler:8000")
 	req.Header.Add("Content-Type", "application/json")
 
 	response, err := http.DefaultClient.Do(req)
@@ -211,83 +185,24 @@ func getNetworkScan(c *gin.Context) {
 	}
 
 	defer response.Body.Close() // Ensure the body is closed after reading
-
-	var netassets networkResponse
+	var netassets jsonhandler.PluginState
 	// Read the response body
 	json.NewDecoder(response.Body).Decode(&netassets) //puts the response into netassets
 	if err != nil {
 		log.Fatal(err)
 	}
-	var addAsset []jsonhandler.Asset
-	var assetIDs []string
-	for k := range netassets.State {
-		assetIDs = append(assetIDs, k)
-	}
-	// Iterate over the State map and print UID values'
-	// There might be a bug here where the assets are not added in the right order
-	for i := 1; i <= len(netassets.State); i++ {
-		asset := jsonhandler.Asset{
-			Name:        "netscan-" + fmt.Sprint(netassets.DateUpdated) + "-" + fmt.Sprint(i),
-			Owner:       "",
-			Type:        []string{},
-			Criticality: 0,
-			IP:          netassets.State[assetIDs[i-1]].IPv4Addr,
-		}
-		addAsset = append(addAsset, asset)
-		fmt.Println("Asset: ", asset)
-	}
-	request := dbcon.AssetRequest{
-		AddAsset: addAsset,
-	}
-	fmt.Println("Request: ", request)
-	_, addedassets := dbcon.AddAssets(request, assetIDs)
-	pluginState := jsonhandler.PluginState{
-		StateID:     "netscan",
-		DateCreated: netassets.DateCreated,
-		DateUpdated: netassets.DateUpdated,
-		State:       make(map[string]any),
-	}
 
-	for k, v := range netassets.State {
-		pluginState.State[k] = v
-	}
-	plugin := jsonhandler.Plugin{
-		PluginStateID: netassets.StateID,
-	}
-	fmt.Println("PluginState: ", pluginState)
-
-	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
-	addedSubnetAssets := addSubnetAssets(netassets)
-	addedRelations := addSubnetRelations(netassets)
-
-	addPluginData := dbcon.AddPluginData(pluginState, plugin)
-	addedassets = append(addedassets, addedSubnetAssets...)
-	changes := dbcon.Timeline{
-		AddedAssets:      addedassets,
-		RemovedAssets:    nil,
-		UpdatedAssets:    addPluginData,
-		AddedRelations:   addedRelations,
-		RemovedRelations: nil,
-	}
-	timelineDB := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("timelineDB")}
-
-	err = dbcon.SaveChange(changes, timelineDB)
-	if err != nil {
-		log.Fatalf("Failed to save changes: %v", err)
-	}
+	netassetsJSON, _ := json.Marshal(netassets)
+	log.Println("NetscanStatus Gave:", string(netassetsJSON))
+	return netassetsJSON
 
 }
 
-func addSubnetAssets(netassets networkResponse) []string {
+func addSubnetAssets(subnets []string) []string {
 	var addAsset []jsonhandler.Asset
 	var assetIDs []string
-	subnets := make(map[string]bool)
 
-	for _, asset := range netassets.State {
-		subnets[asset.Subnet] = true
-	}
-
-	for subnet, _ := range subnets {
+	for _, subnet := range subnets {
 		fmt.Println("SUBNET: ", subnet)
 		asset := jsonhandler.Asset{
 			Name:        subnet,
@@ -315,7 +230,7 @@ func addSubnetAssets(netassets networkResponse) []string {
 	return addedSubnetAssets
 }
 
-func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
+func addSubnetRelations(netassets networkResponse, subnets []string) []dbcon.RelationChang {
 	db := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	latestScan, err := dbcon.GetLatestScan(db)
 	if err != nil {
@@ -325,14 +240,11 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 	}
 	var addRelation []jsonhandler.Relation
 	var relationIDs []string
-	subnets := make(map[string]bool)
 	subnetAssets := make(map[string]jsonhandler.Asset)
-	for _, asset := range netassets.State {
-		subnets[asset.Subnet] = true
-	}
+
 	// Find all assets in subnet, then add relations between them.
 	// dbcon.Addrelations will check if they already exist
-	for subnet, _ := range subnets {
+	for _, subnet := range subnets {
 		for assetID, asset := range latestScan.Assets {
 			if subnet == asset.IP && asset.Type[0] == "Subnet" {
 				//we have found the subnet asset. Add it to subnets
@@ -342,9 +254,21 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 	}
 	//Now have all subnet assets. Adding relations between subnets and assets
 
+	//netip parse stuff here
+
 	for subnetAssetID, subnetAsset := range subnetAssets {
+		var network netip.Prefix
+		network, err = netip.ParsePrefix(subnetAsset.Name)
+		if err != nil {
+			log.Panic("Failed to parse subnet: ", err)
+		}
 		for netAssetID, netAsset := range netassets.State {
-			if netAsset.Subnet == subnetAsset.IP {
+			var assetIP netip.Addr
+			assetIP, err = netip.ParseAddr(netAsset.IPv4Addr)
+			if err != nil {
+				log.Panic("Failed to parse IP: ", err)
+			}
+			if network.Contains(assetIP) {
 				//have match, now make relation
 				relation := jsonhandler.Relation{
 					From:        subnetAssetID,
@@ -460,26 +384,96 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 				DateCreated: "2024-03-05T14:20:00Z",
 			},
 		},
-		PluginStates: map[string]jsonhandler.PluginState{
-			"IPscan": {
-				StateID:     "20240214-1300A",
-				DateCreated: "2024-02-14T13:00:00",
-				DateUpdated: "2024-02-14Z13:30:00",
-				State: map[string]interface{}{
-					"65f8671cfe55e5c76465d840": map[string]interface{}{
-						"status":    "down",
-						"ipv4Addr":  "192.168.1.1",
-						"subnet":    "192.168.1.0/24",
-						"openPorts": []int{},
-					},
-				},
-			},
-		}}
+	}
 	_, err := scansHelper.InsertOne(context.Background(), initialScan)
 	if err != nil {
 		log.Fatalf("Failed to add initial scan: %v", err)
 	}
 	log.Println("Initial scan added successfully")
+}
+
+func updateNetscanAssets(c *gin.Context) {
+	type updateRequest struct {
+		Scan    networkResponse `json:"scan"`
+		Subnets []string        `json:"subnets"`
+	}
+	requestData := updateRequest{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		log.Printf("Failed to bind JSON: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to bind JSON"})
+		return
+	}
+	netscanData := requestData.Scan
+	subnets := requestData.Subnets
+
+	fmt.Println("NETSCAN DATA: ", netscanData)
+	if err != nil {
+		log.Printf("Failed to retrieve the latest scan: %v\n", err)
+		return
+	}
+
+	//getting our subnets from the scan allows us to not have a subnet key in the netscan asset data
+	var addAsset []jsonhandler.Asset
+	var assetIDs []string
+	for k := range netscanData.State {
+		assetIDs = append(assetIDs, k)
+	}
+	// Iterate over the State map and print UID values'
+	// There might be a bug here where the assets are not added in the right order
+	for i := 0; i < len(netscanData.State); i++ {
+		asset := jsonhandler.Asset{
+			Name:        netscanData.State[assetIDs[i]].IPv4Addr,
+			Owner:       "",
+			Type:        []string{},
+			Criticality: 0,
+			IP:          netscanData.State[assetIDs[i]].IPv4Addr,
+		}
+		addAsset = append(addAsset, asset)
+		fmt.Println("Asset: ", asset)
+	}
+	request := dbcon.AssetRequest{
+		AddAsset: addAsset,
+	}
+	fmt.Println("Request: ", request)
+	_, addedassets := dbcon.AddAssets(request, assetIDs)
+	pluginState := jsonhandler.PluginState{
+		StateID:     "netscan",
+		DateCreated: netscanData.DateCreated,
+		DateUpdated: netscanData.DateUpdated,
+		State:       make(map[string]any),
+	}
+
+	for k, v := range netscanData.State {
+		pluginState.State[k] = v
+	}
+	plugin := jsonhandler.Plugin{
+		PluginStateID: netscanData.StateID,
+	}
+	fmt.Println("PluginState: ", pluginState)
+
+	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
+	addedSubnetAssets := addSubnetAssets(subnets)
+	fmt.Println("ADDED SUBNET ASSETS")
+	addedRelations := addSubnetRelations(netscanData, subnets)
+	fmt.Println("ADDED SUBNET RELATIONS")
+
+	addPluginData := dbcon.AddPluginData(pluginState, plugin)
+	addedassets = append(addedassets, addedSubnetAssets...)
+	changes := dbcon.Timeline{
+		AddedAssets:      addedassets,
+		RemovedAssets:    nil,
+		UpdatedAssets:    addPluginData,
+		AddedRelations:   addedRelations,
+		RemovedRelations: nil,
+	}
+	timelineDB := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("timelineDB")}
+
+	err = dbcon.SaveChange(changes, timelineDB)
+	if err != nil {
+		log.Fatalf("Failed to save changes: %v", err)
+	}
+
 }
 
 func main() {
@@ -499,6 +493,9 @@ func main() {
 	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
 	addInitialScan(scansHelper)
 	router.POST("/getLatestState", getLatestState)
+
+	router.POST("/updateNetscanAssets", updateNetscanAssets)
+
 	router.POST("/AddScan", func(c *gin.Context) {
 		dbcon.AddScan(scansHelper, c)
 	})
