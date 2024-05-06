@@ -1,4 +1,3 @@
-
 const axios = require('axios');
 const CVEscanSave = require("../DatabaseConn/CVEconn");
 
@@ -6,33 +5,47 @@ const CVEscanSave = require("../DatabaseConn/CVEconn");
 async function getAPIkey() {
     const url = 'http://confighandler:3001/getOSSAPIkeyInternal';
     try {
-        const apikeyResponse = await axios.get(url);
-        if (apikeyResponse.status !== 200) {
-            console.log("Could not fetch apikey")
+        const response = await axios.get(url);
+        if (response.status !== 200) {
             return ""
         }
-        return apikeyResponse.data.apikey;
-
+        return response.data.apikey;
     } catch (error) {
-        console.error('Error during API call:', error);
-        return "";
+        return ""
     }
 }
 
-async function checkVulnerabilities(purl, apikey) {
+async function checkAPIkey(apiKey) {
+    try {
+        const apiResponse = await axios.get('https://ossindex.sonatype.org/api/v3/version', {
+            headers: {
+                'accept': 'application/json',
+                'Authorization': `Basic ${apiKey}`
+            }
+        });
+        if (apiResponse.status == 200) {
+            return true
+        } else {
+            return false
+        }
+    } catch (error) {
+        return false
+    }
+}
+
+async function CheckVulnerabilities(component, apiKey) {
     /*
         Check CVEs for libraries attached in the parameter against the Sonatype OSS index
     */
 
     const apiUrl = `https://ossindex.sonatype.org/api/v3/component-report`;
     const apiAuthUrl = `https://ossindex.sonatype.org/api/v3/authorized/component-report`;
-    const component = purl;
 
     try {
-        if (apikey != "") {
+        if (apiKey != "") {
             const response = await axios.post(apiAuthUrl, { coordinates: component }, {
                 headers: {
-                    authorization: `Basic ${apikey}`
+                    authorization: `Basic ${apiKey}`
                 },
                 timeout: 10000  // Timeout after 10 seconds
             });
@@ -44,116 +57,141 @@ async function checkVulnerabilities(purl, apikey) {
             return response.data;
         }
     } catch (error) {
-        console.error('Error fetching vulnerability data:', error.message);
-        if (error.response) {
-            console.error('Response status:', error.response.status);
-            console.error('Response data:', error.response.data);
-        }
-        return null;
+        console.error('Error fetching vulnerability data:', error);
+        throw error;
     }
 }
 
-async function getAllPurls() {
-    /*
-        Get all the purl:s in the library DB
-    */
-    const cveSave = new CVEscanSave();
-    return cveSave.connect()
-        .then(() => cveSave.getAllPurls())
-        .then(result => {
-            return result;
-        })
-        .catch(err => {
-            console.log("Could not get purls: ", err);
-            return [];  // Return an empty array in case of error
-        });
-}
-
-async function getPurlsOfAssetID(assetID) {
-    /*
-        Get all the purl:s associated with the given asset-id
-    */
-    const cveSave = new CVEscanSave();
-    return cveSave.connect()
-        .then(() => cveSave.getPurls(assetID))
-        .then(result => {
-            return result;
-        })
-        .catch(err => {
-            console.log("Could not get purls: ", err);
-            return [];  // Return an empty array in case of error
-        });
-}
-
-async function processPurlsInBatches(purl_list, batchSize, apikey) {
-    /*
-        Response data: { code: 400, message: 'Request for more than 128 components' }
-        Thus we have to divide the libraries to batches of 128 and accumulate the results to an object
-    */
-    let accumulatedResult = [];
-
-    for (let i = 0; i < purl_list.length; i += batchSize) {
-        const batch = purl_list.slice(i, i + batchSize);
-        const batchResult = await checkVulnerabilities(batch, apikey);  // Process each batch and expect a result
-        // Accumulate results; merge or concatenate based on your data structure
-        accumulatedResult.push(batchResult);
-    }
-    return accumulatedResult;
-}
-
-async function CVEcheckAll(authToken) {
+async function CheckVulnerabilitiesForAll() {
     /*
         Mother function to check all libraries for CVEs
     */
     try {
-        const apikey = await getAPIkey(authToken);
-        if (apikey === "") {
-            console.log("Erronous api key or could not fetch it from settings")
+        let apiKey = await getAPIkey();
+
+        const authenticated = await checkAPIkey(apiKey);
+
+        if (!authenticated) {
+            apiKey = ""
         }
-        const purl_list = await getAllPurls();
-        const OSSresponses = await processPurlsInBatches(purl_list, 128, apikey);
-        // Reduce to an array of library objects that contain CVEs
-        const componentsWithVulnerabilities = OSSresponses.flatMap(subArray =>
-            subArray.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
-        );
 
-        const objectivizedComponentsWithVulnerabilities = {}
-        componentsWithVulnerabilities.forEach(component => {
-            objectivizedComponentsWithVulnerabilities[component.coordinates] = component.vulnerabilities;
-        })
-
-        return objectivizedComponentsWithVulnerabilities;
+        const purlList = await getAllPurls();
+        if (!purlList.length) {
+            console.log("No PURLs available for processing.");
+            return {};
+        }
+        const openSourceResponses = await processPurlsSequentially(purlList, apiKey, 128);
+        const vulnerabilitiesMap = reduceToVulnerabilitiesMap(openSourceResponses);
+        console.log("Amount of Vulnerable Libraries: ", Object.keys(vulnerabilitiesMap).length);
+        return vulnerabilitiesMap;
     } catch (err) {
         console.error('Error scanning CVEs:', err.message);
         return {};
     }
 }
 
-async function CVEcheck(assetID, authToken) {
+async function getPurlsOfAssetID(assetID, dbConnector = new CVEscanSave()) {
+    try {
+        await dbConnector.connect();
+        const result = await dbConnector.getPurls(assetID);
+        return result;
+    } catch (err) {
+        console.error("Could not get purls for asset ID " + assetID + ": ", err);
+        throw err;  // Return an empty array in case of error
+    }
+}
+
+async function getAllPurls(dbConnector = new CVEscanSave()) {
+    /*
+    Get all the purl:s associated with the given asset-id
+*/
+    try {
+        await dbConnector.connect();
+        const result = await dbConnector.getAllPurls();
+        return result;
+    } catch (err) {
+        console.error("Could not get all PURLs: ", err);
+        throw err;  // Return an empty array in case of error
+    }
+}
+
+async function processPurlsSequentially(purlList, apiKey, batchSize) {
+    const results = [];
+
+    for (let i = 0; i < purlList.length; i += batchSize) {
+        const batch = purlList.slice(i, i + batchSize);
+        try {
+            const result = await CheckVulnerabilities(batch, apiKey);
+            results.push(result);  // Collect results from each batch
+        } catch (err) {
+            console.error('Error processing batch:', err);
+            throw err;  // Stop processing and throw the error
+        }
+    }
+    return results;
+}
+
+function reduceToVulnerabilitiesMap(OSSresponses) {
+    const componentsWithVulnerabilities = OSSresponses.flatMap(response =>
+        response.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
+    );
+
+    return componentsWithVulnerabilities.reduce((acc, component) => {
+        if (acc[component.coordinates]) {
+            // If the component already exists, concatenate new vulnerabilities
+            acc[component.coordinates] = acc[component.coordinates].concat(component.vulnerabilities);
+        } else {
+            // Otherwise, just set the vulnerabilities for this component
+            acc[component.coordinates] = component.vulnerabilities;
+        }
+        return acc;
+    }, {});
+}
+
+
+async function CheckVulnerabilitiesForAsset(assetID) {
     /*
         Mother function to check libraries associated with a specific asset for CVEs
     */
     try {
-        const apikey = await getAPIkey(authToken);
-        if (apikey === "") {
-            console.log("Erronous api key or could not fetch it from settings")
+        let apiKey = await getAPIkey();
+
+        const authenticated = await checkAPIkey(apiKey);
+
+        if (!authenticated) {
+            apiKey = ""
         }
-        const purl_list = await getPurlsOfAssetID(assetID);
-        const OSSresponses = await processPurlsInBatches(purl_list, 128, apikey);
-        // Reduce to an array of library objects that contain CVEs
-        const componentsWithVulnerabilities = OSSresponses.flatMap(subArray =>
-            subArray.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
-        );
-        const objectivizedComponentsWithVulnerabilities = {}
-        componentsWithVulnerabilities.forEach(component => {
-            objectivizedComponentsWithVulnerabilities[component.coordinates] = component.vulnerabilities;
-        })
-        console.log("Amount of Vulnerble Libraries: ", Object.keys(objectivizedComponentsWithVulnerabilities).length)
-        return objectivizedComponentsWithVulnerabilities;
+
+        const purlList = await getPurlsOfAssetID(assetID);
+        if (!purlList.length) {
+            throw new Error("No PURLs found for the asset.");
+        }
+        const OSSresponses = await processPurlsSequentially(purlList, apiKey, 128);
+        const vulnerableComponents = filterVulnerableComponents(OSSresponses);
+        const vulnerabilitiesMap = mapVulnerabilities(vulnerableComponents);
+        console.log("Amount of Vulnerable Libraries: ", Object.keys(vulnerabilitiesMap).length);
+        return vulnerabilitiesMap;
     } catch (err) {
         console.error('Error scanning CVEs:', err.message);
-        return {};
+        throw err;
     }
+}
+
+function filterVulnerableComponents(OSSresponses) {
+    return OSSresponses.flatMap(response =>
+        response.filter(component => component.vulnerabilities && component.vulnerabilities.length > 0)
+    );
+}
+
+function mapVulnerabilities(vulnerableComponents) {
+    return vulnerableComponents.reduce((acc, component) => {
+        if (acc[component.coordinates]) {
+            acc[component.coordinates] = acc[component.coordinates].concat(component.vulnerabilities);
+        } else {
+            acc[component.coordinates] = component.vulnerabilities;
+        }
+        return acc;
+    }, {});
 }
 
 async function CheckIfVulnerabilities(assetID) {
@@ -162,23 +200,40 @@ async function CheckIfVulnerabilities(assetID) {
             - run function that invokes an external API call to check for CVEs
         - [x] Save result to database
     */
-    const purlsWithVulnerbilities = await CVEcheck(assetID);
-    const cveSave = new CVEscanSave();
-    cveSave.connect()
-        .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))
-        .catch((err) => {
-            console.log("Could not save purl CVE data: ", err)
-        });
+    try {
+        const purlsWithVulnerbilities = await CheckVulnerabilitiesForAsset(assetID);
+        const cveSave = new CVEscanSave();
+        await cveSave.connect();
+        await cveSave.addCVEsToPurl(purlsWithVulnerbilities);
+    } catch (err) {
+        console.error('Error checking vulnerabilities or saving CVE data:', err);
+        throw err;
+    }
 }
 
 async function CheckIfSBOMVulnsAll() {
-    const purlsWithVulnerbilities = await CVEcheckAll();
-    const cveSave = new CVEscanSave();
-    cveSave.connect()
-        .then(() => cveSave.addCVEsToPurl(purlsWithVulnerbilities))
-        .catch((err) => {
-            console.log("Could not save purl CVE data: ", err)
-        });
+    try {
+        const purlsWithVulnerbilities = await CheckVulnerabilitiesForAll();
+        const cveSave = new CVEscanSave();
+        await cveSave.connect();
+        await cveSave.addCVEsToPurl(purlsWithVulnerbilities);
+    } catch (err) {
+        console.error("Could not save purl CVE data: ", err)
+        throw err;
+    };
 }
 
-module.exports = { CheckIfVulnerabilities, CheckIfSBOMVulnsAll };
+module.exports = {
+    getAPIkey,
+    CheckVulnerabilities,
+    getPurlsOfAssetID,
+    getAllPurls,
+    processPurlsSequentially,
+    CheckVulnerabilitiesForAll,
+    reduceToVulnerabilitiesMap,
+    CheckVulnerabilitiesForAsset,
+    filterVulnerableComponents,
+    mapVulnerabilities,
+    CheckIfVulnerabilities,
+    CheckIfSBOMVulnsAll
+};

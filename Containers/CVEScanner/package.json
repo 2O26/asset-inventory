@@ -19,7 +19,9 @@
         "node-fetch": "^3.3.2",
         "axios": "^1.6.8",
         "supertest": "^6.3.4",
-        "jest-fetch-mock": "3.0.3"
+        "jest-fetch-mock": "3.0.3",
+        "axios-mock-adapter": "1.22.0",
+        "rewire": "7.0.0"
     },
     "devDependencies": {
         "jest": "^29.7.0"

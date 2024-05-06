@@ -521,3 +521,45 @@ describe('GET /recheckVulnerabilitiesAll', () => {
 
 });
 
+describe('GET /checkAPIkey', () => {
+    it('should return the API version when the correct API key is provided', async () => {
+        // Setup axios to mock a successful API response
+        axios.get.mockResolvedValue({
+            data: { version: '3.1.0' }
+        });
+
+        const response = await request(app)
+            .get('/checkAPIkey')
+            .set('Authorization', 'Bearer valid-api-key');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ version: '3.1.0' });
+    });
+
+    it('should return an error if the API key is invalid', async () => {
+        axios.get.mockRejectedValue({
+            response: {
+                status: 401,
+                data: { message: 'Invalid API Key' }
+            }
+        });
+
+        const response = await request(app)
+            .get('/checkAPIkey')
+            .set('Authorization', 'Bearer invalid-api-key');
+
+        expect(response.status).toBe(401);
+        expect(response.body).toEqual({ message: 'Invalid API Key' });
+    });
+
+    it('should handle network or other errors gracefully', async () => {
+        axios.get.mockRejectedValue(new Error('Network error'));
+
+        const response = await request(app)
+            .get('/checkAPIkey')
+            .set('Authorization', 'Bearer whatever-key');
+
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('Network error');
+    });
+});
