@@ -65,7 +65,7 @@ var requests = make(map[int]chan bool)
 // The function will return false without an error if it doesn't receive a response from the target host within the timeout.
 const (
 	ReadBufferSize = 1500
-	ReadDeadline   = 5 * time.Second
+	ReadDeadline   = 1 * time.Second
 )
 
 func ping(addr string) (bool, error) {
@@ -107,6 +107,7 @@ func ping(addr string) (bool, error) {
 		if _, err = c.WriteTo(wb, dst); err != nil {
 			return false, fmt.Errorf("failed to send ICMP message: %w", err)
 		}
+		time.Sleep(time.Second * 5)
 
 		err = c.SetReadDeadline(time.Now().Add(ReadDeadline))
 		if err != nil {
