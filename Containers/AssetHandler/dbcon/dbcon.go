@@ -305,6 +305,7 @@ func GetLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 				Assets:           make(map[string]jsonhandler.Asset),
 				Relations:        make(map[string]jsonhandler.Relation),
 				PluginStates:     make(map[string]jsonhandler.PluginState),
+				Plugins:          make(map[string]jsonhandler.Plugin),
 			}
 			_, err = db.InsertOne(context.TODO(), latestScan)
 			if err != nil {
@@ -325,6 +326,9 @@ func GetLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 		}
 		if latestScan.Relations == nil {
 			latestScan.Relations = make(map[string]jsonhandler.Relation)
+		}
+		if latestScan.Plugins == nil {
+			latestScan.Plugins = make(map[string]jsonhandler.Plugin)
 		}
 	}
 	return latestScan, nil
