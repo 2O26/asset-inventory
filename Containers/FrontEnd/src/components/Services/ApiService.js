@@ -1,7 +1,6 @@
 // ApiServices.js
 import UserService from './UserService';
 
-
 export const AssetHandlerStatus = async () => {
     // assethandler status check
 
@@ -726,5 +725,42 @@ export const GetTrelloKeys = async () => {
     } catch (err) {
         console.error(err);
         throw new Error('Could not fetch Trello keys');
+    }
+}
+
+export const SetDocLink = async (docLinkData) => {
+    const docLink = docLinkData.link;
+    const assetID = docLinkData.assetID;
+    try {
+        const response = await fetch('http://localhost:3001/setDocLink', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ doclink: docLink, assetid: assetID })
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not add Doc Link');
+    }
+}
+
+export const GetDocLink = async (assetID) => {
+    try {
+        const response = await fetch('http://localhost:3001/getDocLink', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({assetid: assetID})
+        });
+
+        const return_data = await response.json();
+        return return_data.doclink;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch Doc Link');
     }
 }
