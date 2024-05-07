@@ -183,7 +183,7 @@ func getLatestState(c *gin.Context) {
 		// Will now remove any data that a user cannot access.
 		if len(subnets) > 0 {
 			currentState = jsonhandler.FilterBySubnets(currentState, auth, subnets)
-		} else if auth.IsAdmin == false {
+		} else if !auth.IsAdmin {
 			currentState = jsonhandler.NeedToKnow(currentState, auth)
 		}
 
@@ -279,7 +279,7 @@ func addSubnetAssets(netassets networkResponse) []string {
 		subnets[asset.Subnet] = true
 	}
 
-	for subnet, _ := range subnets {
+	for subnet := range subnets {
 		fmt.Println("SUBNET: ", subnet)
 		asset := jsonhandler.Asset{
 			Name:        subnet,
@@ -324,7 +324,7 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 	}
 	// Find all assets in subnet, then add relations between them.
 	// dbcon.Addrelations will check if they already exist
-	for subnet, _ := range subnets {
+	for subnet := range subnets {
 		for assetID, asset := range latestScan.Assets {
 			if subnet == asset.IP && asset.Type[0] == "Subnet" {
 				//we have found the subnet asset. Add it to subnets
