@@ -395,19 +395,16 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 }
 
 func updateNetscanAssets(c *gin.Context) {
-	//this function only accepts connection from netscan
+	// this function only accepts connection from netscan
 	if c.GetHeader("Origin") != netscanURL {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unknown origin"})
 		return
 	}
-	//also perform authorization check
+	// also perform authorization check
+	// will not perform any other security checks as any user has the ability to perform a scan
 	auth := authorizeUser(c)
 	if !auth.Authenticated {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-	if !auth.IsAdmin && !auth.CanManageAssets {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient privileges"})
 		return
 	}
 

@@ -141,7 +141,7 @@ func ping(addr string) (bool, error) {
 }
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") //Only the assethandler may access this container
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
@@ -167,7 +167,6 @@ func main() {
 		postNetScan(scansHelper, c)
 	})
 	router.GET("/getLatestScan", func(c *gin.Context) {
-		//Due to security concerns, this function will only be available to the assethandler
 		dbcon.GetLatestScan(scansHelper, c)
 	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
