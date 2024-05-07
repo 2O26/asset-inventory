@@ -119,7 +119,7 @@ export default function AssetView() {
                             className={`tab-button ${selectedView === 'DocLink' ? 'active-button' : ''}`}
                             onClick={() => handleButtonClick('DocLink')}
                         >
-                            Documentation
+                            Docs
                         </button>
                         <button
                             className={`tab-button ${selectedView === 'Trello' ? 'active-button' : ''}`}

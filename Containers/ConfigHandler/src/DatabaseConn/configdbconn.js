@@ -12,11 +12,11 @@ var TrelloKeysSchema = require('../Schemas/TrelloKeysSchema');
 class ConfigHandler {
     constructor() { }
 
-    
+
     async connect() {
         let connection = `mongodb://${dbServer}/${dbName}`;
         return mongoose.connect(connection)
-        .then(() => {
+            .then(() => {
                 console.log('Connected to DB:', dbName);
             })
             .catch((err) => {
@@ -31,7 +31,7 @@ class ConfigHandler {
         const transformedIpRanges = ipRanges.map(elem => elem.IPRange);
         return transformedIpRanges;
     }
-    
+
     async addIPrange(IPrange) {
         const newRange_instance = new IPRangeSchema({ IPRange: IPrange });
         try {
@@ -40,7 +40,7 @@ class ConfigHandler {
             console.log('Error while inserting test text:', err.message);
         }
     }
-    
+
     async removeIPrange(IPrange) {
         try {
             await IPRangeSchema.findOneAndRemove({ IPRange: IPrange });
@@ -48,12 +48,12 @@ class ConfigHandler {
             console.log(`Error while removing IP range:`, err.message);
         }
     }
-    
+
     async getRecurringScans() {
         const recurringScans = await RecurringScanSchema.find().exec();
         return recurringScans;
     }
-    
+
     async addRecurringScan(recurringScan) {
         const newRange_instance = new RecurringScanSchema({ plugin: recurringScan.plugin, time: recurringScan.time, IpRange: recurringScan.IpRange });
         try {
@@ -70,7 +70,7 @@ class ConfigHandler {
             console.log(`Error while removing IP range:`, err.message);
         }
     }
-    
+
     async getOSSAPIkey() {
         const apikey = await OSSAPIKEYSchema.find().exec();
         if (apikey.length !== 0) {
@@ -107,7 +107,7 @@ class ConfigHandler {
             console.log("Error updating OSS API key");
         }
     }
-    
+
     async getTrelloKeys() {
         let trelloKeys;
         try {
@@ -116,13 +116,13 @@ class ConfigHandler {
             console.log('Error while fetching Trello keys:', err.message);
             throw err;  // Rethrow or handle as needed
         }
-        
+
         const defaultKeys = {
             apiKey: "",
             token: "",
             boardId: ""
         };
-        
+
         if (trelloKeys.length === 0 || (trelloKeys[0] && Object.keys(trelloKeys[0]).length !== 3)) {
             try {
                 const newTrelloKeysConfig = new TrelloKeysSchema(defaultKeys);
@@ -143,20 +143,32 @@ class ConfigHandler {
             console.log("Error updating Trello keys", err);
         }
     }
-    
-    async setDocLink(userDocLink, userAssetID) { //Create new schema where assetID and relevant DocLink is stored.
-        const newDocLink_instance = new DocLinkSchema({docLink: userDocLink, assetID: userAssetID});
+    async setDocLink(userDocLink, userAssetID) {
+        const filter = { assetID: userAssetID };
+        const update = { docLink: userDocLink, assetID: userAssetID };
+
+        // Set the options to upsert true, which creates a new document if one doesn't already exist
+        const options = { upsert: true, new: true };
+
         try {
-            await newDocLink_instance.save();
+            const updatedDoc = await DocLinkSchema.findOneAndUpdate(filter, update, options);
         } catch (err) {
-            console.log('Error while updating Doc Link:', err.message);
+            console.log('Error while updating or creating Doc Link:', err.message);
         }
     }
-    
-    async getDoclink(userAssetID) { 
-        const docLinkData = await DocLinkSchema.find({ assetID: userAssetID }).exec();
-        const docLink = docLinkData[docLinkData.length-1].docLink; //-1 to get the most recent item
-        return docLink;
+
+    async getDoclink(userAssetID) {
+        try {
+            const docLinkData = await DocLinkSchema.findOne({ assetID: userAssetID }).exec();
+            if (docLinkData) {
+                return docLinkData.docLink;
+            } else {
+                return null;
+            }
+        } catch (err) {
+            console.error('Error retrieving document link:', err);
+            return null;
+        }
     }
 }
 

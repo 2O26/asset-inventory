@@ -338,25 +338,25 @@ app.post("/setDocLink", async (req, res) => {
     try {
         const configHandler = new ConfigHandler();
         await configHandler.connect();
-        const response = await configHandler.setDocLink(req.body.doclink, req.body.assetid);
-        res.json({ responseFromServer: "Server.js: Succeeded to add doc link", success: "success", doclink: req.body.doclink });     
-} catch (error) {
-    console.error('Error while adding doc link:', error);
-    res.status(500).send('Error adding doc link');
-}
+        await configHandler.setDocLink(req.body.doclink, req.body.assetid);
+        res.json({ responseFromServer: "Server.js: Succeeded to add doc link", success: "success", doclink: req.body.doclink });
+    } catch (error) {
+        console.error('Error while adding doc link:', error);
+        res.status(500).send('Error adding doc link');
+    }
 });
 
 app.post("/getDocLink", async (req, res) => {
-try {
-    const configHandler = new ConfigHandler();
-    await configHandler.connect();
-    const doclink = await configHandler.getDoclink(req.body.assetid);
-    res.json({ responseFromServer: "Server.js: Succeeded to fetch doc link", success: "success", assetid: req.body.assetid, doclink: doclink });
-    return doclink;
+    try {
+        const configHandler = new ConfigHandler();
+        await configHandler.connect();
+        const doclink = await configHandler.getDoclink(req.body.assetid);
+        res.json({ responseFromServer: "Succeeded to fetch doc link", success: "success", assetid: req.body.assetid, doclink: doclink });
+        return doclink;
 
-} catch (error) {
-    res.status(500).send('Error fetching doc link');
-}
+    } catch (error) {
+        res.status(500).send('Error fetching doc link');
+    }
 });
 
 module.exports = { app, server, CronTask };
