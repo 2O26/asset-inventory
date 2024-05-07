@@ -296,9 +296,36 @@ func ManageAssetsAndRelations(db DatabaseHelper, timelineDB DatabaseHelper, c *g
 
 func GetLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 	var latestScan jsonhandler.BackState
-	if err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&latestScan); err != nil {
-		log.Printf("Failed to retrieve the latest scan: %v\n", err)
-		return latestScan, fmt.Errorf("error while retrieving the latest scan: %v", err)
+	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&latestScan)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// Initialize latestScan with empty maps if no documents are found
+			latestScan = jsonhandler.BackState{
+				MostRecentUpdate: time.Now(),
+				Assets:           make(map[string]jsonhandler.Asset),
+				Relations:        make(map[string]jsonhandler.Relation),
+				PluginStates:     make(map[string]jsonhandler.PluginState),
+			}
+			_, err = db.InsertOne(context.TODO(), latestScan)
+			if err != nil {
+				log.Printf("Failed to create default empty scan: %v\n", err)
+				return latestScan, fmt.Errorf("failed to create default empty scan: %v", err)
+			}
+		} else {
+			log.Printf("Failed to retrieve the latest scan: %v\n", err)
+			return latestScan, fmt.Errorf("error while retrieving the latest scan: %v", err)
+		}
+	} else {
+		// Ensure all maps are initialized even if documents exist
+		if latestScan.PluginStates == nil {
+			latestScan.PluginStates = make(map[string]jsonhandler.PluginState)
+		}
+		if latestScan.Assets == nil {
+			latestScan.Assets = make(map[string]jsonhandler.Asset)
+		}
+		if latestScan.Relations == nil {
+			latestScan.Relations = make(map[string]jsonhandler.Relation)
+		}
 	}
 	return latestScan, nil
 }
