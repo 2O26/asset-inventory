@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { GetDocLink, SetDocLink } from '../Services/ApiService';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
-import './DocLink.css';
 
 export default function DocLink({ assetID }) {
     const [inputLink, setInputLink] = useState('');
