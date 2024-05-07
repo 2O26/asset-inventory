@@ -42,6 +42,8 @@ var flake, _ = sonyflake.New(sonyflake.Settings{
 	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
 })
 
+const netscanURL = "http://networkscan:8081"
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -393,6 +395,22 @@ func addInitialScan(scansHelper dbcon.DatabaseHelper) {
 }
 
 func updateNetscanAssets(c *gin.Context) {
+	//this function only accepts connection from netscan
+	if c.GetHeader("Origin") != netscanURL {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unknown origin"})
+		return
+	}
+	//also perform authorization check
+	auth := authorizeUser(c)
+	if !auth.Authenticated {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	if !auth.IsAdmin && !auth.CanManageAssets {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient privileges"})
+		return
+	}
+
 	type updateRequest struct {
 		Scan    networkResponse `json:"scan"`
 		Subnets []string        `json:"subnets"`

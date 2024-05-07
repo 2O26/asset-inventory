@@ -168,10 +168,7 @@ func main() {
 	})
 	router.GET("/getLatestScan", func(c *gin.Context) {
 		//Due to security concerns, this function will only be available to the assethandler
-		auth := dbcon.AuthorizeUser(c)
-		if auth.Authenticated {
-			dbcon.GetLatestScan(scansHelper, c, auth)
-		}
+		dbcon.GetLatestScan(scansHelper, c)
 	})
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
 		dbcon.PrintAllDocuments(scansHelper, c)
@@ -192,7 +189,19 @@ func main() {
 }
 
 func deleteAsset(db dbcon.DatabaseHelper, c *gin.Context) {
+	auth := dbcon.AuthorizeUser(c)
+	if !auth.Authenticated {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	assetIDs := c.PostFormArray("assetID")
+	//need to check if user can delete assets
+	if !auth.IsAdmin && !auth.CanManageAssets {
+		//User has insufficient privileges, do not perform action
+		c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient privileges for operation"})
+		return
+	}
+
 	err := dbcon.DeleteAsset(db, assetIDs)
 	if err != nil {
 		log.Println("Failed to remove netscan asset with ID(s)", assetIDs, "from database. Error:", err)
@@ -535,7 +544,7 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 		updatedScan := dbcon.AddScan(db, scanResultGlobal)
 		fmt.Println("ADDED UPDATED SCAN TO DATABASE")
 
-		updateAssets(updatedScan, accessibleIPRanges)
+		updateAssets(updatedScan, accessibleIPRanges, c)
 
 		// Return a success message to the caller
 		c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
@@ -549,7 +558,7 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 
 }
 
-func updateAssets(updatedScan dbcon.Scan, accessibleIPRanges []string) {
+func updateAssets(updatedScan dbcon.Scan, accessibleIPRanges []string, c *gin.Context) {
 	type request struct {
 		Scan    dbcon.Scan `json:"scan"`
 		Subnets []string   `json:"subnets"`
@@ -570,6 +579,8 @@ func updateAssets(updatedScan dbcon.Scan, accessibleIPRanges []string) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Origin", "http://networkscan:8081")
+	req.Header.Set("Authorization", c.GetHeader("Authorization"))
 
 	do, err := http.DefaultClient.Do(req)
 	if err != nil {

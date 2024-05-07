@@ -242,7 +242,14 @@ func AddScan(db DatabaseHelper, scan Scan) Scan {
 	return updatedScan
 }
 
-func GetLatestScan(db DatabaseHelper, c *gin.Context, auth AuthResponse) {
+func GetLatestScan(db DatabaseHelper, c *gin.Context) {
+	//authorize user
+	auth := AuthorizeUser(c)
+	if !auth.Authenticated {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized", "success": false})
+		return
+	}
+
 	var scan Scan
 	// Find the latest scan based on the mostRecentUpdate field
 	// Sorting by -1 to ensure the latest document is returned first mostRecentUpdate
