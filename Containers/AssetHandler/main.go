@@ -507,7 +507,7 @@ func main() {
 	timelineDB := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("timelineDB")}
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
-	addInitialScan(scansHelper)
+	addEmptyScan(scansHelper)
 	router.POST("/getLatestState", getLatestState)
 	router.POST("/AddScan", func(c *gin.Context) {
 		dbcon.AddScan(scansHelper, c)
