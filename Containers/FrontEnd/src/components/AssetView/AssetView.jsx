@@ -11,6 +11,7 @@ import { LeftArrow, RightArrow } from '../common/Icons/Icons';
 import { CSSTransition } from 'react-transition-group';
 import CycloneDX from './CycloneDX';
 import History from '../Tools/History/History';
+import DocLink from './DocLink';
 import TrelloTab from './TrelloTab';
 
 export default function AssetView() {
@@ -115,6 +116,12 @@ export default function AssetView() {
                             C-DX
                         </button>
                         <button
+                            className={`tab-button ${selectedView === 'DocLink' ? 'active-button' : ''}`}
+                            onClick={() => handleButtonClick('DocLink')}
+                        >
+                            Docs
+                        </button>
+                        <button
                             className={`tab-button ${selectedView === 'Trello' ? 'active-button' : ''}`}
                             onClick={() => handleButtonClick('Trello')}
                         >
@@ -133,6 +140,9 @@ export default function AssetView() {
                     }
                     {selectedView === 'CycloneDx' && (
                         <CycloneDX assetID={assetID} ></CycloneDX>)
+                    }
+                    {selectedView === 'DocLink' && (
+                        <DocLink assetID={assetID} ></DocLink>)
                     }
                     {selectedView === 'Trello' && (
                         <TrelloTab assetID={assetID} ></TrelloTab>)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/netip"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -32,7 +33,6 @@ type Asset struct {
 type networkAsset struct {
 	Status    string `bson:"status" json:"status"`
 	IPv4Addr  string `bson:"ipv4Addr" json:"ipv4Addr"`
-	Subnet    string `bson:"subnet" json:"subnet"`
 	OpenPorts []int  `bson:"openPorts" json:"openPorts"`
 }
 
@@ -193,18 +193,29 @@ func NeedToKnow(inState FrontState, auth AuthResponse) FrontState {
 	alteredState.MostRecentUpdate = inState.MostRecentUpdate
 
 	//find assets that user can view, and add them to the state
-	//the code below only accounts for assets from the network scan, as roles aren't set for ordinary assets yet
 	for assetID, asset := range inState.Assets {
 		netscanData, ok := asset.Plugins["netscan"].(map[string]any)
 		if ok {
 			var netProps networkAsset
 			err := mapstructure.Decode(netscanData, &netProps)
 			if err != nil {
-				continue //ADD ERROR HERE
+				continue
+			}
+			var assetIP netip.Addr
+			assetIP, err = netip.ParseAddr(asset.IP)
+			if err != nil {
+				fmt.Println("Error parsing IP: ", assetIP, "ERROR:", err)
+				continue
 			}
 			for _, role := range auth.Roles {
-				fmt.Println("ASSET NAME", asset.Name)
-				if netProps.Subnet == role {
+				fmt.Println("ROLE", role)
+				var network netip.Prefix
+				network, err = netip.ParsePrefix(role)
+				if err != nil {
+					//role is not a subnet role
+					continue
+				}
+				if network.Contains(assetIP) {
 					// user can view asset, add it to alteredState
 					alteredState.Assets[assetID] = asset
 				}
@@ -291,7 +302,16 @@ func FilterBySubnets(inState FrontState, auth AuthResponse, subnets []string) Fr
 				continue
 			}
 			for accessible := range rolesAndSubnets {
-				if netProps.Subnet == accessible {
+				network, err := netip.ParsePrefix(accessible)
+				if err != nil {
+					//role is not a subnet role
+					continue
+				}
+				assetIP, err := netip.ParseAddr(netProps.IPv4Addr)
+				if err != nil {
+					continue
+				}
+				if network.Contains(assetIP) {
 					//user can view, add to alteredState
 					alteredState.Assets[assetID] = asset
 				}

@@ -72,8 +72,8 @@ async function LibraryDBupdate(assetID) {
         await cveSave.connect();
         const previousState = await cveSave.getAllLibraries();
         const cycloneDXjson = await FetchCycloneDX(assetID);
-        console.log("Previous State:", previousState);
-        console.log("CycloneDX JSON:", cycloneDXjson);
+        // console.log("Previous State:", previousState);
+        // console.log("CycloneDX JSON:", cycloneDXjson);
 
         if (cycloneDXjson === "failure") {
             throw new Error("Failed to fetch SBOM data");

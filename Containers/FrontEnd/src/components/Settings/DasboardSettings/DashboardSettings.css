@@ -13,7 +13,7 @@
     flex-direction: column;
     gap: 0.5rem;
     text-align: left;
-    width: 8rem;
+    width: 10rem;
 }
 
 .pligin-list-row {
@@ -33,6 +33,7 @@
 }
 
 .conifg-description {
+    text-align: left;
     color: var(--text-color);
     width: 20vw;
     font-weight: 600;

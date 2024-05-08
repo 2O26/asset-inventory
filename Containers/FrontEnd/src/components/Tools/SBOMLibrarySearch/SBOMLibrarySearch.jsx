@@ -33,7 +33,7 @@ export function SearchBar({ onSearch }) {
     );
 }
 
-export default function SBOMLibrarySearch({ width, height, isDashboard = false }) {
+export default function SBOMLibrarySearch({ isDashboard = false }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredLibraries, setFilteredLibraries] = useState([]);
     const [visibilityStates, setVisibilityStates] = useState({});
@@ -52,12 +52,6 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
         queryFn: GetAllSBOMLibraries,
         enabled: true
     });
-
-    function handleClick() {
-        if (filteredLibraries) {
-            console.log(filteredLibraries)
-        }
-    }
 
     const toggleVisibility = (section) => {
         setVisibilityStates(prevState => ({
@@ -131,13 +125,11 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                 Error loading data: {libraryError.message}. Could not fetch the libraries?
             </div>)
     }
-    console.log("stateData: ", stateData)
 
     return (
         <div className='page-container'>
-            <div className="SBOM-container">
+            <div className="SBOM-container" style={{ width: (!isDashboard && "50vw") }}>
                 {!isDashboard && <h1 style={{ color: "var(--text-color)", marginTop: "1rem 0" }}>Global library search</h1>}
-                {/* <button className='standard-button' onClick={() => handleClick()}> Console all libraries</button> */}
                 <div>
                     {/* <hr /> */}
                     <div className='SBOM-search-container'>
@@ -177,7 +169,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                                                 </div>
                                             </div>
                                             {visibilityStates[index] && (
-                                                <div className='settings-container'>
+                                                <div className='dropdown-container'>
                                                     <p> Library name: {library.name} </p>
                                                     <p> Purl: {library.purl} </p>
                                                     <p> Version: {library.version} </p>
@@ -185,13 +177,13 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                                                     <div className='cve-asset-container' >
                                                         {library.assetids.map((id, idx) => (
                                                             <div key={idx} className='cve-asset-item' onClick={() => navigate(`/asset-view/${id}`)}>
-                                                                <p>Name: {stateData?.state?.assets && stateData.state.assets[id].properties.Name}</p>
+                                                                <p>Name: {stateData?.state?.assets && stateData.state.assets[id]?.properties.Name}</p>
                                                                 <p>ID: {id}</p>
                                                             </div>
                                                         ))}
                                                     </div>
                                                     {library.CVE[0] && (
-                                                        <div>
+                                                        <div >
                                                             <p>CVE: {library.CVE[0].cve}</p>
                                                             <p>CVE score: {library.CVE[0].cvssScore}</p>
                                                             <p>Description: {library.CVE[0].description}</p>

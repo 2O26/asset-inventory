@@ -6,10 +6,12 @@ const dbName = 'configurations';
 var IPRangeSchema = require('../Schemas/IPRangeSchema');
 var RecurringScanSchema = require('../Schemas/RecurringScanSchema');
 var OSSAPIKEYSchema = require('../Schemas/OSSAPIKEYSchema');
+var DocLinkSchema = require('../Schemas/DocLinkSchema');
 var TrelloKeysSchema = require('../Schemas/TrelloKeysSchema');
 
 class ConfigHandler {
     constructor() { }
+
 
     async connect() {
         let connection = `mongodb://${dbServer}/${dbName}`;
@@ -139,6 +141,34 @@ class ConfigHandler {
             await TrelloKeysSchema.findOneAndUpdate({}, updatedTrelloKeys, { upsert: true });
         } catch (err) {
             console.log("Error updating Trello keys", err);
+        }
+    }
+    async setDocLink(userDocLink, userAssetID) {
+        const filter = { assetID: userAssetID };
+        const update = { docLink: userDocLink, assetID: userAssetID };
+
+        // Set the options to upsert true, which creates a new document if one doesn't already exist
+        const options = { upsert: true, new: true };
+
+        try {
+            const updatedDoc = await DocLinkSchema.findOneAndUpdate(filter, update, options);
+        } catch (err) {
+            console.log('Error while updating or creating Doc Link:', err.message);
+            throw err;
+        }
+    }
+
+    async getDocLink(userAssetID) {
+        try {
+            const docLinkData = await DocLinkSchema.findOne({ assetID: userAssetID }).exec();
+            if (docLinkData) {
+                return docLinkData.docLink;
+            } else {
+                return null;
+            }
+        } catch (err) {
+            console.error('Error retrieving document link:', err);
+            throw err;
         }
     }
 }

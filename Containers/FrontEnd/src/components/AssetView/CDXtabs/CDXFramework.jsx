@@ -23,19 +23,16 @@ const theme = {
 
 export const CDXFramework = (components) => {
     return (
-        <div>
-            <div>
-                <div>
-                    <h1>List of frameworks used in software</h1>
-                    {components.data
-                        .filter(component => component.type === "framework")
-                        .map((component, index) => (
-                            <li key={index}>
-                                <strong>{component.name}</strong> - Type: {component.type}
-                            </li>
-                        ))}
-                </div>
-                <hr />
+        <div className='cdx-tabs'>
+            <div >
+                <h1 style={{ marginBottom: "2rem" }}>List of frameworks used in software</h1>
+                {components.data
+                    .filter(component => component.type === "framework")
+                    .map((component, index) => (
+                        <li key={index}>
+                            <strong>{component.name}</strong> - Type: {component.type}
+                        </li>
+                    ))}
             </div>
         </div>
     );

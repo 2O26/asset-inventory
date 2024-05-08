@@ -36,7 +36,7 @@ const options = {
 
 const countryCode = 'en-SE'
 
-export default function History({ width, height , isDashboard = false, isAssetView = false, assetID = null }) {
+export default function History({ width, height, isDashboard = false, isAssetView = false, assetID = null }) {
 
     const { data: historyData, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['getHistory'],
@@ -70,7 +70,6 @@ export default function History({ width, height , isDashboard = false, isAssetVi
                             <h2 style={{ marginBottom: "1rem" }}>{formattedDate}</h2>
                             {
                                 Object.entries(value.change).map(([key, val], index) => {
-                                    console.log("val2: ", val)
                                     return (
                                         val && (
                                             <div key={index} style={{ marginLeft: "3rem" }}>

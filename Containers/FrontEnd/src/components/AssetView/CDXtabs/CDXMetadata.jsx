@@ -23,19 +23,26 @@ const theme = {
 
 export const CDXMetadata = (metadata) => {
     return (
-        <div>
+        <div className='cdx-tabs'>
             <div>
-                <div>
+                <div className='meta-base-info'>
                     <h1>Base information about the software: {metadata.data.component.name}</h1>
-                    <h4>Name</h4>
-                    <p>{metadata.data.component.name}</p>
-                    <h4>Type</h4>
-                    <p>{metadata.data.component.type}</p>
-                    <h4>Version</h4>
-                    <p>{metadata.data.component.version}</p>
+                    <div className='meta-base-info-child'>
+                        <h4>Name:</h4>
+                        <p>{metadata.data.component.name}</p>
+                    </div>
+                    <div className='meta-base-info-child'>
+                        <h4>Type:</h4>
+                        <p>{metadata.data.component.type}</p>
+
+                    </div>
+                    <div className='meta-base-info-child'>
+                        <h4>Version:</h4>
+                        <p>{metadata.data.component.version}</p>
+                    </div>
+                    <hr />
                 </div>
-                <hr />
-                <div>
+                <div className='json-tree-container'>
                     <h3>Raw JSON fields related to metadata in CycloneDXfile</h3>
                     <JSONTree data={metadata} theme={theme} hideRoot />
                 </div>

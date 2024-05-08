@@ -104,3 +104,26 @@
     visibility: visible;
     opacity: 1;
 }
+
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.form-group label {
+    flex-basis: 20%;
+    flex-shrink: 0;
+    color: var(--text-color);
+    margin-right: 10px;
+}
+
+.form-group input {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 0.2rem;
+    border: 0;
+    box-sizing: border-box;
+}

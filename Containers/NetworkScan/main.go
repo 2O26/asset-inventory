@@ -2,6 +2,8 @@ package main
 
 import (
 	dbcon "assetinventory/networkscan/dbcon-networkscan"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -25,6 +27,8 @@ var ports = []int{1, 3, 4, 6, 7, 9, 13, 17, 19, 20, 21, 22, 23, 24, 25, 26, 30, 
 var flake, _ = sonyflake.New(sonyflake.Settings{
 	StartTime: time.Date(2023, 6, 1, 7, 15, 20, 0, time.UTC),
 })
+
+const UpdateAssetsURL = "http://assethandler:8080/updateNetscanAssets"
 
 func printActiveIPs(scan dbcon.Scan) { // This is a tmp function
 	fmt.Println("Active IP addresses:")
@@ -184,7 +188,19 @@ func main() {
 }
 
 func deleteAsset(db dbcon.DatabaseHelper, c *gin.Context) {
+	auth := dbcon.AuthorizeUser(c)
+	if !auth.Authenticated {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	assetIDs := c.PostFormArray("assetID")
+	//need to check if user can delete assets
+	if !auth.IsAdmin && !auth.CanManageAssets {
+		//User has insufficient privileges, do not perform action
+		c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient privileges for operation"})
+		return
+	}
+
 	err := dbcon.DeleteAsset(db, assetIDs)
 	if err != nil {
 		log.Println("Failed to remove netscan asset with ID(s)", assetIDs, "from database. Error:", err)
@@ -466,45 +482,113 @@ func inc(ip net.IP) {
 }
 
 func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
-	var req dbcon.ScanRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("Failed to bind JSON: %+v\n", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to bind JSON"})
+	auth := dbcon.AuthorizeUser(c)
+
+	if auth.Authenticated && (auth.CanManageAssets || auth.IsAdmin) {
+		log.Println("USER AUTHORIZED")
+		var req dbcon.ScanRequest
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Printf("Failed to bind JSON: %+v\n", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to bind JSON"})
+			return
+		}
+
+		log.Printf("Received request: %+v\n", req)
+
+		log.Printf("Starting to scan...\n")
+
+		// Check that requested ranges are accessible by user
+		// Any user can perform a scan
+		var accessibleIPRanges []string
+		if auth.IsAdmin {
+			accessibleIPRanges = req.IPRanges
+		} else {
+			for _, subnet := range req.IPRanges {
+				for _, role := range auth.Roles {
+					if subnet == role {
+						accessibleIPRanges = append(accessibleIPRanges, subnet)
+					}
+				}
+			}
+		}
+
+		// Perform the scan for each target in the request
+		for _, target := range accessibleIPRanges {
+
+			var err error
+
+			switch req.CmdSelection {
+			case "extensive":
+				scanResultGlobal, err = performAdvancedScan(target)
+			case "simple":
+				scanResultGlobal, err = performSimpleScan(target)
+			default:
+				c.JSON(http.StatusBadRequest, gin.H{"error": "No valid scan selection provided"})
+				return
+			}
+
+			if err != nil {
+				log.Printf("Failed to perform scan: %+v\n", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to perform scan"})
+				return
+			}
+
+			printActiveIPs(scanResultGlobal) // Print the active IP addresses
+		}
+
+		log.Printf("Finished postNetScan\n")
+
+		updatedScan := dbcon.AddScan(db, scanResultGlobal)
+		fmt.Println("ADDED UPDATED SCAN TO DATABASE")
+
+		updateAssets(updatedScan, accessibleIPRanges, c)
+
+		// Return a success message to the caller
+		c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
+		log.Println("Scan performed and assets updated successfully")
+
+	} else {
+		log.Println("USER NOT AUTHORIZED")
+	}
+
+	return
+
+}
+
+func updateAssets(updatedScan dbcon.Scan, accessibleIPRanges []string, c *gin.Context) {
+	type request struct {
+		Scan    dbcon.Scan `json:"scan"`
+		Subnets []string   `json:"subnets"`
+	}
+
+	// Send a POST request to the assetHandler to update the netscan assets
+
+	// Send the scan state to the assethandler
+	requestData := request{
+		Scan:    updatedScan,
+		Subnets: accessibleIPRanges,
+	}
+	requestDataJSON, err := json.Marshal(requestData)
+	req, err := http.NewRequest("POST", UpdateAssetsURL, bytes.NewReader(requestDataJSON))
+	if err != nil {
+		log.Println("Failed to create request: ", err)
 		return
 	}
 
-	log.Printf("Received request: %+v\n", req)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Origin", "http://networkscan:8081")
+	req.Header.Set("Authorization", c.GetHeader("Authorization"))
 
-	log.Printf("Starting to scan...\n")
-
-	// Perform the scan for each target in the request
-	for _, target := range req.IPRanges {
-
-		var err error
-
-		switch req.CmdSelection {
-		case "extensive":
-			scanResultGlobal, err = performAdvancedScan(target)
-		case "simple":
-			scanResultGlobal, err = performSimpleScan(target)
-		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "No valid scan selection provided"})
-			return
-		}
-
-		if err != nil {
-			log.Printf("Failed to perform scan: %+v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to perform scan"})
-			return
-		}
-
-		printActiveIPs(scanResultGlobal) // Print the active IP addresses
+	do, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("Failed to send request", err)
 	}
 
-	log.Printf("Finished postNetScan\n")
+	if do.StatusCode != http.StatusOK {
+		log.Println("Failed to update assets")
+	}
+	return
 
-	dbcon.AddScan(db, scanResultGlobal)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
 }

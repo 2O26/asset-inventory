@@ -363,8 +363,10 @@ func AddPluginData(pluginState jsonhandler.PluginState, plugin jsonhandler.Plugi
 
 	} else {
 		// Add the new plugin state
+		latestScan.PluginStates = make(map[string]jsonhandler.PluginState)
 		pluginState.DateCreated = time.Now().Format(time.RFC3339)
 		pluginState.DateUpdated = pluginState.DateCreated
+
 		latestScan.PluginStates[pluginState.StateID] = pluginState
 	}
 
@@ -431,7 +433,7 @@ func diffStates(before, after jsonhandler.PluginState) map[string]any {
 	return differences
 }
 
-// addAssets adds form network scan
+// AddAssets adds from network scan
 func AddAssets(req AssetRequest, assetIDS []string) (string, []string) {
 	changes := []string{}
 	// Find the latest scan to update

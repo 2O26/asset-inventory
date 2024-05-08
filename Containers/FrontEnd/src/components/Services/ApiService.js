@@ -1,14 +1,13 @@
 // ApiServices.js
 import UserService from './UserService';
 
-
 export const AssetHandlerStatus = async () => {
     // assethandler status check
 
     if (UserService.tokenExpired()) {
         await UserService.updateToken()
     }
-    const authToken = await UserService.getToken();
+    const authToken = UserService.getToken();
     const response = await fetch('http://localhost:8080/assetHandlerStatus', {
         method: 'GET',
         headers: {
@@ -29,7 +28,7 @@ export const GetState = async (ipRanges = []) => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
         }
-        const authToken = await UserService.getToken();
+        const authToken = UserService.getToken();
 
         const formData = new FormData();
         for (let i = 0; i < ipRanges.length; i++) {
@@ -55,11 +54,23 @@ export const GetState = async (ipRanges = []) => {
 
 export const StartNetScan = async (scanSettings) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = UserService.getToken();
+
         const response = await fetch('http://localhost:8081/startNetScan', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: JSON.stringify(scanSettings)
         });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
 
         const resData = await response.json();
 
@@ -76,7 +87,7 @@ export const CreateRealmRole = async (IPRange) => {
             await UserService.updateToken()
         }
 
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch("http://localhost:8085/admin/realms/master/roles", {
             method: 'POST',
@@ -109,7 +120,7 @@ export const DeleteRealmRole = async (IPRange) => {
         await UserService.updateToken()
     }
 
-    const authToken = await UserService.getToken()
+    const authToken = UserService.getToken()
 
     const getRoleIdByName = async () => {
         const url = `http://localhost:8085/admin/realms/master/roles/${encodedRoleName}`;
@@ -172,7 +183,7 @@ export const GetIPranges = async () => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3001/getIPranges', {
             method: 'GET',
@@ -195,7 +206,7 @@ export const AddIPranges = async (IPRange) => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3001/addIPranges', {
             method: 'POST',
@@ -218,7 +229,7 @@ export const RmIPrange = async (IPRange) => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3001/removeIPrange', {
             method: 'POST',
@@ -241,7 +252,7 @@ export const GetRecurring = async () => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3001/getRecurring', {
             method: 'GET',
@@ -264,7 +275,7 @@ export const AddRecurring = async (recurring) => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3001/addRecurring', {
             method: 'POST',
@@ -287,7 +298,7 @@ export const RmRecurring = async (recurring) => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3001/removeRecurring', {
             method: 'POST',
@@ -310,7 +321,7 @@ export const UpdateAsset = async (data) => {
     if (UserService.tokenExpired()) {
         await UserService.updateToken()
     }
-    const authToken = await UserService.getToken()
+    const authToken = UserService.getToken()
 
     const response = await fetch('http://localhost:8080/assetHandler', {
         method: 'POST',
@@ -334,8 +345,18 @@ export const UploadCycloneDX = async (data) => {
     const uploadURL = 'http://localhost:8082/uploadCycloneDX';
 
     try {
+
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = UserService.getToken();
+
         const response = await fetch(uploadURL, {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: data,
         });
 
@@ -362,7 +383,7 @@ export const SaveUserSetting = async (data) => {
             await UserService.updateToken()
         }
 
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3001/UpdateUserConfig', {
             method: 'POST',
@@ -387,7 +408,7 @@ export const GetUserSettings = async () => {
             await UserService.updateToken()
         }
 
-        const authToken = await UserService.getToken();
+        const authToken = UserService.getToken();
 
         const response = await fetch('http://localhost:3001/getUserConfigurations', {
             method: 'GET',
@@ -405,7 +426,17 @@ export const GetUserSettings = async () => {
 
 export const GetCDXfiles = async (assetID) => {
     try {
-        const response = await fetch('http://localhost:8082/getCycloneDXFile?assetID=' + assetID);
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = UserService.getToken();
+
+        const response = await fetch('http://localhost:8082/getCycloneDXFile?assetID=' + assetID, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
+        });
         const return_data = await response.json();
         return return_data;
     } catch (err) {
@@ -416,10 +447,19 @@ export const GetCDXfiles = async (assetID) => {
 
 export const RemoveCDXfile = async (assetID) => {
     try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken()
+        }
+
+        const authToken = UserService.getToken();
+
         const formData = new FormData();
         formData.append('assetID', assetID)
         const response = await fetch('http://localhost:8082/removeCycloneDX', {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
             body: formData
         })
         const return_data = await response.json();
@@ -466,7 +506,7 @@ export const UpdateAPIOSSkey = async (apikey) => {
             await UserService.updateToken()
         }
 
-        const authToken = await UserService.getToken();
+        const authToken = UserService.getToken();
         const response = await fetch('http://localhost:3001/updateOSSAPIkey', {
             method: 'POST',
             headers: {
@@ -489,7 +529,7 @@ export const GetOSSAPIkey = async () => {
             await UserService.updateToken()
         }
 
-        const authToken = await UserService.getToken();
+        const authToken = UserService.getToken();
 
         const response = await fetch('http://localhost:3001/getOSSAPIkey', {
             method: 'GET',
@@ -532,7 +572,7 @@ export const GetAllSBOMLibraries = async () => {
             await UserService.updateToken()
         }
 
-        const authToken = await UserService.getToken();
+        const authToken = UserService.getToken();
 
         const response = await fetch('http://localhost:3002/getAllLibraries', {
             method: 'GET',
@@ -554,7 +594,7 @@ export const GetVulnerbleComponents = async (assetID) => {
         if (UserService.tokenExpired()) {
             UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3002/getVulnerableAssetID', {
             method: 'POST',
@@ -579,7 +619,7 @@ export const GetVulnerbleComponentsAll = async (assetID) => {
         if (UserService.tokenExpired()) {
             UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const response = await fetch('http://localhost:3002/getVulnerableAssetAll', {
             method: 'GET',
@@ -627,7 +667,7 @@ export const GetHistory = async (assetID) => {
         if (UserService.tokenExpired()) {
             UserService.updateToken()
         }
-        const authToken = await UserService.getToken()
+        const authToken = UserService.getToken()
 
         const bodyData = assetID ? `?assetID=${assetID}` : ''
         const response = await fetch(`http://localhost:8080/GetTimelineData${bodyData}`,
@@ -654,7 +694,7 @@ export const UpdateTrelloKeys = async (trelloKeys) => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken();
         }
-        const authToken = await UserService.getToken();
+        const authToken = UserService.getToken();
         const response = await fetch('http://localhost:3001/updateTrelloKeys', {
             method: 'POST',
             headers: {
@@ -676,7 +716,7 @@ export const GetTrelloKeys = async () => {
         if (UserService.tokenExpired()) {
             await UserService.updateToken();
         }
-        const authToken = await UserService.getToken();
+        const authToken = UserService.getToken();
         const response = await fetch('http://localhost:3001/getTrelloKeys', {
             method: 'GET',
             headers: {
@@ -688,5 +728,52 @@ export const GetTrelloKeys = async () => {
     } catch (err) {
         console.error(err);
         throw new Error('Could not fetch Trello keys');
+    }
+}
+
+export const SetDocLink = async (docLinkData) => {
+    const docLink = docLinkData.link;
+    const assetID = docLinkData.assetID;
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken();
+        }
+        const authToken = UserService.getToken();
+        const response = await fetch('http://localhost:3001/setDocLink', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({ doclink: docLink, assetid: assetID })
+        });
+        const resData = await response.json();
+        return resData;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Network response was not ok, could not add Doc Link');
+    }
+}
+
+export const GetDocLink = async (assetID) => {
+    try {
+        if (UserService.tokenExpired()) {
+            await UserService.updateToken();
+        }
+        const authToken = UserService.getToken();
+        const response = await fetch('http://localhost:3001/getDocLink', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({ assetid: assetID })
+        });
+
+        const return_data = await response.json();
+        return return_data.doclink;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Could not fetch Doc Link');
     }
 }

@@ -1,20 +1,5 @@
-/*
-    Tests for server.js and all its routes, namely:
-        - GET /getIPranges
-        - POST /addIPranges
-        - POST /removeIPrange
-        - GET /getRecurring
-        - POST /addRecurring
-        - POST /removeRecurring
-        - GET /getUserConfigurations
-        - POST /UpdateUserConfig
-        - GET /getOSSAPIkey
-        - POST /updateOSSAPIkey
-*/
-
 const request = require('supertest');
 const axios = require('axios');
-
 const { app, server, CronTask } = require('../server.js');
 const { IPRangechecker, RecurringScanFormat } = require('../formatchecker.js');
 
@@ -39,7 +24,8 @@ const mockUpdateUserSettings = jest.fn();
 const mockUpdateOSSAPIkey = jest.fn();
 const mockGetTrelloKeys = jest.fn()
 const mockUpdateTrelloKeys = jest.fn();
-
+const mockGetDocLink = jest.fn();
+const mockSetDocLink = jest.fn();
 
 jest.mock('axios');
 
@@ -57,6 +43,8 @@ jest.mock('../DatabaseConn/configdbconn', () => {
             updateOSSAPIkey: mockUpdateOSSAPIkey,
             getTrelloKeys: mockGetTrelloKeys,
             updateTrelloKeys: mockUpdateTrelloKeys,
+            getDocLink: mockGetDocLink,
+            setDocLink: mockSetDocLink,
         };
     });
 });
@@ -581,14 +569,15 @@ describe('GET /getUserConfigurations', () => {
 
         // Assume successful fetch from database
         mockConnect.mockResolvedValue(true);
-        userConfigHandler.getUserSettings.mockResolvedValue([
+        const userSetting = [
             {
                 userID: "userID3",
-                leftDash: ["Asset List"],
-                rightDash: ["Graph View"],
+                leftDash: { "Asset List": 1 },
+                rightDash: { "Graph View": 1 },
                 darkmode: false
             }
-        ]);
+        ];
+        userConfigHandler.getUserSettings.mockResolvedValue(userSetting);
 
         const response = await request(app)
             .get('/getUserConfigurations')
@@ -596,24 +585,25 @@ describe('GET /getUserConfigurations', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
-            userSettings: [
-                {
-                    userID: "userID3",
-                    leftDash: ["Asset List"],
-                    rightDash: ["Graph View"],
-                    darkmode: false
-                }
-            ]
+            userSettings: userSetting
         });
     });
 
     test('responds with user settings when the user is authenticated and data is fetched successfully. No setting exist for requesting user.', async () => {
-        const responseAxios = axios.get.mockResolvedValue({ data: { authenticated: true }, userID: 'mock-user-id' }); // Mock axios for successful authentication
+        const responseAxios = axios.get.mockResolvedValue({ data: { authenticated: true, userID: 'mock-user-id' } }); // Mock axios for successful authentication
         const UserConfigHandler = require('../DatabaseConn/userConfigurationConn');
         const userConfigHandler = new UserConfigHandler();
 
         // Assume successful fetch from database
         mockConnect.mockResolvedValue(true);
+        const userSetting = [
+            {
+                userID: 'mock-user-id',
+                leftDash: { "Graph View": 1 },
+                rightDash: { "Asset List": 1 },
+                darkmode: false
+            }
+        ];
         userConfigHandler.getUserSettings.mockResolvedValue([]); // Empty array 
 
         const response = await request(app)
@@ -622,18 +612,9 @@ describe('GET /getUserConfigurations', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
-            userSettings: [
-                {
-                    userID: responseAxios.userID,
-                    leftDash: ["Graph View"],
-                    rightDash: ["Asset List"],
-                    darkmode: false
-                },
-            ]
+            userSettings: userSetting
         });
     });
-
-
 });
 
 describe('POST /UpdateUserConfig', () => {
@@ -747,6 +728,26 @@ describe('GET /getOSSAPIkey', () => {
 
 });
 
+describe('GET /getOSSAPIkeyInternal', () => {
+    test('responds with OSS API key on successful fetch', async () => {
+        const expectedApiKey = "sample-api-key-1234";
+        mockConnect.mockResolvedValue(true);
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+        configHandler.getOSSAPIkey.mockResolvedValue(expectedApiKey);
+        const response = await request(app).get('/getOSSAPIkeyInternal');
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ apikey: expectedApiKey });
+    });
+
+    test('responds with 500 Internal Server Error when database connection fails', async () => {
+        mockConnect.mockRejectedValue(new Error('Database connection error'));
+        const response = await request(app).get('/getOSSAPIkeyInternal');
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('Error fetching OSS API key');
+    });
+});
+
 describe('POST /updateOSSAPIkey', () => {
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: false } });
@@ -839,7 +840,6 @@ describe('GET /getTrelloKeys', () => {
     });
 });
 
-
 describe('POST /updateTrelloKeys', () => {
 
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
@@ -898,4 +898,95 @@ describe('POST /updateTrelloKeys', () => {
         expect(response.body).toEqual({ responseFromServer: "Succeeded to update Trello keys!", success: "success" });
         expect(configHandler.updateTrelloKeys).toHaveBeenCalledWith(trelloINFO);
     });
+});
+
+describe('POST /setDocLink', () => {
+    test('responds with 401 Unauthorized if the user is not authenticated', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: false } });
+        const response = await request(app).post('/setDocLink').set('Authorization', 'Bearer fake_token');
+        expect(response.status).toBe(401);
+        expect(response.text).toBe('Invalid token');
+    });
+
+    test('responds with success when doc link is set correctly', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+        const docLink = "http://example.com/doc";
+        const assetId = "12345";
+
+        mockConnect.mockResolvedValue(true);  // Assume successful database connection
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+        configHandler.setDocLink.mockResolvedValue();  // Mock successful operation
+
+        const response = await request(app)
+            .post('/setDocLink')
+            .send({ doclink: docLink, assetid: assetId });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({
+            responseFromServer: "Server.js: Succeeded to add doc link",
+            success: "success",
+            doclink: docLink
+        });
+    });
+
+    test('responds with error when there is a database failure', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+        const docLink = "http://example.com/doc";
+        const assetId = "12345";
+
+        mockConnect.mockRejectedValue(new Error('Database connection error'));
+
+        const response = await request(app)
+            .post('/setDocLink')
+            .send({ doclink: docLink, assetid: assetId });
+
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('Error adding doc link');
+    });
+});
+
+describe('POST /getDocLink', () => {
+    test('responds with 401 Unauthorized if the user is not authenticated', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: false } });
+        const response = await request(app).post('/getDocLink').set('Authorization', 'Bearer fake_token');
+        expect(response.status).toBe(401);
+        expect(response.text).toBe('Invalid token');
+    });
+
+    test('responds with error when there is a database failure', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+        const assetId = "12345";
+
+        mockConnect.mockRejectedValue(new Error('Database connection error'));
+
+        const response = await request(app)
+            .post('/getDocLink')
+            .send({ assetid: assetId });
+
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('Error fetching doc link');
+    });
+
+    test('responds with success when doc link is retrieved correctly', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true } });
+        const assetId = "12345";
+        const docLink = "http://example.com/doc";
+
+        mockConnect.mockResolvedValue(true);  // Assume successful database connection
+        mockGetDocLink.mockResolvedValue(docLink);  // Mock successful fetch
+
+        const response = await request(app)
+            .post('/getDocLink')
+            .send({ assetid: assetId });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({
+            responseFromServer: "Succeeded to fetch doc link",
+            success: "success",
+            assetid: assetId,
+            doclink: docLink
+        });
+    });
+
 });

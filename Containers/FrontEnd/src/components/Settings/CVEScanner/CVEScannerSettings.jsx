@@ -44,7 +44,11 @@ export default function CVEScanSettings() {
 
     const addAPIkey = (event) => {
         event.preventDefault();
-        mutateAdd(btoa(`${apiCredentials.username}:${apiCredentials.apikey}`));
+        if (apiCredentials.username == "" && apiCredentials.apikey == "") {
+            mutateAdd("")
+        } else {
+            mutateAdd(btoa(`${apiCredentials.username}:${apiCredentials.apikey}`));
+        }
     }
 
     const handleChangeKey = (event) => {
@@ -99,77 +103,78 @@ export default function CVEScanSettings() {
     // { isErrorMutAdd && <div className='errorMessage'>{errorMutAdd.message}</div> }
 
     return (
-        <div >
+        <form onSubmit={addAPIkey} style={{ width: "80%" }}>
+            <h3 style={{ margin: "1rem 0" }}> Sonatype OSS index key </h3>
+            <div className='form-group'>
+
+                <label > API Token:</label>
+                <p style={{ wordBreak: "break-word", width: "30vw", textAlign: "left" }}>{apiData?.apikey}</p>
+            </div>
+
+            <div className='form-group'>
+                <label>Username:</label>
+                <input
+                    type="username"
+                    id="username"
+                    name="username"
+                    value={apiCredentials.username} // Set the value of the input to the state
+                    onChange={handleChangeUsername} // Update the state when the input changes
+                >
+                </input>
+            </div>
+            <div className='form-group'>
+                <label>Api Key:</label>
+                <input
+                    type="API key"
+                    id="OSSAPIKEY"
+                    name="OSSAPIKEY"
+                    value={apiCredentials.apikey} // Set the value of the input to the state
+                    onChange={handleChangeKey} // Update the state when the input changes
+                >
+                </input>
+            </div>
             <div>
-                <h3> Sonatype OSS index key: </h3>
-            </div>
-            <div style={{ marginTop: "2rem" }}>
-                <form onSubmit={addAPIkey}>
-                    <p> Base 64 API Token: {apiData?.apikey}</p>
-                    <p style={{ marginTop: "1rem" }}>Username:</p>
-                    <input
-                        type="username"
-                        id="username"
-                        name="username"
-                        value={apiCredentials.username} // Set the value of the input to the state
-                        onChange={handleChangeUsername} // Update the state when the input changes
-                        className='api-input'
-                    >
-                    </input>
-                    <p style={{ marginTop: "1rem" }}>Api Key:</p>
-                    <input
-                        type="API key"
-                        id="OSSAPIKEY"
-                        name="OSSAPIKEY"
-                        value={apiCredentials.apikey} // Set the value of the input to the state
-                        onChange={handleChangeKey} // Update the state when the input changes
-                        className='api-input'
-                    >
-                    </input>
+
+                {isPendingMutAdd && <LoadingSpinner />}
+                {isSuccessMutAdd &&
                     <div>
-
-                        {isPendingMutAdd && <LoadingSpinner />}
-                        {isSuccessMutAdd &&
-                            <div>
-                                <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully updated API key </p>
-                            </div>
-                        }
-                        {isErrorMutAdd &&
-                            <div>
-                                <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to update API key. </p>
-                            </div>
-                        }
-                        {wrongFormat &&
-                            <div>
-                                <p className='errorMessage'> Input only accepts letters and numbers</p>
-                            </div>
-
-                        }
-                        {isPendingCheck && <LoadingSpinner />}
-
-                        {isSuccessCheck &&
-                            <div>
-                                <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Token is authenticated! </p>
-                            </div>
-                        }
-                        {isErrorCheck &&
-                            <div>
-                                <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> {errorCheck.message} </p>
-                            </div>
-                        }
+                        <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Successfully updated API key </p>
+                    </div>
+                }
+                {isErrorMutAdd &&
+                    <div>
+                        <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> Failed to update API key. </p>
+                    </div>
+                }
+                {wrongFormat &&
+                    <div>
+                        <p className='errorMessage'> Input only accepts letters and numbers</p>
                     </div>
 
-                    <div className='buttonContainerNetScan'>
-                        <button className='standard-button' type="submit">
-                            <div> Save </div>
-                        </button>
-                        <button className='standard-button' type="button" onClick={() => handleCheck()}>
-                            <div> Check Connection</div>
-                        </button>
+                }
+                {isPendingCheck && <LoadingSpinner />}
+
+                {isSuccessCheck &&
+                    <div>
+                        <p className='successText'> <CheckIcon size={30} color="var(--success-color)" /> Token is authenticated! </p>
                     </div>
-                </form>
+                }
+                {isErrorCheck &&
+                    <div>
+                        <p className='successText'> <CrossIcon size={30} color="var(--error-color)" /> {errorCheck.message} </p>
+                    </div>
+                }
             </div>
-        </div>
+
+            <div className='buttonContainerNetScan'>
+                <button className='standard-button' type="submit">
+                    <div> Save </div>
+                </button>
+                <button className='standard-button' type="button" onClick={() => handleCheck()}>
+                    <div> Check Connection</div>
+                </button>
+            </div>
+        </form>
     )
 }
 

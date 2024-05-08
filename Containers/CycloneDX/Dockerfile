@@ -12,14 +12,12 @@ COPY ./dbcon-cyclonedx/go.mod ./dbcon-cyclonedx/go.sum ./dbcon-cyclonedx/
 RUN go mod download
 COPY ./dbcon-cyclonedx/*.go ./dbcon-cyclonedx/
 COPY *.go ./
-COPY ./bom.xml ./bom.xml
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cyclonedx
 
 # Build step 3: Deploy the compiled binaries to a barebone container
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+FROM debian:bookworm
+RUN apt-get update && apt-get install -y libicu72 libssl-dev
 WORKDIR /app/
-COPY ./bom.json ./bom.json
 COPY --from=cyclonedx-builder /root/cyclonedx-cli/bin /bin
 COPY --from=go-builder /cyclonedx /cyclonedx
 
