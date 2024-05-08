@@ -239,10 +239,9 @@ func AddScan(db DatabaseHelper, scan Scan) Scan {
 
 	return updatedScan
 }
-}
-func GetLatestScan(db DatabaseHelper, c *gin.Context) {
-	//authorize user
-	auth := AuthorizeUser(c)
+
+
+func GetLatestScan(db DatabaseHelper, c *gin.Context, auth AuthResponse) {
 	if !auth.Authenticated {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized", "success": false})
 		return

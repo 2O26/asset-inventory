@@ -400,13 +400,7 @@ func updateNetscanAssets(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unknown origin"})
 		return
 	}
-	// also perform authorization check
-	// will not perform any other security checks as any user has the ability to perform a scan
-	auth := authorizeUser(c)
-	if !auth.Authenticated {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+	//This function will not perform authentication, as cronjob has no token
 
 	type updateRequest struct {
 		Scan    networkResponse `json:"scan"`

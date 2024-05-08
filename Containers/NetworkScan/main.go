@@ -164,11 +164,21 @@ func main() {
 	}
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	router.POST("/startNetScan", func(c *gin.Context) {
-		postNetScan(scansHelper, c)
+		auth := dbcon.AuthorizeUser(c)
+		postNetScan(scansHelper, c, auth)
 	})
 	router.GET("/getLatestScan", func(c *gin.Context) {
-		dbcon.GetLatestScan(scansHelper, c)
+		auth := dbcon.AuthorizeUser(c)
+		dbcon.GetLatestScan(scansHelper, c, auth)
 	})
+	router.POST("/deleteAsset", func(c *gin.Context) {
+		auth := dbcon.AuthorizeUser(c)
+		deleteAsset(scansHelper, c, auth)
+	})
+	router.POST("/recurringScan", func(c *gin.Context) {
+		recurringScan(scansHelper, c)
+	})
+
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
 		dbcon.PrintAllDocuments(scansHelper, c)
 	})
@@ -177,18 +187,13 @@ func main() {
 		dbcon.DeleteAllDocuments(scansHelper, c)
 	})
 
-	router.POST("/deleteAsset", func(c *gin.Context) {
-		deleteAsset(scansHelper, c)
-	})
-
 	log.Println("Server starting on port 8081...")
 	if err := router.Run(":8081"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
 
-func deleteAsset(db dbcon.DatabaseHelper, c *gin.Context) {
-	auth := dbcon.AuthorizeUser(c)
+func deleteAsset(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthResponse) {
 	if !auth.Authenticated {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -481,9 +486,7 @@ func inc(ip net.IP) {
 	}
 }
 
-func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
-
-	auth := dbcon.AuthorizeUser(c)
+func postNetScan(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthResponse) {
 
 	if auth.Authenticated && (auth.CanManageAssets || auth.IsAdmin) {
 		log.Println("USER AUTHORIZED")
@@ -552,6 +555,61 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context) {
 	} else {
 		log.Println("USER NOT AUTHORIZED")
 	}
+
+	return
+
+}
+
+func recurringScan(db dbcon.DatabaseHelper, c *gin.Context) {
+	//This endpoint has no authentication and will only be used for the recurring scan
+	var req dbcon.ScanRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("Failed to bind JSON: %+v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to bind JSON"})
+		return
+	}
+
+	log.Printf("Received request: %+v\n", req)
+
+	log.Printf("Starting to scan...\n")
+
+	// Check that requested ranges are accessible by user
+	// Any user can perform a scan
+	// Perform the scan for each target in the request
+	for _, target := range req.IPRanges {
+
+		var err error
+
+		switch req.CmdSelection {
+		case "extensive":
+			scanResultGlobal, err = performAdvancedScan(target)
+		case "simple":
+			scanResultGlobal, err = performSimpleScan(target)
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No valid scan selection provided"})
+			return
+		}
+
+		if err != nil {
+			log.Printf("Failed to perform scan: %+v\n", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to perform scan"})
+			return
+		}
+
+		printActiveIPs(scanResultGlobal) // Print the active IP addresses
+	}
+
+	log.Printf("Finished postNetScan\n")
+
+	updatedScan := dbcon.AddScan(db, scanResultGlobal)
+	fmt.Println("ADDED UPDATED SCAN TO DATABASE")
+
+	updateAssets(updatedScan, req.IPRanges, c)
+
+	// Return a success message to the caller
+	c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
+	log.Println("Scan performed and assets updated successfully")
 
 	return
 
