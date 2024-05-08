@@ -44,18 +44,19 @@ class UserConfigHandler {
         const userSettings = await UserConfigSchema.find({ userID: sub }).exec();
 
         if (userSettings.length === 0) {
-            const newSetting = { userID: sub, leftDash: ['Graph View'], rightDash: ['Asset List'], darkmode: true };
+            const newSetting = { userID: sub, leftDash: { 'Graph View': 1 }, rightDash: { 'Asset List': 1 }, darkmode: true };
             const newUserConfig = new UserConfigSchema(newSetting);
             try {
                 await newUserConfig.save();
             } catch (err) {
                 console.log('Error while adding user settings for a new user:', err.message);
             }
-        }
-        try {
-            const result = await UserConfigSchema.findOneAndUpdate({ userID: sub }, update, { new: true, upsert: false });
-        } catch (err) {
-            console.log("Errror");
+        } else {
+            try {
+                await UserConfigSchema.findOneAndUpdate({ userID: sub }, update, { new: true, upsert: false });
+            } catch (err) {
+                console.log("Errror");
+            }
         }
     }
 }

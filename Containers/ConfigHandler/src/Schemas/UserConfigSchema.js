@@ -4,8 +4,14 @@ var Schema = mongoose.Schema;
 var UserConfigSchema = new Schema({
     // timestamp: String,
     userID: String,
-    leftDash: [String],
-    rightDash: [String],
+    leftDash: {
+        type: Map,
+        of: Number
+    },
+    rightDash: {
+        type: Map,
+        of: Number
+    },
     darkmode: Boolean
 });
 

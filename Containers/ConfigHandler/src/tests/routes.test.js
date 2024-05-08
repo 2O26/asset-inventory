@@ -584,8 +584,8 @@ describe('GET /getUserConfigurations', () => {
         userConfigHandler.getUserSettings.mockResolvedValue([
             {
                 userID: "userID3",
-                leftDash: ["Asset List"],
-                rightDash: ["Graph View"],
+                leftDash: { "Asset List": 1 },
+                rightDash: { "Graph View": 1 },
                 darkmode: false
             }
         ]);
@@ -599,8 +599,8 @@ describe('GET /getUserConfigurations', () => {
             userSettings: [
                 {
                     userID: "userID3",
-                    leftDash: ["Asset List"],
-                    rightDash: ["Graph View"],
+                    leftDash: { "Asset List": 1 },
+                    rightDash: { "Graph View": 1 },
                     darkmode: false
                 }
             ]
@@ -625,8 +625,8 @@ describe('GET /getUserConfigurations', () => {
             userSettings: [
                 {
                     userID: responseAxios.userID,
-                    leftDash: ["Graph View"],
-                    rightDash: ["Asset List"],
+                    leftDash: { "Graph View": 1 },
+                    rightDash: { "Asset List": 1 },
                     darkmode: false
                 },
             ]

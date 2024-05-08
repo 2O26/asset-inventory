@@ -1,64 +1,75 @@
 import React, { useState, useEffect } from 'react'
 import './Dashboard.css'
 import { dashboardTools } from '../Tools/Tools.jsx'
-import { SaveUserSetting, GetUserSettings } from '../Services/ApiService.js';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import {components} from "react-select";
+import { GetUserSettings } from '../Services/ApiService.js';
+import { useQuery } from '@tanstack/react-query';
+import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner.jsx';
 
 export default function Dashboard() {
-    const [tools25by50, setTools25by50] = useState(["Asset List", "Graph View", "Asset List"]);
-    const [tools75by50, setTools75by50] = useState(["Graph View", "Asset List", "Graph View"]);
 
-    const { mutate, isPending, isError, error } = useMutation({
-        mutationFn: SaveUserSetting,
-        onSuccess: (data) => {
-            // window.alert("Settings Saved")
-            refetchUserSettings();
-        },
-        onError: (error) => {
-            console.error("Save Dashboard Config: ", error);
-        }
-    });
-
-    const { data: userSettingData, isLoading: isLoadingUserSettings, isError: isUserSettings, error: errorUserSettings, refetch: refetchUserSettings } = useQuery({
+    const { data: userSettingData, isLoading: isLoadingUserSettings, isError: isUserSettings, error: errorUserSettings } = useQuery({
         queryKey: ['User Settings'],
         queryFn: GetUserSettings,
         enabled: true
     });
 
-    const combinedTools = tools75by50.map((key, index) => ({
-        tool75: key,
-        tool25: tools25by50[index],
-    }));
+    const [combinedTools, setCombinedTools] = useState([]);
 
     useEffect(() => {
         if (userSettingData) {
-            setTools25by50(userSettingData.userSettings[0].rightDash);
-            setTools75by50(userSettingData.userSettings[0].leftDash);
-        }
-    }, [userSettingData])
+            const leftLst = userSettingData.userSettings[0].leftDash
+            const rightLst = userSettingData.userSettings[0].rightDash
+            const maxKey = Math.max(
+                ...Object.values(leftLst),
+                ...Object.values(rightLst).filter(value => value !== 0)
+            );
 
+            const newCombined = [];
+
+            for (let i = 1; i <= maxKey; i++) {
+                const leftTool = Object.keys(leftLst).find(key => leftLst[key] === i) || null;
+                const rightTool = Object.keys(rightLst).find(key => rightLst[key] === i) || null;
+
+                // fix so that if left tool is empty, the right tool will take its place
+                if (leftTool) {
+                    console.log("1")
+                    newCombined.push({ leftTool, rightTool });
+                } else if (!leftTool && rightTool) {
+                    console.log("2")
+                    newCombined.push({ "leftTool": rightTool, "rightTool": leftTool });
+                }
+            }
+
+            setCombinedTools(newCombined);
+        }
+    }, [userSettingData]);
+
+    if (isLoadingUserSettings) return <LoadingSpinner />;
+    if (isUserSettings) return <div className='errorMessage'>{errorUserSettings.message}</div>;
+
+
+    console.log(combinedTools)
     return (
         <div className='dashboard-container'>
             {combinedTools.map((item, index) => (
                 <div key={index} className="container-50-height">
                     <div className="dashboard-tool-container-75">
                         <h3 className='item-header-ds'>
-                            {dashboardTools({size: 24})[item.tool75].icon} {item.tool75}
+                            {dashboardTools({ size: 24 })[item.leftTool].icon} {item.leftTool}
                         </h3>
                         <div className="tool-component">
-                            {dashboardTools()[item.tool75].component}
+                            {dashboardTools()[item.leftTool].component}
                         </div>
                     </div>
-                    {item.tool25 ?
-                    <div className="dashboard-tool-container-25">
-                        <h3 className='item-header-ds'>
-                            {dashboardTools({size: 24})[item.tool25].icon} {item.tool25}
-                        </h3>
-                        <div className="tool-component">
-                            {dashboardTools()[item.tool25].component}
+                    {item.rightTool ?
+                        <div className="dashboard-tool-container-25">
+                            <h3 className='item-header-ds'>
+                                {dashboardTools({ size: 24 })[item.rightTool].icon} {item.rightTool}
+                            </h3>
+                            <div className="tool-component">
+                                {dashboardTools()[item.rightTool].component}
+                            </div>
                         </div>
-                    </div>
                         : null}
                 </div>
             ))}

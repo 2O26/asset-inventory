@@ -12,6 +12,29 @@ function sortDictByValues(dict) {
         .map(([key]) => key);
 }
 
+function sanitizeList(inputList) {
+    const usedValues = new Set();
+    const result = {};
+
+    // Iterate over each entry in the input object
+    Object.entries(inputList).forEach(([key, value]) => {
+        // Allow 0 to be used multiple times
+        if (value !== 0) {
+            // Check if the non-zero value is already used
+            while (usedValues.has(value)) {
+                value++;  // Increment the value until it's unique
+            }
+        }
+        // Set the value for the key and add it to the set of used values if not 0
+        result[key] = value;
+        if (value !== 0) {
+            usedValues.add(value);
+        }
+    });
+
+    return result;
+}
+
 export default function DashboardSettings() {
     const [showButtons, setShowButtons] = useState(false);
     const toolsObject = dashboardTools(); // Assuming this returns an object like { "plugin1": {...}, "plugin2": {...} }
@@ -37,18 +60,6 @@ export default function DashboardSettings() {
         enabled: true
     });
 
-    function countToolObjectOccurances(array, toolsObject) {
-        let counts = {}
-        toolsObject.forEach(item => {
-            counts[item] = 0
-        })
-        array.forEach((item, index) => {
-            counts[item] = index + 1;
-        });
-
-        return counts;
-    }
-
     // Handler for changing values in leftLst
     const handleLeftInputChange = (key, value) => {
         setShowButtons(true)
@@ -62,22 +73,34 @@ export default function DashboardSettings() {
     };
 
     const handleSave = () => {
-        mutate({ update: { "leftDash": sortDictByValues(leftLst), "rightDash": sortDictByValues(rightLst) } });
+        mutate({ update: { "leftDash": sanitizeList(leftLst), "rightDash": sanitizeList(rightLst) } });
         setShowButtons(false)
     }
 
     const resetInput = () => {
         if (userSettingData) {
-            setRightLst(countToolObjectOccurances(userSettingData.userSettings[0].rightDash, Object.keys(toolsObject)));
-            setLeftLst(countToolObjectOccurances(userSettingData.userSettings[0].leftDash, Object.keys(toolsObject)));
+            setRightLst(userSettingData.userSettings[0].rightDash);
+            setLeftLst(userSettingData.userSettings[0].leftDash);
         }
         setShowButtons(false)
     }
 
+    const updateList = (newData, setFunc) => {
+        setFunc(currentState => {
+            let updatedState = { ...currentState };
+            for (const key in newData) {
+                if (newData.hasOwnProperty(key)) {
+                    updatedState[key] = newData[key];
+                }
+            }
+            return updatedState;
+        });
+    };
+
     useEffect(() => {
         if (userSettingData) {
-            setRightLst(countToolObjectOccurances(userSettingData.userSettings[0].rightDash, Object.keys(toolsObject)));
-            setLeftLst(countToolObjectOccurances(userSettingData.userSettings[0].leftDash, Object.keys(toolsObject)));
+            updateList(userSettingData.userSettings[0].rightDash, setRightLst);
+            updateList(userSettingData.userSettings[0].leftDash, setLeftLst);
         }
     }, [userSettingData])
 
@@ -105,10 +128,10 @@ export default function DashboardSettings() {
                         <div key={index} className='pligin-list-row'>
                             <div>{key}</div>
                             <input className='input-nr'
-                                   type="number"
-                                   value={value}
-                                   onChange={(e) => handleRightInputChange(key, e.target.value)}
-                                   min={0}
+                                type="number"
+                                value={value}
+                                onChange={(e) => handleRightInputChange(key, e.target.value)}
+                                min={0}
                             />
                         </div>
                     ))}
@@ -117,9 +140,10 @@ export default function DashboardSettings() {
             <div className='conifg-description'>
                 <p>0: will not show</p>
                 <p>1+: will display in decending order</p>
+                <p style={{ marginTop: "0.6rem" }}>Note: If Main widget has its own row, it will consume the entire width of the dash board. </p>
 
             </div>
-            {isPending && <LoadingSpinner/>}
+            {isPending && <LoadingSpinner />}
             {isError && <div className='errorMessage'>{error.message}</div>}
             {showButtons &&
                 <div className='standard-button-container'>

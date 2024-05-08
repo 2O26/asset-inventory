@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import {string} from "prop-types";
+import { string } from "prop-types";
 
 export function isDate(value) {
     const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
@@ -25,7 +25,7 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
     return (
         <div className='asset-info-container' >
             <div>{title}</div>
-            <div key={data.state.assets && data.state.assets[assetID] ? data.state.assets[assetID].properties.name : 'defaultKey'}>
+            <div >
                 {/* Standard information */}
                 {data.state.assets && data.state.assets[assetID] && Object.entries(data.state.assets[assetID].properties).map(([key, value], index) => {
                     const isList = Array.isArray(value);
@@ -33,21 +33,21 @@ export const AssetInfo = ({ data, assetID, title, showPluginInfo }) => {
                         isList ? (
                             <div key={key} className='assetItem'>
                                 <span className="key-value">{key}: </span>
-                                    <button onClick={() => toggleListVisibility(key)} className='arrow-container'>
-                                        {expandedLists[key] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
-                                    </button>
-                                    {expandedLists[key] && (
-                                        <ul>
-                                            {value.map((item, index) => (
-                                                <li className="asset-item-list" key={index} id={`${key}_${index}`} style={{ width: "fit-content", minWidth: "40%" }}> {index + 1} : {item}</li>
-                                            ))}
-                                        </ul>
-                                    )}
+                                <button onClick={() => toggleListVisibility(key)} className='arrow-container'>
+                                    {expandedLists[key] ? <i className="arrow down"></i> : <i className="arrow up"></i>}
+                                </button>
+                                {expandedLists[key] && (
+                                    <ul>
+                                        {value.map((item, index) => (
+                                            <li className="asset-item-list" key={index} id={`${key}_${index}`} style={{ width: "fit-content", minWidth: "40%" }}> {index + 1} : {item}</li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>) :
                             (
                                 index === 0 ? <h1 key={key} className="asset-name">{value}</h1> :
                                     (
-                                        <div className="assetItem">
+                                        <div className="assetItem" key={key}>
                                             {key}: {isDate(value) ? toLocalTime(value) : value}
                                         </div>
                                     )

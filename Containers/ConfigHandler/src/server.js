@@ -203,8 +203,8 @@ app.get("/getUserConfigurations", async (req, res) => {
         if (result.length === 0) {
             const defaultSetting = [{
                 userID: response.data.userID,
-                leftDash: ["Graph View"],
-                rightDash: ["Asset List"],
+                leftDash: { "Graph View": 1 },
+                rightDash: { "Asset List": 1 },
                 darkmode: false
             }];
             res.json({ userSettings: defaultSetting });

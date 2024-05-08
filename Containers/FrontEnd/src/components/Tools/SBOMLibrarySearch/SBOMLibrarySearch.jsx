@@ -33,7 +33,7 @@ export function SearchBar({ onSearch }) {
     );
 }
 
-export default function SBOMLibrarySearch({ width, height, isDashboard = false }) {
+export default function SBOMLibrarySearch({ isDashboard = false }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredLibraries, setFilteredLibraries] = useState([]);
     const [visibilityStates, setVisibilityStates] = useState({});
@@ -135,7 +135,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
 
     return (
         <div className='page-container'>
-            <div className="SBOM-container">
+            <div className="SBOM-container" style={{ width: (!isDashboard && "50vw") }}>
                 {!isDashboard && <h1 style={{ color: "var(--text-color)", marginTop: "1rem 0" }}>Global library search</h1>}
                 {/* <button className='standard-button' onClick={() => handleClick()}> Console all libraries</button> */}
                 <div>
@@ -191,7 +191,7 @@ export default function SBOMLibrarySearch({ width, height, isDashboard = false }
                                                         ))}
                                                     </div>
                                                     {library.CVE[0] && (
-                                                        <div>
+                                                        <div >
                                                             <p>CVE: {library.CVE[0].cve}</p>
                                                             <p>CVE score: {library.CVE[0].cvssScore}</p>
                                                             <p>Description: {library.CVE[0].description}</p>

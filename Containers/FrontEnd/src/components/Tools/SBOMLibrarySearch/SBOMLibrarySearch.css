@@ -5,7 +5,7 @@
     overflow-y: auto;
     justify-content: center;
     box-shadow: var(--box-shadow);
-    width: 50vw;
+    width: 100%;
 }
 
 .SBOM-search-container {
@@ -134,4 +134,8 @@
 
 .cve-asset-item:hover {
     filter: invert(15%);
+}
+
+.cve-description {
+    word-wrap: break-word;
 }
