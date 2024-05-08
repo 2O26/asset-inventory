@@ -475,16 +475,14 @@ func addSubnetRelations(netassets networkResponse) []dbcon.RelationChang {
 // }
 
 func addEmptyScan(scansHelper dbcon.DatabaseHelper) {
-	// Create an initial empty scan with no assets but ready to accept new assets
 	emptyScan := jsonhandler.BackState{
-		ID:               primitive.NewObjectID(),              // Generate a new ID for the scan
-		MostRecentUpdate: time.Now(),                           // Set the current time as the most recent update
-		Assets:           map[string]jsonhandler.Asset{},       // No assets initially
-		Relations:        map[string]jsonhandler.Relation{},    // No relations initially
-		PluginStates:     map[string]jsonhandler.PluginState{}, // No plugin states initially
+		ID:               primitive.NewObjectID(),
+		MostRecentUpdate: time.Now(),
+		Assets:           map[string]jsonhandler.Asset{},
+		Relations:        map[string]jsonhandler.Relation{},
+		PluginStates:     map[string]jsonhandler.PluginState{},
 	}
 
-	// Insert the empty scan into the database
 	_, err := scansHelper.InsertOne(context.Background(), emptyScan)
 	if err != nil {
 		log.Fatalf("Failed to add empty initial scan: %v", err)
@@ -542,9 +540,7 @@ func main() {
 		dbcon.DeleteAllDocuments(scansHelper, c)
 		dbcon.DeleteAllDocuments(timelineDB, c)
 
-		// Empty state after deletion
 		addEmptyScan(scansHelper)
-		c.JSON(http.StatusOK, gin.H{"message": "All documents deleted and base state reinitialized"})
 	})
 
 	router.POST("/GetTimelineData", func(c *gin.Context) {

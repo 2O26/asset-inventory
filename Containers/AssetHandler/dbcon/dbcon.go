@@ -299,7 +299,6 @@ func GetLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "mostRecentUpdate", Value: -1}})).Decode(&latestScan)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			// Initialize latestScan with empty maps if no documents are found
 			latestScan = jsonhandler.BackState{
 				MostRecentUpdate: time.Now(),
 				Assets:           make(map[string]jsonhandler.Asset),
@@ -317,7 +316,7 @@ func GetLatestScan(db DatabaseHelper) (jsonhandler.BackState, error) {
 			return latestScan, fmt.Errorf("error while retrieving the latest scan: %v", err)
 		}
 	} else {
-		// Ensure all maps are initialized even if documents exist
+		// initialize all maps even if documents exist
 		if latestScan.PluginStates == nil {
 			latestScan.PluginStates = make(map[string]jsonhandler.PluginState)
 		}
