@@ -482,23 +482,6 @@ describe('POST /removeAssetidLibs', () => {
 
 
 describe('GET /recheckVulnerabilitiesAll', () => {
-    test('responds with 401 Unauthorized if the user is not authenticated', async () => {
-        axios.get.mockResolvedValue({ data: { authenticated: false } });
-        const response = await request(app)
-            .get('/recheckVulnerabilitiesAll')
-            .set('Authorization', 'Bearer fake_token');
-        expect(response.status).toBe(401);
-        expect(response.text).toBe('Invalid token');
-    });
-
-    test('responds with 401 Unauthorized if the Authorization header is missing', async () => {
-        const response = await request(app)
-            .get('/recheckVulnerabilitiesAll')
-            .set('Authorization', 'Bearer fake_token');
-        expect(response.status).toBe(401);
-        expect(response.text).toBe('Invalid token');
-    });
-
     test('should handle errors from /recheckVulnerabilitiesAll gracefully', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: true } });
         CheckIfSBOMVulnsAll.mockRejectedValue(new Error('Could not check vulnerablilities'));

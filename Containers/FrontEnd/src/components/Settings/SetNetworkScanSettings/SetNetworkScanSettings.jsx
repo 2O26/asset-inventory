@@ -47,9 +47,6 @@ export default function SetNetworkScanSettings() {
                 addRole(data.range)
                 refetch();
                 // console.log("IP range added sucessfully:", data);
-            } else if (data.success === "wrong format") {
-
-                // console.log("Could not add IP range sucessfully");
             }
             else {
                 console.log("Could not add IP range sucessfully. Error: ", data.success);
@@ -70,8 +67,6 @@ export default function SetNetworkScanSettings() {
                 rmRole(data.range)
                 refetch();
                 // console.log("IP range added sucessfully:", data);
-            } else if (data.success === "wrong format") {
-                // console.log("Could not add IP range sucessfully");
             }
             else {
                 console.log("Could not add IP range sucessfully. Error: ", data.success);

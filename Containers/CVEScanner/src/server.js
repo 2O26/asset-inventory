@@ -183,15 +183,7 @@ app.post("/removeAssetidLibs", async (req, res) => {
 
 app.get("/recheckVulnerabilitiesAll", async (req, res) => {
     try {
-        const authResponse = await axios.get('http://authhandler:3003/getUID', {
-            headers: {
-                'Authorization': req.headers.authorization
-            }
-        });
-        if (!authResponse.data.authenticated) {
-            return res.status(401).send('Invalid token');
-        }
-
+        // No authtoken check as this API call is internal!
         await CheckIfSBOMVulnsAll();
         res.json({ success: true });
 

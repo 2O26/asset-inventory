@@ -90,7 +90,12 @@ export default function RecurringScanSettings() {
 
     const addRecurringScan = (event) => {
         event.preventDefault();
-        mutateAdd({ recurring: { time: timeinterval, IpRange: iprange, plugin: pluginType } });
+        if (pluginType === "Network Scan") {
+            mutateAdd({ recurring: { time: timeinterval, IpRange: iprange, plugin: pluginType } });
+        } else {
+            mutateAdd({ recurring: { time: timeinterval, plugin: pluginType } });
+        }
+
         setTimeinterval("* * * * *");
         setRecurringSuccess(false);
         setRecurringFail(false);
@@ -178,11 +183,11 @@ export default function RecurringScanSettings() {
                         <div>
                             <form onSubmit={addRecurringScan}>
                                 <div>
-                                    <p className='settingsText'>  IP range to recurringly scan: </p>
-                                    <select className='select-container' value={iprange} onChange={handleIPChange}>
-                                        {ipRangesData.ipranges.map((iprange, index) => (
-                                            <option key={iprange}>
-                                                {iprange}
+                                    <p className='settingsText'>  Plugin type: </p>
+                                    <select className='select-container' value={pluginType} onChange={handlePluginChange}>
+                                        {Plugins.map((plugintype, index) => (
+                                            <option key={plugintype}>
+                                                {plugintype}
                                             </option>
                                         ))}
                                     </select>
@@ -203,16 +208,18 @@ export default function RecurringScanSettings() {
                                     </input>
                                 </div>
                                 <div className='interval-text'>Interval: {readableExpression}.</div>
-                                <div>
-                                    <p className='settingsText'>  Plugin type: </p>
-                                    <select className='select-container' value={pluginType} onChange={handlePluginChange}>
-                                        {Plugins.map((plugintype, index) => (
-                                            <option key={plugintype}>
-                                                {plugintype}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                {pluginType === 'Network Scan' && (
+                                    <div>
+                                        <p className='settingsText'>  IP range to recurringly scan: </p>
+                                        <select className='select-container' value={iprange} onChange={handleIPChange}>
+                                            {ipRangesData.ipranges.map((iprange, index) => (
+                                                <option key={iprange}>
+                                                    {iprange}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                                 {isPendingMutAdd && <LoadingSpinner />}
                                 {addRecurringSuccess &&
                                     <div>

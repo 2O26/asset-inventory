@@ -1,5 +1,6 @@
 const Plugins = [
-    "Network Scan"
+    "Network Scan",
+    "CVE Scan"
 ];
 
 export default Plugins;

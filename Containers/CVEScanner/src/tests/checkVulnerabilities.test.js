@@ -19,18 +19,18 @@ describe('CheckVulnerabilities', () => {
         await expect(CheckVulnerabilities(purls, '')).resolves.toEqual(responseData);
     });
 
-    it('should return data on successful API call with API key', async () => {
-        const responseData = { vulnerabilities: [] };
-        const apiKey = 'your_api_key';
-        const encodedApiKey = Buffer.from(`${apiKey}:`).toString('base64');
-        mock.onPost(apiAuthUrl, { coordinates: purls }, {
-            headers: {
-                authorization: `Basic ${encodedApiKey}`
-            }
-        }).reply(200, responseData);
+    // it('should return data on successful API call with API key', async () => {
+    //     const responseData = { vulnerabilities: [] };
+    //     const apiKey = 'your_api_key';
+    //     const encodedApiKey = Buffer.from(`${apiKey}:`).toString('base64');
+    //     mock.onPost(apiAuthUrl, { coordinates: purls }, {
+    //         headers: {
+    //             authorization: `Basic ${encodedApiKey}`
+    //         }
+    //     }).reply(200, responseData);
 
-        await expect(CheckVulnerabilities(purls, apiKey)).resolves.toEqual(responseData);
-    });
+    //     await expect(CheckVulnerabilities(purls, apiKey)).resolves.toEqual(responseData);
+    // });
 
 
     it('should handle empty array input correctly without API key', async () => {

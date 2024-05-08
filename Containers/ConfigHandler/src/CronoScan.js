@@ -14,30 +14,37 @@ async function ConnectToDatabaseAndFetchRecurringScans() {
     }
 }
 
-function PrepareIpToScan(plugins, recurringScans) {
+function PrepareToScan(plugins, recurringScans) {
     let IpToScanWplugin = {};
-    Object.keys(plugins).forEach(pluginName => {
-        IpToScanWplugin[pluginName] = { cmdSelection: 'simple', IpRanges: [] }; // Use spread operator for deep copy
-    });
-
     recurringScans.forEach(recurring => {
         // IpToScanWplugin[recurring.plugin]['IpRanges'] = []
         if (IsCronDue(recurring.time)) {
-
-            IpToScanWplugin[recurring.plugin]['IpRanges'].push(recurring.IpRange);
+            // TODO: Differentiate if ip or non-ip scan
+            if (recurring.IpRange) {
+                IpToScanWplugin[recurring.plugin] = { cmdSelection: 'simple', IpRanges: [] };
+                IpToScanWplugin[recurring.plugin]['IpRanges'].push(recurring.IpRange);
+            } else {
+                IpToScanWplugin[recurring.plugin] = ''; // Eventual payload for the get request
+            }
         }
     });
     return IpToScanWplugin;
 }
 
-async function PerformRecurringScan(IpToScanWplugin) {
+async function PerformRecurringScan(ToScanWplugin) {
     const promises = [];
-    for (const pluginType of Object.keys(IpToScanWplugin)) {
-        if (Object.keys(IpToScanWplugin[pluginType]['IpRanges']).length !== 0) {
+    for (const pluginType of Object.keys(ToScanWplugin)) {
+        if (ToScanWplugin[pluginType]['IpRanges']) { // Maybe remove length bit. Just check if it exists
             const promise = fetch(Plugins[pluginType], {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(IpToScanWplugin[pluginType])
+                body: JSON.stringify(ToScanWplugin[pluginType])
+            }).then(response => response.json());
+            promises.push(promise);
+        } else {
+            const promise = fetch(Plugins[pluginType], {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
             }).then(response => response.json());
             promises.push(promise);
         }
@@ -46,4 +53,4 @@ async function PerformRecurringScan(IpToScanWplugin) {
     return results.find(result => result);
 }
 
-module.exports = { ConnectToDatabaseAndFetchRecurringScans, PrepareIpToScan, PerformRecurringScan };
+module.exports = { ConnectToDatabaseAndFetchRecurringScans, PrepareToScan, PerformRecurringScan };

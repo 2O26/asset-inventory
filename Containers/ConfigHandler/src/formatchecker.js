@@ -43,9 +43,7 @@ function isValidIpRange(ipRange) {
 }
 
 function cronFormat(cronString) {
-    // this regex is not correct
-    const cronPattern = /^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+L?|\*(\/\d+)?|L(-\d+)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$/;
-
+    const cronPattern = /^\s*(\*|([0-5]?[0-9]))\s+(\*|(2[0-3]|[01]?[0-9]))\s+(\*|(3[01]|[12][0-9]|[1-9]))\s+(\*|(1[0-2]|0?[1-9]))\s+(\*|[0-6])\s*$/;
     return cronPattern.test(cronString);
 }
 
@@ -67,10 +65,17 @@ function IPRangechecker(IPRange) {
 
 function RecurringScanFormat(recurring) {
 
-    if (IPRangechecker(recurring.IpRange) && cronFormat(recurring.time) && validPlugin(recurring.plugin)) {
-        return true;
+    if (recurring.IpRange) {
+        if (IPRangechecker(recurring.IpRange) && cronFormat(recurring.time) && validPlugin(recurring.plugin)) {
+            return true;
+        }
+        return false;
+    } else {
+        if (cronFormat(recurring.time) && validPlugin(recurring.plugin)) {
+            return true;
+        }
+        return false;
     }
-    return false;
 }
 
 module.exports = { IPRangechecker, RecurringScanFormat, validPlugin, cronFormat, isValidIpRange, isValidSubnet, isValidIp, convertIpToNumber };

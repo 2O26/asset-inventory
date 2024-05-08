@@ -14,7 +14,8 @@ const {
     CheckVulnerabilitiesForAll,
     filterVulnerableComponents,
     mapVulnerabilities,
-    CheckVulnerabilitiesForAsset
+    CheckVulnerabilitiesForAsset,
+    checkAPIkey
 } = require('../OSSCVEscan/OSSCVEscan.js');
 
 // Mocking axios and CVEscanSave
@@ -47,23 +48,56 @@ describe('getAPIkey', () => {
         expect(apikey).toBe('12345');
     });
 
-    it('throws an error when the API request fails', async () => {
+    it('returns an empty string when the API request fails', async () => {
         axios.get.mockRejectedValue(new Error('Failed to fetch API key'));
-        await expect(getAPIkey).rejects.toThrow('Error during API call: Failed to fetch API key');
-    });
-
-    it('throws an error if the response status is not 200', async () => {
-        axios.get.mockResolvedValue({ status: 404, data: {} });
-        await expect(getAPIkey()).rejects.toThrow('Failed to fetch API key');
-    });
-
-    it('handles unexpected data structure gracefully', async () => {
-        axios.get.mockResolvedValue({ status: 200, data: { wrongKey: 'no_apikey_here' } });
 
         const apikey = await getAPIkey();
-        expect(apikey).toBeUndefined(); // Adjust this based on how you want to handle this scenario
+        expect(apikey).toBe("");
+    });
+
+    it('returns an empty string if the response status is not 200', async () => {
+        axios.get.mockResolvedValue({ status: 404, data: {} });
+
+        const apikey = await getAPIkey();
+        expect(apikey).toBe("");
     });
 });
+
+describe('checkAPIkey', () => {
+    const validApiKey = 'validKey';
+    const invalidApiKey = 'invalidKey';
+
+    it('should return true when API response status is 200', async () => {
+        axios.get.mockResolvedValue({ status: 200 });
+        const result = await checkAPIkey(validApiKey);
+        expect(result).toBe(true);
+    });
+
+    it('should return false when API response status is not 200', async () => {
+        axios.get.mockResolvedValue({ status: 404 });
+        const result = await checkAPIkey(invalidApiKey);
+        expect(result).toBe(false);
+    });
+
+    it('should return false when API request fails', async () => {
+        axios.get.mockRejectedValue(new Error('API request failed'));
+        const result = await checkAPIkey(invalidApiKey);
+        expect(result).toBe(false);
+    });
+
+    it('should correctly set the Authorization header', async () => {
+        axios.get.mockImplementation((url, config) => {
+            if (config.headers.Authorization === `Basic ${validApiKey}`) {
+                return Promise.resolve({ status: 200 });
+            } else {
+                return Promise.resolve({ status: 401 });
+            }
+        });
+        const result = await checkAPIkey(validApiKey);
+        expect(result).toBe(true);
+    });
+});
+
 
 
 describe('getPurlsOfAssetID', () => {

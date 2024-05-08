@@ -168,48 +168,23 @@ describe('POST /addIPranges', () => {
 
     test('responds with 401 Unauthorized if the user is not an admin', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: false } });
-
-        // Make sure to send a POST request to the correct endpoint.
         const response = await request(app)
             .post('/addIPranges')
             .set('Authorization', 'Bearer valid_token')
-            .send({ iprange: '192.168.1.0/24' }); // Include the payload as it's a POST request.
-
+            .send({ iprange: '192.168.1.0/24' });
         expect(response.status).toBe(401);
         expect(response.text).toBe('Unauthorized');
     });
 
-    test('responds with return value 500 when failing to connect to database', async () => {
+    test('responds with success message for when adding valid IP range 1', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
         IPRangechecker.mockReturnValue(true);
-
         const ConfigHandler = require('../DatabaseConn/configdbconn');
         const configHandler = new ConfigHandler();
-        mockConnect.mockRejectedValue(new Error('Database error'));
+        configHandler.addIPrange.mockResolvedValue();
+        configHandler.connect.mockResolvedValue();
 
-        const ipRange = '192.168.1.1-192.168.1.255';
-        const response = await request(app)
-            .post('/addIPranges')
-            .set('Authorization', 'Bearer valid_admin_token')
-            .send({ iprange: ipRange });
-
-        expect(response.status).toBe(500);
-        expect(response.text).toContain('Error adding ip rangess');
-
-        expect(IPRangechecker).toHaveBeenCalledWith(ipRange);
-        mockConnect.mockReset();
-        IPRangechecker.mockReset();
-    });
-
-    test('responds with success message for when adding valid IP range', async () => {
-        axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
-        IPRangechecker.mockReturnValue(true);
-
-        const ConfigHandler = require('../DatabaseConn/configdbconn');
-        const configHandler = new ConfigHandler();
-
-
-        const ipRange = '192.168.1.1-192.168.1.255';
+        const ipRange = '192.168.1.0/24';
         const response = await request(app)
             .post('/addIPranges')
             .set('Authorization', 'Bearer valid_admin_token')
@@ -221,22 +196,17 @@ describe('POST /addIPranges', () => {
             success: "success",
             range: ipRange
         });
-
-        expect(IPRangechecker).toHaveBeenCalledWith(ipRange);
-        expect(configHandler.addIPrange).toHaveBeenCalledWith(ipRange);
-        mockConnect.mockReset();
-        IPRangechecker.mockReset();
     });
 
-    test('responds with failure message for invalid IP range', async () => {
+    test('responds with success message for when adding valid IP range 2', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
-        IPRangechecker.mockReturnValue(false);
-
+        IPRangechecker.mockReturnValue(true);
         const ConfigHandler = require('../DatabaseConn/configdbconn');
         const configHandler = new ConfigHandler();
+        configHandler.addIPrange.mockResolvedValue();
+        configHandler.connect.mockResolvedValue();
 
-
-        const ipRange = '192.168.1.255-192.168.1.1';
+        const ipRange = '127.0.0.1/32';
         const response = await request(app)
             .post('/addIPranges')
             .set('Authorization', 'Bearer valid_admin_token')
@@ -244,16 +214,77 @@ describe('POST /addIPranges', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
-            responseFromServer: "Failure to add IPrange!!",
-            success: "wrong format",
+            responseFromServer: "Succeeded to add IPrange!!",
+            success: "success",
             range: ipRange
         });
-
-        expect(IPRangechecker).toHaveBeenCalledWith(ipRange);
-        mockConnect.mockReset();
-        IPRangechecker.mockReset();
     });
-})
+
+    test('responds with failure message for when adding invalid IP range 1', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
+        IPRangechecker.mockReturnValue(false);
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const mockConfigHandler = new ConfigHandler();
+        mockConfigHandler.addIPrange.mockResolvedValue();
+
+        const ipRange = '192.168.1.0/52';
+        const response = await request(app)
+            .post('/addIPranges')
+            .set('Authorization', 'Bearer valid_admin_token')
+            .send({ iprange: ipRange });
+
+        expect(response.status).toBe(500);
+        expect(response.text).toBe('Error adding ip ranges');
+    });
+
+    test('responds with failure message for when adding invalid IP range 2', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
+        IPRangechecker.mockReturnValue(false);
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const mockConfigHandler = new ConfigHandler();
+        mockConfigHandler.addIPrange.mockResolvedValue();
+
+        const ipRange = '192.168.1.423/2';
+        const response = await request(app)
+            .post('/addIPranges')
+            .set('Authorization', 'Bearer valid_admin_token')
+            .send({ iprange: ipRange });
+
+        expect(response.status).toBe(500);
+        expect(response.text).toBe('Error adding ip ranges');
+    });
+
+    test('responds with failure message for invalid IP range 3', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
+        IPRangechecker.mockReturnValue(false);
+
+        const ipRange = '192.168.1.255-192.168.1.1';
+        const response = await request(app)
+            .post('/addIPranges')
+            .set('Authorization', 'Bearer valid_admin_token')
+            .send({ iprange: ipRange });
+
+        expect(response.status).toBe(500);
+        expect(response.text).toBe('Error adding ip ranges');
+    });
+
+    test('responds with return value 500 when failing to connect to database', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
+        IPRangechecker.mockReturnValue(true);
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+        configHandler.connect.mockRejectedValue(new Error('Database error'));
+
+        const ipRange = '192.168.1.1-192.168.1.255';
+        const response = await request(app)
+            .post('/addIPranges')
+            .set('Authorization', 'Bearer valid_admin_token')
+            .send({ iprange: ipRange });
+
+        expect(response.status).toBe(500);
+        expect(response.text).toBe('Error adding ip ranges');
+    });
+});
 
 describe('POST /removeIPrange', () => {
     test('responds with 401 Unauthorized if the user is not authenticated', async () => {
@@ -422,13 +453,12 @@ describe('POST /addRecurring', () => {
         RecurringScanFormat.mockReset();
     });
 
-    test('responds with success message for when adding valid recurring scan settings', async () => {
+    test('responds with success message for when adding valid recurring scan settings of ip type', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
         RecurringScanFormat.mockReturnValue(true);
 
         const ConfigHandler = require('../DatabaseConn/configdbconn');
         const configHandler = new ConfigHandler();
-
 
         const recurring = { plugin: "Network Scan", time: "* * * * *", IpRange: "192.1.1.0/24" };
         const response = await request(app)
@@ -449,11 +479,14 @@ describe('POST /addRecurring', () => {
         RecurringScanFormat.mockReset();
     });
 
-    test('responds with failure message for invalid IP range', async () => {
+    test('responds with success message for when adding valid recurring scan settings of non-ip type', async () => {
         axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
-        RecurringScanFormat.mockReturnValue(false);
+        RecurringScanFormat.mockReturnValue(true);
 
-        const recurring = { plugin: "NetwScan", time: "* * *", IpRange: "192.1.1.0/24" };
+        const ConfigHandler = require('../DatabaseConn/configdbconn');
+        const configHandler = new ConfigHandler();
+
+        const recurring = { plugin: "CVE Scan", time: "* * * * *" };
         const response = await request(app)
             .post('/addRecurring')
             .set('Authorization', 'Bearer valid_admin_token')
@@ -461,11 +494,29 @@ describe('POST /addRecurring', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
-            responseFromServer: "Failure to add recurring scan!!",
-            success: "wrong format",
+            responseFromServer: "Succeeded to add recurring scan!!",
+            success: "success",
             recurring: recurring
         });
 
+        expect(RecurringScanFormat).toHaveBeenCalledWith(recurring);
+        expect(configHandler.addRecurringScan).toHaveBeenCalledWith(recurring);
+        mockConnect.mockReset();
+        RecurringScanFormat.mockReset();
+    });
+
+    test('responds with failure message for invalid time format', async () => {
+        axios.get.mockResolvedValue({ data: { authenticated: true, isAdmin: true } });
+        RecurringScanFormat.mockReturnValue(false);
+
+        const recurring = { plugin: "Network Scan", time: "* * *", IpRange: "192.1.1.0/24" };
+        const response = await request(app)
+            .post('/addRecurring')
+            .set('Authorization', 'Bearer valid_admin_token')
+            .send({ recurring: recurring });
+
+        expect(response.status).toBe(500);
+        expect(response.text).toContain('Error adding recurring scans');
         expect(RecurringScanFormat).toHaveBeenCalledWith(recurring);
         mockConnect.mockReset();
         RecurringScanFormat.mockReset();

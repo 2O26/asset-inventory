@@ -1,7 +1,7 @@
 const { IPRangechecker, RecurringScanFormat, validPlugin, cronFormat, isValidIpRange, isValidSubnet, isValidIp, convertIpToNumber } = require('../formatchecker.js'); // Replace 'yourModule' with the path to your module file.
 const Plugins = require('../Plugins.js');
 
-describe('IP Utilities', () => {
+describe('Recurring scan format tests', () => {
     describe('convertIpToNumber', () => {
         it('should convert an IP address to the correct number', () => {
             expect(convertIpToNumber('127.0.0.1')).toBe(2130706433);
@@ -72,11 +72,19 @@ describe('IP Utilities', () => {
     });
 
     describe('RecurringScanFormat', () => {
-        it('should return true for a valid recurring scan format', () => {
+        it('should return true for a valid recurring scan format with IpRange', () => {
             const recurring = {
                 IpRange: '192.168.1.0/24',
                 time: '* * * * *', // This is a valid cron format
                 plugin: 'Network Scan',
+            };
+            expect(RecurringScanFormat(recurring)).toBe(true);
+        });
+
+        it('should return true for a valid recurring scan format without IpRange', () => {
+            const recurring = {
+                time: '* * * * *', // This is a valid cron format
+                plugin: 'CVE Scan',
             };
             expect(RecurringScanFormat(recurring)).toBe(true);
         });

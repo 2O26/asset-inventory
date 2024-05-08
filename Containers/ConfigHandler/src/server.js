@@ -6,7 +6,7 @@ const axios = require('axios');
 const Plugins = require('./Plugins.js');
 const { IPRangechecker, RecurringScanFormat } = require("./formatchecker");
 
-const { PerformRecurringScan, ConnectToDatabaseAndFetchRecurringScans, PrepareIpToScan } = require("./CronoScan");
+const { PerformRecurringScan, ConnectToDatabaseAndFetchRecurringScans, PrepareToScan } = require("./CronoScan");
 const UserConfigHandler = require("./DatabaseConn/userConfigurationConn.js")
 const ConfigHandler = require("./DatabaseConn/configdbconn");
 // const app = express(express.json());
@@ -65,17 +65,20 @@ app.post("/addIPranges", async (req, res) => {
         }
 
         if (IPRangechecker(req.body.iprange)) {
+            console.log("!!! Enters. Valid body")
             const configHandler = new ConfigHandler();
             await configHandler.connect();
+            console.log("After connect!!!")
             const response = await configHandler.addIPrange(req.body.iprange);
+            console.log("After DB operation!!!")
             res.json({ responseFromServer: "Succeeded to add IPrange!!", success: "success", range: req.body.iprange });
 
         } else {
-            res.json({ responseFromServer: "Failure to add IPrange!!", success: "wrong format", range: req.body.iprange });
+            throw new Error("Invalid IP format");
         }
     } catch (error) {
         console.error('Error while adding ip ranges:', error);
-        res.status(500).send('Error adding ip rangess');
+        res.status(500).send('Error adding ip ranges');
     }
 });
 
@@ -146,9 +149,8 @@ app.post("/addRecurring", async (req, res) => {
             await configHandler.connect();
             const resp = await configHandler.addRecurringScan(req.body.recurring)
             res.json({ responseFromServer: "Succeeded to add recurring scan!!", success: "success", recurring: req.body.recurring });
-
         } else {
-            res.json({ responseFromServer: "Failure to add recurring scan!!", success: "wrong format", recurring: req.body.recurring });
+            throw new Error("Invalid recurring format");
         }
 
     } catch (error) {
@@ -182,7 +184,6 @@ app.post("/removeRecurring", async (req, res) => {
         console.error('Error while removing recurring scans:', error);
         res.status(500).send('Error removing recurring scans');
     }
-
 });
 
 app.get("/getUserConfigurations", async (req, res) => {
@@ -215,7 +216,6 @@ app.get("/getUserConfigurations", async (req, res) => {
         res.status(500).send('Error fetching user configurations');
     }
 });
-
 
 app.post("/UpdateUserConfig", async (req, res) => {
     try {
@@ -359,9 +359,8 @@ const CronTask = cron.schedule('* * * * *', async () => {
 
     try {
         const recurringScans = await ConnectToDatabaseAndFetchRecurringScans();
-        const IpToScanWplugin = PrepareIpToScan(Plugins, recurringScans);
-        const result = await PerformRecurringScan(IpToScanWplugin);
-
+        const ToScanWithPlugin = PrepareToScan(Plugins, recurringScans);
+        const result = await PerformRecurringScan(ToScanWithPlugin);
     } catch (err) {
         console.error("Failed to run cron scan. Err: ", err);
     }

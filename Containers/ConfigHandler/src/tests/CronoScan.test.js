@@ -23,7 +23,7 @@ global.fetch = jest.fn(() =>
     })
 );
 
-const { ConnectToDatabaseAndFetchRecurringScans, PrepareIpToScan, PerformRecurringScan } = require('../CronoScan.js');
+const { ConnectToDatabaseAndFetchRecurringScans, PrepareToScan, PerformRecurringScan } = require('../CronoScan.js');
 
 describe('ConnectToDatabaseAndFetchRecurringScans', () => {
     it('handles connection errors', async () => {
@@ -54,7 +54,7 @@ describe('ConnectToDatabaseAndFetchRecurringScans', () => {
 });
 
 
-describe('PrepareIpToScan', () => {
+describe('PrepareToScan', () => {
     beforeEach(() => {
         mockIsCronDue.mockReset();
     })
@@ -65,7 +65,7 @@ describe('PrepareIpToScan', () => {
         const recurringScans = [
             {
                 plugin: 'Network Scan',
-                time: '* * * * *',
+                time: '* * * * 4',
                 IpRange: '127.0.0.1/32',
             },
             {
@@ -74,19 +74,14 @@ describe('PrepareIpToScan', () => {
                 IpRange: '192.168.1.0/24',
             }
         ]
-        const expectedOutput = {
-            'Network Scan': { cmdSelection: 'simple', IpRanges: [] }
-        }
-
-        const result = PrepareIpToScan(Plugins, recurringScans);
-
+        const expectedOutput = {}
+        const result = PrepareToScan(Plugins, recurringScans);
         expect(result).toEqual(expectedOutput);
     });
 
     // Test to ensure it includes the IP range for a plugin if the cron is due
     it('Should include the IP range for the plugin if the cron jobs are due', () => {
         IsCronDue.mockReturnValue(true);
-
         const recurringScans = [
             {
                 plugin: 'Network Scan',
@@ -94,28 +89,29 @@ describe('PrepareIpToScan', () => {
                 IpRange: '127.0.0.1/32',
             },
             {
-                plugin: 'Network Scan',
+                plugin: 'CVE Scan',
                 time: '* * * * 1',
-                IpRange: '192.168.1.0/24',
             }
         ]
         const expectedOutput = {
-            'Network Scan': { cmdSelection: 'simple', IpRanges: ['127.0.0.1/32', '192.168.1.0/24'] }
+            'Network Scan': { cmdSelection: 'simple', IpRanges: ['127.0.0.1/32'] },
+            'CVE Scan': ''
         }
-        const result = PrepareIpToScan(Plugins, recurringScans);
-
+        const result = PrepareToScan(Plugins, recurringScans);
         expect(result).toEqual(expectedOutput);
     });
 
     it('Should return empty list of IpRanges if recurring scans field is empty', () => {
         IsCronDue.mockReturnValue(true);
 
-        const recurringScans = []
+        const recurringScans = [{
+            plugin: 'CVE Scan',
+            time: '* * * * 1',
+        }]
         const expectedOutput = {
-            'Network Scan': { cmdSelection: 'simple', IpRanges: [] }
+            'CVE Scan': ''
         }
-        const result = PrepareIpToScan(Plugins, recurringScans);
-
+        const result = PrepareToScan(Plugins, recurringScans);
         expect(result).toEqual(expectedOutput);
     });
 });
@@ -139,7 +135,6 @@ describe('PerformRecurringScan', () => {
                 body: JSON.stringify(IpToScanWplugin[pluginType])
             });
             expect(result).toEqual({ success: true });
-
         }
 
     });

@@ -235,5 +235,6 @@ module.exports = {
     filterVulnerableComponents,
     mapVulnerabilities,
     CheckIfVulnerabilities,
-    CheckIfSBOMVulnsAll
+    CheckIfSBOMVulnsAll,
+    checkAPIkey
 };
