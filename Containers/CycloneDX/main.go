@@ -66,7 +66,18 @@ func uploadCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
 		}
 		defer os.Remove(dst) // Remove the temporary file after conversion
 
-		cmd := exec.Command("cyclonedx", "convert", "--input-format", "xml", "--input-file", dst, "--output-format", "json")
+		cmd := exec.Command("cyclonedx", "validate", "--input-file", dst, "--input-version", "v1_2", "--fail-on-errors")
+		fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
+		_, err = cmd.Output()
+		if err != nil {
+			fmt.Printf("cyclonedx command error: %v\n", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to validate file",
+			})
+			return
+		}
+
+		cmd = exec.Command("cyclonedx", "convert", "--input-format", "xml", "--input-file", dst, "--output-format", "json")
 		fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
 		out, err := cmd.Output()
 		if err != nil {
@@ -78,18 +89,38 @@ func uploadCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
 		}
 		sbomData = out
 	} else {
+
 		// Read the JSON file content into a byte slice
-		fileContent, err := file.Open()
+		stdin, err := file.Open()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Failed to open the file",
 			})
 			return
 		}
-		defer fileContent.Close()
+		defer stdin.Close()
 
+		dst := "./" + file.Filename
+		if err := c.SaveUploadedFile(file, dst); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to save the file",
+			})
+			return
+		}
+		defer os.Remove(dst) // Remove the temporary file after check
+
+		cmd := exec.Command("cyclonedx", "validate", "--input-file", dst, "--input-version", "v1_2", "--fail-on-errors")
+		fmt.Printf("Running command: %s\n", strings.Join(cmd.Args, " "))
+		_, err = cmd.Output()
+		if err != nil {
+			fmt.Printf("cyclonedx command error: %v\n", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to validate file",
+			})
+			return
+		}
 		buf := bytes.NewBuffer(nil)
-		if _, err := io.Copy(buf, fileContent); err != nil {
+		if _, err := io.Copy(buf, stdin); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Failed to read the file",
 			})

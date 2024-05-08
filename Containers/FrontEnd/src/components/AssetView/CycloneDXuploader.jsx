@@ -32,7 +32,7 @@ export const CycloneDXuploader = ({ assetID }) => {
 
     };
 
-    if (isPendingMutAdd) return <LoadingSpinner />;
+    if (isPendingMutAdd) return <div className="bomSpinner" >Validating <LoadingSpinner /></div>
     if (isErrorMutAdd) return <div className='errorMessage'>{errorMutAdd.message}</div>;
 
     return (
@@ -47,7 +47,7 @@ export const CycloneDXuploader = ({ assetID }) => {
                     types={supportedFileTypes}
                     className="custom-file-uploader" />
             </div>
-            <p>NOTE: Uploding a new file will overwrite an already existing file.</p>
+            <p>NOTE: Uploading a new file will overwrite an already existing file.</p>
         </div>
     );
 };

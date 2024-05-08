@@ -6,3 +6,11 @@
 .guZdik {
   min-width: 20vw !important;
 }
+
+.bomSpinner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: larger;
+}
