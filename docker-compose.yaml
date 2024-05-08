@@ -1,15 +1,16 @@
 version: "3.8"
 services:
-  assinvfront:
-    image: assinvfront
+  frontenddev:
+    image: frontenddev
     ports:
-      # - 3000:3000
-      - 80:80
+      - 3000:3000
+    volumes:
+      - ./Containers/FrontEnd/src:/app/src
     logging:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224 # TODO: Use fluentd's DNS name.
-        tag: assethandler.app
+        tag: frontenddev.app
     depends_on:
       fluentd:
         condition: service_healthy
@@ -42,8 +43,39 @@ services:
 
   confighandler:
     image: confighandler
+    restart: always
     ports:
       - "3001:3001"
+    volumes:
+      - ./Containers/ConfigHandler/src:/app/src
+    depends_on:
+      - keycloak
+
+  cyclonedx:
+    image: cyclonedx
+    ports:
+      - "8082:8082"
+
+  cvescanner:
+    image: cvescanner
+    volumes:
+      - ./Containers/CVEScanner/src:/app/src
+    ports:
+      - "3002:3002"
+    # env_file:
+    #   - ./Containers/CVEScanner/.env
+
+  netscanstorage:
+    image: mongo
+    restart: always
+    command: [ "mongod", "--port", "27019", "--quiet", "--syslog" ]
+    ports:
+      - "27019:27019"
+    expose:
+      - "27019"
+    volumes:
+      - netscanstorage:/data/db
+      - netscanconfig:/data/configdb
 
   dbstorage:
     image: mongo
@@ -77,11 +109,64 @@ services:
       - configstorage:/data/db
       - configdbconfig:/data/configdb
 
-  ######################################################
-  ### EFK stack (elastic search, fluentd and kibana) ###
-  ######################################################
+  cyclonedxstorage:
+    image: mongo
+    restart: always
+    command: [ "mongod", "--port", "27020", "--quiet", "--syslog" ]
+    ports:
+      - "27020:27020"
+    expose:
+      - "27020"
+    volumes:
+      - cyclonedxstorage:/data/db
+      - cyclonedxconfig:/data/configdb
 
-  # https://docs.fluentd.org/container-deployment/docker-compose
+  keycloakstorage:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: keycloak_local
+    ports:
+      - "8085:8085"
+      - "8443:8443"
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloakstorage:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin # makeTheDevelopersLifesH4RDbySettingAwaytoLongPassword!
+      KC_HEALTH_ENABLED: true
+    depends_on:
+      - keycloakstorage
+
+  clientinit:
+    image: clientinit
+    depends_on:
+      - keycloak
+
+  authhandler:
+    image: authhandler
+    volumes:
+      - ./Containers/AuthHandler/src:/app/src
+    depends_on:
+      - keycloak
+
+  mkdocs:
+    container_name: mkdocs
+    image: squidfunk/mkdocs-material
+    restart: always
+    ports:
+      - "6880:8000"
+    volumes:
+      - "./Containers/docs:/docs:ro"
+
   fluentd:
     image: fluentd
     ports:
@@ -98,10 +183,6 @@ services:
       kibana:
         condition: service_healthy
 
-  # https://hub.docker.com/_/elasticsearch
-  # https://www.elastic.co/guide/en/elasticsearch/reference/7.4/secure-cluster.html
-  # https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-settings.html
-  # https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html
   elasticsearch:
     image: elasticsearch
     ports:
@@ -119,11 +200,7 @@ services:
       resources:
         limits:
           memory: 3G
-    #### 
-    # TODO: Ticket I032, Replace later with proper key managment. 
-    #   - Use environmental variable for access keys and passwords
-    #   - usernames and default users
-    ####
+    # TODO: Ticket I032, Replace later with proper key management
     # environment:
 
   kibana:
@@ -139,11 +216,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    #### 
-    # TODO: Ticket I032, Replace later with proper key managment. 
-    #   - Use environmental variable for access keys and passwords
-    #   - usernames and default users
-    ####
+    # TODO: Ticket I032, Replace later with proper key management
     # environment:
     #   - KIBANAPASSWORD=$KIBANAPASSWORD
 
@@ -152,7 +225,11 @@ volumes:
   configdbconfig:
   dbstorage:
   dbconfig:
-
+  netscanstorage:
+  netscanconfig:
+  keycloak_data:
+  cyclonedxstorage:
+  cyclonedxconfig:
 
 networks:
   test_network:

@@ -6,6 +6,7 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 ENV DEBUG='frontend:*'
+ENV NODE_OPTIONS="--max-old-space-size=8192"
 
 # ENTRYPOINT [ "npm", "start" ]
 RUN npm run build
