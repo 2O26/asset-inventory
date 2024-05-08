@@ -193,7 +193,14 @@ func TestGetLatestScan(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
-			GetLatestScan(mockDB, c)
+			auth := AuthResponse{
+				Authenticated:   true,
+				Roles:           nil,
+				IsAdmin:         true,
+				CanManageAssets: false,
+			}
+
+			GetLatestScan(mockDB, c, auth)
 
 			assert.Equal(t, tc.expectedCode, w.Code)
 
