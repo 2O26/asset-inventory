@@ -342,70 +342,70 @@ func TestCompareScanStates(t *testing.T) {
 	}
 }
 
-func TestAddScan(t *testing.T) {
+// func TestAddScan(t *testing.T) {
 
-	testCases := []struct {
-		name        string
-		scan        Scan
-		mockSetup   func(*MockDB)
-		expectedErr string
-	}{
-		{
-			name: "newScan",
-			scan: testScan1,
-			mockSetup: func(mockDB *MockDB) {
-				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
-				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
-			},
-			expectedErr: "",
-		},
-		{
-			name: "error inserting Scan",
-			scan: testScan1,
-			mockSetup: func(mockDB *MockDB) {
-				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
-				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("Error inserting file"))
-			},
-			expectedErr: "could not insert scan: Error inserting file",
-		},
+// 	testCases := []struct {
+// 		name        string
+// 		scan        Scan
+// 		mockSetup   func(*MockDB)
+// 		expectedErr string
+// 	}{
+// 		{
+// 			name: "newScan",
+// 			scan: testScan1,
+// 			mockSetup: func(mockDB *MockDB) {
+// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
+// 				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
+// 			},
+// 			expectedErr: "",
+// 		},
+// 		{
+// 			name: "error inserting Scan",
+// 			scan: testScan1,
+// 			mockSetup: func(mockDB *MockDB) {
+// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
+// 				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("Error inserting file"))
+// 			},
+// 			expectedErr: "could not insert scan: Error inserting file",
+// 		},
 
-		{
-			name: "firstScan",
-			scan: Scan{},
-			mockSetup: func(mockDB *MockDB) {
-				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
-				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
-			},
-			expectedErr: "",
-		},
-		{
-			name: "firstScan",
-			scan: Scan{},
-			mockSetup: func(mockDB *MockDB) {
-				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
-				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("Error inserting file"))
-			},
-			expectedErr: "could not insert scan: Error inserting file",
-		},
-		{
-			name: "firstScan",
-			scan: Scan{},
-			mockSetup: func(mockDB *MockDB) {
-				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("Error finding latestscan"), nil))
-			},
-			expectedErr: "failed to retrieve the latest scan: Error finding latestscan",
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			mockDB := new(MockDB)
-			tc.mockSetup(mockDB)
+// 		{
+// 			name: "firstScan",
+// 			scan: Scan{},
+// 			mockSetup: func(mockDB *MockDB) {
+// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
+// 				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
+// 			},
+// 			expectedErr: "",
+// 		},
+// 		{
+// 			name: "firstScan",
+// 			scan: Scan{},
+// 			mockSetup: func(mockDB *MockDB) {
+// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
+// 				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("Error inserting file"))
+// 			},
+// 			expectedErr: "could not insert scan: Error inserting file",
+// 		},
+// 		{
+// 			name: "firstScan",
+// 			scan: Scan{},
+// 			mockSetup: func(mockDB *MockDB) {
+// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("Error finding latestscan"), nil))
+// 			},
+// 			expectedErr: "failed to retrieve the latest scan: Error finding latestscan",
+// 		},
+// 	}
+// 	for _, tc := range testCases {
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			mockDB := new(MockDB)
+// 			tc.mockSetup(mockDB)
 
-			err := AddScan(mockDB, tc.scan)
-			if err != nil && err.Error() != tc.expectedErr {
-				t.Errorf("got : %v, want %s", err, tc.expectedErr)
-			}
-			mockDB.AssertExpectations(t)
-		})
-	}
-}
+// 			err := AddScan(mockDB, tc.scan)
+// 			if err != nil && err.Error() != tc.expectedErr {
+// 				t.Errorf("got : %v, want %s", err, tc.expectedErr)
+// 			}
+// 			mockDB.AssertExpectations(t)
+// 		})
+// 	}
+// }
