@@ -160,7 +160,7 @@ func getLatestState(c *gin.Context) {
 		// Will now remove any data that a user cannot access.
 		if len(subnets) > 0 {
 			currentState = jsonhandler.FilterBySubnets(currentState, auth, subnets)
-		} else if auth.IsAdmin == false {
+		} else if !auth.IsAdmin {
 			currentState = jsonhandler.NeedToKnow(currentState, auth)
 		}
 
@@ -301,97 +301,113 @@ func addSubnetRelations(netassets networkResponse, subnets []string) []dbcon.Rel
 
 }
 
-func addInitialScan(scansHelper dbcon.DatabaseHelper) {
-	// Add initial scan
-	initialScan := jsonhandler.BackState{
+// func addInitialScan(scansHelper dbcon.DatabaseHelper) {
+// 	// Add initial scan
+// 	initialScan := jsonhandler.BackState{
+// 		ID:               primitive.NewObjectID(),
+// 		MostRecentUpdate: time.Now(),
+// 		Assets: map[string]jsonhandler.Asset{
+// 			"65f8671cfe55e5c76465d840": {
+// 				Name:        "PC-A",
+// 				Owner:       "UID_2332",
+// 				Type:        []string{"PC", "Windows"},
+// 				DateCreated: "2024-02-14T23:00:00Z",
+// 				DateUpdated: "2024-02-14T23:00:30Z",
+// 				Criticality: 2,
+// 			},
+// 			"65f8671cfe55e5c76465d841": {
+// 				Name:        "Chromecast",
+// 				Owner:       "UID_2332",
+// 				Type:        []string{"IoT", "Media"},
+// 				DateCreated: "2024-02-10T20:04:20Z",
+// 				DateUpdated: "2024-02-14T23:00:30Z",
+// 				Criticality: 1,
+// 			},
+// 			"65f8671cfe55e5c76465d842": {
+// 				Name:        "Password Vault",
+// 				Owner:       "UID_2332",
+// 				Type:        []string{"Server", "Database"},
+// 				DateCreated: "2024-02-14T23:00:00Z",
+// 				DateUpdated: "2024-02-14T23:00:30Z",
+// 				Criticality: 4,
+// 			},
+// 			"65f8671cfe55e5c76465d843": {
+// 				Name:        "Smart Thermostat",
+// 				Owner:       "UID_2332",
+// 				Type:        []string{"IoT", "HVAC"},
+// 				DateCreated: "2024-03-01T12:15:00Z",
+// 				DateUpdated: "2024-03-18T09:50:00Z",
+// 				Criticality: 2,
+// 			},
+// 			"65f8671cfe55e5c76465d844": {
+// 				Name:        "Work Laptop",
+// 				Owner:       "UID_6372",
+// 				Type:        []string{"Laptop", "Windows"},
+// 				DateCreated: "2024-02-25T08:30:00Z",
+// 				DateUpdated: "2024-03-18T10:00:00Z",
+// 				Criticality: 3,
+// 			},
+// 		},
+// 		Plugins: map[string]jsonhandler.Plugin{
+// 			"ipScan": {
+// 				PluginStateID: "20240214-1300A",
+// 			},
+// 			"macScan": {
+// 				PluginStateID: "20240215-0800G",
+// 			},
+// 		},
+// 		Relations: map[string]jsonhandler.Relation{
+// 			"65f8671cfe55e5c76465d845": {
+// 				From:        "65f8671cfe55e5c76465d840",
+// 				To:          "65f8671cfe55e5c76465d841",
+// 				Direction:   "uni",
+// 				Owner:       "UID_2332",
+// 				DateCreated: "2024-02-14T23:35:53Z",
+// 			},
+// 			"65f8671cfe55e5c76465d846": {
+// 				From:        "65f8671cfe55e5c76465d841",
+// 				To:          "65f8671cfe55e5c76465d842",
+// 				Direction:   "bi",
+// 				Owner:       "UID_6372",
+// 				DateCreated: "2024-01-22T07:32:32Z",
+// 			},
+// 			"65f8671cfe55e5c76465d847": {
+// 				From:        "65f8671cfe55e5c76465d842",
+// 				To:          "65f8671cfe55e5c76465d843",
+// 				Direction:   "uni",
+// 				Owner:       "UID_2332",
+// 				DateCreated: "2024-03-01T12:30:00Z",
+// 			},
+// 			"65f8671cfe55e5c76465d848": {
+// 				From:        "65f8671cfe55e5c76465d840",
+// 				To:          "65f8671cfe55e5c76465d844",
+// 				Direction:   "uni",
+// 				Owner:       "UID_6372",
+// 				DateCreated: "2024-03-05T14:20:00Z",
+// 			},
+// 		},
+// 	}
+// 	_, err := scansHelper.InsertOne(context.Background(), initialScan)
+// 	if err != nil {
+// 		log.Fatalf("Failed to add initial scan: %v", err)
+// 	}
+// 	log.Println("Initial scan added successfully")
+// }
+
+func addEmptyScan(scansHelper dbcon.DatabaseHelper) {
+	emptyScan := jsonhandler.BackState{
 		ID:               primitive.NewObjectID(),
 		MostRecentUpdate: time.Now(),
-		Assets: map[string]jsonhandler.Asset{
-			"65f8671cfe55e5c76465d840": {
-				Name:        "PC-A",
-				Owner:       "UID_2332",
-				Type:        []string{"PC", "Windows"},
-				DateCreated: "2024-02-14T23:00:00Z",
-				DateUpdated: "2024-02-14T23:00:30Z",
-				Criticality: 2,
-			},
-			"65f8671cfe55e5c76465d841": {
-				Name:        "Chromecast",
-				Owner:       "UID_2332",
-				Type:        []string{"IoT", "Media"},
-				DateCreated: "2024-02-10T20:04:20Z",
-				DateUpdated: "2024-02-14T23:00:30Z",
-				Criticality: 1,
-			},
-			"65f8671cfe55e5c76465d842": {
-				Name:        "Password Vault",
-				Owner:       "UID_2332",
-				Type:        []string{"Server", "Database"},
-				DateCreated: "2024-02-14T23:00:00Z",
-				DateUpdated: "2024-02-14T23:00:30Z",
-				Criticality: 4,
-			},
-			"65f8671cfe55e5c76465d843": {
-				Name:        "Smart Thermostat",
-				Owner:       "UID_2332",
-				Type:        []string{"IoT", "HVAC"},
-				DateCreated: "2024-03-01T12:15:00Z",
-				DateUpdated: "2024-03-18T09:50:00Z",
-				Criticality: 2,
-			},
-			"65f8671cfe55e5c76465d844": {
-				Name:        "Work Laptop",
-				Owner:       "UID_6372",
-				Type:        []string{"Laptop", "Windows"},
-				DateCreated: "2024-02-25T08:30:00Z",
-				DateUpdated: "2024-03-18T10:00:00Z",
-				Criticality: 3,
-			},
-		},
-		Plugins: map[string]jsonhandler.Plugin{
-			"ipScan": {
-				PluginStateID: "20240214-1300A",
-			},
-			"macScan": {
-				PluginStateID: "20240215-0800G",
-			},
-		},
-		Relations: map[string]jsonhandler.Relation{
-			"65f8671cfe55e5c76465d845": {
-				From:        "65f8671cfe55e5c76465d840",
-				To:          "65f8671cfe55e5c76465d841",
-				Direction:   "uni",
-				Owner:       "UID_2332",
-				DateCreated: "2024-02-14T23:35:53Z",
-			},
-			"65f8671cfe55e5c76465d846": {
-				From:        "65f8671cfe55e5c76465d841",
-				To:          "65f8671cfe55e5c76465d842",
-				Direction:   "bi",
-				Owner:       "UID_6372",
-				DateCreated: "2024-01-22T07:32:32Z",
-			},
-			"65f8671cfe55e5c76465d847": {
-				From:        "65f8671cfe55e5c76465d842",
-				To:          "65f8671cfe55e5c76465d843",
-				Direction:   "uni",
-				Owner:       "UID_2332",
-				DateCreated: "2024-03-01T12:30:00Z",
-			},
-			"65f8671cfe55e5c76465d848": {
-				From:        "65f8671cfe55e5c76465d840",
-				To:          "65f8671cfe55e5c76465d844",
-				Direction:   "uni",
-				Owner:       "UID_6372",
-				DateCreated: "2024-03-05T14:20:00Z",
-			},
-		},
+		Assets:           map[string]jsonhandler.Asset{},
+		Relations:        map[string]jsonhandler.Relation{},
+		PluginStates:     map[string]jsonhandler.PluginState{},
 	}
-	_, err := scansHelper.InsertOne(context.Background(), initialScan)
+
+	_, err := scansHelper.InsertOne(context.Background(), emptyScan)
 	if err != nil {
-		log.Fatalf("Failed to add initial scan: %v", err)
+		log.Fatalf("Failed to add empty initial scan: %v", err)
 	}
-	log.Println("Initial scan added successfully")
+	log.Println("Empty initial scan added successfully")
 }
 
 func updateNetscanAssets(c *gin.Context) {
@@ -500,7 +516,7 @@ func main() {
 	timelineDB := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("timelineDB")}
 	scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	// assetsHelper := &dbcon-networkscan.MongoDBHelper{Collection: dbcon-networkscan.GetCollection("assets")}
-	addInitialScan(scansHelper)
+	addEmptyScan(scansHelper)
 	router.POST("/getLatestState", getLatestState)
 
 	router.POST("/updateNetscanAssets", updateNetscanAssets)
@@ -537,6 +553,8 @@ func main() {
 	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
 		dbcon.DeleteAllDocuments(scansHelper, c)
 		dbcon.DeleteAllDocuments(timelineDB, c)
+
+		addEmptyScan(scansHelper)
 	})
 
 	router.POST("/GetTimelineData", func(c *gin.Context) {
