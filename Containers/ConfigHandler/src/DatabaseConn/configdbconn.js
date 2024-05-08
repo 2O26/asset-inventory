@@ -154,10 +154,11 @@ class ConfigHandler {
             const updatedDoc = await DocLinkSchema.findOneAndUpdate(filter, update, options);
         } catch (err) {
             console.log('Error while updating or creating Doc Link:', err.message);
+            throw err;
         }
     }
 
-    async getDoclink(userAssetID) {
+    async getDocLink(userAssetID) {
         try {
             const docLinkData = await DocLinkSchema.findOne({ assetID: userAssetID }).exec();
             if (docLinkData) {
@@ -167,7 +168,7 @@ class ConfigHandler {
             }
         } catch (err) {
             console.error('Error retrieving document link:', err);
-            return null;
+            throw err;
         }
     }
 }

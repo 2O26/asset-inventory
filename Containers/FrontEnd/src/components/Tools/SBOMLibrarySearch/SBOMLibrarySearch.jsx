@@ -53,12 +53,6 @@ export default function SBOMLibrarySearch({ isDashboard = false }) {
         enabled: true
     });
 
-    function handleClick() {
-        if (filteredLibraries) {
-            console.log(filteredLibraries)
-        }
-    }
-
     const toggleVisibility = (section) => {
         setVisibilityStates(prevState => ({
             ...prevState,
@@ -131,13 +125,11 @@ export default function SBOMLibrarySearch({ isDashboard = false }) {
                 Error loading data: {libraryError.message}. Could not fetch the libraries?
             </div>)
     }
-    console.log("stateData: ", stateData)
 
     return (
         <div className='page-container'>
             <div className="SBOM-container" style={{ width: (!isDashboard && "50vw") }}>
                 {!isDashboard && <h1 style={{ color: "var(--text-color)", marginTop: "1rem 0" }}>Global library search</h1>}
-                {/* <button className='standard-button' onClick={() => handleClick()}> Console all libraries</button> */}
                 <div>
                     {/* <hr /> */}
                     <div className='SBOM-search-container'>

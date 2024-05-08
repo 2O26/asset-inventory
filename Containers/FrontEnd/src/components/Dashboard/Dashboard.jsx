@@ -32,10 +32,8 @@ export default function Dashboard() {
 
                 // fix so that if left tool is empty, the right tool will take its place
                 if (leftTool) {
-                    console.log("1")
                     newCombined.push({ leftTool, rightTool });
                 } else if (!leftTool && rightTool) {
-                    console.log("2")
                     newCombined.push({ "leftTool": rightTool, "rightTool": leftTool });
                 }
             }
@@ -47,8 +45,6 @@ export default function Dashboard() {
     if (isLoadingUserSettings) return <LoadingSpinner />;
     if (isUserSettings) return <div className='errorMessage'>{errorUserSettings.message}</div>;
 
-
-    console.log(combinedTools)
     return (
         <div className='dashboard-container'>
             {combinedTools.map((item, index) => (

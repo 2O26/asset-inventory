@@ -289,21 +289,6 @@ app.post("/updateOSSAPIkey", async (req, res) => {
     }
 });
 
-const CronTask = cron.schedule('* * * * *', async () => {
-    /*
-        Every minute fetch from the database and see if any matching cron jobs
-    */
-
-    try {
-        const recurringScans = await ConnectToDatabaseAndFetchRecurringScans();
-        const IpToScanWplugin = PrepareIpToScan(Plugins, recurringScans);
-        const result = await PerformRecurringScan(IpToScanWplugin);
-
-    } catch (err) {
-        console.error("Failed to run cron scan. Err: ", err);
-    }
-});
-
 app.get("/getTrelloKeys", async (req, res) => {
     try {
         const response = await axios.get('http://authhandler:3003/getUID', { headers: { 'Authorization': req.headers.authorization } });
@@ -336,6 +321,10 @@ app.post("/updateTrelloKeys", async (req, res) => {
 
 app.post("/setDocLink", async (req, res) => {
     try {
+        const response = await axios.get('http://authhandler:3003/getUID', { headers: { 'Authorization': req.headers.authorization } });
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
         const configHandler = new ConfigHandler();
         await configHandler.connect();
         await configHandler.setDocLink(req.body.doclink, req.body.assetid);
@@ -348,14 +337,33 @@ app.post("/setDocLink", async (req, res) => {
 
 app.post("/getDocLink", async (req, res) => {
     try {
+        const response = await axios.get('http://authhandler:3003/getUID', { headers: { 'Authorization': req.headers.authorization } });
+        if (!response.data.authenticated) {
+            return res.status(401).send('Invalid token');
+        }
         const configHandler = new ConfigHandler();
         await configHandler.connect();
-        const doclink = await configHandler.getDoclink(req.body.assetid);
+        const doclink = await configHandler.getDocLink(req.body.assetid);
         res.json({ responseFromServer: "Succeeded to fetch doc link", success: "success", assetid: req.body.assetid, doclink: doclink });
         return doclink;
 
     } catch (error) {
         res.status(500).send('Error fetching doc link');
+    }
+});
+
+const CronTask = cron.schedule('* * * * *', async () => {
+    /*
+        Every minute fetch from the database and see if any matching cron jobs
+    */
+
+    try {
+        const recurringScans = await ConnectToDatabaseAndFetchRecurringScans();
+        const IpToScanWplugin = PrepareIpToScan(Plugins, recurringScans);
+        const result = await PerformRecurringScan(IpToScanWplugin);
+
+    } catch (err) {
+        console.error("Failed to run cron scan. Err: ", err);
     }
 });
 
