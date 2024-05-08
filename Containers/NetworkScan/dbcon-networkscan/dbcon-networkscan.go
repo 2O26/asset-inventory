@@ -251,5 +251,5 @@ func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
-	// test()
+
 }

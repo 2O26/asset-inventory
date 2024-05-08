@@ -401,29 +401,3 @@ func TestAddScan(t *testing.T) {
 		})
 	}
 }
-
-// func TestAddScanNoPreviousScans(t *testing.T) {
-// 	mockDB := new(MockDB)
-// 	scan := Scan{StateID: "newScan", DateUpdated: ""}
-// 	result := mongo.InsertOneResult{InsertedID: "newID"}
-
-// 	mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, mongo.ErrNoDocuments))
-// 	mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&result, nil)
-
-// 	AddScan(mockDB, scan)
-
-// 	mockDB.AssertCalled(t, "InsertOne", mock.Anything, mock.Anything)
-// }
-
-// // TestAddScanFindError tests error handling when the FindOne operation fails
-// func TestAddScanFindError(t *testing.T) {
-// 	mockDB := new(MockDB)
-// 	scan := Scan{StateID: "errorScan", DateUpdated: ""}
-
-// 	mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(nil, mongo.ErrClientDisconnected))
-// 	mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(nil, nil) // This should not be called
-
-// 	AddScan(mockDB, scan)
-
-// 	mockDB.AssertNotCalled(t, "InsertOne", mock.Anything, mock.Anything)
-// }

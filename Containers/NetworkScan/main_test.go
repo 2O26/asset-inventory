@@ -159,10 +159,10 @@ func TestGetNetworkAndBroadcastAddresses(t *testing.T) {
 	}{
 		{
 			name:            "Valid IPv4 CIDR",
-			input:           "192.168.1.0/24",
-			expectedNetwork: net.ParseIP("192.168.1.0"),
-			expectedBroad:   net.ParseIP("192.168.1.255"),
-			expectedSubnet:  &net.IPNet{IP: net.ParseIP("192.168.1.0"), Mask: net.IPv4Mask(255, 255, 255, 0)},
+			input:           "127.0.0.1/24",
+			expectedNetwork: net.ParseIP("127.0.0.0"),
+			expectedBroad:   net.ParseIP("127.0.0.255"),
+			expectedSubnet:  &net.IPNet{IP: net.ParseIP("127.0.0.0"), Mask: net.IPv4Mask(255, 255, 255, 0)},
 			expectErr:       false,
 		},
 		{
@@ -202,8 +202,8 @@ func TestCloneIP(t *testing.T) {
 	}{
 		{
 			name:     "Clone IPv4 address",
-			input:    net.ParseIP("192.168.1.1"),
-			expected: net.ParseIP("192.168.1.1"),
+			input:    net.ParseIP("127.0.0.1"),
+			expected: net.ParseIP("127.0.0.1"),
 		},
 	}
 
@@ -224,7 +224,7 @@ func TestPerformAdvancedScan(t *testing.T) {
 	}{
 		{
 			name:   "Perform IPv4 scan",
-			target: "192.168.1.0/32",
+			target: "127.0.0.1/32",
 			expected: dbcon.Scan{
 				StateID:     "",
 				DateCreated: time.Now().Format(time.RFC3339),
@@ -299,7 +299,7 @@ func TestPostNetScan(t *testing.T) {
 			name: "Valid extensive scan",
 			body: dbcon.ScanRequest{
 				CmdSelection: "extensive",
-				IPRanges:     []string{"192.168.1.0/32"},
+				IPRanges:     []string{"127.0.0.1/32"},
 			},
 			expectedStatus: http.StatusOK,
 			expectedError:  "",
@@ -308,14 +308,14 @@ func TestPostNetScan(t *testing.T) {
 			name: "Valid simple scan",
 			body: dbcon.ScanRequest{
 				CmdSelection: "simple",
-				IPRanges:     []string{"192.168.1.0/32"},
+				IPRanges:     []string{"127.0.0.1/32"},
 			},
 			expectedStatus: http.StatusOK,
 			expectedError:  "",
 		},
 		{
 			name:           "Invalid body",
-			payload:        []byte(`{"cmdSelection":1,"ipRanges":[192.168.1.0/32]}`),
+			payload:        []byte(`{"cmdSelection":1,"ipRanges":[127.0.0.1/32]}`),
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Failed to bind JSON",
 		},
@@ -323,7 +323,7 @@ func TestPostNetScan(t *testing.T) {
 			name: "Invalid request body",
 			body: dbcon.ScanRequest{
 				CmdSelection: "invalid",
-				IPRanges:     []string{"192.168.1.0/32"},
+				IPRanges:     []string{"127.0.0.1/32"},
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "No valid scan selection provided",
@@ -412,8 +412,8 @@ func TestCreateAsset(t *testing.T) {
 		{
 			name:      "Valid asset",
 			status:    "open",
-			ip:        "192.168.1.100",
-			target:    "192.168.1.0/24",
+			ip:        "127.0.0.1",
+			target:    "127.0.0.0/24",
 			scanType:  "extensive",
 			expectErr: false,
 		},
@@ -524,15 +524,15 @@ func TestScanIP(t *testing.T) {
 		expectedAsset dbcon.Asset
 		expectedErr   error
 	}{
-		//The test case with open ports found is commented out because it requires a live network connection to test with live IPs.
+		// The test case with open ports found is commented out because it requires open port on the ip.
 		// {
 		// 	name:   "Open ports found",
-		// 	ip:     net.ParseIP("192.168.1.1"),
-		// 	target: "192.168.1.0/32",
+		// 	ip:     net.ParseIP("127.0.0.1"),
+		// 	target: "127.0.0.1/32",
 		// 	expectedAsset: dbcon.Asset{
 		// 		Status:   "up",
-		// 		IPv4Addr: "192.168.1.1",
-		// 		Subnet:   "192.168.1.0/32",
+		// 		IPv4Addr: "127.0.0.1",
+		// 		Subnet:   "127.0.0.1/32",
 		// 		ScanType: "extensive",
 		// 	},
 		// 	expectedErr: nil,
@@ -543,7 +543,7 @@ func TestScanIP(t *testing.T) {
 			ip:            net.ParseIP("192.168.1.101"),
 			target:        "192.168.1.0/32",
 			expectedAsset: dbcon.Asset{},
-			expectedErr:   &net.AddrError{Err: "No open ports found on IP 192.168.1.101"},
+			expectedErr:   &net.AddrError{Err: "no open ports found on IP 192.168.1.101"},
 		},
 	}
 
