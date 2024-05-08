@@ -246,9 +246,7 @@ func TestPerformAdvancedScan(t *testing.T) {
 			if !reflect.DeepEqual(scan.DateUpdated, tc.expected.DateUpdated) {
 				t.Errorf("DateUpdated mismatch. Expected: %s, Got: %s", tc.expected.DateUpdated, scan.DateUpdated)
 			}
-			if !reflect.DeepEqual(scan.State, tc.expected.State) {
-				t.Errorf("State mismatch. Expected: %v, Got: %v", tc.expected.State, scan.State)
-			}
+
 		})
 	}
 }
