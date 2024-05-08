@@ -289,11 +289,14 @@ func TestPrintActiveIPs(t *testing.T) {
 
 func TestPostNetScan(t *testing.T) {
 	testCases := []struct {
-		name           string
-		body           dbcon.ScanRequest
-		payload        []byte
-		expectedStatus int
-		expectedError  string
+		name            string
+		body            dbcon.ScanRequest
+		payload         []byte
+		expectedStatus  int
+		expectedError   string
+		authenticated   bool
+		isAdmin         bool
+		canManageAssets bool
 	}{
 		{
 			name: "Valid extensive scan",
@@ -301,8 +304,11 @@ func TestPostNetScan(t *testing.T) {
 				CmdSelection: "extensive",
 				IPRanges:     []string{"127.0.0.1/32"},
 			},
-			expectedStatus: http.StatusOK,
-			expectedError:  "",
+			expectedStatus:  http.StatusOK,
+			expectedError:   "",
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: false,
 		},
 		{
 			name: "Valid simple scan",
@@ -310,14 +316,20 @@ func TestPostNetScan(t *testing.T) {
 				CmdSelection: "simple",
 				IPRanges:     []string{"127.0.0.1/32"},
 			},
-			expectedStatus: http.StatusOK,
-			expectedError:  "",
+			expectedStatus:  http.StatusOK,
+			expectedError:   "",
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: false,
 		},
 		{
-			name:           "Invalid body",
-			payload:        []byte(`{"cmdSelection":1,"ipRanges":[127.0.0.1/32]}`),
-			expectedStatus: http.StatusBadRequest,
-			expectedError:  "Failed to bind JSON",
+			name:            "Invalid body",
+			payload:         []byte(`{"cmdSelection":1,"ipRanges":[127.0.0.1/32]}`),
+			expectedStatus:  http.StatusBadRequest,
+			expectedError:   "Failed to bind JSON",
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: false,
 		},
 		{
 			name: "Invalid request body",
@@ -325,8 +337,11 @@ func TestPostNetScan(t *testing.T) {
 				CmdSelection: "invalid",
 				IPRanges:     []string{"127.0.0.1/32"},
 			},
-			expectedStatus: http.StatusBadRequest,
-			expectedError:  "No valid scan selection provided",
+			expectedStatus:  http.StatusBadRequest,
+			expectedError:   "No valid scan selection provided",
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: false,
 		},
 		{
 			name: "Invalid target",
@@ -334,8 +349,11 @@ func TestPostNetScan(t *testing.T) {
 				CmdSelection: "extensive",
 				IPRanges:     []string{"invaled"},
 			},
-			expectedStatus: http.StatusInternalServerError,
-			expectedError:  "Failed to perform scan",
+			expectedStatus:  http.StatusInternalServerError,
+			expectedError:   "Failed to perform scan",
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: false,
 		},
 	}
 
@@ -355,7 +373,14 @@ func TestPostNetScan(t *testing.T) {
 			mockDB := &dbcon.MockDB{}
 			mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
 			mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
-			postNetScan(mockDB, c)
+			auth := dbcon.AuthResponse{
+				Authenticated:   tc.authenticated,
+				Roles:           nil,
+				IsAdmin:         tc.isAdmin,
+				CanManageAssets: tc.canManageAssets,
+			}
+
+			postNetScan(mockDB, c, auth)
 
 			if w.Code != tc.expectedStatus {
 				t.Errorf("Expected status %d, got %d", tc.expectedStatus, w.Code)
@@ -460,6 +485,9 @@ func TestDeleteAsset(t *testing.T) {
 		mockSetup       func(*dbcon.MockDB)
 		expectedStatus  int
 		expectedMessage string
+		authenticated   bool
+		isAdmin         bool
+		canManageAssets bool
 	}{
 		{
 			name:      "Success",
@@ -471,6 +499,9 @@ func TestDeleteAsset(t *testing.T) {
 			},
 			expectedStatus:  http.StatusOK,
 			expectedMessage: "Netscan asset removed.",
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: false,
 		},
 		{
 			name:      "Asset not found",
@@ -481,6 +512,9 @@ func TestDeleteAsset(t *testing.T) {
 			},
 			expectedStatus:  http.StatusInternalServerError,
 			expectedMessage: "Failed to remove netscan asset from database.",
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: false,
 		},
 	}
 
@@ -494,8 +528,14 @@ func TestDeleteAsset(t *testing.T) {
 
 			mockDB := new(dbcon.MockDB)
 			tc.mockSetup(mockDB)
+			auth := dbcon.AuthResponse{
+				Authenticated:   tc.authenticated,
+				Roles:           nil,
+				IsAdmin:         tc.isAdmin,
+				CanManageAssets: tc.canManageAssets,
+			}
 
-			deleteAsset(mockDB, c)
+			deleteAsset(mockDB, c, auth)
 
 			if w.Code != tc.expectedStatus {
 				t.Errorf("Expected status %d, got %d", tc.expectedStatus, w.Code)
