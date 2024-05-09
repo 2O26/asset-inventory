@@ -139,11 +139,10 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
                 {filteredAssets.map(([key, value]) => (
                     <div key={key} className='assetRow' id={key}>
                         {(!isNarrowView && !isDashboard) && (
-                            <div className='assetCell'>
+                            <div onClick={() => handleCheckboxChange(key)} className='assetCell'>
                                 <input
                                     type="checkbox"
                                     checked={checkedItems[key] || false}
-                                    onChange={() => handleCheckboxChange(key)}
                                 />
                             </div>
                         )}
