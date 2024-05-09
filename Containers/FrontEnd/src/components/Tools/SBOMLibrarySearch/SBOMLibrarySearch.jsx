@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { GetAllSBOMLibraries } from '../../Services/ApiService';
+import { GetAllSBOMLibraries, RecheckVulnerbleComponentsAll } from '../../Services/ApiService';
 import "./SBOMLibrarySearch.css";
-import { SearchIcon, StatusIcon } from '../../common/Icons/Icons';
+import { CheckIcon, ReloadIcon, SearchIcon, StatusIcon } from '../../common/Icons/Icons';
 import { GetState } from '../../Services/ApiService';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import { useNavigate } from 'react-router-dom';
@@ -53,6 +53,17 @@ export default function SBOMLibrarySearch({ isDashboard = false }) {
         enabled: true
     });
 
+    const { mutate, isPending, isSuccess: isSuccessMut, reset } = useMutation({
+        mutationFn: RecheckVulnerbleComponentsAll,
+        onSuccess: () => {
+            refetchLibraries()
+        },
+        onError: (error) => {
+            window.alert("There was an error scanning the Libraries:", error.message)
+        }
+
+    })
+
     const toggleVisibility = (section) => {
         setVisibilityStates(prevState => ({
             ...prevState,
@@ -86,6 +97,10 @@ export default function SBOMLibrarySearch({ isDashboard = false }) {
         return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`;
     }
 
+    const scanLibraries = () => {
+        reset()
+        mutate()
+    }
 
     useEffect(() => {
         if (libraryData && libraryData.libraries) {
@@ -136,15 +151,21 @@ export default function SBOMLibrarySearch({ isDashboard = false }) {
                         <div className='SBOM-top-row'>
                             <p className='vulncount'>Vulnerable libraries: {vulnerableCVECount}</p>
                             <SearchBar onSearch={setSearchTerm} />
-                            <label className='range-checkbox-label' style={{ marginRight: "auto", marginTop: "0.5rem" }}>
-                                <p className='text-desc'>Show only vulnerable libraries</p>
-                                <input
-                                    type="checkbox"
-                                    value="all"
-                                    checked={onlyVulnerable}
-                                    onChange={() => setOnlyVulnerable(!onlyVulnerable)}
-                                />
-                            </label>
+                            <div className='SBOM-mid-row'>
+                                <label className='range-checkbox-label' style={{ marginRight: "auto", marginTop: "0.5rem" }}>
+                                    <p className='text-desc'>Show only vulnerable libraries</p>
+                                    <input
+                                        type="checkbox"
+                                        value="all"
+                                        checked={onlyVulnerable}
+                                        onChange={() => setOnlyVulnerable(!onlyVulnerable)}
+                                    />
+                                </label>
+                                <div style={{ display: "flex", flexDirection: "column" }}>
+                                    <p className="scan-lib-container text-desc" style={{ width: "16rem" }}>Scan Libraries {isPending ? <div style={{ width: "3rem", height: "3rem" }}><LoadingSpinner /></div> : <div style={{ width: "3rem", height: "3rem" }} onClick={() => scanLibraries()}><ReloadIcon /></div>}</p>
+                                    {isSuccessMut && <div className='scan-lib-container text-desc'>Libraries Scanned<CheckIcon color={'var(--success-color)'} /></div>}
+                                </div>
+                            </div>
                         </div>
                         {filteredLibraries && (
                             <div className='center-flex-column'>

@@ -21,11 +21,19 @@ import { MdOutlineAdminPanelSettings } from "react-icons/md";
 import { RiRadioButtonLine } from "react-icons/ri";
 import { LuHistory } from "react-icons/lu";
 import { MdOutlineScreenSearchDesktop } from "react-icons/md";
+import { TbReload } from "react-icons/tb";
 
 
 
 // get icons from HERE: https://react-icons.github.io/react-icons/
 
+export const ReloadIcon = ({ size = 40 }) => {
+    return (
+        <div>
+            <TbReload className='reload-icon' size={size} />
+        </div>
+    )
+}
 export const AdminConsoleIcon = ({ size = 30 }) => {
     return (
         <MdOutlineAdminPanelSettings size={size} />

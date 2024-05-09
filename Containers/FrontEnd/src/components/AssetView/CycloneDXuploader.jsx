@@ -32,7 +32,7 @@ export const CycloneDXuploader = ({ assetID }) => {
 
     };
 
-    if (isPendingMutAdd) return <div className="bomSpinner" >Validating <LoadingSpinner /></div>
+    if (isPendingMutAdd) return <div className="bomSpinner" >Validating <div style={{ width: "4rem" }}><LoadingSpinner /></div></div>
     if (isErrorMutAdd) return <div className='errorMessage'>{errorMutAdd.message}</div>;
 
     return (
