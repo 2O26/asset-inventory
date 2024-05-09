@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './AssetList.css';
 import { useNavigate } from 'react-router-dom';
 import AddAsset from '../../AddAsset/AddAsset';
@@ -13,8 +13,8 @@ const NarrowList = ['Name', 'Owner', 'Type', 'Criticality', 'IP']
 
 const getColumnHeaders = (data, isNarrowView, isDashboard) => {
     const columnHeaders = new Set();
+    !isDashboard && columnHeaders.add('Select'); // Assuming 'Select' is a special column for checkboxes
     if (!isNarrowView) {
-        !isDashboard && columnHeaders.add('Select'); // Assuming 'Select' is a special column for checkboxes
         Object.values(data.state.assets).forEach(asset => {
             Object.keys(asset.properties).forEach(key => columnHeaders.add(key));
         });
@@ -56,20 +56,46 @@ export function SearchBar({ onSearch }) {
 
 export default function AssetList({ width = "95vw", height = "84vh", isDashboard = false }) {
     const navigate = useNavigate();
-    const { data, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['getState'],
-        queryFn: GetState,
-        enabled: true,
-    });
+    const componentRef = useRef(null);
+    const [isNarrowView, setIsNarrowView] = useState(false);
     const [filteredAssets, setFilteredAssets] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [checkedItems, setCheckedItems] = useState({});
     const [isRemoveVisible, setIsRemoveVisible] = useState(false);
 
-    // Dynamically adjust based on viewport width
-    const matches = width.match(/\d+/);
-    const numberPart = parseInt(matches[0], 10)
-    const isNarrowView = numberPart < 60; // Example breakpoint
+    const { data, isLoading, isError, error, refetch } = useQuery({
+        queryKey: ['getState'],
+        queryFn: GetState,
+        enabled: true,
+    });
+
+    useEffect(() => {
+        const updateIsNarrowView = () => {
+            if (componentRef.current) {
+                const screenWidth = window.innerWidth;
+                const componentWidth = componentRef.current.getBoundingClientRect().width;
+
+                // Determine if the component width is less than 50vw
+                // setIsNarrowView(componentWidth < (0.5 * screenWidth));
+                setIsNarrowView(componentWidth < 916);
+                console.log("narrow:", componentWidth < (0.5 * screenWidth));
+            }
+        };
+
+        updateIsNarrowView(); // Run initially
+
+        // Set up ResizeObserver to handle dynamic resizing
+        const resizeObserver = new ResizeObserver(updateIsNarrowView);
+        if (componentRef.current) {
+            resizeObserver.observe(componentRef.current);
+        }
+
+        return () => {
+            if (componentRef.current) {
+                resizeObserver.unobserve(componentRef.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (data) {
@@ -127,7 +153,7 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
         <div className='page-container'>
             {!isDashboard && <div><SearchBar onSearch={setSearchTerm} /></div>}
 
-            <div className='asset-list-container' style={{ width: width, height: height }}>
+            <div className='asset-list-container' ref={componentRef} style={{ width: width, height: height }}>
                 <div className='headerRow'>
                     {data && getColumnHeaders(data, isNarrowView, isDashboard).map(header => (
                         <div key={header} className={`headerCell ${header === 'Select' ? 'checkbox-header' : ''}`}>
@@ -138,7 +164,7 @@ export default function AssetList({ width = "95vw", height = "84vh", isDashboard
                 <hr />
                 {filteredAssets.map(([key, value]) => (
                     <div key={key} className='assetRow' id={key}>
-                        {(!isNarrowView && !isDashboard) && (
+                        {(!isDashboard) && (
                             <div onClick={() => handleCheckboxChange(key)} className='assetCell'>
                                 <input
                                     type="checkbox"
