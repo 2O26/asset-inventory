@@ -84,11 +84,11 @@ async function checkVulnerabilities(purl, apikey) {
 
 As shown above two different API calls are being used to connect with the Sonartype Rest API depending on if you have configured `api-token` and `username` or not.
 
-See documnetation at: https://ossindex.sonatype.org/rest 
+See documnetation at:  [https://ossindex.sonatype.org/rest](URL)
 
 ### How to find API token and username:
-1. Visit https://ossindex.sonatype.org/
+1. Visit [https://ossindex.sonatype.org/](URL)
 2. Create an account and sig in
-3. Navigate to your user settings: https://ossindex.sonatype.org/user/settings
+3. Navigate to your user settings: [https://ossindex.sonatype.org/user/settings](URL)
 4. Under "Email Address" in the top middle section of the page, find your username.
 5. In the middle section at the bottom of the page find your API Token. 

@@ -51,7 +51,7 @@ export default function Dashboard() {
                 <div key={index} className="container-50-height">
                     <div className="dashboard-tool-container-75">
                         <h3 className='item-header-ds'>
-                            {dashboardTools({ size: 24 })[item.leftTool].icon} {item.leftTool}
+                            {dashboardTools({ size: 24 })[item.leftTool]?.icon} {item.leftTool}
                         </h3>
                         <div className="tool-component">
                             {dashboardTools()[item.leftTool].component}
@@ -60,7 +60,7 @@ export default function Dashboard() {
                     {item.rightTool ?
                         <div className="dashboard-tool-container-25">
                             <h3 className='item-header-ds'>
-                                {dashboardTools({ size: 24 })[item.rightTool].icon} {item.rightTool}
+                                {dashboardTools({ size: 24 })[item.rightTool]?.icon} {item.rightTool}
                             </h3>
                             <div className="tool-component">
                                 {dashboardTools()[item.rightTool].component}

@@ -176,6 +176,7 @@ export default function SBOMLibrarySearch({ isDashboard = false }) {
                                                     <p> Library exists in the SBOM files for the following assets: </p>
                                                     <div className='cve-asset-container' >
                                                         {library.assetids.map((id, idx) => (
+                                                            (stateData.state.assets[id]) &&
                                                             <div key={idx} className='cve-asset-item' onClick={() => navigate(`/asset-view/${id}`)}>
                                                                 <p>Name: {stateData?.state?.assets && stateData.state.assets[id]?.properties.Name}</p>
                                                                 <p>ID: {id}</p>

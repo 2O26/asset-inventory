@@ -25,7 +25,10 @@ nav:
       - CycloneDX: API_cyclonedx.md
       - NetworkScan: API_networkscan.md
       - CVEScanner:  API_CVE_scanner.md
-
+  - Full Stack Documentation:
+        - New Plugin: AddingANewPlugin.md
+        - Recurring Scan: AddingRecurringScan.md
+        - Add Plugin to Dashboard: AddingPluginToDashboard.md
 # Markdown Extensions to enhance documentation
 markdown_extensions:
   - toc:

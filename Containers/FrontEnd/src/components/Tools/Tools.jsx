@@ -5,12 +5,13 @@ import './Tools.css';
 import { AssetListIcon, IpScannerIcon, LogsIcon, GraphIcon, PDFIcon, AdminConsoleIcon, SBOMSearch, HistoryIcon } from '../common/Icons/Icons';
 import { RedirectToLogServer } from './ViewLogs/ViewLogs.jsx';
 
+import RenderOnRole from '../ProtectedRoutes/RenderOnRole.jsx';
+
+import IssueBoard from './IssueBoard/IssueBoard';
+
 import AssetList from './AssetList/AssetList.jsx';
 import GraphView from './GraphView/GraphView.jsx';
 import History from './History/History.jsx';
-
-import RenderOnRole from '../ProtectedRoutes/RenderOnRole.jsx';
-import IssueBoard from './IssueBoard/IssueBoard';
 import SBOMLibrarySearch from './SBOMLibrarySearch/SBOMLibrarySearch.jsx';
 
 export const dashboardTools = ({ size = 60, width = "100%", height = "100%" } = {}) => (

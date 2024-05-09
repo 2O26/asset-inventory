@@ -14,7 +14,7 @@ Adding a new plugin for the asset inventory system consists of two parts:
 ### Frontend framework
 The frontend framework used is Reactjs.
 
-https://react.dev/learn
+[https://react.dev/learn](URL)
 
 ### Creating a new component
 Create compenent in the place you want to add a new component in the frontend. Import it.
