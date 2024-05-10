@@ -543,7 +543,7 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthRespons
 
 		log.Printf("Finished postNetScan\n")
 
-		updatedScan := dbcon.AddScan(db, scanResultGlobal)
+		updatedScan, _ := dbcon.AddScan(db, scanResultGlobal)
 		fmt.Println("ADDED UPDATED SCAN TO DATABASE")
 
 		updateAssets(updatedScan, accessibleIPRanges, c)
@@ -602,7 +602,7 @@ func recurringScan(db dbcon.DatabaseHelper, c *gin.Context) {
 
 	log.Printf("Finished postNetScan\n")
 
-	updatedScan := dbcon.AddScan(db, scanResultGlobal)
+	updatedScan, _ := dbcon.AddScan(db, scanResultGlobal)
 	fmt.Println("ADDED UPDATED SCAN TO DATABASE")
 
 	updateAssets(updatedScan, req.IPRanges, c)

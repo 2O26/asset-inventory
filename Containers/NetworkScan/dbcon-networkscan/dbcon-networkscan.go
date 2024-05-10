@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
 	"net/netip"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type AuthResponse struct {
@@ -211,21 +212,21 @@ func compareScanStates(currentScan Scan, previousScan Scan) Scan {
 	return updatedScan
 }
 
-func AddScan(db DatabaseHelper, scan Scan) Scan {
+func AddScan(db DatabaseHelper, scan Scan) (Scan, error) {
 	var previousScan Scan
 	err := db.FindOne(context.TODO(), bson.D{}, options.FindOne().SetSort(bson.D{{Key: "dateupdated", Value: -1}})).Decode(&previousScan)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		// Detta är den första skannen, infoga den direkt
 		scan.DateUpdated = time.Now().Format(time.RFC3339)
 		result, err := db.InsertOne(context.TODO(), scan)
 		if err != nil {
-			log.Fatalf("Could not insert scan: %s", err)
+			log.Printf("Could not insert scan: %s", err)
+			return Scan{}, fmt.Errorf("could not insert scan: %v", err)
 		}
 		log.Printf("OK!, %v", result)
-		return scan
+		return scan, nil
 	} else if err != nil {
 		log.Printf("Failed to retrieve the latest scan: %v", err)
-		return Scan{}
+		return Scan{}, fmt.Errorf("failed to retrieve the latest scan: %v", err)
 	}
 
 	updatedScan := compareScanStates(scan, previousScan)
@@ -233,13 +234,13 @@ func AddScan(db DatabaseHelper, scan Scan) Scan {
 	result, err := db.InsertOne(context.TODO(), updatedScan)
 
 	if err != nil {
-		log.Fatalf("Could not insert scan: %s", err)
+		log.Printf("Could not insert scan: %s", err)
+		return Scan{}, fmt.Errorf("could not insert scan: %v", err)
 	}
 	log.Printf("OK!, %v", result)
 
-	return updatedScan
+	return updatedScan, nil
 }
-
 
 func GetLatestScan(db DatabaseHelper, c *gin.Context, auth AuthResponse) {
 	if !auth.Authenticated {
