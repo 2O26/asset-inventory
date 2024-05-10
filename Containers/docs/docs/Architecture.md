@@ -1,0 +1,1 @@
+PlantUML images of architectures can be found under the 'Template Structure' folder.
