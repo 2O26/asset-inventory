@@ -1,6 +1,6 @@
 mode: set
-assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:79.49,88.22 3 0
-assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:88.22,91.3 2 0
+assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:79.49,88.22 3 1
+assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:88.22,91.3 2 1
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:94.2,96.16 3 0
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:96.16,100.3 3 0
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:101.2,104.16 4 0
