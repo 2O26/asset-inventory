@@ -227,8 +227,8 @@ Backend states are on a different format to the output from /getLatestState and 
               "description": "Criticality of asset.",
               "type": "integer"
             },
-            "Hostname": {
-              "description": "IP address of asset (if applicable). Name of the key will be updated in the future.",
+            "IP": {
+              "description": "IP address of asset (if applicable).",
               "type": "string"
             }
           }
@@ -329,8 +329,7 @@ This endpoint manages assets and relationships based on the provided request. It
                 "Gaming Console",
                 "PlayStation"
             ],
-            "criticality": 5,
-            "hostname": "PS5-1"
+            "criticality": 5
         },
         {
             "name": "My iPhone",
@@ -339,8 +338,7 @@ This endpoint manages assets and relationships based on the provided request. It
                 "Mobile",
                 "iOS"
             ],
-            "criticality": 3,
-            "hostname": "iPhone-1"
+            "criticality": 3
         }
     ],
     "removeAsset": [
@@ -355,8 +353,7 @@ This endpoint manages assets and relationships based on the provided request. It
                 "Laptop",
                 "Windows"
             ],
-            "criticality": 1,
-            "hostname": "Work-Laptop-56"
+            "criticality": 1
         },
         "65f8671cfe5565d878": {
             "name": "Work Laptop",
@@ -365,8 +362,7 @@ This endpoint manages assets and relationships based on the provided request. It
                 "Laptop",
                 "Windows"
             ],
-            "criticality": 4,
-            "hostname": "Work-Laptop-56"
+            "criticality": 4
         }
     },
     "addRelations": [
