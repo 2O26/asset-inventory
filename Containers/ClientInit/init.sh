@@ -21,6 +21,7 @@ while true; do
   fi
 done
 
+sleep 5 # Wait for 5 seconds before retrying
 
 # Admin credentials
 ADMIN_USER="admin"

@@ -29,6 +29,8 @@ nav:
         - New Plugin: AddingANewPlugin.md
         - Recurring Scan: AddingRecurringScan.md
         - Add Plugin to Dashboard: AddingPluginToDashboard.md
+  - Testing:
+        - Cypress Tests: CypressTests.md
 # Markdown Extensions to enhance documentation
 markdown_extensions:
   - toc:

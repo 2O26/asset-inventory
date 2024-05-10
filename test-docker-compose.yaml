@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   frontenddev:
     image: frontenddev
@@ -6,11 +5,6 @@ services:
       - 3000:3000
     volumes:
       - ./Containers/FrontEnd/src:/app/src
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:3000/ || exit 1" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
 
   assethandler:
     image: assethandler
@@ -24,10 +18,39 @@ services:
 
   confighandler:
     image: confighandler
+    restart: always
     ports:
       - "3001:3001"
     volumes:
       - ./Containers/ConfigHandler/src:/app/src
+    depends_on:
+      - keycloak
+
+  cyclonedx:
+    image: cyclonedx
+    ports:
+      - "8082:8082"
+
+  cvescanner:
+    image: cvescanner
+    volumes:
+      - ./Containers/CVEScanner/src:/app/src
+    ports:
+      - "3002:3002"
+    # env_file:
+    #   - ./Containers/CVEScanner/.env
+
+  netscanstorage:
+    image: mongo
+    restart: always
+    command: [ "mongod", "--port", "27019", "--quiet", "--syslog" ]
+    ports:
+      - "27019:27019"
+    expose:
+      - "27019"
+    volumes:
+      - netscanstorage:/data/db
+      - netscanconfig:/data/configdb
 
   dbstorage:
     image: mongo
@@ -53,6 +76,18 @@ services:
       - configstorage:/data/db
       - configdbconfig:/data/configdb
 
+  cyclonedxstorage:
+    image: mongo
+    restart: always
+    command: [ "mongod", "--port", "27020", "--quiet", "--syslog" ]
+    ports:
+      - "27020:27020"
+    expose:
+      - "27020"
+    volumes:
+      - cyclonedxstorage:/data/db
+      - cyclonedxconfig:/data/configdb
+
   keycloakstorage:
     image: postgres:latest
     environment:
@@ -74,6 +109,7 @@ services:
       KC_DB_PASSWORD: keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin # makeTheDevelopersLifesH4RDbySettingAwaytoLongPassword!
+      KC_HEALTH_ENABLED: true
     depends_on:
       - keycloakstorage
 
@@ -84,18 +120,22 @@ services:
 
   authhandler:
     image: authhandler
+    volumes:
+      - ./Containers/AuthHandler/src:/app/src
     depends_on:
       - keycloak
-
+  mkdocs:
+    container_name: mkdocs
+    image: squidfunk/mkdocs-material
+    restart: always
+    ports:
+      - "6880:8000"
+    volumes:
+      - "./Containers/docs:/docs:ro"
   ######################################################
   ###     Test Environment (nginx, postgres, cypress)   ###
   ######################################################
-  webserver:
-    image: nginx
-    ports:
-      - "89:80"
-    networks:
-      - test_network
+
 
   postgres:
     image: postgres
@@ -108,11 +148,6 @@ services:
 
   cypress:
     image: cypresslocal
-    volumes:
-      - ./Containers/Cypress/coverage/lcov-report:/app/coverage/lcov-report/
-    depends_on:
-      frontenddev:
-        condition: service_healthy
       # - dbstorage
       # - assethandler
       # - configstorage
@@ -124,7 +159,11 @@ volumes:
   configdbconfig:
   dbstorage:
   dbconfig:
+  netscanstorage:
+  netscanconfig:
   keycloak_data:
+  cyclonedxstorage:
+  cyclonedxconfig:
   test_coverage:
 
 
