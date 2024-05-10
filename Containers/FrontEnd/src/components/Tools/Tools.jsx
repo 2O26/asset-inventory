@@ -56,10 +56,6 @@ export default function Tools() {
                         <HistoryIcon size={60} />
                         <div className='tool-lable'> History </div>
                     </button>
-                    <button className='button-tool' onClick={() => navigate("/tools/SBOMLibrarySearch")}>
-                        <SBOMSearch size={60} />
-                        <div className='tool-lable'> Global SBOM library search</div>
-                    </button>
                     <button className='button-tool' onClick={() => navigate("/tools/pdf-download")}>
                         <PDFIcon size={60} />
                         <div className='tool-lable'> Download PDF</div>
@@ -89,10 +85,10 @@ export default function Tools() {
                         <IpScannerIcon size={55} />
                         <div className='tool-lable'> Network Scanner</div>
                     </button>
-                    {/* <button className='button-tool' onClick={() => navigate("/tools/mac-scan")}>
-                        <MacScannerIcon size={65} />
-                        <div> Mac Scanner</div>
-                    </button> */}
+                    <button className='button-tool' onClick={() => navigate("/tools/SBOMLibrarySearch")}>
+                        <SBOMSearch size={60} />
+                        <div className='tool-lable'> Global SBOM library search</div>
+                    </button>
                 </div>
             </div>
             <hr />

@@ -78,3 +78,11 @@
     visibility: visible;
     opacity: 1;
 }
+
+.reload-icon {
+    cursor: pointer;
+}
+
+.reload-icon:hover {
+    color: var(--button-hover);
+}

@@ -23,6 +23,23 @@
     gap: 0.5rem;
 }
 
+.SBOM-mid-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-color);
+}
+
+.scan-lib-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem
+}
+
 .vulncount {
     color: var(--text-color);
     font-weight: 600;
