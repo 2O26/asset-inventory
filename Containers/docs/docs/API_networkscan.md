@@ -88,7 +88,7 @@ startNetScan initiates a network scan over specified IP ranges. It processes eac
     ```json
     {
         "cmdSelection": "simple",
-        "IPRanges": [192.168.50.220/32:true]
+        "IPRanges": [192.168.50.220/32]
     }
     ```
 
