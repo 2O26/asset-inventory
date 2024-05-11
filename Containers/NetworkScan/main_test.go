@@ -3,7 +3,9 @@ package main
 import (
 
 	"testing"
-
+    "reflect"
+    "time"
+    "dbcon"
 )
 
 func TestValidNmapTarget(t *testing.T) {
@@ -35,4 +37,50 @@ func TestValidNmapTarget(t *testing.T) {
 				t.Errorf("nmap Target: %s is %t it should be %t", test.target, valid, test.result)
 		  }
 	 }
+}
+
+
+func TestPerformSimpleScan(t *testing.T) {
+    // Define a test case
+    testCase := struct {
+        target string
+    }{
+        target: "127.0.0.1", // Use localhost as the target
+    }
+
+    // Call the function with the test case
+    scan, err := performSimpleScan(testCase.target)
+
+    // Check for unexpected errors
+    if err != nil {
+        t.Fatalf("performSimpleScan() returned an error: %v", err)
+    }
+
+    // Check the scan object
+    if scan.StateID != "" {
+        t.Errorf("Unexpected StateID: got %v, want %v", scan.StateID, "")
+    }
+
+    // Parse the date strings
+    dateCreated, err := time.Parse(time.RFC3339, scan.DateCreated)
+    if err != nil {
+        t.Fatalf("Failed to parse DateCreated: %v", err)
+    }
+    dateUpdated, err := time.Parse(time.RFC3339, scan.DateUpdated)
+    if err != nil {
+        t.Fatalf("Failed to parse DateUpdated: %v", err)
+    }
+
+    // Check the dates
+    if !dateCreated.Before(time.Now()) {
+        t.Errorf("DateCreated is not before current time")
+    }
+    if !dateUpdated.Before(time.Now()) {
+        t.Errorf("DateUpdated is not before current time")
+    }
+
+    // Check the state map
+    if !reflect.DeepEqual(scan.State, make(map[string]dbcon.Asset)) {
+        t.Errorf("Unexpected State: got %v, want %v", scan.State, make(map[string]dbcon.Asset))
+    }
 }

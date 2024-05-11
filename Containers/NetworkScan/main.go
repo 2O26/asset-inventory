@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"math/rand"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sony/sonyflake"
@@ -65,7 +66,7 @@ var requests = make(map[int]chan bool)
 // The function will return false without an error if it doesn't receive a response from the target host within the timeout.
 const (
 	ReadBufferSize = 1500
-	ReadDeadline   = 1 * time.Second
+	ReadDeadline   = 3 * time.Second
 )
 
 func ping(addr string) (bool, error) {
@@ -100,14 +101,16 @@ func ping(addr string) (bool, error) {
 
 	rb := make([]byte, ReadBufferSize)
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 4; i++ {
 		attemptStart := time.Now()
 		fmt.Println("Attempt", i+1, "started at", attemptStart)
 
 		if _, err = c.WriteTo(wb, dst); err != nil {
 			return false, fmt.Errorf("failed to send ICMP message: %w", err)
 		}
-		time.Sleep(time.Second * 5)
+		// This code is here to make sure not all packets are sent at the same time
+		sleepDuration := time.Duration(rand.Intn(2)+1) * time.Second
+		time.Sleep(sleepDuration)
 
 		err = c.SetReadDeadline(time.Now().Add(ReadDeadline))
 		if err != nil {
@@ -211,7 +214,7 @@ func deleteAsset(db dbcon.DatabaseHelper, c *gin.Context) {
 	})
 }
 
-// OBS!!! THIS IS CURRENTLY NOT IN USE WE NEED TO CONNECT THE CODE
+
 func validNmapTarget(nmapTarget string) bool {
 	//Example of strings able to be handled "192.168.1.0/24, 172.15.1.1-100, 10.10.1.145"
 	regex := `^(\b(?:\d{1,3}\.){3}\d{1,3}(?:/\d{1,2})?|\b(?:\d{1,3}\.){3}\d{1,3}-\d{1,3}\b)$` // `` Have to be used instead of "" or the regex breaks
