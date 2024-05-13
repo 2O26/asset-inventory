@@ -222,7 +222,12 @@ func TestGetCycloneDXFile(t *testing.T) {
 		"sbomData":         "invalid data",
 		"mostRecentUpdate": time.Now()}
 	recorder := httptest.NewRecorder()
-
+	auth := AuthResponse{
+		Authenticated:   true,
+		Roles:           nil,
+		IsAdmin:         true,
+		CanManageAssets: false,
+	}
 	// Define test cases
 	tests := []struct {
 		name          string
@@ -271,7 +276,8 @@ func TestGetCycloneDXFile(t *testing.T) {
 			if tc.name == "Success" {
 				mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc, nil, nil))
-				GetCycloneDXFile(mockDB, c)
+				// Running these tests as admin. Authentication checks are performed in main
+				GetCycloneDXFile(mockDB, c, auth)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -286,7 +292,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 			}
 			if tc.name == "MissingAssetID" {
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.SingleResult{}, nil)
-				GetCycloneDXFile(mockDB, c)
+				GetCycloneDXFile(mockDB, c, auth)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -301,7 +307,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 			}
 			if tc.name == "FileNotFound" {
 				mockDB.On("FindOne", mock.Anything, mock.Anything).Return(nil, mongo.ErrNoDocuments)
-				GetCycloneDXFile(mockDB, c)
+				GetCycloneDXFile(mockDB, c, auth)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -317,7 +323,8 @@ func TestGetCycloneDXFile(t *testing.T) {
 			if tc.name == "ErrorFindingFile" {
 				mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc, errors.New("error finding file"), nil))
-				GetCycloneDXFile(mockDB, c)
+
+				GetCycloneDXFile(mockDB, c, auth)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -333,7 +340,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 			if tc.name == "ErrorDecodingDocument" {
 				mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc2, nil, nil))
-				GetCycloneDXFile(mockDB, c)
+				GetCycloneDXFile(mockDB, c, auth)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}

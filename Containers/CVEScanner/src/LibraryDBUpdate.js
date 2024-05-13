@@ -1,7 +1,7 @@
 const CVEscanSave = require("./DatabaseConn/CVEconn");
 
 async function FetchCycloneDX(assetID) {
-    const cycloneDXResponse = await fetch(`http://cyclonedx:8082/getCycloneDXFile?assetID=${assetID}`);
+    const cycloneDXResponse = await fetch(`http://cyclonedx:8082/getCycloneDXFileInternal?assetID=${assetID}`);
     if (cycloneDXResponse.status !== 200) {
         return "failure";
     }

@@ -2,6 +2,7 @@ package dbcon_cyclonedx
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,6 +18,13 @@ type CycloneDXDocument struct {
 	ID               string    `bson:"_id,omitempty"`
 	SBOMData         []byte    `bson:"sbom_data"`
 	MostRecentUpdate time.Time `json:"mostRecentUpdate"`
+}
+
+type AuthResponse struct {
+	Authenticated   bool     `json:"authenticated"`
+	Roles           []string `json:"roles"`
+	IsAdmin         bool     `json:"isAdmin"`
+	CanManageAssets bool     `json:"canManageAssets"`
 }
 
 var client *mongo.Client
@@ -44,6 +52,51 @@ func SetupDatabase(uri string, databaseName string) error {
 
 func GetCollection(collectionName string) *mongo.Collection {
 	return client.Database(dbName).Collection(collectionName)
+}
+
+func AuthorizeUser(c *gin.Context) AuthResponse {
+
+	emptyAuth := AuthResponse{
+		Authenticated:   false,
+		Roles:           nil,
+		IsAdmin:         false,
+		CanManageAssets: false,
+	}
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized", "success": false})
+		return emptyAuth
+	}
+
+	// Perform authentication
+	authURL := "http://authhandler:3003/getRoles"
+	req, err := http.NewRequest("GET", authURL, nil)
+	if err != nil {
+		log.Printf("Failed to fetch authentication token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch authentication token"})
+		return emptyAuth
+	}
+	req.Header.Add("Authorization", authHeader)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Failed to connect to validation server: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to validation server"})
+		return emptyAuth
+	}
+
+	defer resp.Body.Close()
+
+	var auth AuthResponse
+	fmt.Println("Response Status:", resp.StatusCode)
+	err = json.NewDecoder(resp.Body).Decode(&auth)
+	if err != nil {
+		log.Printf("Failed to fetch authentication token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch authentication token"})
+		return emptyAuth
+	}
+
+	return auth
 }
 
 func SaveCycloneDX(db DatabaseHelper, sbomData []byte, assetID string) error {
@@ -93,6 +146,7 @@ func RemoveCycloneDX(db DatabaseHelper, assetID string) error {
 // GetCycloneDXFile retrieves the CycloneDX file for the specified asset ID from the database.
 func GetCycloneDXFile(db DatabaseHelper, c *gin.Context) {
 	// Fetch the assetID from the POST request
+
 	var assetID string
 
 	if id := c.Query("assetID"); id != "" { // Check if asset ID is provided as a query parameter
