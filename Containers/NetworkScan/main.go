@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	"math/rand"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sony/sonyflake"
-	"golang.org/x/net/icmp"
-	"golang.org/x/net/ipv4"
+	//"golang.org/x/net/icmp"
+	//"golang.org/x/net/ipv4"
+	//"math/rand"
 
 	"os/exec"
 	"strings"
@@ -67,6 +67,8 @@ var requests = make(map[int]chan bool)
 // 8. If no response is received within the timeout, or if the response is not an ICMP echo reply, the function returns false, indicating that the host is not up.
 //
 // The function will return false without an error if it doesn't receive a response from the target host within the timeout.
+/*
+This function was replaced with exec ping since it had some incosistency issues
 const (
 	ReadBufferSize = 1500
 	ReadDeadline   = 3 * time.Second
@@ -152,7 +154,7 @@ func ping(addr string) (bool, error) {
 
 	return false, nil
 }
-
+*/
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
