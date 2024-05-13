@@ -1,4 +1,4 @@
-describe('Docs Tab Test', () => {
+describe('Info Tab Test', () => {
   const tmpAssetData = {
     name: "Test Asset",
     crit: 4,
@@ -85,5 +85,6 @@ describe('Docs Tab Test', () => {
         cy.get('div').contains('There is no connected documentation link to this asset');
     });
 });
+
 
 });
