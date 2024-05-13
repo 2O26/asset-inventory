@@ -64,8 +64,8 @@ The output is a JSON document that complies with the following schema:
                 "description": "Criticality of asset.",
                 "type": "integer"
               },
-              "Hostname": {
-                "description": "IP of asset (if applicable). Will be updated in the future.",
+              "IP": {
+                "description": "IP of asset (if applicable).",
                 "type": "string"
               }
             }
