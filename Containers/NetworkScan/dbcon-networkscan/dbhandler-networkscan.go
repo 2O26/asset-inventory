@@ -26,9 +26,6 @@ func (m *MongoDBHelper) InsertOne(ctx context.Context, document interface{}) (*m
 func (m *MongoDBHelper) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
 	return m.Collection.FindOne(ctx, filter, opts...)
 }
-func (m *MongoDBHelper) DeleteMany(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
-	return m.Collection.DeleteMany(ctx, filter)
-}
 
 // Implementing the UpdateOne method for MongoDBHelper
 func (m *MongoDBHelper) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error) {

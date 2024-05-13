@@ -519,18 +519,6 @@ func TestAuthorizeUser(t *testing.T) {
 			expectedHTTPStatus:   http.StatusUnauthorized,
 			expectedErrorMessage: "User unauthorized",
 		},
-		// {
-		// 	name:       "Valid Authorization Header",
-		// 	authHeader: "Bearer valid_token",
-		// 	expectedAuthResponse: AuthResponse{
-		// 		Authenticated:   true,
-		// 		Roles:           []string{"192.168.1.0/24", "10.0.0.0/32"},
-		// 		IsAdmin:         true,
-		// 		CanManageAssets: true,
-		// 	},
-		// 	expectedHTTPStatus:   http.StatusOK,
-		// 	expectedErrorMessage: "",
-		// },
 	}
 
 	for _, tc := range testCases {

@@ -185,25 +185,3 @@ func GetCycloneDXFile(db DatabaseHelper, c *gin.Context) {
 
 	c.Data(http.StatusOK, "application/json", doc.SBOMData)
 }
-
-func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {
-	results, err := db.Find(context.TODO(), bson.D{})
-	if err != nil {
-		log.Printf("Failed to find documents:%v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching documents"})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, results)
-}
-
-func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
-	deleteResult, err := db.DeleteMany(context.TODO(), bson.D{})
-	if err != nil {
-		log.Printf("Failed to delete documents:%v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting documents"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
-}
