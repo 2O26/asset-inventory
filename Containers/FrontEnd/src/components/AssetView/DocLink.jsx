@@ -15,7 +15,7 @@ export default function DocLink({ assetID }) {
     const { mutate: setLink, isPending: isPendingSetLink } = useMutation({
         mutationFn: SetDocLink,
         onSuccess: () => {
-            window.alert("Succesfully added doc link");
+            window.alert("Successfully updated doc link");
             setInputLink(''); // Empty the input field
             refetchGetLink();
         },
@@ -36,24 +36,27 @@ export default function DocLink({ assetID }) {
         setLink({ link: linkToSet, assetID });
     };
 
-
     const handleOpenLink = () => {
         window.open(docLinkData, "_blank"); // Open link in new tab
+    };
+
+    const handleRemoveLink = () => {
+        setLink({ link: "", assetID }); // Set doc link to an empty string
     };
 
     return (
         <div className="asset-info-container">
             <div>
-                {docLinkData ? (
-                    <div>
-                        <div>Link connected to asset: <a onClick={handleOpenLink} style={{ color: "var(--button-hover)", cursor: "pointer" }}>{docLinkData}</a></div>
-                        <div className="standard-button-container">
-                            <button className="standard-button" onClick={handleOpenLink}>Open Link</button>
-                        </div>
-                    </div>
-                ) : (
-                    <div style={{ marginBottom: "1rem" }}>There is no connected documentation link to this asset</div>
-                )}
+            {docLinkData !== null && docLinkData !== undefined ? (
+            <div>
+                <div>Link connected to asset: <a onClick={handleOpenLink} style={{ color: "var(--button-hover)", cursor: "pointer" }}>{docLinkData}</a></div>
+                <div className="standard-button-container">
+                    <button className="standard-button" onClick={handleOpenLink}>Open Link</button>
+                </div>
+            </div>
+        ) : (
+            <div style={{ marginBottom: "1rem" }}>There is no connected documentation link to this asset</div>
+        )}
                 <form onSubmit={handleSetLink}>
                     <div className='inputContainer'>
                         <input
@@ -69,6 +72,9 @@ export default function DocLink({ assetID }) {
                         <button className="standard-button" type="submit" disabled={isPendingSetLink}>{docLinkData ? "Update" : "Set Link"}</button>
                     </div>
                 </form>
+                <div className="standard-button-container">
+                    <button className="standard-button" onClick={handleRemoveLink} disabled={!docLinkData}>Remove Link</button>
+                </div>
                 {getLinkLoading && <LoadingSpinner />}
                 {getLinkIsError && <div className='errorMessage'>{getLinkError.message}</div>}
                 {isPendingSetLink && <LoadingSpinner />}
