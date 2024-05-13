@@ -47,7 +47,7 @@ The response is a JSON document that follows to the Asset inventory backend scan
             "type": "string",
             "format": "ipv4"
           },
-          "Last Discovered at": {
+          "Subnet" : {
             "type": "string"
           },
           "Open Ports": {
@@ -55,6 +55,13 @@ The response is a JSON document that follows to the Asset inventory backend scan
             "items": {
               "type": "string"
             }
+          },
+          "Scan Type": {
+            "type": "string",
+            "enum": ["simple", "extensive"]
+          },
+          "Last Discovered at": {
+            "type": "string"
           }
         }
       },
@@ -88,7 +95,7 @@ startNetScan initiates a network scan over specified IP ranges. It processes eac
     ```json
     {
         "cmdSelection": "simple",
-        "IPRanges": [192.168.50.220/32]
+        "IPRanges": ["192.168.50.220/32"]
     }
     ```
 
