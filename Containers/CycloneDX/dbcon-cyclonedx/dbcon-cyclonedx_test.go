@@ -2,6 +2,7 @@ package dbcon_cyclonedx
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -222,13 +223,6 @@ func TestGetCycloneDXFile(t *testing.T) {
 		"sbomData":         "invalid data",
 		"mostRecentUpdate": time.Now()}
 	recorder := httptest.NewRecorder()
-	auth := AuthResponse{
-		Authenticated:   true,
-		Roles:           nil,
-		IsAdmin:         true,
-		CanManageAssets: false,
-	}
-	// Define test cases
 	tests := []struct {
 		name          string
 		queryParam    string
@@ -277,7 +271,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 				mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc, nil, nil))
 				// Running these tests as admin. Authentication checks are performed in main
-				GetCycloneDXFile(mockDB, c, auth)
+				GetCycloneDXFile(mockDB, c)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -292,7 +286,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 			}
 			if tc.name == "MissingAssetID" {
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.SingleResult{}, nil)
-				GetCycloneDXFile(mockDB, c, auth)
+				GetCycloneDXFile(mockDB, c)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -307,7 +301,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 			}
 			if tc.name == "FileNotFound" {
 				mockDB.On("FindOne", mock.Anything, mock.Anything).Return(nil, mongo.ErrNoDocuments)
-				GetCycloneDXFile(mockDB, c, auth)
+				GetCycloneDXFile(mockDB, c)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -324,7 +318,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 				mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc, errors.New("error finding file"), nil))
 
-				GetCycloneDXFile(mockDB, c, auth)
+				GetCycloneDXFile(mockDB, c)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -340,7 +334,7 @@ func TestGetCycloneDXFile(t *testing.T) {
 			if tc.name == "ErrorDecodingDocument" {
 				mockDB := new(MockDB)
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc2, nil, nil))
-				GetCycloneDXFile(mockDB, c, auth)
+				GetCycloneDXFile(mockDB, c)
 				if recorder.Code != tc.expectedCode {
 					t.Errorf("unexpected status code: got %v, want %d", recorder, tc.expectedCode)
 				}
@@ -352,6 +346,52 @@ func TestGetCycloneDXFile(t *testing.T) {
 						t.Errorf("unexpected response body: got %s, want %s", recorder.Body.String(), expectedBody)
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestAuthorizeUser(t *testing.T) {
+	testCases := []struct {
+		name                 string
+		authHeader           string
+		expectedAuthResponse AuthResponse
+		expectedHTTPStatus   int
+		expectedErrorMessage string
+	}{
+		{
+			name:       "Missing Authorization Header",
+			authHeader: "",
+			expectedAuthResponse: AuthResponse{
+				Authenticated:   false,
+				Roles:           nil,
+				IsAdmin:         false,
+				CanManageAssets: false,
+			},
+			expectedHTTPStatus:   http.StatusUnauthorized,
+			expectedErrorMessage: "User unauthorized",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request, _ = http.NewRequest("GET", "/", nil)
+			c.Request.Header.Set("Authorization", tc.authHeader)
+
+			auth := AuthorizeUser(c)
+
+			assert.Equal(t, tc.expectedAuthResponse, auth)
+			assert.Equal(t, tc.expectedHTTPStatus, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			if err != nil {
+				t.Errorf("Failed to unmarshal response body: %v", err)
+			}
+			if tc.expectedErrorMessage != "" {
+				assert.Equal(t, tc.expectedErrorMessage, response["message"])
 			}
 		})
 	}

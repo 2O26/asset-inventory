@@ -275,14 +275,6 @@ func main() {
 		dbcon.GetCycloneDXFile(sbomHelper, c)
 	})
 
-	router.GET("/PrintAllDocuments", func(c *gin.Context) {
-		dbcon.PrintAllDocuments(sbomHelper, c)
-	})
-
-	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
-		dbcon.DeleteAllDocuments(sbomHelper, c)
-	})
-
 	log.Println("Server starting on port 8082...")
 	if err := router.Run(":8082"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
