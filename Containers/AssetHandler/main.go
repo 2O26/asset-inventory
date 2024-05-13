@@ -53,31 +53,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-/*
-func getNetScanStatus() json.RawMessage {
-	url := "http://localhost:8081/status"
 
-	// GET request from netscan
-	response, err := http.Get(url)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer response.Body.Close() // Ensure the body is closed after reading
-
-	var netassets jsonhandler.PluginState
-	// Read the response body
-	json.NewDecoder(response.Body).Decode(&netassets) //puts the response into netassets
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	netassetsJSON, _ := json.Marshal(netassets)
-	log.Println("NetscanStatus Gave:", string(netassetsJSON))
-	return netassetsJSON
-
-}*/
 
 func getLatestState(c *gin.Context) {
 	// Add assets from network scan
@@ -136,7 +112,6 @@ func getNetworkScan(url ...string) {
 	}
 	// GET request from netscan
 	response, err := http.Get(url[0])
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -169,37 +144,29 @@ func getNetworkScan(url ...string) {
 		addAsset = append(addAsset, asset)
 		fmt.Println("Asset: ", asset)
 	}
-	fmt.Println("5")
 	request := dbcon.AssetRequest{
 		AddAsset: addAsset,
 	}
 	fmt.Println("Request: ", request)
 	fmt.Println(assetIDs)
-	fmt.Println("5.5")
 	dbcon.AddAssets(request, assetIDs)
-	fmt.Println("6")
 	pluginState := jsonhandler.PluginState{
 		StateID:     "netscan",
 		DateCreated: netassets.DateCreated,
 		DateUpdated: netassets.DateUpdated,
 		State:       make(map[string]any),
 	}
-	fmt.Println("7")
 	for k, v := range netassets.State {
 		pluginState.State[k] = v
 	}
-	fmt.Println("8")
 	plugin := jsonhandler.Plugin{
 		PluginStateID: netassets.StateID,
 	}
-	fmt.Println("9")
 	fmt.Println("PluginState: ", pluginState)
 
 	// Will need to iterate over the subnets present in scan and make assets if they don't already exist
 	addSubnetAssets(netassets)
-	fmt.Println("19")
 	addSubnetRelations(netassets)
-	fmt.Println("71")
 	dbcon.AddPluginData(pluginState, plugin)
 
 }

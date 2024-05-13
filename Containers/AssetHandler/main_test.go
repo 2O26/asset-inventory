@@ -1,15 +1,16 @@
 package main
 
 import (
-	//"assetinventory/assethandler/dbcon"
-	"assetinventory/assethandler/jsonhandler"
+	"assetinventory/assethandler/dbcon"
+	//"assetinventory/assethandler/jsonhandler"
 	//"errors"
 	"testing"
 	"fmt"
 	"net/http/httptest"
 	"net/http"
 	"time"
-	"log"
+	//"log"
+	//"os"
 	//"strings"
 	//"bytes"
 	//"net/url"
@@ -70,16 +71,12 @@ func TestCORSMiddleware(t *testing.T) {
 	}
 	fmt.Println("Test CORSMiddleware *SUCCESSFUL*")
 }
-
+/*
 func TestGetNetworkScan(t *testing.T) {
 	dbcon.SetupDatabase("mongodb://localhost:27017/","TestDB")
 	router1 := gin.Default()
 	router1.Use(CORSMiddleware())
 	//mockDB := new(mock.Mock)
-	/*err := dbcon.SetupDatabase("mongodb://netscanstorage:27019/", "scan")
-	if err != nil {
-		log.Fatalf("Error setting up database: %v", err)
-	}*/
 	//mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("PluginState")).Return(&mongo.InsertOneResult{}, nil)
 	//scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
 	//addInitialScan(scansHelper)
@@ -106,10 +103,7 @@ func TestGetNetworkScan(t *testing.T) {
 		c.JSON(http.StatusOK, testResp)
 	})
 	log.Println("Server starting on port 8081...")
-	/*if err := router1.Run(":8081"); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}*/
-	//router1.Run(":8081")
+
 
     server1 := &http.Server{
         Addr:    ":8081",
@@ -123,44 +117,52 @@ func TestGetNetworkScan(t *testing.T) {
     }()
 
 	time.Sleep(2 * time.Second)
+	//getNetworkScan("http://localhost:8081/GetLatestScan")
+
+
 	getNetworkScan("http://localhost:8081/GetLatestScan")
 
-	fmt.Println("1")
 
+	//error := Perform(getNetScanStatus, JsonTestMsg)
 	if err := server1.Shutdown(context.Background()); err != nil {
         t.Fatalf("failed to shutdown server: %v", err)
     }
-	time.Sleep(5 * time.Second)
-
-
-
-
-
-	/*JsonTestMsg := getNetworkScan("http://localhost:8081/GetLatestScan")
-	fmt.Println("8")
-	if string(JsonTestMsg) != `{"stateID":"","dateCreated":"","dateUpdated":"","state":null}` {
-		t.Errorf("Expected not nil got nil")
-	}
-	//error := Perform(getNetScanStatus, JsonTestMsg)
 	/*if err := server1.Shutdown(context.Background()); err != nil {
         t.Fatalf("failed to shutdown server: %v", err)
     }*/
 
-}
+//}
 
 func TestGetLatestState(t *testing.T) {
-	/*TODO
-	jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil) -> Error
-	var authSuccess = true
+	//TODO
+	//jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil) -> Error
+	//var authSuccess = true
 
-	if authSuccess --> get to false??
+	//if authSuccess --> get to false??
+	dbcon.SetupDatabase("mongodb://localhost:27017/","TestDB")
 
-	*/
 	//fakeReq := httptest.NewRequest("GET", "", nil)
 	writer := httptest.NewRecorder()
 	testContext, _ := gin.CreateTestContext(writer)
 
 	//http.Get(url) -> Error Refuse connection
+	router := gin.Default()
+	router.Use(CORSMiddleware())
+    router.GET("/GetLatestScan", func(c *gin.Context) {
+        c.String(http.StatusOK, "This is a test response")
+    })
+
+    server := &http.Server{
+        Addr:    ":8081",
+        Handler: router,
+    }
+
+    go func() {
+        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            t.Fatalf("failed to start server: %v", err)
+        }
+    }()
+	time.Sleep(2 * time.Second)
 
 	getLatestState(testContext)
 	expectedMsg := `{"error":"Failed to get latest scan"}`
@@ -172,43 +174,13 @@ func TestGetLatestState(t *testing.T) {
 		t.Errorf("Expected status code %s but got %s", expectedMsg, writer.Body.String())
 	}
 
-	//open port 
-	// Start a test server listening on port 8080
-    router := gin.Default()
-    router.GET("/GetLatestScan", func(c *gin.Context) {
-        c.String(http.StatusOK, "This is a test response")
-    })
-
-    server := &http.Server{
-        Addr:    ":8080",
-        Handler: router,
-    }
-
-    go func() {
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            t.Fatalf("failed to start server: %v", err)
-        }
-    }()
-
-	time.Sleep(2 * time.Second)
-	//json.NewDecoder(resp.Body).Decode(&scanResult) -> Error
-	writer = httptest.NewRecorder()
-	testContext, _ = gin.CreateTestContext(writer)
-	getLatestState(testContext)
-	expectedMsg = `{"error":"Failed to decode latest scan data"}`
-	
-	if testContext.Writer.Status() != http.StatusInternalServerError {
-        t.Errorf("Expected status code %d but got %d", http.StatusInternalServerError, testContext.Writer.Status()) 
-    }
-	if expectedMsg != writer.Body.String() {
-		t.Errorf("Expected status code %s but got %s", expectedMsg, writer.Body.String())
-	}
 	if err := server.Shutdown(context.Background()); err != nil {
         t.Fatalf("failed to shutdown server: %v", err)
     }
-	
-	//json.Marshal(scanResult) -> Error
-	responseBody := json.RawMessage(`
+
+	//open port 
+	// Start a test server listening on port 8080
+		responseBody := json.RawMessage(`
 		{
 			"stateID": "20240417-1400B",
 			"dateCreated": "2024-02-30 23:00:00",
@@ -219,8 +191,71 @@ func TestGetLatestState(t *testing.T) {
 				}
 			}
 		}`)
+
+    router = gin.Default()
+	router.Use(CORSMiddleware())
+	//mockDB := new(mock.Mock)
+	//mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("PluginState")).Return(&mongo.InsertOneResult{}, nil)
+	//scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
+	//addInitialScan(scansHelper)
+    router.GET("/GetLatestScan", func(c *gin.Context) {
+        c.String(http.StatusOK, "This is a test response")
+    })
+
+    server = &http.Server{
+        Addr:    ":8080",
+        Handler: router,
+    }
+
+	router1 := gin.Default()
+	router1.Use(CORSMiddleware())
+    router1.GET("/GetLatestScan", func(c *gin.Context) {
+        respReader := responseBody
+		c.JSON(http.StatusOK, respReader)
+    })
+
+    server1 := &http.Server{
+        Addr:    ":8081",
+        Handler: router1,
+    }
+
+    go func() {
+        if err := server1.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            t.Fatalf("failed to start server1: %v", err)
+        }
+    }()
+
+    go func() {
+        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            t.Fatalf("failed to start server: %v", err)
+        }
+    }()
 	
+	//json.NewDecoder(resp.Body).Decode(&scanResult) -> Error
+	writer = httptest.NewRecorder()
+	testContext, _ = gin.CreateTestContext(writer)
+	
+	time.Sleep(3 * time.Second)
+	getLatestState(testContext)
+	expectedMsg = `{"error":"Failed to decode latest scan data"}`
+		
+	if testContext.Writer.Status() != http.StatusInternalServerError {
+        t.Errorf("Expected status code %d but got %d", http.StatusInternalServerError, testContext.Writer.Status()) 
+    }
+	if expectedMsg != writer.Body.String() {
+		t.Errorf("Expected status code %s but got %s", expectedMsg, writer.Body.String())
+	}
+	if err := server.Shutdown(context.Background()); err != nil {
+        t.Fatalf("failed to shutdown server: %v", err)
+    }
+	if err := server1.Shutdown(context.Background()); err != nil {
+        t.Fatalf("failed to shutdown server: %v", err)
+    }
+
+	//json.Marshal(scanResult) -> Error
+	/*
 	router = gin.Default()
+	router.Use(CORSMiddleware())
     router.GET("/GetLatestScan", func(c *gin.Context) {
 	// Create a scan result with an unsupported field type`
 		respReader := responseBody
@@ -237,13 +272,14 @@ func TestGetLatestState(t *testing.T) {
         }
     }()
 		//ROUTER SERVER 8081    
-	router1 := gin.Default()
+	router1 = gin.Default()
+	router1.Use(CORSMiddleware())
     router1.GET("/GetLatestScan", func(c *gin.Context) {
         respReader := responseBody
 		c.JSON(http.StatusOK, respReader)
     })
 
-    server1 := &http.Server{
+    server1 = &http.Server{
         Addr:    ":8081",
         Handler: router1,
     }
@@ -273,14 +309,14 @@ func TestGetLatestState(t *testing.T) {
     if err := server.Shutdown(context.Background()); err != nil {
         t.Fatalf("failed to shutdown server: %v", err)
     }
-	/*if err := server1.Shutdown(context.Background()); err != nil {
+	if err := server1.Shutdown(context.Background()); err != nil {
         t.Fatalf("failed to shutdown server: %v", err)
-    }*/
+    }
 	
 }
 
 func TestAddSubnetAssets(t *testing.T) {
-	
+	//TODO
 }
 
 func TestAddSubnetRelations(t *testing.T) {

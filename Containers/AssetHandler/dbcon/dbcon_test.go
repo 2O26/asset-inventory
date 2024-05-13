@@ -450,15 +450,15 @@ func TestAddRelations(t *testing.T){
         log.Fatal(err)
     }
 
-	expectedOutput = "No new relations to add, all relations already exist"
+	expectedOutput = "New relations added successfully to the latest scan"
 	testOutput = AddRelations(testRequest, testIDS)
 
 	if testOutput != expectedOutput{
 		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
 	}
 
-	expectedOutput = "New relations added successfully to the latest scan"
-	testOutput = AddRelations(testRequest2, testIDS)
+	expectedOutput = "No new relations to add, all relations already exist"
+	testOutput = AddRelations(testRequest, testIDS)
 	
 	if testOutput != expectedOutput{
 		t.Errorf("Expected status code '%s' but got '%s'", expectedOutput, testOutput)
