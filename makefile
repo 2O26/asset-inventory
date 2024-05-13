@@ -4,7 +4,7 @@ all: assetHandler networkScan frontendDev fluentd elasticsearch kibana cypresslo
 
 all-dev: assetHandler networkScan frontendDev configHandler keycloakLocal cyclonedx clientInit cveScanner authHandler
 
-all-test: assetHandler networkScan frontendDev configHandler cypresslocal keycloakLocal cyclonedx clientInit authHandler
+all-test: cypresslocal assetHandler networkScan frontendDev configHandler keycloakLocal cyclonedx clientInit cveScanner authHandler
 
 assInvFront:
 	docker build -t assinvfront ./Containers/FrontEnd
@@ -50,7 +50,6 @@ cypresslocal:
 
 dev:
 	docker compose -f dev-docker-compose.yaml up
-	open http://localhost:3000/
 
 test:
 	docker compose -f test-docker-compose.yaml up
