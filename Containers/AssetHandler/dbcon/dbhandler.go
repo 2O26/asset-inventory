@@ -18,7 +18,6 @@ type DatabaseHelper interface {
 	InsertOne(ctx context.Context, document interface{}) (*mongo.InsertOneResult, error)
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
 	Find(ctx context.Context, filter interface{}) ([]bson.M, error)
-	DeleteMany(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error)
 	UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error)
 	DeleteOne(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error)
 }
@@ -28,9 +27,6 @@ func (m *MongoDBHelper) InsertOne(ctx context.Context, document interface{}) (*m
 }
 func (m *MongoDBHelper) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
 	return m.Collection.FindOne(ctx, filter, opts...)
-}
-func (m *MongoDBHelper) DeleteMany(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
-	return m.Collection.DeleteMany(ctx, filter)
 }
 
 // Implementing the UpdateOne method for MongoDBHelper
@@ -71,16 +67,10 @@ func (m *MockDB) Find(ctx context.Context, filter interface{}) ([]bson.M, error)
 	args := m.Called(ctx, filter)
 	return args.Get(0).([]bson.M), args.Error(1)
 }
-
-func (m *MockDB) DeleteMany(ctx context.Context, filter interface{}) (*mongo.DeleteResult, error) {
-	args := m.Called(ctx, filter)
-	return args.Get(0).(*mongo.DeleteResult), args.Error(1)
-}
 func (m *MockDB) InsertOne(ctx context.Context, document interface{}) (*mongo.InsertOneResult, error) {
 	args := m.Called(ctx, document)
 	return args.Get(0).(*mongo.InsertOneResult), args.Error(1)
 }
-
 func (m *MockDB) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*mongo.UpdateResult, error) {
 	args := m.Called(ctx, filter, update)
 	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
@@ -90,7 +80,6 @@ func (m *MockDB) DeleteOne(ctx context.Context, filter interface{}) (*mongo.Dele
 	args := m.Called(ctx, filter)
 	return args.Get(0).(*mongo.DeleteResult), args.Error(1)
 }
-
 func (m *MockDB) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
 	args := m.Called(ctx, filter, opts)
 	return args.Get(0).(*mongo.SingleResult)

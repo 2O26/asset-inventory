@@ -794,28 +794,6 @@ func removeRelations(req AssetRequest, latestScan jsonhandler.BackState, db Data
 	return messages, errors, changes
 }
 
-func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {
-	results, err := db.Find(context.TODO(), bson.D{})
-	if err != nil {
-		log.Printf("Failed to find documents:%v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching documents"})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, results)
-}
-
-func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
-	deleteResult, err := db.DeleteMany(context.TODO(), bson.D{})
-	if err != nil {
-		log.Printf("Failed to delete documents:%v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting documents"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
-}
-
 // GetTimelineData retrieves the latest 10 changes from the timelineDB collection
 // and returns them as a JSON response.
 func GetTimelineData(db DatabaseHelper, c *gin.Context) {
