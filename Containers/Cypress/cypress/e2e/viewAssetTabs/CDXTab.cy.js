@@ -44,8 +44,8 @@ describe('CDX Tab Test', () => {
         }
       });
     };
-    clickCheckboxUntilChecked(5); 
-    
+    clickCheckboxUntilChecked(5);
+
     cy.get('.assetCell').contains(tmpAssetData.name).parents('.assetRow').find('input[type="checkbox"]').should('be.checked');
     cy.get('div').contains('Remove Asset').then($button => {
       if ($button.length) {
@@ -66,16 +66,13 @@ describe('CDX Tab Test', () => {
 
     it('Check if CDX tab has the uploaded file', () => {
       cy.get('button.tab-button').contains('C-DX').click();
-      cy.wait(2000);
-      cy.get('.cdxFileTest').should('contain', 'Uploaded SBOM file');
+      cy.get('.cdxFileTest', { timeout: 10000 }).should('contain', 'Uploaded SBOM file');
     });
 
     it('Check if the uploaded file has all tabs', () => {
       cy.get('button.tab-button').contains('C-DX').click();
-      cy.wait(2000);
-      cy.get('.cdxFileTest').click();
-      cy.wait(2000);
-      cy.get('.ReactModal__Content').should('be.visible');
+      cy.get('.cdxFileTest', { timeout: 10000 }).click();
+      cy.get('.ReactModal__Content', { timeout: 10000 }).should('be.visible');
       cy.get('.button-container-json button.tab-button').should('have.length', 5);
       cy.get('.button-container-json button.tab-button').eq(0).should('contain.text', 'Full CycloneDX File');
       cy.get('.button-container-json button.tab-button').eq(1).should('contain.text', 'Metadata about software');
@@ -85,23 +82,21 @@ describe('CDX Tab Test', () => {
       cy.reload();
       cy.wait(2000);
     });
-    
+
     it('Should match SBOM file information with Global Library Search', () => {
       const expectedDetails = {
-          name: 'body-parser',
-          version: '1.19.0',
-          purl: 'pkg:npm/body-parser@1.19.0'
+        name: 'body-parser',
+        version: '1.19.0',
+        purl: 'pkg:npm/body-parser@1.19.0'
       };
-  
+
       cy.get('button.tab-button').contains('C-DX').click();
-      cy.wait(2000);
-      cy.get('.cdxFileTest').contains('Uploaded SBOM file').click();
-      cy.wait(2000);
-      cy.contains('components:').click();
+      cy.get('.cdxFileTest', { timeout: 10000 }).contains('Uploaded SBOM file').click();
+      cy.contains('components:', { timeout: 10000 }).click();
       cy.contains('0:').click();
       cy.get('li > ul > li').then(($lis) => {
         const componentLi = $lis.filter((index, li) => Cypress.$(li).find('label > span').text().trim() === '0:');
-      
+
         if (componentLi.length > 0) {
           const name = componentLi.find('li > label:contains("name:") > span').text().trim();
           const version = componentLi.find('li > label:contains("version:") > span').text().trim();
@@ -110,7 +105,7 @@ describe('CDX Tab Test', () => {
           expect(name, `Checking name`).to.equal(expectedDetails.name);
           expect(version, `Checking version`).to.equal(expectedDetails.version);
           expect(purl, `Checking purl`).to.equal(expectedDetails.purl);
-          
+
         } else {
           cy.log('Component details not found');
         }
@@ -122,19 +117,19 @@ describe('CDX Tab Test', () => {
       cy.contains('Global SBOM library search').click();
       cy.get('.inputWrapper input[type="text"]').type(`${expectedDetails.name}{enter}`);
       cy.get('.drop-down-header').contains(`${expectedDetails.name} @ ${expectedDetails.version}`).click();
-  
+
       cy.get('.json-tree-container').then(element => {
-          const actualDetails = {
-              name: element.find('.dropdown-container p').eq(0).text().trim(),
-              version: element.find('.dropdown-container p').eq(2).text().trim(),
-              purl: element.find('.dropdown-container p').eq(1).text().trim()
-          };
-  
-          expect(actualDetails.name, `Check name in library: '${actualDetails.name}'`).to.include(expectedDetails.name);
-          expect(actualDetails.version, `Check version in library: '${actualDetails.version}'`).to.include(expectedDetails.version);
-          expect(actualDetails.purl, `Check purl in library: '${actualDetails.purl}'`).to.include(expectedDetails.purl);
+        const actualDetails = {
+          name: element.find('.dropdown-container p').eq(0).text().trim(),
+          version: element.find('.dropdown-container p').eq(2).text().trim(),
+          purl: element.find('.dropdown-container p').eq(1).text().trim()
+        };
+
+        expect(actualDetails.name, `Check name in library: '${actualDetails.name}'`).to.include(expectedDetails.name);
+        expect(actualDetails.version, `Check version in library: '${actualDetails.version}'`).to.include(expectedDetails.version);
+        expect(actualDetails.purl, `Check purl in library: '${actualDetails.purl}'`).to.include(expectedDetails.purl);
       });
-  });
-  
+    });
+
   });
 });
