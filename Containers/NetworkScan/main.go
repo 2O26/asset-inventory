@@ -16,6 +16,9 @@ import (
 	"github.com/sony/sonyflake"
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
+
+	"os/exec"
+	"strings"
 )
 
 // Global variable to store the scan result
@@ -254,75 +257,77 @@ func getNetworkAndBroadcastAddresses(target string) (net.IP, net.IP, *net.IPNet,
 }
 
 func performSimpleScan(target string) (dbcon.Scan, error) {
-	fmt.Printf("Starting scan for target: %s\n", target)
+    fmt.Printf("Starting scan for target: %s\n", target)
 
-	networkAddress, _, subnet, err := getNetworkAndBroadcastAddresses(target)
-	if err != nil {
-		return dbcon.Scan{}, err
-	}
+    networkAddress, _, subnet, err := getNetworkAndBroadcastAddresses(target)
+    if err != nil {
+        return dbcon.Scan{}, err
+    }
 
-	// Create a new scan
-	scan := dbcon.Scan{
-		StateID:     "", // Replace with actual state ID
-		DateCreated: time.Now().Format(time.RFC3339),
-		DateUpdated: time.Now().Format(time.RFC3339),
-		State:       make(map[string]dbcon.Asset),
-	}
-	fmt.Println("Scan object created")
+    // Create a new scan
+    scan := dbcon.Scan{
+        StateID:     "", // Replace with actual state ID
+        DateCreated: time.Now().Format(time.RFC3339),
+        DateUpdated: time.Now().Format(time.RFC3339),
+        State:       make(map[string]dbcon.Asset),
+    }
+    fmt.Println("Scan object created")
 
-	// Create a channel to communicate the ping results
-	pingResults := make(chan pingResult)
-	fmt.Println("Ping results channel created")
+    // Create a channel to communicate the ping results
+    pingResults := make(chan pingResult)
+    fmt.Println("Ping results channel created")
 
-	var wg sync.WaitGroup
-	fmt.Println("WaitGroup created")
+    var wg sync.WaitGroup
+    fmt.Println("WaitGroup created")
 
-	// Start a new goroutine for each IP address in the subnet
-	for ip := cloneIP(networkAddress); subnet.Contains(ip); inc(ip) {
-		wg.Add(1)
-		go func(ip net.IP) {
-			defer wg.Done()
-			isUp, err := ping(ip.String())
-			if err != nil {
-				fmt.Println("Error pinging: ", ip, " Error: ", err)
-			} else if isUp {
-				fmt.Println("Finished ping for: ", ip, " with status: ", isUp)
-				pingResults <- pingResult{ip: ip, isUp: isUp, err: err}
-			}
-		}(cloneIP(ip))
-	}
-	fmt.Println("Started goroutines for each IP")
+    // Start a new goroutine for each IP address in the subnet
+    for ip := cloneIP(networkAddress); subnet.Contains(ip); inc(ip) {
+        wg.Add(1)
+        go func(ip net.IP) {
+            defer wg.Done()
+            cmd := exec.Command("ping", "-c", "1", "-W", "1", ip.String())
+            output, err := cmd.Output()
+            isUp := err == nil && !strings.Contains(string(output), "100% packet loss")
+            if err != nil {
+                fmt.Println("Error pinging: ", ip, " Error: ", err)
+            } else if isUp {
+                fmt.Println("Finished ping for: ", ip, " with status: ", isUp)
+                pingResults <- pingResult{ip: ip, isUp: isUp, err: err}
+            }
+        }(cloneIP(ip))
+    }
+    fmt.Println("Started goroutines for each IP")
 
-	// Wait for all goroutines to finish
-	go func() {
-		wg.Wait()
-		close(pingResults)
-	}()
-	fmt.Println("Waiting for all goroutines to finish")
+    // Wait for all goroutines to finish
+    go func() {
+        wg.Wait()
+        close(pingResults)
+    }()
+    fmt.Println("Waiting for all goroutines to finish")
 
-	// Iterate over the ping results
-	for result := range pingResults {
-		if result.err != nil {
-			fmt.Printf("Error pinging IP: %s: %v\n", result.ip, result.err)
-			continue
-		}
+    // Iterate over the ping results
+    for result := range pingResults {
+        if result.err != nil {
+            fmt.Printf("Error pinging IP: %s: %v\n", result.ip, result.err)
+            continue
+        }
 
-		// Update the status of the IP address in the scan
-		status := "down"
-		if result.isUp {
-			status = "up"
-			asset, err := createAsset(status, result.ip.String(), target, "simple")
-			if err != nil {
-				fmt.Printf("Error creating asset: %v\n", err)
-				return dbcon.Scan{}, err
-			}
-			scan.State[asset.UID] = asset
-		}
+        // Update the status of the IP address in the scan
+        status := "down"
+        if result.isUp {
+            status = "up"
+            asset, err := createAsset(status, result.ip.String(), target, "simple")
+            if err != nil {
+                fmt.Printf("Error creating asset: %v\n", err)
+                return dbcon.Scan{}, err
+            }
+            scan.State[asset.UID] = asset
+        }
 
-	}
+    }
 
-	fmt.Println("Finished scanning")
-	return scan, nil
+    fmt.Println("Finished scanning")
+    return scan, nil
 }
 
 func performAdvancedScan(target string) (dbcon.Scan, error) {
