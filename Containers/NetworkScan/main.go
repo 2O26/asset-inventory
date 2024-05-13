@@ -179,14 +179,6 @@ func main() {
 		recurringScan(scansHelper, c)
 	})
 
-	router.GET("/PrintAllDocuments", func(c *gin.Context) {
-		dbcon.PrintAllDocuments(scansHelper, c)
-	})
-
-	router.GET("/DeleteAllDocuments", func(c *gin.Context) {
-		dbcon.DeleteAllDocuments(scansHelper, c)
-	})
-
 	log.Println("Server starting on port 8081...")
 	if err := router.Run(":8081"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
@@ -486,7 +478,7 @@ func inc(ip net.IP) {
 	}
 }
 
-func postNetScan(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthResponse) {
+func postNetScan(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthResponse, url ...string) {
 
 	if auth.Authenticated && (auth.CanManageAssets || auth.IsAdmin) {
 		log.Println("USER AUTHORIZED")
@@ -546,7 +538,11 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthRespons
 		updatedScan, _ := dbcon.AddScan(db, scanResultGlobal)
 		fmt.Println("ADDED UPDATED SCAN TO DATABASE")
 
-		updateAssets(updatedScan, accessibleIPRanges, c)
+		if len(url) > 0 {
+			updateAssets(updatedScan, req.IPRanges, c, url[0])
+		} else {
+			updateAssets(updatedScan, req.IPRanges, c)
+		}
 
 		// Return a success message to the caller
 		c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
@@ -560,7 +556,7 @@ func postNetScan(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthRespons
 
 }
 
-func recurringScan(db dbcon.DatabaseHelper, c *gin.Context) {
+func recurringScan(db dbcon.DatabaseHelper, c *gin.Context, url ...string) {
 	//This endpoint has no authentication and will only be used for the recurring scan
 	var req dbcon.ScanRequest
 
@@ -601,12 +597,13 @@ func recurringScan(db dbcon.DatabaseHelper, c *gin.Context) {
 	}
 
 	log.Printf("Finished postNetScan\n")
-
 	updatedScan, _ := dbcon.AddScan(db, scanResultGlobal)
 	fmt.Println("ADDED UPDATED SCAN TO DATABASE")
-
-	updateAssets(updatedScan, req.IPRanges, c)
-
+	if len(url) > 0 {
+		updateAssets(updatedScan, req.IPRanges, c, url[0])
+	} else {
+		updateAssets(updatedScan, req.IPRanges, c)
+	}
 	// Return a success message to the caller
 	c.JSON(http.StatusOK, gin.H{"message": "Scan performed successfully", "success": true})
 	log.Println("Scan performed and assets updated successfully")
@@ -615,7 +612,7 @@ func recurringScan(db dbcon.DatabaseHelper, c *gin.Context) {
 
 }
 
-func updateAssets(updatedScan dbcon.Scan, accessibleIPRanges []string, c *gin.Context) {
+func updateAssets(updatedScan dbcon.Scan, accessibleIPRanges []string, c *gin.Context, url ...string) {
 	type request struct {
 		Scan    dbcon.Scan `json:"scan"`
 		Subnets []string   `json:"subnets"`
@@ -628,8 +625,15 @@ func updateAssets(updatedScan dbcon.Scan, accessibleIPRanges []string, c *gin.Co
 		Scan:    updatedScan,
 		Subnets: accessibleIPRanges,
 	}
-	requestDataJSON, err := json.Marshal(requestData)
-	req, err := http.NewRequest("POST", UpdateAssetsURL, bytes.NewReader(requestDataJSON))
+	requestDataJSON, _ := json.Marshal(requestData)
+	var req *http.Request
+	var err error
+
+	if len(url) > 0 {
+		req, err = http.NewRequest("POST", url[0], bytes.NewReader(requestDataJSON))
+	} else {
+		req, err = http.NewRequest("POST", UpdateAssetsURL, bytes.NewReader(requestDataJSON))
+	}
 	if err != nil {
 		log.Println("Failed to create request: ", err)
 		return

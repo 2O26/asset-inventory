@@ -68,27 +68,27 @@ var testScan1 = Scan{
 	},
 }
 
-// func TestSetupDatabase(t *testing.T) {
-// 	mockDB := new(MockDB)
-// 	ctx := context.TODO()
-// 	uri := "mongodb://localhost:27019/"
-// 	dbName := "test_db"
+func TestSetupDatabase(t *testing.T) {
+	mockDB := new(MockDB)
+	ctx := context.TODO()
+	uri := "mongodb://localhost:27019/"
+	dbName := "test_db"
 
-// 	// Set up expectations for the mock
-// 	mockDB.On("Connect", ctx, mock.Anything).Return(&mongo.Client{}, nil)
+	// Set up expectations for the mock
+	mockDB.On("Connect", ctx, mock.Anything).Return(&mongo.Client{}, nil)
 
-// 	// Call the SetupDatabase function with the mock
-// 	_, err := mockDB.Connect(ctx, nil)
-// 	assert.NoError(t, err)
-// 	err = SetupDatabase(uri, dbName)
-// 	if err != nil {
-// 		t.Errorf("SetupDatabase failed: %v", err)
-// 	}
+	// Call the SetupDatabase function with the mock
+	_, err := mockDB.Connect(ctx, nil)
+	assert.NoError(t, err)
+	err = SetupDatabase(uri, dbName)
+	if err != nil {
+		t.Errorf("SetupDatabase failed: %v", err)
+	}
 
-// 	// Assert that the expectations were met and no error occurred
-// 	assert.NoError(t, err)
-// 	mockDB.AssertExpectations(t)
-// }
+	// Assert that the expectations were met and no error occurred
+	assert.NoError(t, err)
+	mockDB.AssertExpectations(t)
+}
 
 func TestDeleteAsset(t *testing.T) {
 
@@ -503,7 +503,6 @@ func TestAuthorizeUser(t *testing.T) {
 	testCases := []struct {
 		name                 string
 		authHeader           string
-		mockAuthServer       func(t *testing.T, w http.ResponseWriter)
 		expectedAuthResponse AuthResponse
 		expectedHTTPStatus   int
 		expectedErrorMessage string
@@ -511,9 +510,6 @@ func TestAuthorizeUser(t *testing.T) {
 		{
 			name:       "Missing Authorization Header",
 			authHeader: "",
-			mockAuthServer: func(t *testing.T, w http.ResponseWriter) {
-				// No action needed as this tests the absence of header
-			},
 			expectedAuthResponse: AuthResponse{
 				Authenticated:   false,
 				Roles:           nil,
@@ -523,59 +519,40 @@ func TestAuthorizeUser(t *testing.T) {
 			expectedHTTPStatus:   http.StatusUnauthorized,
 			expectedErrorMessage: "User unauthorized",
 		},
+		// {
+		// 	name:       "Valid Authorization Header",
+		// 	authHeader: "Bearer valid_token",
+		// 	expectedAuthResponse: AuthResponse{
+		// 		Authenticated:   true,
+		// 		Roles:           []string{"192.168.1.0/24", "10.0.0.0/32"},
+		// 		IsAdmin:         true,
+		// 		CanManageAssets: true,
+		// 	},
+		// 	expectedHTTPStatus:   http.StatusOK,
+		// 	expectedErrorMessage: "",
+		// },
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create a mock auth server
-			mockAuthServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				tc.mockAuthServer(t, w)
-			}))
-			defer mockAuthServer.Close()
-
-			// Create a test Gin engine
-			type contextKey string
-
-			router := gin.Default()
-			router.GET("/authorize", func(c *gin.Context) {
-				c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), contextKey("authServerURL"), mockAuthServer.URL))
-				AuthorizeUser(c)
-			})
-
-			// Send a GET request to the test router
-			req, _ := http.NewRequest("GET", "/authorize", nil)
-			if tc.authHeader != "" {
-				req.Header.Add("Authorization", tc.authHeader)
-			}
-
 			w := httptest.NewRecorder()
-			router.ServeHTTP(w, req)
+			c, _ := gin.CreateTestContext(w)
+			c.Request, _ = http.NewRequest("GET", "/", nil)
+			c.Request.Header.Set("Authorization", tc.authHeader)
 
-			// Check the HTTP status code
+			url := "http://localhost:3003/getRoles"
+			auth := AuthorizeUser(c, url)
+
+			assert.Equal(t, tc.expectedAuthResponse, auth)
 			assert.Equal(t, tc.expectedHTTPStatus, w.Code)
 
-			// Logging the body to see what's the output when the test fails
-			if w.Code == http.StatusOK {
-				var authResponse AuthResponse
-				err := json.Unmarshal(w.Body.Bytes(), &authResponse)
-				assert.NoError(t, err)
-				assert.Equal(t, tc.expectedAuthResponse, authResponse)
-			} else {
-				responseBody := w.Body.String()
-				t.Logf("Response Body: %s", responseBody)
-
-				var errorResponse map[string]interface{}
-				err := json.Unmarshal(w.Body.Bytes(), &errorResponse)
-				if err != nil {
-					t.Fatalf("Failed to unmarshal error response: %v", err)
-				}
-				if msg, ok := errorResponse["error"].(string); ok {
-					assert.Equal(t, tc.expectedErrorMessage, msg)
-				} else if msg, ok := errorResponse["message"].(string); ok {
-					assert.Equal(t, tc.expectedErrorMessage, msg)
-				} else {
-					t.Fatalf("Error message not found in the response")
-				}
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			if err != nil {
+				t.Errorf("Failed to unmarshal response body: %v", err)
+			}
+			if tc.expectedErrorMessage != "" {
+				assert.Equal(t, tc.expectedErrorMessage, response["message"])
 			}
 		})
 	}

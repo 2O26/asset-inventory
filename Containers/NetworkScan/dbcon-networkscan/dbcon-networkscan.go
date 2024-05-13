@@ -76,8 +76,8 @@ type OS struct {
 var client *mongo.Client
 var dbName string
 
-func AuthorizeUser(c *gin.Context) AuthResponse {
-
+func AuthorizeUser(c *gin.Context, url ...string) AuthResponse {
+	var authURL string
 	emptyAuth := AuthResponse{
 		Authenticated:   false,
 		Roles:           nil,
@@ -89,9 +89,12 @@ func AuthorizeUser(c *gin.Context) AuthResponse {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized", "success": false})
 		return emptyAuth
 	}
-
-	// Perform authentication
-	authURL := "http://authhandler:3003/getRoles"
+	if len(url) > 0 {
+		authURL = url[0]
+	} else {
+		// Perform authentication
+		authURL = "http://authhandler:3003/getRoles"
+	}
 	req, err := http.NewRequest("GET", authURL, nil)
 	if err != nil {
 		log.Printf("Failed to fetch authentication token: %v", err)
@@ -323,27 +326,4 @@ func DeleteAsset(db DatabaseHelper, assetIDs []string) error {
 		log.Println("Asset deleted successfully", status)
 		return nil
 	}
-}
-
-func PrintAllDocuments(db DatabaseHelper, c *gin.Context) {
-	results, err := db.Find(context.TODO(), bson.D{})
-	if err != nil {
-		log.Printf("Failed to find documents:%v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching documents"})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, results)
-}
-
-func DeleteAllDocuments(db DatabaseHelper, c *gin.Context) {
-	deleteResult, err := db.DeleteMany(context.TODO(), bson.D{})
-	if err != nil {
-		log.Printf("Failed to delete documents:%v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting documents"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Documents deleted", "count": deleteResult.DeletedCount})
-
 }

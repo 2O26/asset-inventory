@@ -1,13 +1,13 @@
 mode: set
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:79.49,88.22 3 1
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:88.22,91.3 2 1
-assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:94.2,96.16 3 0
+assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:94.2,96.16 3 1
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:96.16,100.3 3 0
-assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:101.2,104.16 4 0
+assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:101.2,104.16 4 1
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:104.16,108.3 3 0
-assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:110.2,115.16 5 0
+assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:110.2,115.16 5 1
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:115.16,119.3 3 0
-assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:121.2,121.13 1 0
+assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:121.2,121.13 1 1
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:124.59,130.16 5 0
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:130.16,133.3 2 0
 assetinventory/networkscan/dbcon-networkscan/dbcon-networkscan.go:134.2,135.16 2 0
