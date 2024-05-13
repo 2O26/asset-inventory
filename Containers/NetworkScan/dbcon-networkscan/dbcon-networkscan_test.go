@@ -1,12 +1,17 @@
 package dbcon_networkscan
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -17,8 +22,8 @@ import (
 
 var testScan1 = Scan{
 	StateID:     "",
-	DateCreated: "2024-04-25 11:33:31",
-	DateUpdated: "2024-04-25 11:33:36",
+	DateCreated: time.Now().Format(time.RFC3339),
+	DateUpdated: time.Now().Format(time.RFC3339),
 	State: map[string]Asset{
 		"47716233453240327": {
 			IPv4Addr:  "192.168.1.12",
@@ -156,12 +161,41 @@ func TestDeleteAsset(t *testing.T) {
 func TestGetLatestScan(t *testing.T) {
 	testCases := []struct {
 		name         string
+		auth         AuthResponse
 		mockSetup    func(*MockDB)
 		expectedCode int
 		expectedBody interface{}
+		expectedLog  string
 	}{
 		{
-			name: "Get Latest Scan",
+			name: "Unauthorized User",
+			auth: AuthResponse{Authenticated: false},
+			mockSetup: func(mockDB *MockDB) {
+			},
+			expectedCode: http.StatusUnauthorized,
+			expectedBody: gin.H{"message": "User unauthorized", "success": false},
+		},
+		{
+			name: "No Scans Found",
+			auth: AuthResponse{Authenticated: true, IsAdmin: true},
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(Scan{}, mongo.ErrNoDocuments, nil))
+			},
+			expectedCode: http.StatusNotFound,
+			expectedBody: gin.H{"error": "No scans found"},
+		},
+		{
+			name: "Error Retrieving Scan",
+			auth: AuthResponse{Authenticated: true, IsAdmin: true},
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(Scan{}, errors.New("Error while retrieving the latest scan"), nil))
+			},
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: gin.H{"error": "Error while retrieving the latest scan"},
+		},
+		{
+			name: "Get Latest Scan as Admin",
+			auth: AuthResponse{Authenticated: true, IsAdmin: true},
 			mockSetup: func(mockDB *MockDB) {
 				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
 			},
@@ -169,41 +203,84 @@ func TestGetLatestScan(t *testing.T) {
 			expectedBody: testScan1,
 		},
 		{
-			name: "No Scan",
-			mockSetup: func(db *MockDB) {
-				db.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
+			name: "Get Latest Scan as Non-Admin with Roles",
+			auth: AuthResponse{Authenticated: true, IsAdmin: false, Roles: []string{"192.168.1.0/24"}},
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
 			},
-			expectedCode: http.StatusNotFound,
-			expectedBody: gin.H{"error": "No scans found"},
+			expectedCode: http.StatusOK,
+			expectedBody: Scan{
+				StateID:     testScan1.StateID,
+				DateCreated: testScan1.DateCreated,
+				DateUpdated: testScan1.DateUpdated,
+				State: map[string]Asset{
+					"47716233453240327": {
+						IPv4Addr:  "192.168.1.12",
+						OpenPorts: []int{},
+						ScanType:  "simple",
+						Status:    "up",
+						Subnet:    "192.168.1.0/24",
+						UID:       "47716233453240327",
+					},
+					"47716233537126407": {
+						IPv4Addr:  "192.168.1.115",
+						OpenPorts: []int{},
+						ScanType:  "simple",
+						Status:    "up",
+						Subnet:    "192.168.1.0/24",
+						UID:       "47716233537126407",
+					},
+					"47716234560536583": {
+						IPv4Addr:  "192.168.1.58",
+						OpenPorts: []int{},
+						ScanType:  "simple",
+						Status:    "up",
+						Subnet:    "192.168.1.0/24",
+						UID:       "47716234560536583",
+					},
+					"47716234560536588": {
+						IPv4Addr:  "192.168.1.59",
+						OpenPorts: []int{},
+						ScanType:  "simple",
+						Status:    "down",
+						Subnet:    "192.168.1.0/24",
+						UID:       "47716234560536588",
+					},
+				},
+			},
 		},
 		{
-			name: "No Scan",
-			mockSetup: func(db *MockDB) {
-				db.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("Error while retrieving the latest scan"), nil))
+			name: "Get Latest Scan as Non-Admin with Roles",
+			auth: AuthResponse{Authenticated: true, IsAdmin: false, Roles: []string{""}},
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, bson.D{}, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
 			},
-			expectedCode: http.StatusInternalServerError,
-			expectedBody: gin.H{"error": "Error while retrieving the latest scan"},
+			expectedCode: http.StatusOK,
+			expectedBody: Scan{
+				StateID:     testScan1.StateID,
+				DateCreated: testScan1.DateCreated,
+				DateUpdated: testScan1.DateUpdated,
+				State:       map[string]Asset{}},
 		},
 	}
-
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			mockDB := new(MockDB)
 			tc.mockSetup(mockDB)
+
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
-			auth := AuthResponse{
-				Authenticated:   true,
-				Roles:           nil,
-				IsAdmin:         true,
-				CanManageAssets: false,
-			}
+			// Capture logs
+			var logBuffer bytes.Buffer
+			log.SetOutput(&logBuffer)
+			defer func() {
+				log.SetOutput(os.Stderr)
+			}()
 
-			GetLatestScan(mockDB, c, auth)
+			GetLatestScan(mockDB, c, tc.auth)
 
 			assert.Equal(t, tc.expectedCode, w.Code)
-
 			if tc.expectedCode == http.StatusOK {
 				var actualBody Scan
 				err := json.Unmarshal(w.Body.Bytes(), &actualBody)
@@ -216,11 +293,14 @@ func TestGetLatestScan(t *testing.T) {
 				assert.Equal(t, tc.expectedBody, actualBody)
 			}
 
+			if tc.expectedLog != "" {
+				assert.Contains(t, logBuffer.String(), tc.expectedLog)
+			}
+
 			mockDB.AssertExpectations(t)
 		})
 	}
 }
-
 func TestCompareScanStates(t *testing.T) {
 	testCases := []struct {
 		name         string
@@ -342,70 +422,138 @@ func TestCompareScanStates(t *testing.T) {
 	}
 }
 
-// func TestAddScan(t *testing.T) {
+func TestAddScan(t *testing.T) {
 
-// 	testCases := []struct {
-// 		name        string
-// 		scan        Scan
-// 		mockSetup   func(*MockDB)
-// 		expectedErr string
-// 	}{
-// 		{
-// 			name: "newScan",
-// 			scan: testScan1,
-// 			mockSetup: func(mockDB *MockDB) {
-// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
-// 				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
-// 			},
-// 			expectedErr: "",
-// 		},
-// 		{
-// 			name: "error inserting Scan",
-// 			scan: testScan1,
-// 			mockSetup: func(mockDB *MockDB) {
-// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
-// 				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("Error inserting file"))
-// 			},
-// 			expectedErr: "could not insert scan: Error inserting file",
-// 		},
+	testCases := []struct {
+		name        string
+		scan        Scan
+		mockSetup   func(*MockDB)
+		expectedErr string
+		expectedRes Scan
+	}{
+		{
+			name: "newScan",
+			scan: testScan1,
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
+				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
+			},
+			expectedErr: "",
+			expectedRes: testScan1,
+		},
+		{
+			name: "error inserting Scan",
+			scan: testScan1,
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, nil, nil))
+				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("Error inserting file"))
+			},
+			expectedErr: "could not insert scan: Error inserting file",
+			expectedRes: Scan{},
+		},
 
-// 		{
-// 			name: "firstScan",
-// 			scan: Scan{},
-// 			mockSetup: func(mockDB *MockDB) {
-// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
-// 				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
-// 			},
-// 			expectedErr: "",
-// 		},
-// 		{
-// 			name: "firstScan",
-// 			scan: Scan{},
-// 			mockSetup: func(mockDB *MockDB) {
-// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
-// 				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("Error inserting file"))
-// 			},
-// 			expectedErr: "could not insert scan: Error inserting file",
-// 		},
-// 		{
-// 			name: "firstScan",
-// 			scan: Scan{},
-// 			mockSetup: func(mockDB *MockDB) {
-// 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("Error finding latestscan"), nil))
-// 			},
-// 			expectedErr: "failed to retrieve the latest scan: Error finding latestscan",
-// 		},
-// 	}
-// 	for _, tc := range testCases {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			mockDB := new(MockDB)
-// 			tc.mockSetup(mockDB)
+		{
+			name: "firstScan",
+			scan: testScan1,
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
+				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
+			},
+			expectedErr: "",
+			expectedRes: testScan1,
+		},
+		{
+			name: "secondScan",
+			scan: Scan{},
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, mongo.ErrNoDocuments, nil))
+				mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, errors.New("Error inserting file"))
+			},
+			expectedErr: "could not insert scan: Error inserting file",
+			expectedRes: Scan{},
+		},
+		{
+			name: "firstScan error",
+			scan: Scan{},
+			mockSetup: func(mockDB *MockDB) {
+				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(testScan1, errors.New("Error finding latestscan"), nil))
+			},
+			expectedErr: "failed to retrieve the latest scan: Error finding latestscan",
+			expectedRes: Scan{},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			mockDB := new(MockDB)
+			tc.mockSetup(mockDB)
 
-// 			err := AddScan(mockDB, tc.scan)
-// 			if err != nil && err.Error() != tc.expectedErr {
-// 				t.Errorf("got : %v, want %s", err, tc.expectedErr)
-// 			}
-// 			mockDB.AssertExpectations(t)
-// 		})
-// 	}
-// }
+			result, err := AddScan(mockDB, tc.scan)
+			if !reflect.DeepEqual(result, tc.expectedRes) {
+				t.Errorf("got : %v, want %v", result, tc.expectedRes)
+			}
+			if err != nil && err.Error() != tc.expectedErr {
+				t.Errorf("got : %v, want %s", err, tc.expectedErr)
+			}
+			mockDB.AssertExpectations(t)
+		})
+	}
+}
+
+func TestAuthorizeUser(t *testing.T) {
+	testCases := []struct {
+		name                 string
+		authHeader           string
+		expectedAuthResponse AuthResponse
+		expectedHTTPStatus   int
+		expectedErrorMessage string
+	}{
+		{
+			name:       "Missing Authorization Header",
+			authHeader: "",
+			expectedAuthResponse: AuthResponse{
+				Authenticated:   false,
+				Roles:           nil,
+				IsAdmin:         false,
+				CanManageAssets: false,
+			},
+			expectedHTTPStatus:   http.StatusUnauthorized,
+			expectedErrorMessage: "User unauthorized",
+		},
+		// {
+		// 	name:       "Valid Authorization Header",
+		// 	authHeader: "Bearer valid_token",
+		// 	expectedAuthResponse: AuthResponse{
+		// 		Authenticated:   true,
+		// 		Roles:           []string{"192.168.1.0/24", "10.0.0.0/32"},
+		// 		IsAdmin:         true,
+		// 		CanManageAssets: true,
+		// 	},
+		// 	expectedHTTPStatus:   http.StatusOK,
+		// 	expectedErrorMessage: "",
+		// },
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request, _ = http.NewRequest("GET", "/", nil)
+			c.Request.Header.Set("Authorization", tc.authHeader)
+
+			url := "http://localhost:3003/getRoles"
+			auth := AuthorizeUser(c, url)
+
+			assert.Equal(t, tc.expectedAuthResponse, auth)
+			assert.Equal(t, tc.expectedHTTPStatus, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			if err != nil {
+				t.Errorf("Failed to unmarshal response body: %v", err)
+			}
+			if tc.expectedErrorMessage != "" {
+				assert.Equal(t, tc.expectedErrorMessage, response["message"])
+			}
+		})
+	}
+}
