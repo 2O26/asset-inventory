@@ -3,7 +3,6 @@ module assetinventory/networkscan/dbcon-networkscan
 go 1.22.0
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver v1.15.0
