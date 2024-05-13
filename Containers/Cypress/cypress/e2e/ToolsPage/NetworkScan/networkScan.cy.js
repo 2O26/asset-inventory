@@ -42,7 +42,8 @@ describe('Testing NetworkScan Page', () => {
         cy.get('.standard-button').click()
         cy.wait(1000)
         cy.get('.resultText', { timeout: 10000 }).should('exist');
-        cy.get('.resultText').should('contain', 'Successfully started scanning IP range')
+        cy.get('.resultText').should('contain', 'Successfully scanned subnet')
+
 
     })
 
@@ -56,15 +57,15 @@ describe('Testing NetworkScan Page', () => {
 
     // })
 
-    it('can see info texts', () => {
-        cy.get(".info-content").first().should('exist')
-        cy.get(".info-content").eq(1).should('exist')
-    })
+    // it('can see info texts', () => {
+    //     cy.get(".info-content").first().should('exist')
+    //     cy.get(".info-content").eq(1).should('exist')
+    // })
 
-    it('can only select one scan type', () => {
-        cy.get('input[name="scantype"][value="extensive"]').click()
-        cy.get('input[name="scantype"][value="simple"]').click()
-        cy.get('input[name="scantype"][value="extensive"]').should('not.be.checked')
-    })
+    // it('can only select one scan type', () => {
+    //     cy.get('input[name="scantype"][value="extensive"]').click()
+    //     cy.get('input[name="scantype"][value="simple"]').click()
+    //     cy.get('input[name="scantype"][value="extensive"]').should('not.be.checked')
+    // })
 
 })

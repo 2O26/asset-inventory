@@ -31,24 +31,60 @@ func TestRemoveCycloneDX(t *testing.T) {
 
 	// Define test cases
 	tests := []struct {
-		name         string
-		assetID      string
-		expectedCode int
-		expectedBody string
+		name            string
+		assetID         string
+		expectedCode    int
+		expectedBody    string
+		authenticated   bool
+		isAdmin         bool
+		canManageAssets bool
 	}{
 		{
-			name:         "Successful Removal",
-			assetID:      "existingAssetID",
-			expectedCode: http.StatusOK,
+			name:            "Successful Removal (admin)",
+			assetID:         "existingAssetID",
+			expectedCode:    http.StatusOK,
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: true,
 			// Update this to be a JSON response
 			expectedBody: `{"message":"CycloneDX file removed."}`,
 		},
 		{
-			name:         "Failed Removal",
-			assetID:      "nonExistingAssetID",
-			expectedCode: http.StatusInternalServerError,
+			name:            "Successful Removal (non-admin)",
+			assetID:         "existingAssetID",
+			expectedCode:    http.StatusOK,
+			authenticated:   true,
+			isAdmin:         false,
+			canManageAssets: true,
+			expectedBody:    `{"message":"CycloneDX file removed."}`,
+		},
+		{
+			name:            "Failed Removal",
+			assetID:         "nonExistingAssetID",
+			expectedCode:    http.StatusInternalServerError,
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: true,
 			// Update this to be a JSON response
 			expectedBody: `{"error":"Failed to remove SBOM from database."}`,
+		},
+		{
+			name:            "User not authenticated",
+			assetID:         "existingAssetID",
+			expectedCode:    http.StatusUnauthorized,
+			expectedBody:    `{"error":"Unauthorized"}`,
+			authenticated:   false,
+			isAdmin:         true,
+			canManageAssets: true,
+		},
+		{
+			name:            "User authenticated but cannot manage assets",
+			assetID:         "existingAssetID",
+			expectedCode:    http.StatusForbidden,
+			expectedBody:    `{"error":"Invalid privileges for operation"}`,
+			authenticated:   true,
+			isAdmin:         false,
+			canManageAssets: false,
 		},
 	}
 
@@ -65,8 +101,18 @@ func TestRemoveCycloneDX(t *testing.T) {
 			if tc.name == "Failed Removal" {
 				mockDB.On("DeleteOne", mock.Anything, bson.M{"_id": "nonExistingAssetID"}).Return(&mongo.DeleteResult{DeletedCount: 0}, nil)
 			}
+
+			//create the authentication object
+
+			auth := dbcon.AuthResponse{
+				Authenticated:   tc.authenticated,
+				Roles:           nil,
+				IsAdmin:         tc.isAdmin,
+				CanManageAssets: tc.canManageAssets,
+			}
+
 			// Call the function under test
-			removeCycloneDX(mockDB, c)
+			removeCycloneDX(mockDB, c, auth)
 
 			// Check the response code
 			assert.Equal(t, tc.expectedCode, w.Code)
@@ -98,8 +144,16 @@ func TestUploadCycloneDX(t *testing.T) {
 	mockDB.On("InsertOne", mock.Anything, mock.Anything).Return(mockInsertResult, nil)
 	mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(mongo.NewSingleResultFromDocument(expectedDoc, mongo.ErrNoDocuments, nil))
 	router := gin.New()
+	//assuming the user can manage assets
+	auth := dbcon.AuthResponse{
+		Authenticated:   true,
+		Roles:           nil,
+		IsAdmin:         false,
+		CanManageAssets: true,
+	}
+
 	router.POST("/uploadCycloneDX", func(c *gin.Context) {
-		uploadCycloneDX(mockDB, c)
+		uploadCycloneDX(mockDB, c, auth)
 	})
 
 	body := new(bytes.Buffer)
@@ -149,18 +203,17 @@ func TestUploadCycloneDX(t *testing.T) {
 func TestUploadCycloneDX_InvalidAttempts(t *testing.T) {
 	mockDB := new(dbcon.MockDB)
 	defer mockDB.Mock.AssertExpectations(t)
-	router := gin.New()
-	router.POST("/uploadCycloneDX", func(c *gin.Context) {
-		uploadCycloneDX(mockDB, c)
-	})
 
 	// Define subtests
 	tests := []struct {
-		name          string
-		setupRequest  func() *http.Request
-		mockSetup     func()
-		expectedError string
-		expectedCode  int
+		name            string
+		setupRequest    func() *http.Request
+		mockSetup       func()
+		expectedError   string
+		expectedCode    int
+		authenticated   bool
+		isAdmin         bool
+		canManageAssets bool
 	}{
 		{
 			name: "Invalid file upload attempt",
@@ -176,8 +229,11 @@ func TestUploadCycloneDX_InvalidAttempts(t *testing.T) {
 			mockSetup: func() {
 				// No need to setup the mock as the error is before DB interaction
 			},
-			expectedError: "Invalid file upload attempt",
-			expectedCode:  http.StatusBadRequest,
+			expectedError:   "Invalid file upload attempt",
+			expectedCode:    http.StatusBadRequest,
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: true,
 		},
 		{
 			name: "Only JSON or XML files are allowed",
@@ -198,8 +254,11 @@ func TestUploadCycloneDX_InvalidAttempts(t *testing.T) {
 			mockSetup: func() {
 				// No need to setup the mock as the error is before DB interaction
 			},
-			expectedError: "Only JSON or XML files are allowed",
-			expectedCode:  http.StatusBadRequest,
+			expectedError:   "Only JSON or XML files are allowed",
+			expectedCode:    http.StatusBadRequest,
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: true,
 		},
 		{
 			name: "Failed to save SBOM to database",
@@ -241,14 +300,113 @@ func TestUploadCycloneDX_InvalidAttempts(t *testing.T) {
 			mockSetup: func() {
 				mockDB.On("FindOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.SingleResult{}, errors.New("database error"))
 			},
-			expectedError: "Failed to save SBOM to database",
-			expectedCode:  http.StatusInternalServerError,
+			expectedError:   "Failed to save SBOM to database",
+			expectedCode:    http.StatusInternalServerError,
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: true,
+		},
+		{
+			name: "User not authenticated",
+			setupRequest: func() *http.Request {
+				body := new(bytes.Buffer)
+				writer := multipart.NewWriter(body)
+				writer.Close()
+
+				req, _ := http.NewRequest("POST", "/uploadCycloneDX", body)
+				req.Header.Set("Content-Type", writer.FormDataContentType())
+				return req
+			},
+			mockSetup: func() {
+				// No need to setup the mock as the error is before DB interaction
+			},
+			expectedCode:    http.StatusUnauthorized,
+			expectedError:   "Unauthorized",
+			authenticated:   false,
+			isAdmin:         true,
+			canManageAssets: true,
+		},
+		{
+			name: "User authorized but cannot manage assets",
+			setupRequest: func() *http.Request {
+				body := new(bytes.Buffer)
+				writer := multipart.NewWriter(body)
+				writer.Close()
+
+				req, _ := http.NewRequest("POST", "/uploadCycloneDX", body)
+				req.Header.Set("Content-Type", writer.FormDataContentType())
+				return req
+			},
+			mockSetup: func() {
+				// No need to setup the mock as the error is before DB interaction
+			},
+			expectedCode:    http.StatusForbidden,
+			expectedError:   "Invalid privileges for operation",
+			authenticated:   true,
+			isAdmin:         false,
+			canManageAssets: false,
+		},
+		{
+			name: "Failed to convert XML to JSON",
+			setupRequest: func() *http.Request {
+				body := new(bytes.Buffer)
+				writer := multipart.NewWriter(body)
+
+				header := make(textproto.MIMEHeader)
+				header.Set("Content-Disposition", `form-data; name="file"; filename=test.xml`)
+				header.Set("Content-Type", "text/xml")
+				part, err := writer.CreatePart(header)
+				if err != nil {
+					t.Errorf("Failed to create form part: %v", err)
+					return nil
+				}
+
+				_, err = part.Write([]byte(`{"metadata":{"component":{"name":"Test Component"}}}`))
+				if err != nil {
+					t.Errorf("Failed to write to form part: %v", err)
+					return nil
+				}
+
+				err = writer.WriteField("assetID", "test-id")
+				if err != nil {
+					t.Errorf("Failed to write field 'assetID': %v", err)
+					return nil
+				}
+
+				writer.Close()
+
+				req, err := http.NewRequest("POST", "/uploadCycloneDX", body)
+				if err != nil {
+					t.Errorf("Failed to create request: %v", err)
+					return nil
+				}
+				req.Header.Set("Content-Type", writer.FormDataContentType())
+				return req
+			},
+			mockSetup: func() {
+
+			},
+			expectedError:   "Failed to convert XML to JSON",
+			expectedCode:    http.StatusInternalServerError,
+			authenticated:   true,
+			isAdmin:         true,
+			canManageAssets: false,
 		},
 	}
 
 	// Run subtests
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			auth := dbcon.AuthResponse{
+				Authenticated:   tc.authenticated,
+				Roles:           nil,
+				IsAdmin:         tc.isAdmin,
+				CanManageAssets: tc.canManageAssets,
+			}
+			router := gin.New()
+			router.POST("/uploadCycloneDX", func(c *gin.Context) {
+				uploadCycloneDX(mockDB, c, auth)
+			})
 			tc.mockSetup()
 
 			req := tc.setupRequest()

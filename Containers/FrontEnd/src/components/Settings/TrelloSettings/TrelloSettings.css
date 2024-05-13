@@ -72,6 +72,12 @@
   transform: translateY(-3px);
 }
 
+.success-message {
+  color: green;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
 
 
 @media (max-width: 768px) {

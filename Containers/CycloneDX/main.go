@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -24,9 +23,20 @@ type LibraryCVEresp struct {
 	Success string `json:"response"`
 }
 
-func uploadCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
+func uploadCycloneDX(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthResponse) {
 	// Limit the size of the request body to 10MB
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 10<<20)
+
+	if !auth.Authenticated {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	//check if user is able to upload sbom file
+	if !auth.CanManageAssets && !auth.IsAdmin {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid privileges for operation"})
+		return
+	}
 
 	// Retrieve the file from the form data
 	file, err := c.FormFile("file")
@@ -166,7 +176,7 @@ func uploadCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 		return
@@ -185,7 +195,19 @@ func uploadCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
 	})
 }
 
-func removeCycloneDX(db dbcon.DatabaseHelper, c *gin.Context) {
+func removeCycloneDX(db dbcon.DatabaseHelper, c *gin.Context, auth dbcon.AuthResponse) {
+
+	if !auth.Authenticated {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	//check if user is able to upload sbom file
+	if !auth.CanManageAssets && !auth.IsAdmin {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid privileges for operation"})
+		return
+	}
+
 	assetID := c.PostForm("assetID")
 	fmt.Printf("Asset ID: %s\n", assetID)
 
@@ -231,18 +253,28 @@ func main() {
 	}
 	sbomHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("SBOMS")}
 	router.POST("/uploadCycloneDX", func(c *gin.Context) {
-		uploadCycloneDX(sbomHelper, c)
+		auth := dbcon.AuthorizeUser(c)
+		uploadCycloneDX(sbomHelper, c, auth)
 	})
 	// router.POST("/uploadCycloneDX", uploadCycloneDX)
 
 	router.POST("/removeCycloneDX", func(c *gin.Context) {
-		removeCycloneDX(sbomHelper, c)
+		auth := dbcon.AuthorizeUser(c)
+		removeCycloneDX(sbomHelper, c, auth)
 	})
-	// router.POST("/removeCycloneDX", removeCycloneDX)
 
 	router.GET("/getCycloneDXFile", func(c *gin.Context) {
+		auth := dbcon.AuthorizeUser(c)
+		if !auth.Authenticated {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
 		dbcon.GetCycloneDXFile(sbomHelper, c)
 	})
+	router.GET("/getCycloneDXFileInternal", func(c *gin.Context) {
+		dbcon.GetCycloneDXFile(sbomHelper, c)
+	})
+
 	router.GET("/PrintAllDocuments", func(c *gin.Context) {
 		dbcon.PrintAllDocuments(sbomHelper, c)
 	})
