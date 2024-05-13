@@ -12,12 +12,18 @@ export default function TrelloSettings() {
   const [connectionStatus, setConnectionStatus] = useState(null);
   const [checkConnectionColor, setCheckConnectionColor] = useState('var(--button-color)');
   const [checkConnectionText, setCheckConnectionText] = useState('Check Connection');
+  const [successMessage, setSuccessMessage] = useState(''); // New state for success message
 
   const { mutate: mutateSave, isPending: isPendingMutSave, isError: isErrorMutSave, error: errorMutSave } = useMutation({
     mutationFn: () => UpdateTrelloKeys({ apiKey: trelloApiKey, token: trelloToken, boardId: trelloBoardId }),
     onSuccess: (data) => {
       if (data.success === "success") {
         console.log("Trello keys updated successfully:", data);
+        setSuccessMessage('Trello settings updated successfully'); // Set success message
+        // Clear the success message after a few seconds
+        setTimeout(() => {
+          setSuccessMessage('');
+        }, 3000);
       } else {
         console.log("Could not update Trello keys. Error: ", data.success);
       }
@@ -101,6 +107,7 @@ export default function TrelloSettings() {
   return (
     <div className="trello-settings">
       <h3>Trello Settings</h3>
+      {successMessage && <div className="success-message">{successMessage}</div>} {/* Display success message */}
       <div className="form-group">
         <label htmlFor="trelloApiKey">Trello API Key:</label>
         <input

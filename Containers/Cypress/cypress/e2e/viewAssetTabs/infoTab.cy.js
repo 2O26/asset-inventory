@@ -1,4 +1,4 @@
-describe('View asset page tests', () => {
+describe('Info Tab Test', () => {
     const tmpAssetData = {
       name: "Test Asset",
       crit: 4,
@@ -6,7 +6,7 @@ describe('View asset page tests', () => {
       owner: "Jack Sparrow"
     };
   
-    beforeEach('visiting Asset List page', () => {
+    beforeEach('visiting Asset List page and creating asset', () => {
       cy.login();
       cy.contains('Tools').click();
       cy.contains('Asset List').click();
@@ -16,11 +16,13 @@ describe('View asset page tests', () => {
       cy.get('input.inputFields[name="asset-type"]').type(tmpAssetData.type);
       cy.get('input.inputFields[name="asset-owner"]').type(tmpAssetData.owner);
       cy.get('.AuthBtnContainer').find('button.standard-button').contains('Add').click();
+      cy.get('.assetCell').contains(tmpAssetData.name).parents('.assetRow').click();
     });
   
     afterEach('removing asset and logout', () => {
       cy.contains('Tools').click();
       cy.contains('Asset List').click();
+  
       const clickCheckboxUntilChecked = (maxAttempts, attempts = 0) => {
         attempts++;
         cy.get('.assetCell').contains(tmpAssetData.name).parents('.assetRow').find('input[type="checkbox"]').click().then($checkbox => {
@@ -31,7 +33,8 @@ describe('View asset page tests', () => {
           }
         });
       };
-      clickCheckboxUntilChecked(5);
+      clickCheckboxUntilChecked(5); 
+      
       cy.get('.assetCell').contains(tmpAssetData.name).parents('.assetRow').find('input[type="checkbox"]').should('be.checked');
       cy.get('div').contains('Remove Asset').then($button => {
         if ($button.length) {
@@ -41,47 +44,19 @@ describe('View asset page tests', () => {
           });
         }
       });
+  
       cy.logout();
     });
-
-    for (let i = 0; i < 1; i++) {
-        describe(`when viewing asset ${i}`, () => {
-            let tmpName = ""
-            let tmpOwner = ""
-            let tmpCreated = ""
-            let tmpEdited = ""
-            let tmpCrit = ""
-            beforeEach('clicking asset in list and saving info', () => {
-                cy.get('.assetRow').eq(i)
-                    .then((row) => {
-                        tmpName = row.find('.assetCell').eq(1).text();
-                        tmpOwner = row.find('.assetCell').eq(2).text();
-                        tmpCreated = row.find('.assetCell').eq(4).text();
-                        tmpEdited = row.find('.assetCell').eq(5).text();
-                        tmpCrit = row.find('.assetCell').eq(6).text();
-                    }).click();
-            })
-
-            it('can verify asset name', () => {
-                cy.get('h1.asset-name').should('contain.text', tmpName);
-            })
-
-            it('can verify asset Owner', () => {
-                cy.get('.assetItem').contains('Owner').should('contain', tmpOwner);
-            })
-
-            it('can verify asset Creation Date', () => {
-                cy.get('.assetItem').contains('Created at').should('contain', tmpCreated);
-            })
-
-            it('can verify asset Updated Date', () => {
-                cy.get('.assetItem').contains('Updated at').should('contain', tmpEdited);
-            })
-
-            it('can verify asset criticality', () => {
-                cy.get('.assetItem').contains('Criticality').should('contain', tmpCrit);
-            })
-
-        })
-    }
-})
+  
+    describe('Information Tab Functionality', () => {
+      it('Check if information tab exists', () => {
+        cy.get('button.tab-button').contains('Information').click();
+      });
+  
+      it('Verify asset details in information tab', () => {
+        cy.get('h1.asset-name').should('contain.text', tmpAssetData.name);
+        cy.get('div.assetItem').contains('Owner').should('contain.text', tmpAssetData.owner);
+      });
+    });
+  });
+  

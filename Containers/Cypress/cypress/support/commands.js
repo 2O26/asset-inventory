@@ -35,9 +35,11 @@ Cypress.Commands.add('login', () => {
 });
 
 Cypress.Commands.add('logout', () => {
-    cy.contains('Sign Out').click()
-}
-)
+    cy.origin(Cypress.env('base-url'), () => {
+    cy.contains('Sign Out').click();
+    })
+})
+
 Cypress.Commands.add('addAsset', (name, criticality, type, owner) => {
     cy.contains('Tools').click()
     cy.contains('Asset List').click()

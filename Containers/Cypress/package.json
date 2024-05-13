@@ -11,8 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@cypress/code-coverage": "^3.12.26",
-    "cypress": "^13.7.2",
+    "@cypress/code-coverage": "^3.12.39",
+    "cypress": "^13.9.0",
+    "cypress-file-upload": "^5.0.8",
     "xvfb": "^0.4.0"
   }
 }

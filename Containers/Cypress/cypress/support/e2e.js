@@ -14,6 +14,7 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
+import 'cypress-file-upload'
 import './commands'
 import '@cypress/code-coverage/support'
 // Alternatively you can use CommonJS syntax:
