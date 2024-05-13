@@ -19,7 +19,7 @@ The response is a JSON document that follows to the Asset inventory backend scan
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "$id": "https://example.com/product.schema.json",
   "title": "Asset inventory backend state schema",
-  "description": "A state as retrieved from the AssetHandler database",
+  "description": "A state as retrieved from the network scan database",
   "type": "object",
   "properties": {
     "StateID": {
@@ -39,22 +39,29 @@ The response is a JSON document that follows to the Asset inventory backend scan
           "uid": {
             "type": "string"
           },
-          "status": {
+          "Status": {
             "type": "string",
             "enum": ["up", "down"]
           },
-          "ipv4Addr": {
+          "IPv4 Address": {
             "type": "string",
             "format": "ipv4"
           },
-          "subnet": {
+          "Subnet" : {
             "type": "string"
           },
-          "openPorts": {
+          "Open Ports": {
             "type": "array",
             "items": {
               "type": "string"
             }
+          },
+          "Scan Type": {
+            "type": "string",
+            "enum": ["simple", "extensive"]
+          },
+          "Last Discovered at": {
+            "type": "string"
           }
         }
       },
@@ -88,7 +95,7 @@ startNetScan initiates a network scan over specified IP ranges. It processes eac
     ```json
     {
         "cmdSelection": "simple",
-        "IPRanges": [192.168.50.220/32:true]
+        "IPRanges": ["192.168.50.220/32"]
     }
     ```
 
