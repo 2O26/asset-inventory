@@ -539,7 +539,7 @@ func TestIsValidType(t *testing.T) {
 		}
 	}
 }
-/*
+
 func TestManageAssetsAndRelations(t *testing.T) {
 	mockDB := new(MockDB)
 
@@ -954,4 +954,3 @@ func TestManageAssetsAndRelations_invaledRequest(t *testing.T) {
 		})
 	}
 }
-*/

@@ -33,15 +33,6 @@ type Person struct {
 	ExtraInfo func()
 }
 
-/*func Perform(fn func() (json.RawMessage), x json.RawMessage) (err error){
-	defer func() {
-		if r := recover(); r != nil {
-			err = r.(error)
-		}
-	}()
-	x = fn()
-	return
-}*/
 
 func TestCORSMiddleware(t *testing.T) {
 	
@@ -76,10 +67,6 @@ func TestGetNetworkScan(t *testing.T) {
 	dbcon.SetupDatabase("mongodb://localhost:27017/","TestDB")
 	router1 := gin.Default()
 	router1.Use(CORSMiddleware())
-	//mockDB := new(mock.Mock)
-	//mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("PluginState")).Return(&mongo.InsertOneResult{}, nil)
-	//scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
-	//addInitialScan(scansHelper)
 	testResp := networkResponse{
 		StateID:     "123",
 		DateCreated: "2024-04-11",
@@ -117,19 +104,12 @@ func TestGetNetworkScan(t *testing.T) {
     }()
 
 	time.Sleep(2 * time.Second)
-	//getNetworkScan("http://localhost:8081/GetLatestScan")
-
-
 	getNetworkScan("http://localhost:8081/GetLatestScan")
-
 
 	//error := Perform(getNetScanStatus, JsonTestMsg)
 	if err := server1.Shutdown(context.Background()); err != nil {
         t.Fatalf("failed to shutdown server: %v", err)
     }
-	/*if err := server1.Shutdown(context.Background()); err != nil {
-        t.Fatalf("failed to shutdown server: %v", err)
-    }*/
 
 }
 
