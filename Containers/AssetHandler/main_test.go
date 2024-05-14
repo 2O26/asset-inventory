@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"net/http"
 	"time"
-	//"log"
+	"log"
 	//"os"
 	//"strings"
 	//"bytes"
@@ -71,7 +71,7 @@ func TestCORSMiddleware(t *testing.T) {
 	}
 	fmt.Println("Test CORSMiddleware *SUCCESSFUL*")
 }
-/*
+
 func TestGetNetworkScan(t *testing.T) {
 	dbcon.SetupDatabase("mongodb://localhost:27017/","TestDB")
 	router1 := gin.Default()
@@ -131,14 +131,9 @@ func TestGetNetworkScan(t *testing.T) {
         t.Fatalf("failed to shutdown server: %v", err)
     }*/
 
-//}
+}
 
 func TestGetLatestState(t *testing.T) {
-	//TODO
-	//jsonhandler.BackToFront(json.RawMessage(scanResultJSON), nil) -> Error
-	//var authSuccess = true
-
-	//if authSuccess --> get to false??
 	dbcon.SetupDatabase("mongodb://localhost:27017/","TestDB")
 
 	//fakeReq := httptest.NewRequest("GET", "", nil)
@@ -194,10 +189,6 @@ func TestGetLatestState(t *testing.T) {
 
     router = gin.Default()
 	router.Use(CORSMiddleware())
-	//mockDB := new(mock.Mock)
-	//mockDB.On("InsertOne", mock.Anything, mock.AnythingOfType("PluginState")).Return(&mongo.InsertOneResult{}, nil)
-	//scansHelper := &dbcon.MongoDBHelper{Collection: dbcon.GetCollection("scans")}
-	//addInitialScan(scansHelper)
     router.GET("/GetLatestScan", func(c *gin.Context) {
         c.String(http.StatusOK, "This is a test response")
     })
@@ -313,12 +304,4 @@ func TestGetLatestState(t *testing.T) {
         t.Fatalf("failed to shutdown server: %v", err)
     }
 	
-}
-
-func TestAddSubnetAssets(t *testing.T) {
-	//TODO
-}
-
-func TestAddSubnetRelations(t *testing.T) {
-	//TODO 
 }
