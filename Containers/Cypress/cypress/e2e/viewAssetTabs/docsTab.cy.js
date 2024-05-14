@@ -1,4 +1,4 @@
-describe('Info Tab Test', () => {
+describe('Doc Link Tab Test', () => {
   const tmpAssetData = {
     name: "Test Asset",
     crit: 4,
