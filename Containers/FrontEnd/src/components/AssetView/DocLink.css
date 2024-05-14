@@ -1,0 +1,45 @@
+.link-container {
+    display: flex;
+    align-items: center;
+}
+
+.remove-button-container {
+    margin-left: 1rem; /* Adjust as needed */
+}
+
+.remove-btn {
+    white-space: nowrap;
+    color: var(--text-color);
+    background-color: transparent;
+    border: none;
+    margin-left: 1rem;
+    position: relative;
+}
+
+.remove-btn .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    text-align: center;
+    border-radius: 0.2rem;
+    padding: 0.2rem;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    bottom: 22%;
+    left: 50%;
+    margin-left: 1.6rem;
+    /* margin-left: -60px; */
+    /* Use half of the width value to align it center */
+
+    /* Fade in tooltip - animations */
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.remove-btn:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}

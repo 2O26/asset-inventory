@@ -1,4 +1,4 @@
-describe('Docs Tab Test', () => {
+describe('Doc Link Tab Test', () => {
   const tmpAssetData = {
     name: "Test Asset",
     crit: 4,
@@ -50,7 +50,41 @@ describe('Docs Tab Test', () => {
 
   describe('Docs Tab Functionality', () => {
     it('Check if Docs tab exists', () => {
-      cy.get('button.tab-button').contains('Docs').click();
+        cy.get('button.tab-button').contains('Docs').click();
     });
-  });
+
+    it('Check if an input field exists', () => {
+        cy.get('input.inputFields').should('exist');
+    });
+
+    it('Type text into input field, click update, and receive success alert', () => {
+        const testLink = 'https://example.com';
+        cy.get('input.inputFields').type(testLink);
+        cy.get('button.standard-button').contains('Set Link').click();
+        cy.on('window:alert', (alertText) => {
+            expect(alertText).to.equal('Successfully updated doc link');
+        });
+    });
+
+    it('Check if "Open Link" button opens the link in a new tab', () => {
+        const testLink = 'https://example.com';
+        cy.get('input.inputFields').type(testLink);
+        cy.get('button.standard-button').contains('Set Link').click();
+        cy.get('button.standard-button').contains('Open Link').click();
+        cy.url().should('eq', testLink);
+    });
+
+    it('Check if "Remove Link" button removes the link', () => {
+        const testLink = 'https://example.com';
+        cy.get('input.inputFields').type(testLink);
+        cy.get('button.standard-button').contains('Set Link').click();
+        cy.get('button.standard-button').contains('Remove Link').click();
+        cy.on('window:alert', (alertText) => {
+            expect(alertText).to.equal('Successfully updated doc link');
+        });
+        cy.get('div').contains('There is no connected documentation link to this asset');
+    });
+});
+
+
 });
